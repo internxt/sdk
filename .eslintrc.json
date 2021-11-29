@@ -1,22 +1,3 @@
 {
-  "parser": "@typescript-eslint/parser",
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
-  "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:jsdoc/recommended",
-    "prettier"
-  ],
-  "rules": {
-    "prettier/prettier": 1,
-    "jsdoc/require-jsdoc":["error" ,{
-      "publicOnly": true
-    }],
-    "jsdoc/require-param-type": 0,
-    "jsdoc/require-returns-type": 0
-  }
+  "extends": "@internxt/eslint-config-internxt"
 }

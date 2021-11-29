@@ -1,4 +1,4 @@
-import { AxiosError, AxiosResponse } from "axios";
+import { AxiosError, AxiosResponse } from 'axios';
 
 export function extractAxiosErrorMessage(err: AxiosError): string {
   let errMsg: string;
