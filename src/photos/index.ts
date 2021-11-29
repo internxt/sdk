@@ -1,8 +1,7 @@
 import axios from 'axios';
 
 import { extractAxiosErrorMessage } from '../utils';
-import { Device, DeviceId } from './models/Device';
-import { Photo, PhotoId } from './models/Photo';
+import { Device, DeviceId, Photo, PhotoId } from './types';
 
 export class Photos {
   private url: string;

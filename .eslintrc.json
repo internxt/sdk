@@ -1,3 +1,4 @@
 {
-  "extends": "@internxt/eslint-config-internxt"
+  "extends": "@internxt/eslint-config-internxt",
+  "ignorePatterns": "dist"
 }
