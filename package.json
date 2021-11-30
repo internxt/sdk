@@ -1,6 +1,6 @@
 {
   "name": "@internxt/sdk",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -17,9 +17,6 @@
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/@internxt"
-  },
   "scripts": {
     "prepare": "husky install",
     "test": "jest --passWithNoTests",
