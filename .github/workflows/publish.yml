@@ -4,10 +4,10 @@ on:
     types: [created]
 jobs:
   build:
-    runs-on: ubuntu-latest 
-    permissions: 
+    runs-on: ubuntu-latest
+    permissions:
       contents: read
-      packages: write 
+      packages: write
     steps:
       - uses: actions/checkout@v2
       # Setup .npmrc file to publish to GitHub Packages
@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://npm.pkg.github.com'
-      - run: yarn 
+      - run: yarn
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn build
