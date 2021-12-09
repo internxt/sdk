@@ -152,3 +152,5 @@ export class Photos {
       });
   }
 }
+
+export * from './types';
