@@ -1,7 +1,8 @@
-import axios from 'axios';
+import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
 
 export class Auth {
+    private axios: AxiosStatic;
     private apiUrl: string;
     private clientName: string;
     private clientVersion: string;
@@ -10,7 +11,8 @@ export class Auth {
         return new Auth(axios, apiUrl, clientName, clientVersion);
     }
 
-    constructor(axios: object, apiUrl: string, clientName: string, clientVersion: string) {
+    constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
+        this.axios = axios;
         this.apiUrl = apiUrl;
         this.clientName = clientName;
         this.clientVersion = clientVersion;
@@ -29,7 +31,7 @@ export class Auth {
         referral?: string,
         referrer?: string,
     ) {
-        return axios
+        return this.axios
             .post(`${this.apiUrl}/api/register`, {
                 name: name,
                 lastname: lastname,
