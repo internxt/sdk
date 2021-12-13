@@ -44,6 +44,7 @@ export class Auth {
                 referrer: referrer,
             }, {
                 headers: {
+                    'content-type': 'application/json; charset=utf-8',
                     'internxt-version': this.clientVersion,
                     'internxt-client': this.clientName
                 },
