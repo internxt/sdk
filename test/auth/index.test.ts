@@ -10,6 +10,63 @@ describe('# auth service tests', () => {
         axiosMock.reset();
     });
 
+    it('Should have all the correct params on call', async () => {
+
+        const post = jest.spyOn(axios, 'post');
+
+        axiosMock.onPost('apiUrl/api/register').reply(200, {
+            valid: true
+        });
+
+        const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
+
+        const name = '1';
+        const lastname = '2';
+        const email = '3';
+        const password = '4';
+        const mnemonic = '5';
+        const salt = '6';
+        const privateKey = '7';
+        const publicKey = '8';
+        const revocationKey = '9';
+
+        await authClient.register(
+            name,
+            lastname,
+            email,
+            password,
+            mnemonic,
+            salt,
+            privateKey,
+            publicKey,
+            revocationKey
+        );
+
+        expect(post).toBeCalledWith(
+            'apiUrl/api/register',
+            {
+                name: name,
+                lastname: lastname,
+                email: email,
+                password: password,
+                mnemonic: mnemonic,
+                salt: salt,
+                privateKey: privateKey,
+                publicKey: publicKey,
+                revocationKey: revocationKey,
+                referral: undefined,
+                referrer: undefined,
+            },
+            {
+                headers: {
+                    'content-type': 'application/json; charset=utf-8',
+                    'internxt-version': '0.1',
+                    'internxt-client': 'client-test-name'
+                },
+            }
+        );
+    });
+
     it('Should return error on network error', async () => {
 
         axiosMock.onPost('/api/register').networkError();
@@ -59,7 +116,7 @@ describe('# auth service tests', () => {
         const publicKey = '';
         const revocationKey = '';
 
-        const call = authClient.register(
+        const call = await authClient.register(
             name,
             lastname,
             email,
@@ -71,7 +128,7 @@ describe('# auth service tests', () => {
             revocationKey
         );
 
-        await expect(call).resolves.toEqual({
+        expect(call).toEqual({
             valid: true
         });
     });
