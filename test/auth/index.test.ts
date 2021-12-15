@@ -4,11 +4,11 @@ import sinon from 'sinon';
 
 describe('# auth service tests', () => {
 
-    describe('# register use case', () => {
+    afterEach(() => {
+        sinon.restore();
+    });
 
-        afterEach(() => {
-            sinon.restore();
-        });
+    describe('-> register use case', () => {
 
         it('Should have all the correct params on call', async () => {
             const name = '1';
@@ -130,11 +130,7 @@ describe('# auth service tests', () => {
 
     });
 
-    describe('# login use case', () => {
-
-        afterEach(() => {
-            sinon.restore();
-        });
+    describe('-> login use case', () => {
 
         it('Should bubble up the error on first call failure', async () => {
             // Arrange
@@ -147,9 +143,7 @@ describe('# auth service tests', () => {
                 tfaCode: undefined
             };
             const cryptoProvider: CryptoProvider = {
-                encryptPassword: () => {
-                    return '';
-                },
+                encryptPassword: () => '',
                 generateKeys: (password: Password) => {
                     const keys: Keys = {
                         privateKeyEncrypted: '',
@@ -167,29 +161,22 @@ describe('# auth service tests', () => {
             await expect(call).rejects.toEqual(error);
         });
 
-        it('Should call access with correct parameters', async () => {
+        it('Should bubble up the error on second call failure', async () => {
             // Arrange
+            const error = new Error('Network error');
+            const authClient = new Auth(axios, '', '', '');
             const loginDetails: LoginDetails = {
-                email: 'my_email',
-                password: 'password',
+                email: '',
+                password: '',
                 tfaCode: undefined
             };
-            const config = {
-                headers: {
-                    'content-type': 'application/json; charset=utf-8',
-                    'internxt-version': '',
-                    'internxt-client': '',
-                },
-            };
             const cryptoProvider: CryptoProvider = {
-                encryptPassword: (password, encryptedSalt) => {
-                    return password + '-' + encryptedSalt;
-                },
+                encryptPassword: () => '',
                 generateKeys: (password: Password) => {
                     const keys: Keys = {
-                        privateKeyEncrypted: 'priv',
-                        publicKey: 'pub',
-                        revocationCertificate: 'rev'
+                        privateKeyEncrypted: '',
+                        publicKey: '',
+                        revocationCertificate: ''
                     };
                     return keys;
                 }
@@ -203,12 +190,58 @@ describe('# auth service tests', () => {
                     }
                 })
                 .onSecondCall()
-                .resolves({});
-
-            const authClient = new Auth(axios, '', '', '');
+                .rejects(error);
 
             // Act
-            await authClient.login(loginDetails, cryptoProvider);
+            const call = authClient.login(loginDetails, cryptoProvider);
+
+            // Assert
+            await expect(call).rejects.toEqual(error);
+        });
+
+        it('Should call access with correct parameters', async () => {
+            // Arrange
+            const authClient = new Auth(axios, '', '', '');
+            const loginDetails: LoginDetails = {
+                email: 'my_email',
+                password: 'password',
+                tfaCode: undefined
+            };
+            const cryptoProvider: CryptoProvider = {
+                encryptPassword: (password, encryptedSalt) => password + '-' + encryptedSalt,
+                generateKeys: (password: Password) => {
+                    const keys: Keys = {
+                        privateKeyEncrypted: 'priv',
+                        publicKey: 'pub',
+                        revocationCertificate: 'rev'
+                    };
+                    return keys;
+                }
+            };
+            const config = {
+                headers: {
+                    'content-type': 'application/json; charset=utf-8',
+                    'internxt-version': '',
+                    'internxt-client': '',
+                },
+            };
+            const postStub = sinon.stub(axios, 'post');
+            postStub
+                .onFirstCall()
+                .resolves({
+                    data: {
+                        sKey: 'encrypted_salt'
+                    }
+                })
+                .onSecondCall()
+                .resolves({
+                    data: {
+                        user: 'user'
+                    }
+                });
+
+            // Act
+            const body = await authClient.login(loginDetails, cryptoProvider);
 
             // Assert
             expect(postStub.firstCall.args).toEqual([
@@ -230,6 +263,9 @@ describe('# auth service tests', () => {
                 },
                 config
             ]);
+            expect(body).toEqual({
+                user: 'user'
+            });
         });
 
     });
