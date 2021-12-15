@@ -1,11 +1,15 @@
 import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
+import {CryptoProvider, LoginDetails} from './types';
+
+export * from './types';
+
 
 export class Auth {
     private axios: AxiosStatic;
-    private apiUrl: string;
-    private clientName: string;
-    private clientVersion: string;
+    private readonly apiUrl: string;
+    private readonly clientName: string;
+    private readonly clientVersion: string;
 
     public static client(apiUrl: string, clientName: string, clientVersion: string) {
         return new Auth(axios, apiUrl, clientName, clientVersion);
@@ -18,7 +22,7 @@ export class Auth {
         this.clientVersion = clientVersion;
     }
 
-    register(
+    public register(
         name: string,
         lastname: string,
         email: string,
@@ -45,11 +49,7 @@ export class Auth {
                 referral: referral,
                 referrer: referrer,
             }, {
-                headers: {
-                    'content-type': 'application/json; charset=utf-8',
-                    'internxt-version': this.clientVersion,
-                    'internxt-client': this.clientName
-                },
+                headers: this.headers(),
             })
             .then(response => {
                 return response.data;
@@ -59,4 +59,54 @@ export class Auth {
             });
     }
 
+    public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
+        data: {
+            token: string;
+            user: unknown;
+            userTeam: unknown | null
+        }
+    }> {
+        const loginResponse = await this.axios
+            .post(`${this.apiUrl}/api/login`, {
+                email: details.email
+            }, {
+                headers: this.headers(),
+            })
+            .then(response => {
+                return response.data;
+            })
+            .catch(error => {
+                throw new Error(extractAxiosErrorMessage(error));
+            });
+
+        const encryptedSalt = loginResponse.sKey;
+        const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
+        const keys = cryptoProvider.generateKeys(details.password);
+
+        return this.axios
+            .post(`${this.apiUrl}/api/access`, {
+                email: details.email,
+                password: encryptedPassword,
+                tfa: details.tfaCode,
+                privateKey: keys.privateKeyEncrypted,
+                publicKey: keys.publicKey,
+                revocateKey: keys.revocationCertificate,
+            }, {
+                headers: this.headers(),
+            })
+            .then(response => {
+                return response.data;
+            })
+            .catch(error => {
+                throw new Error(extractAxiosErrorMessage(error));
+            });
+    }
+
+    private headers() {
+        return {
+            'content-type': 'application/json; charset=utf-8',
+            'internxt-version': this.clientVersion,
+            'internxt-client': this.clientName
+        };
+    }
 }
