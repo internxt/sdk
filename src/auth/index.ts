@@ -1,9 +1,10 @@
 import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
 import {CryptoProvider, LoginDetails} from './types';
+import {UserSettings} from '../shared/types/userSettings';
+import {TeamsSettings} from '../shared/types/teams';
 
 export * from './types';
-
 
 export class Auth {
     private axios: AxiosStatic;
@@ -62,8 +63,8 @@ export class Auth {
     public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
         data: {
             token: string;
-            user: unknown;
-            userTeam: unknown | null
+            user: UserSettings;
+            userTeam: TeamsSettings | null
         }
     }> {
         const loginResponse = await this.axios
