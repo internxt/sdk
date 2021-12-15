@@ -35,7 +35,11 @@ export class Auth {
         revocationKey: string,
         referral?: string,
         referrer?: string,
-    ) {
+    ): Promise<{
+        token: unknown,
+        user: unknown,
+        uuid: unknown
+    }> {
         return this.axios
             .post(`${this.apiUrl}/api/register`, {
                 name: name,
