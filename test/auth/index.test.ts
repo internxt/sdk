@@ -167,5 +167,70 @@ describe('# auth service tests', () => {
             await expect(call).rejects.toEqual(error);
         });
 
+        it('Should call access with correct parameters', async () => {
+            // Arrange
+            const loginDetails: LoginDetails = {
+                email: 'my_email',
+                password: 'password',
+                tfaCode: undefined
+            };
+            const config = {
+                headers: {
+                    'content-type': 'application/json; charset=utf-8',
+                    'internxt-version': '',
+                    'internxt-client': '',
+                },
+            };
+            const cryptoProvider: CryptoProvider = {
+                encryptPassword: (password, encryptedSalt) => {
+                    return password + '-' + encryptedSalt;
+                },
+                generateKeys: (password: Password) => {
+                    const keys: Keys = {
+                        privateKeyEncrypted: 'priv',
+                        publicKey: 'pub',
+                        revocationCertificate: 'rev'
+                    };
+                    return keys;
+                }
+            };
+            const postStub = sinon.stub(axios, 'post');
+            postStub
+                .onFirstCall()
+                .resolves({
+                    data: {
+                        sKey: 'encrypted_salt'
+                    }
+                })
+                .onSecondCall()
+                .resolves({});
+
+            const authClient = new Auth(axios, '', '', '');
+
+            // Act
+            await authClient.login(loginDetails, cryptoProvider);
+
+            // Assert
+            expect(postStub.firstCall.args).toEqual([
+                '/api/login',
+                {
+                    email: loginDetails.email
+                },
+                config
+            ]);
+            expect(postStub.secondCall.args).toEqual([
+                '/api/access',
+                {
+                    email: loginDetails.email,
+                    password: 'password-encrypted_salt',
+                    tfa: loginDetails.tfaCode,
+                    privateKey: 'priv',
+                    publicKey: 'pub',
+                    revocateKey: 'rev',
+                },
+                config
+            ]);
+        });
+
     });
 });
