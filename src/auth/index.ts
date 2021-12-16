@@ -1,6 +1,6 @@
 import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
-import {CryptoProvider, LoginDetails} from './types';
+import {CryptoProvider, LoginDetails, RegisterDetails} from './types';
 import {UserSettings} from '../shared/types/userSettings';
 import {TeamsSettings} from '../shared/types/teams';
 
@@ -23,36 +23,24 @@ export class Auth {
     this.clientVersion = clientVersion;
   }
 
-  public register(
-    name: string,
-    lastname: string,
-    email: string,
-    password: string,
-    mnemonic: string,
-    salt: string,
-    privateKey: string,
-    publicKey: string,
-    revocationKey: string,
-    referral?: string,
-    referrer?: string,
-  ): Promise<{
+  public register(registerDetails: RegisterDetails): Promise<{
     token: unknown,
     user: unknown,
     uuid: unknown
   }> {
     return this.axios
       .post(`${this.apiUrl}/api/register`, {
-        name: name,
-        lastname: lastname,
-        email: email,
-        password: password,
-        mnemonic: mnemonic,
-        salt: salt,
-        privateKey: privateKey,
-        publicKey: publicKey,
-        revocationKey: revocationKey,
-        referral: referral,
-        referrer: referrer,
+        name: registerDetails.name,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
+        privateKey: registerDetails.keys.privateKeyEncrypted,
+        publicKey: registerDetails.keys.publicKey,
+        revocationKey: registerDetails.keys.revocationCertificate,
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
       }, {
         headers: this.headers(),
       })

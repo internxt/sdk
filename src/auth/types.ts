@@ -7,6 +7,19 @@ export interface LoginDetails {
   tfaCode: string | undefined
 }
 
+export interface RegisterDetails {
+  name: string,
+  lastname: string,
+  email: Email,
+  password: Password,
+  mnemonic: string,
+  salt: string,
+  keys: Keys,
+  captcha: string,
+  referrer?: string,
+  referral?: string,
+}
+
 export interface Keys {
   privateKeyEncrypted: string,
   publicKey: string,

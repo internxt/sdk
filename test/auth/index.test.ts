@@ -1,6 +1,7 @@
-import {Auth, CryptoProvider, Keys, LoginDetails, Password} from '../../src/auth';
+import {Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails} from '../../src';
 import axios from 'axios';
 import sinon from 'sinon';
+import {emptyRegisterDetails} from './registerDetails.mother';
 
 describe('# auth service tests', () => {
 
@@ -11,118 +12,78 @@ describe('# auth service tests', () => {
   describe('-> register use case', () => {
 
     it('Should have all the correct params on call', async () => {
-      const name = '1';
-      const lastname = '2';
-      const email = '3';
-      const password = '4';
-      const mnemonic = '5';
-      const salt = '6';
-      const privateKey = '7';
-      const publicKey = '8';
-      const revocationKey = '9';
+      // Arrange
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+      registerDetails.name = '1';
+      registerDetails.lastname = '2';
+      registerDetails.email = '3';
+      registerDetails.password = '4';
+      registerDetails.mnemonic = '5';
+      registerDetails.salt = '6';
+      registerDetails.keys.privateKeyEncrypted = '7';
+      registerDetails.keys.publicKey = '8';
+      registerDetails.keys.revocationCertificate = '9';
 
-      sinon.stub(axios, 'post')
-        .withArgs(
-          'apiUrl/api/register',
-          {
-            name: name,
-            lastname: lastname,
-            email: email,
-            password: password,
-            mnemonic: mnemonic,
-            salt: salt,
-            privateKey: privateKey,
-            publicKey: publicKey,
-            revocationKey: revocationKey,
-            referral: undefined,
-            referrer: undefined,
-          },
-          {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'client-test-name',
-            },
-          }
-        )
-        .resolves({});
-
+      const postCall = sinon.stub(axios, 'post').resolves({});
       const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
 
-      await authClient.register(
-        name,
-        lastname,
-        email,
-        password,
-        mnemonic,
-        salt,
-        privateKey,
-        publicKey,
-        revocationKey
-      );
+      // Act
+      await authClient.register(registerDetails);
+
+      // Assert
+      expect(postCall.firstCall.args).toEqual([
+        'apiUrl/api/register',
+        {
+          name: registerDetails.name,
+          lastname: registerDetails.lastname,
+          email: registerDetails.email,
+          password: registerDetails.password,
+          mnemonic: registerDetails.mnemonic,
+          salt: registerDetails.salt,
+          privateKey: registerDetails.keys.privateKeyEncrypted,
+          publicKey: registerDetails.keys.publicKey,
+          revocationKey: registerDetails.keys.revocationCertificate,
+          referral: registerDetails.referral,
+          referrer: registerDetails.referrer,
+        },
+        {
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'internxt-version': '0.1',
+            'internxt-client': 'client-test-name',
+          },
+        }
+      ]);
     });
 
     it('Should return error on network error', async () => {
+      // Arrange
       const error = new Error('Network error');
       sinon.stub(axios, 'post').rejects(error);
       const authClient = new Auth(axios, '', '', '');
-      const name = '';
-      const lastname = '';
-      const email = '';
-      const password = '';
-      const mnemonic = '';
-      const salt = '';
-      const privateKey = '';
-      const publicKey = '';
-      const revocationKey = '';
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
 
-      const call = authClient.register(
-        name,
-        lastname,
-        email,
-        password,
-        mnemonic,
-        salt,
-        privateKey,
-        publicKey,
-        revocationKey
-      );
+      // Act
+      const call = authClient.register(registerDetails);
 
+      // Assert
       await expect(call).rejects.toEqual(error);
     });
 
     it('Should resolve valid on valid response', async () => {
-
+      // Arrange
       sinon.stub(axios, 'post').resolves({
         data: {
           valid: true
         }
       });
-
       const authClient = new Auth(axios, '', '', '');
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
 
-      const name = '';
-      const lastname = '';
-      const email = '';
-      const password = '';
-      const mnemonic = '';
-      const salt = '';
-      const privateKey = '';
-      const publicKey = '';
-      const revocationKey = '';
+      // Act
+      const body = await authClient.register(registerDetails);
 
-      const body = await authClient.register(
-        name,
-        lastname,
-        email,
-        password,
-        mnemonic,
-        salt,
-        privateKey,
-        publicKey,
-        revocationKey
-      );
-
+      // Assert
       expect(body).toEqual({
         valid: true
       });
@@ -269,4 +230,5 @@ describe('# auth service tests', () => {
     });
 
   });
+
 });
