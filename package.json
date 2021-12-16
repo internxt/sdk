@@ -19,7 +19,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "husky install",
-    "test": "jest --passWithNoTests",
+    "test": "jest --detectOpenHandles test/",
     "test:cov": "jest --coverage",
     "build": "tsc",
     "lint": "eslint src/**/*.ts --max-warnings=0",
@@ -29,10 +29,12 @@
     "@internxt/eslint-config-internxt": "^1.0.3",
     "@internxt/prettier-config": "^1.0.1",
     "@types/jest": "^27.0.1",
+    "@types/sinon": "^10.0.6",
     "eslint": "^7.32.0",
     "husky": "^7.0.1",
     "jest": "^27.0.6",
     "prettier": "^2.3.2",
+    "sinon": "^12.0.1",
     "ts-jest": "^27.0.5",
     "typescript": "^4.3.5"
   },
