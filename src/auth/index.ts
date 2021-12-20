@@ -1,117 +1,109 @@
 import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
-import {CryptoProvider, LoginDetails} from './types';
-import {UserSettings} from '../shared/types/userSettings';
+import {CryptoProvider, LoginDetails, RegisterDetails} from './types';
+import {Token, UserSettings, UUID} from '../shared/types/userSettings';
 import {TeamsSettings} from '../shared/types/teams';
 
 export * from './types';
 
 export class Auth {
-    private axios: AxiosStatic;
-    private readonly apiUrl: string;
-    private readonly clientName: string;
-    private readonly clientVersion: string;
+  private axios: AxiosStatic;
+  private readonly apiUrl: string;
+  private readonly clientName: string;
+  private readonly clientVersion: string;
 
-    public static client(apiUrl: string, clientName: string, clientVersion: string) {
-        return new Auth(axios, apiUrl, clientName, clientVersion);
-    }
+  public static client(apiUrl: string, clientName: string, clientVersion: string) {
+    return new Auth(axios, apiUrl, clientName, clientVersion);
+  }
 
-    constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
-        this.axios = axios;
-        this.apiUrl = apiUrl;
-        this.clientName = clientName;
-        this.clientVersion = clientVersion;
-    }
+  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
+    this.axios = axios;
+    this.apiUrl = apiUrl;
+    this.clientName = clientName;
+    this.clientVersion = clientVersion;
+  }
 
-    public register(
-        name: string,
-        lastname: string,
-        email: string,
-        password: string,
-        mnemonic: string,
-        salt: string,
-        privateKey: string,
-        publicKey: string,
-        revocationKey: string,
-        referral?: string,
-        referrer?: string,
-    ): Promise<{
-        token: unknown,
-        user: unknown,
-        uuid: unknown
-    }> {
-        return this.axios
-            .post(`${this.apiUrl}/api/register`, {
-                name: name,
-                lastname: lastname,
-                email: email,
-                password: password,
-                mnemonic: mnemonic,
-                salt: salt,
-                privateKey: privateKey,
-                publicKey: publicKey,
-                revocationKey: revocationKey,
-                referral: referral,
-                referrer: referrer,
-            }, {
-                headers: this.headers(),
-            })
-            .then(response => {
-                return response.data;
-            })
-            .catch(error => {
-                throw new Error(extractAxiosErrorMessage(error));
-            });
-    }
-
-    public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
-        data: {
-            token: string;
-            user: UserSettings;
-            userTeam: TeamsSettings | null
+  public register(registerDetails: RegisterDetails): Promise<{
+    token: Token,
+    user: Omit<UserSettings, 'bucket'> & { referralCode: string },
+    uuid: UUID
+  }> {
+    return this.axios
+      .post(`${this.apiUrl}/api/register`, {
+        name: registerDetails.name,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
+        privateKey: registerDetails.keys.privateKeyEncrypted,
+        publicKey: registerDetails.keys.publicKey,
+        revocationKey: registerDetails.keys.revocationCertificate,
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
+      }, {
+        headers: this.headers(),
+      })
+      .then(response => {
+        if (response.status === 200) {
+          return response.data;
+        } else if (response.data.error) {
+          throw new Error(response.data.error);
+        } else {
+          throw new Error('Internal Server Error');
         }
-    }> {
-        const loginResponse = await this.axios
-            .post(`${this.apiUrl}/api/login`, {
-                email: details.email
-            }, {
-                headers: this.headers(),
-            })
-            .then(response => {
-                return response.data;
-            })
-            .catch(error => {
-                throw new Error(extractAxiosErrorMessage(error));
-            });
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
 
-        const encryptedSalt = loginResponse.sKey;
-        const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
-        const keys = cryptoProvider.generateKeys(details.password);
+  public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
+    token: Token;
+    user: UserSettings;
+    userTeam: TeamsSettings | null
+  }> {
+    const loginResponse = await this.axios
+      .post(`${this.apiUrl}/api/login`, {
+        email: details.email
+      }, {
+        headers: this.headers(),
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
 
-        return this.axios
-            .post(`${this.apiUrl}/api/access`, {
-                email: details.email,
-                password: encryptedPassword,
-                tfa: details.tfaCode,
-                privateKey: keys.privateKeyEncrypted,
-                publicKey: keys.publicKey,
-                revocateKey: keys.revocationCertificate,
-            }, {
-                headers: this.headers(),
-            })
-            .then(response => {
-                return response.data;
-            })
-            .catch(error => {
-                throw new Error(extractAxiosErrorMessage(error));
-            });
-    }
+    const encryptedSalt = loginResponse.sKey;
+    const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
+    const keys = cryptoProvider.generateKeys(details.password);
 
-    private headers() {
-        return {
-            'content-type': 'application/json; charset=utf-8',
-            'internxt-version': this.clientVersion,
-            'internxt-client': this.clientName
-        };
-    }
+    return this.axios
+      .post(`${this.apiUrl}/api/access`, {
+        email: details.email,
+        password: encryptedPassword,
+        tfa: details.tfaCode,
+        privateKey: keys.privateKeyEncrypted,
+        publicKey: keys.publicKey,
+        revocateKey: keys.revocationCertificate,
+      }, {
+        headers: this.headers(),
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
+
+  private headers() {
+    return {
+      'content-type': 'application/json; charset=utf-8',
+      'internxt-version': this.clientVersion,
+      'internxt-client': this.clientName
+    };
+  }
 }

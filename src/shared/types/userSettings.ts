@@ -1,25 +1,28 @@
 import {AppSumoDetails} from './appsumo';
 
+export type UUID = string;
+export type Token = string;
+
 export interface UserSettings {
-    bucket: string;
-    backupsBucket: string | null;
-    createdAt: Date;
-    credit: number;
-    email: string;
-    lastname: string;
-    mnemonic: string;
-    name: string;
-    privateKey: string;
-    publicKey: string;
-    registerCompleted: boolean;
-    revocationKey: string;
-    root_folder_id: number;
-    userId: string;
-    uuid: string;
-    teams?: boolean;
-    username: string;
-    bridgeUser: string;
-    sharedWorkspace: boolean;
-    appSumoDetails: AppSumoDetails | null;
-    hasReferralsProgram: boolean;
+  userId: string;
+  uuid: UUID;
+  email: string;
+  name: string;
+  lastname: string;
+  username: string;
+  bridgeUser: string;
+  bucket: string;
+  backupsBucket: string | null;
+  root_folder_id: number;
+  sharedWorkspace: boolean;
+  credit: number;
+  mnemonic: string;
+  privateKey: string;
+  publicKey: string;
+  revocationKey: string;
+  teams?: boolean;
+  appSumoDetails: AppSumoDetails | null;
+  registerCompleted: boolean;
+  hasReferralsProgram: boolean;
+  createdAt: Date;
 }
