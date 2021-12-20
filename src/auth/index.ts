@@ -1,7 +1,7 @@
 import axios, {AxiosStatic} from 'axios';
 import {extractAxiosErrorMessage} from '../utils';
 import {CryptoProvider, LoginDetails, RegisterDetails} from './types';
-import {UserSettings} from '../shared/types/userSettings';
+import {Token, UserSettings, UUID} from '../shared/types/userSettings';
 import {TeamsSettings} from '../shared/types/teams';
 
 export * from './types';
@@ -24,9 +24,9 @@ export class Auth {
   }
 
   public register(registerDetails: RegisterDetails): Promise<{
-    token: unknown,
-    user: unknown,
-    uuid: unknown
+    token: Token,
+    user: Omit<UserSettings, 'bucket'> & { referralCode: string },
+    uuid: UUID
   }> {
     return this.axios
       .post(`${this.apiUrl}/api/register`, {
@@ -53,11 +53,9 @@ export class Auth {
   }
 
   public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
-    data: {
-      token: string;
-      user: UserSettings;
-      userTeam: TeamsSettings | null
-    }
+    token: Token;
+    user: UserSettings;
+    userTeam: TeamsSettings | null
   }> {
     const loginResponse = await this.axios
       .post(`${this.apiUrl}/api/login`, {
