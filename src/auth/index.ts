@@ -45,7 +45,13 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
-        return response.data;
+        if (response.status === 200) {
+          return response.data;
+        } else if (response.data.error) {
+          throw new Error(response.data.error);
+        } else {
+          throw new Error('Internal Server Error');
+        }
       })
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));

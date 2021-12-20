@@ -24,7 +24,9 @@ describe('# auth service tests', () => {
       registerDetails.keys.publicKey = '8';
       registerDetails.keys.revocationCertificate = '9';
 
-      const postCall = sinon.stub(axios, 'post').resolves({});
+      const postCall = sinon.stub(axios, 'post').resolves({
+        status: 200
+      });
       const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
 
       // Act
@@ -73,6 +75,7 @@ describe('# auth service tests', () => {
     it('Should resolve valid on valid response', async () => {
       // Arrange
       sinon.stub(axios, 'post').resolves({
+        status: 200,
         data: {
           valid: true
         }
