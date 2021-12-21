@@ -7,19 +7,20 @@ export class Photos {
   private url: string;
   private token?: string;
 
-  constructor(url: string) {
+  constructor(url: string, token?: string) {
     this.url = url;
+    this.token = token;
   }
 
   setToken(token: string): void {
     this.token = token;
   }
 
-  getPhotoById(photoId: PhotoId, token?: string): Promise<Photo> {
+  getPhotoById(photoId: PhotoId): Promise<Photo> {
     return axios
       .get<Photo>(`${this.url}/photos/${photoId}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -30,7 +31,7 @@ export class Photos {
       });
   }
 
-  getPhotos(offset: number, limit: number, token?: string): Promise<Photo[]> {
+  getPhotos(offset: number, limit: number): Promise<Photo[]> {
     if (limit > 200 || limit < 1) {
       throw new Error('Invalid limit. Limit should be positive and lower than 201. Provided limit was: ' + limit);
     }
@@ -42,7 +43,7 @@ export class Photos {
     return axios
       .get<Photo[]>(`${this.url}/photos/?offset=${offset}&limit=${limit}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -53,11 +54,11 @@ export class Photos {
       });
   }
 
-  getPhotosCountByMonth(month: number, year: number, token?: string): Promise<number> {
+  getPhotosCountByMonth(month: number, year: number): Promise<number> {
     return axios
       .get<number>(`${this.url}/photos/?month=${month}&year=${year}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -68,11 +69,11 @@ export class Photos {
       });
   }
 
-  getPhotosCountByYear(year: number, token?: string): Promise<number> {
+  getPhotosCountByYear(year: number): Promise<number> {
     return axios
       .get<number>(`${this.url}/photos/?year=${year}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -83,11 +84,11 @@ export class Photos {
       });
   }
 
-  createPhoto(photo: Photo, token?: string): Promise<PhotoId> {
+  createPhoto(photo: Photo): Promise<PhotoId> {
     return axios
       .post<PhotoId>(`${this.url}/photos`, photo, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -98,11 +99,11 @@ export class Photos {
       });
   }
 
-  deletePhotoById(photoId: PhotoId, token?: string): Promise<unknown> {
+  deletePhotoById(photoId: PhotoId): Promise<unknown> {
     return axios
       .delete(`${this.url}/photos/${photoId}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .catch((err) => {
@@ -110,11 +111,11 @@ export class Photos {
       });
   }
 
-  getDeviceById(deviceId: DeviceId, token?: string): Promise<Device> {
+  getDeviceById(deviceId: DeviceId): Promise<Device> {
     return axios
       .get<Device>(`${this.url}/photos/${deviceId}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -125,11 +126,11 @@ export class Photos {
       });
   }
 
-  createDevice(device: Device, token?: string): Promise<DeviceId> {
+  createDevice(device: Device): Promise<DeviceId> {
     return axios
       .post<DeviceId>(`${this.url}/photos`, device, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .then((res) => {
@@ -140,11 +141,11 @@ export class Photos {
       });
   }
 
-  deleteDevice(deviceId: DeviceId, token?: string): Promise<unknown> {
+  deleteDevice(deviceId: DeviceId): Promise<unknown> {
     return axios
       .delete(`${this.url}/devices/${deviceId}`, {
         headers: {
-          Authorization: `Bearer ${token ?? this.token}`,
+          Authorization: `Bearer ${this.token}`,
         },
       })
       .catch((err) => {
