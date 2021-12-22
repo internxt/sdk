@@ -30,3 +30,5 @@ export interface CryptoProvider {
   encryptPasswordHash: (password: Password, encryptedSalt: string) => string,
   generateKeys: (password: Password) => Promise<Keys>,
 }
+
+export class UserAccessError extends Error {}

@@ -1,8 +1,8 @@
-import axios, {AxiosStatic} from 'axios';
-import {extractAxiosErrorMessage} from '../utils';
-import {CryptoProvider, LoginDetails, RegisterDetails} from './types';
-import {Token, UserSettings, UUID} from '../shared/types/userSettings';
-import {TeamsSettings} from '../shared/types/teams';
+import axios, { AxiosStatic } from 'axios';
+import { extractAxiosErrorMessage } from '../utils';
+import { CryptoProvider, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { Token, UserSettings, UUID } from '../shared/types/userSettings';
+import { TeamsSettings } from '../shared/types/teams';
 
 export * from './types';
 
@@ -45,13 +45,10 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
-        if (response.status === 200) {
-          return response.data;
-        } else if (response.data.error) {
-          throw new Error(response.data.error);
-        } else {
-          throw new Error('Internal Server Error');
+        if (response.status !== 200) {
+          throw new Error(response.data.error || 'Internal Server Error');
         }
+        return response.data;
       })
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));
@@ -70,6 +67,12 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
+        if (response.status === 400) {
+          throw new Error(response.data.error || 'Can not connect to server');
+        }
+        if (response.status !== 200) {
+          throw new Error('This account does not exist');
+        }
         return response.data;
       })
       .catch(error => {
@@ -92,6 +95,9 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
+        if (response.status !== 200) {
+          throw new UserAccessError(response.data.error || response.data);
+        }
         return response.data;
       })
       .catch(error => {
