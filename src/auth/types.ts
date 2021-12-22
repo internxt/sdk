@@ -28,5 +28,5 @@ export interface Keys {
 
 export interface CryptoProvider {
   encryptPassword: (password: Password, encryptedSalt: string) => Password,
-  generateKeys: (password: Password) => Keys,
+  generateKeys: (password: Password) => Promise<Keys>,
 }

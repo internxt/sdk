@@ -78,7 +78,7 @@ export class Auth {
 
     const encryptedSalt = loginResponse.sKey;
     const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
-    const keys = cryptoProvider.generateKeys(details.password);
+    const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
       .post(`${this.apiUrl}/api/access`, {

@@ -114,7 +114,7 @@ describe('# auth service tests', () => {
             publicKey: '',
             revocationCertificate: ''
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
 
@@ -142,7 +142,7 @@ describe('# auth service tests', () => {
             publicKey: '',
             revocationCertificate: ''
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
       const postStub = sinon.stub(axios, 'post');
@@ -179,7 +179,7 @@ describe('# auth service tests', () => {
             publicKey: 'pub',
             revocationCertificate: 'rev'
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
       const config = {
