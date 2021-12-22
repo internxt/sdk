@@ -1,7 +1,7 @@
-import {Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails} from '../../src';
+import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails } from '../../src';
 import axios from 'axios';
 import sinon from 'sinon';
-import {emptyRegisterDetails} from './registerDetails.mother';
+import { emptyRegisterDetails } from './registerDetails.mother';
 
 describe('# auth service tests', () => {
 
@@ -107,7 +107,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: () => '',
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
@@ -135,7 +135,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: () => '',
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
@@ -172,7 +172,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: 'priv',

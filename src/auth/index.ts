@@ -77,13 +77,13 @@ export class Auth {
       });
 
     const encryptedSalt = loginResponse.sKey;
-    const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
+    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
       .post(`${this.apiUrl}/api/access`, {
         email: details.email,
-        password: encryptedPassword,
+        password: encryptedPasswordHash,
         tfa: details.tfaCode,
         privateKey: keys.privateKeyEncrypted,
         publicKey: keys.publicKey,
