@@ -1,6 +1,6 @@
 import axios, { AxiosStatic } from 'axios';
 import { extractAxiosErrorMessage } from '../utils';
-import { CryptoProvider, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
 import { Token, UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 
@@ -105,11 +105,42 @@ export class Auth {
       });
   }
 
+  public updateKeys(keys: Keys, token: Token) {
+    return this.axios
+      .patch(`${this.apiUrl}/api/user/keys`, {
+        publicKey: keys.publicKey,
+        privateKey: keys.privateKeyEncrypted,
+        revocationKey: keys.revocationCertificate,
+      }, {
+        headers: this.headersWithToken(token),
+      })
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(response.data.error || response.data);
+        }
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
+
   private headers() {
     return {
       'content-type': 'application/json; charset=utf-8',
       'internxt-version': this.clientVersion,
       'internxt-client': this.clientName
+    };
+  }
+
+  private headersWithToken(token: Token) {
+    const headers = this.headers();
+    const extra = {
+      Authorization: 'Bearer ' + token
+    };
+    return {
+      ...headers,
+      ...extra
     };
   }
 }

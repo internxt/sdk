@@ -1,4 +1,5 @@
 import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails } from '../../src';
+import { Token } from '../../src/shared/types/userSettings';
 import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
@@ -230,6 +231,42 @@ describe('# auth service tests', () => {
       });
     });
 
+  });
+
+  describe('-> update keys use case', () => {
+
+    it('Should have a header with the auth token', async () => {
+      // Arrange
+      const authClient = new Auth(axios, '', '.t', '.9');
+      const keys: Keys = {
+        privateKeyEncrypted: 'prik',
+        publicKey: 'pubk',
+        revocationCertificate: 'crt'
+      };
+      const token: Token = 'my-secure-token';
+      const axiosStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
+
+      // Act
+      await authClient.updateKeys(keys, token);
+
+      // Assert
+      expect(axiosStub.firstCall.args).toEqual([
+        '/api/user/keys',
+        {
+          publicKey: 'pubk',
+          privateKey: 'prik',
+          revocationKey: 'crt',
+        },
+        {
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'internxt-version': '.9',
+            'internxt-client': '.t',
+            'Authorization': 'Bearer my-secure-token',
+          }
+        }
+      ]);
+    });
   });
 
 });
