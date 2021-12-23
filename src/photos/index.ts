@@ -1,156 +1,37 @@
-import axios from 'axios';
-
-import { extractAxiosErrorMessage } from '../utils';
-import { Device, DeviceId, Photo, PhotoId } from './types';
+import { PhotosModel } from './types';
+import DevicesSubmodule from './devices';
+import PhotosSubmodule from './photos';
+import SharesSubmodule from './shares';
 
 export class Photos {
-  private url: string;
-  private token?: string;
+  private readonly model: PhotosModel;
 
-  constructor(url: string, token?: string) {
-    this.url = url;
-    this.token = token;
+  public readonly photos: PhotosSubmodule;
+  public readonly devices: DevicesSubmodule;
+  public readonly shares: SharesSubmodule;
+
+  constructor(baseUrl: string, accessToken?: string) {
+    this.model = { baseUrl, accessToken };
+
+    this.photos = new PhotosSubmodule(this.model);
+    this.devices = new DevicesSubmodule(this.model);
+    this.shares = new SharesSubmodule(this.model);
   }
 
-  setToken(token: string): void {
-    this.token = token;
+  public setBaseUrl(baseUrl: string): void {
+    this.model.baseUrl = baseUrl;
   }
 
-  getPhotoById(photoId: PhotoId): Promise<Photo> {
-    return axios
-      .get<Photo>(`${this.url}/photos/${photoId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
+  public setAccessToken(accessToken: string): void {
+    this.model.accessToken = accessToken;
   }
 
-  getPhotos(offset: number, limit: number): Promise<Photo[]> {
-    if (limit > 200 || limit < 1) {
-      throw new Error('Invalid limit. Limit should be positive and lower than 201. Provided limit was: ' + limit);
-    }
-
-    if (offset < 0) {
-      throw new Error('Invalid offset. Offset should be positive. Provided offset was: ' + offset);
-    }
-
-    return axios
-      .get<Photo[]>(`${this.url}/photos/?offset=${offset}&limit=${limit}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
+  get baseUrl(): string | undefined {
+    return this.model.baseUrl;
   }
 
-  getPhotosCountByMonth(month: number, year: number): Promise<number> {
-    return axios
-      .get<number>(`${this.url}/photos/?month=${month}&year=${year}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  getPhotosCountByYear(year: number): Promise<number> {
-    return axios
-      .get<number>(`${this.url}/photos/?year=${year}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  createPhoto(photo: Photo): Promise<PhotoId> {
-    return axios
-      .post<PhotoId>(`${this.url}/photos`, photo, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  deletePhotoById(photoId: PhotoId): Promise<unknown> {
-    return axios
-      .delete(`${this.url}/photos/${photoId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  getDeviceById(deviceId: DeviceId): Promise<Device> {
-    return axios
-      .get<Device>(`${this.url}/photos/${deviceId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  createDevice(device: Device): Promise<DeviceId> {
-    return axios
-      .post<DeviceId>(`${this.url}/photos`, device, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .then((res) => {
-        return res.data;
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
-  }
-
-  deleteDevice(deviceId: DeviceId): Promise<unknown> {
-    return axios
-      .delete(`${this.url}/devices/${deviceId}`, {
-        headers: {
-          Authorization: `Bearer ${this.token}`,
-        },
-      })
-      .catch((err) => {
-        throw new Error(extractAxiosErrorMessage(err));
-      });
+  get accessToken(): string | undefined {
+    return this.model.accessToken;
   }
 }
 

@@ -1,9 +1,16 @@
+export interface PhotosModel {
+  baseUrl: string;
+  accessToken?: string;
+}
+
 export type DeviceId = string;
 export interface Device {
   id: DeviceId;
   mac: string;
   name: string;
   userUuid: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type PhotoType = string;
@@ -20,4 +27,24 @@ export interface Photo {
   previewId: FileId;
   deviceId: DeviceId;
   userUuid: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Share {
+  id: string;
+  bucket: string;
+  encryptionKey: string;
+  photoId: string;
+  token: string;
+  views: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreatePhotoShareBody {
+  encryptionKey: string;
+  views: number;
+  photoId: string;
+  bucket: string;
 }
