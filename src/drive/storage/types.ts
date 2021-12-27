@@ -66,3 +66,13 @@ export interface FetchFolderContentResponse {
   userId: number;
   user_id: number;
 }
+
+export interface FileEntry {
+  id: string,
+  type: string,
+  size: number,
+  name: string,
+  bucket: string,
+  folder_id: string,
+  encrypt_version: string,
+}

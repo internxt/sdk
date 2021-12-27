@@ -3,6 +3,7 @@ import { Storage } from '../../src/drive/storage';
 import axios from 'axios';
 import { randomFolderContentResponse } from './folderContentResponse.mother';
 import { validResponse } from '../shared/response';
+import { FileEntry } from "../../src/drive/storage/types";
 
 describe('# storage service tests', () => {
 
@@ -12,11 +13,11 @@ describe('# storage service tests', () => {
 
   describe('-> get folder content use case', () => {
 
-    it('Should have all the correct params on call', async () => {
+    it('Should return the expected elements', async () => {
       // Arrange
       const response = randomFolderContentResponse(2, 2);
+      const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
       sinon.stub(axios, 'get').resolves(validResponse(response));
-      const storageClient = new Storage(axios, '', '', '');
 
       // Act
       const [promise, cancelToken] = storageClient.getFolderContent(1);
@@ -30,7 +31,7 @@ describe('# storage service tests', () => {
 
     it('Should cancel the request', async () => {
       // Arrange
-      const storageClient = new Storage(axios, '', '', '');
+      const storageClient = new Storage(axios, '', '', '', '');
 
       // Act
       const [promise, cancelToken] = storageClient.getFolderContent(1);
@@ -42,4 +43,47 @@ describe('# storage service tests', () => {
 
   });
 
+  describe('-> create file entry use case', () => {
+
+    it('Should have all the correct params on call', async () => {
+      // Arrange
+      const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
+      const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+      const fileEntry: FileEntry = {
+        id: '1',
+        type: 'type',
+        name: 'xtz',
+        size: 2,
+        bucket: '',
+        encrypt_version: '',
+        folder_id: '',
+      };
+
+      // Act
+      await storageClient.createFileEntry(fileEntry);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/storage/file',
+        {
+          fileId: '1',
+          type: 'type',
+          bucket: '',
+          size: 2,
+          folder_id: '',
+          name: 'xtz',
+          encrypt_version: '',
+        },
+        {
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'internxt-version': '0.1',
+            'internxt-client': 'c-name',
+            'Authorization': 'Bearer my-token',
+          }
+        }
+      ]);
+    });
+
+  });
 });

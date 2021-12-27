@@ -1,6 +1,8 @@
 import axios, { AxiosStatic, CancelTokenSource } from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
-import { DriveFileData, DriveFolderData, FetchFolderContentResponse } from './types';
+import { DriveFileData, DriveFolderData, FetchFolderContentResponse, FileEntry } from './types';
+import { Token } from '../../auth';
+import { headersWithToken } from '../../shared/headers';
 
 export * as StorageTypes from './types';
 
@@ -9,16 +11,18 @@ export class Storage {
   private readonly apiUrl: string;
   private readonly clientName: string;
   private readonly clientVersion: string;
+  private readonly token: Token;
 
-  public static client(apiUrl: string, clientName: string, clientVersion: string) {
-    return new Storage(axios, apiUrl, clientName, clientVersion);
+  public static client(apiUrl: string, clientName: string, clientVersion: string, token: Token) {
+    return new Storage(axios, apiUrl, clientName, clientVersion, token);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
+  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token) {
     this.axios = axios;
     this.apiUrl = apiUrl;
     this.clientName = clientName;
     this.clientVersion = clientVersion;
+    this.token = token;
   }
 
   public getFolderContent(folderId: number): [
@@ -31,7 +35,8 @@ export class Storage {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
       .get<FetchFolderContentResponse>(`${this.apiUrl}/api/storage/v2/folder/${folderId}`, {
-        cancelToken: cancelTokenSource.token
+        cancelToken: cancelTokenSource.token,
+        headers: headersWithToken(this.clientName, this.clientVersion, this.token)
       })
       .then(response => {
         return {
@@ -46,4 +51,24 @@ export class Storage {
     return [promise, cancelTokenSource];
   }
 
+  public createFileEntry(fileEntry: FileEntry) {
+    return this.axios
+      .post(`${this.apiUrl}/api/storage/file`, {
+        fileId: fileEntry.id,
+        type: fileEntry.type,
+        bucket: fileEntry.bucket,
+        size: fileEntry.size,
+        folder_id: fileEntry.folder_id,
+        name: fileEntry.name,
+        encrypt_version: fileEntry.encrypt_version,
+      }, {
+        headers: headersWithToken(this.clientName, this.clientVersion, this.token)
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
 }
