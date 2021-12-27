@@ -76,3 +76,19 @@ export interface FileEntry {
   folder_id: string,
   encrypt_version: string,
 }
+
+
+export interface CreateFolderPayload {
+  parentFolderId: number;
+  folderName: string;
+}
+
+export interface CreateFolderResponse {
+  bucket: string;
+  id: number;
+  name: string;
+  parentId: number;
+  createdAt: string;
+  updatedAt: string;
+  userId: number;
+}

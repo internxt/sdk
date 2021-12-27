@@ -1,6 +1,13 @@
 import axios, { AxiosStatic, CancelTokenSource } from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
-import { DriveFileData, DriveFolderData, FetchFolderContentResponse, FileEntry } from './types';
+import {
+  CreateFolderPayload,
+  CreateFolderResponse,
+  DriveFileData,
+  DriveFolderData,
+  FetchFolderContentResponse,
+  FileEntry
+} from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
 
@@ -36,7 +43,7 @@ export class Storage {
     const promise = this.axios
       .get<FetchFolderContentResponse>(`${this.apiUrl}/api/storage/v2/folder/${folderId}`, {
         cancelToken: cancelTokenSource.token,
-        headers: headersWithToken(this.clientName, this.clientVersion, this.token)
+        headers: this.headers()
       })
       .then(response => {
         return {
@@ -51,7 +58,30 @@ export class Storage {
     return [promise, cancelTokenSource];
   }
 
-  public createFileEntry(fileEntry: FileEntry) {
+  public createFolder(data: CreateFolderPayload): [
+    Promise<CreateFolderResponse>,
+    CancelTokenSource
+  ] {
+    const cancelTokenSource = axios.CancelToken.source();
+    const promise = this.axios
+      .post(`${this.apiUrl}/api/storage/folder`, {
+        parentFolderId: data.parentFolderId,
+        folderName: data.folderName,
+      }, {
+        cancelToken: cancelTokenSource.token,
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+
+    return [promise, cancelTokenSource];
+  }
+
+  public createFileEntry(fileEntry: FileEntry): Promise<unknown> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/file`, {
         fileId: fileEntry.id,
@@ -62,7 +92,7 @@ export class Storage {
         name: fileEntry.name,
         encrypt_version: fileEntry.encrypt_version,
       }, {
-        headers: headersWithToken(this.clientName, this.clientVersion, this.token)
+        headers: this.headers()
       })
       .then(response => {
         return response.data;
@@ -70,5 +100,9 @@ export class Storage {
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));
       });
+  }
+
+  private headers() {
+    return headersWithToken(this.clientName, this.clientVersion, this.token);
   }
 }
