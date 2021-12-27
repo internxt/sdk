@@ -3,6 +3,7 @@ import { extractAxiosErrorMessage } from '../utils';
 import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
+import { basicHeaders, headersWithToken } from '../shared/headers';
 
 export * from './types';
 
@@ -43,7 +44,7 @@ export class Auth {
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
         if (response.status !== 200) {
@@ -65,7 +66,7 @@ export class Auth {
       .post(`${this.apiUrl}/api/login`, {
         email: details.email
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
         if (response.status === 400) {
@@ -93,7 +94,7 @@ export class Auth {
         publicKey: keys.publicKey,
         revocateKey: keys.revocationCertificate,
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
         if (response.status !== 200) {
@@ -115,7 +116,7 @@ export class Auth {
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
       }, {
-        headers: this.headersWithToken(token),
+        headers: headersWithToken(this.clientName, this.clientVersion, token),
       })
       .then(response => {
         if (response.status !== 200) {
@@ -128,22 +129,4 @@ export class Auth {
       });
   }
 
-  private headers() {
-    return {
-      'content-type': 'application/json; charset=utf-8',
-      'internxt-version': this.clientVersion,
-      'internxt-client': this.clientName
-    };
-  }
-
-  private headersWithToken(token: Token) {
-    const headers = this.headers();
-    const extra = {
-      Authorization: 'Bearer ' + token
-    };
-    return {
-      ...headers,
-      ...extra
-    };
-  }
 }
