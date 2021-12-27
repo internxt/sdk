@@ -1,6 +1,8 @@
 export type Password = string;
 export type Email = string;
 
+export type Token = string;
+
 export interface LoginDetails {
   email: Email,
   password: Password,

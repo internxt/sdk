@@ -1,7 +1,7 @@
 import axios, { AxiosStatic } from 'axios';
 import { extractAxiosErrorMessage } from '../utils';
-import { CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
-import { Token, UserSettings, UUID } from '../shared/types/userSettings';
+import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 
 export * from './types';
