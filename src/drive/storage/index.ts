@@ -6,7 +6,7 @@ import {
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
-  FileEntry
+  FileEntry, MoveFolderPayload, MoveFolderResponse
 } from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
@@ -32,6 +32,45 @@ export class Storage {
     this.token = token;
   }
 
+  public createFolder(payload: CreateFolderPayload): [
+    Promise<CreateFolderResponse>,
+    CancelTokenSource
+  ] {
+    const cancelTokenSource = axios.CancelToken.source();
+    const promise = this.axios
+      .post(`${this.apiUrl}/api/storage/folder`, {
+        parentFolderId: payload.parentFolderId,
+        folderName: payload.folderName,
+      }, {
+        cancelToken: cancelTokenSource.token,
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+
+    return [promise, cancelTokenSource];
+  }
+
+  public moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
+    return this.axios
+      .post(`${this.apiUrl}/api/storage/move/folder`, {
+        folderId: payload.folderId,
+        destination: payload.destinationFolderId,
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
+
   public getFolderContent(folderId: number): [
     Promise<{
       folders: DriveFolderData[];
@@ -50,29 +89,6 @@ export class Storage {
           folders: response.data.children.map(folder => ({ ...folder, isFolder: true })),
           files: response.data.files,
         };
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
-      });
-
-    return [promise, cancelTokenSource];
-  }
-
-  public createFolder(data: CreateFolderPayload): [
-    Promise<CreateFolderResponse>,
-    CancelTokenSource
-  ] {
-    const cancelTokenSource = axios.CancelToken.source();
-    const promise = this.axios
-      .post(`${this.apiUrl}/api/storage/folder`, {
-        parentFolderId: data.parentFolderId,
-        folderName: data.folderName,
-      }, {
-        cancelToken: cancelTokenSource.token,
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
       })
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));

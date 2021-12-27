@@ -77,7 +77,6 @@ export interface FileEntry {
   encrypt_version: string,
 }
 
-
 export interface CreateFolderPayload {
   parentFolderId: number;
   folderName: string;
@@ -91,4 +90,15 @@ export interface CreateFolderResponse {
   createdAt: string;
   updatedAt: string;
   userId: number;
+}
+
+export interface MoveFolderPayload {
+  folderId: number;
+  destinationFolderId: number;
+}
+
+export interface MoveFolderResponse {
+  item: DriveFolderData;
+  destination: number;
+  moved: boolean;
 }

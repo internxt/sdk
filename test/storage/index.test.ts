@@ -3,7 +3,12 @@ import { Storage, StorageTypes } from '../../src';
 import axios from 'axios';
 import { randomFolderContentResponse } from './folderContentResponse.mother';
 import { validResponse } from '../shared/response';
-import { CreateFolderPayload, CreateFolderResponse } from '../../src/drive/storage/types';
+import {
+  CreateFolderPayload,
+  CreateFolderResponse, DriveFolderData,
+  MoveFolderPayload,
+  MoveFolderResponse
+} from '../../src/drive/storage/types';
 
 describe('# storage service tests', () => {
 
@@ -107,11 +112,70 @@ describe('# storage service tests', () => {
 
     });
 
+    describe('move folder', () => {
+
+      it('Should call with correct params', async () => {
+        // Arrange
+        const payload: MoveFolderPayload = {
+          destinationFolderId: 3,
+          folderId: 4
+        };
+        const response: MoveFolderResponse = {
+          destination: 0,
+          item: <DriveFolderData>{
+            id: 1,
+            bucket: 'bucket',
+            color: 'red',
+            createdAt: '',
+            encrypt_version: '',
+            icon: '',
+            iconId: 1,
+            icon_id: 1,
+            isFolder: true,
+            name: 'name',
+            parentId: 1,
+            parent_id: 1,
+            updatedAt: '',
+            userId: 1,
+            user_id: 1,
+          },
+          moved: false
+        };
+        const callStub = sinon.stub(axios, 'post')
+          .resolves(
+            validResponse(response)
+          );
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const body = await storageClient.moveFolder(payload);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/move/folder',
+          {
+            folderId: payload.folderId,
+            destination: payload.destinationFolderId,
+          },
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+        expect(body).toEqual(response);
+      });
+
+    });
+
   });
 
   describe('-> files', () => {
 
-    describe('-> create file entry use case', () => {
+    describe('create file entry', () => {
 
       it('Should have all the correct params on call', async () => {
         // Arrange
