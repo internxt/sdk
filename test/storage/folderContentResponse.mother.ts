@@ -20,7 +20,7 @@ export function emptyFolderContentResponse() {
   return response;
 }
 
-export function randomFolderContentResponse(childrenCount: number, fileCount: number) {
+export function randomFolderContentResponse(folderCount: number, fileCount: number) {
   const folderChild: FolderChild = {
     bucket: '',
     color: '',
@@ -56,7 +56,7 @@ export function randomFolderContentResponse(childrenCount: number, fileCount: nu
 
   const response = emptyFolderContentResponse();
 
-  for (let i = 0; i < childrenCount; i++) {
+  for (let i = 0; i < folderCount; i++) {
     response.children.push(folderChild);
   }
 

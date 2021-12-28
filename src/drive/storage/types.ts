@@ -93,8 +93,10 @@ export interface CreateFolderResponse {
 }
 
 export interface MoveFolderPayload {
-  folderId: number;
-  destinationFolderId: number;
+  folder: DriveFolderData,
+  destinationFolderId: number,
+  destinationPath: string,
+  bucketId: string,
 }
 
 export interface MoveFolderResponse {
@@ -102,3 +104,9 @@ export interface MoveFolderResponse {
   destination: number;
   moved: boolean;
 }
+
+export type RenameFileInNetwork = (
+  fileId: string,
+  bucketId: string,
+  relativePath: string,
+) => void;

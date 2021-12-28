@@ -1,14 +1,15 @@
 import sinon from 'sinon';
 import { Storage, StorageTypes } from '../../src';
 import axios from 'axios';
-import { randomFolderContentResponse } from './folderContentResponse.mother';
+import { emptyFolderContentResponse, randomFolderContentResponse } from './folderContentResponse.mother';
 import { validResponse } from '../shared/response';
 import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse
+  MoveFolderResponse, RenameFileInNetwork
 } from '../../src/drive/storage/types';
+import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 
 describe('# storage service tests', () => {
 
@@ -114,13 +115,43 @@ describe('# storage service tests', () => {
 
     describe('move folder', () => {
 
-      it('Should call with correct params', async () => {
+      it('Should call with right arguments & bubble up the error', async () => {
         // Arrange
-        const payload: MoveFolderPayload = {
-          destinationFolderId: 3,
-          folderId: 4
-        };
-        const response: MoveFolderResponse = {
+        const payload: MoveFolderPayload = randomMoveFolderPayload();
+        const renameFunction: RenameFileInNetwork = () => null;
+        const callStub = sinon.stub(axios, 'post')
+          .onFirstCall()
+          .rejects(new Error('first call error'));
+
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.moveFolder(payload, renameFunction);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/move/folder',
+          {
+            folderId: payload.folder.id,
+            destination: payload.destinationFolderId,
+          },
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+      it('Should call for details one time & return correct response', async () => {
+        // Arrange
+        const payload: MoveFolderPayload = randomMoveFolderPayload();
+        const folderContentResponse = emptyFolderContentResponse();
+        const moveFolderResponse: MoveFolderResponse = {
           destination: 0,
           item: <DriveFolderData>{
             id: 1,
@@ -141,32 +172,18 @@ describe('# storage service tests', () => {
           },
           moved: false
         };
-        const callStub = sinon.stub(axios, 'post')
-          .resolves(
-            validResponse(response)
-          );
+        const renameFunction: RenameFileInNetwork = () => null;
+        sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
+        sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
         const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const spy = sinon.spy(storageClient, 'getFolderContent');
 
         // Act
-        const body = await storageClient.moveFolder(payload);
+        const body = await storageClient.moveFolder(payload, renameFunction);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/folder',
-          {
-            folderId: payload.folderId,
-            destination: payload.destinationFolderId,
-          },
-          {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
-          }
-        ]);
-        expect(body).toEqual(response);
+        expect(spy.callCount).toEqual(1);
+        expect(body).toEqual(moveFolderResponse);
       });
 
     });

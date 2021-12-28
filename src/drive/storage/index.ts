@@ -6,7 +6,7 @@ import {
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
-  FileEntry, MoveFolderPayload, MoveFolderResponse
+  FileEntry, MoveFolderPayload, MoveFolderResponse, RenameFileInNetwork
 } from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
@@ -55,20 +55,51 @@ export class Storage {
     return [promise, cancelTokenSource];
   }
 
-  public moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
-    return this.axios
+  public async moveFolder(
+    payload: MoveFolderPayload,
+    renameFileInNetwork: RenameFileInNetwork
+  ): Promise<MoveFolderResponse> {
+    const moveFolderResponse = await this.axios
       .post(`${this.apiUrl}/api/storage/move/folder`, {
-        folderId: payload.folderId,
+        folderId: payload.folder.id,
         destination: payload.destinationFolderId,
       }, {
         headers: this.headers()
       })
       .then(response => {
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
+
+    // * Renames files iterating over folders
+    const pendingFolders = [{
+      destinationPath: `${payload.destinationPath}/${payload.folder.name}`,
+      data: payload.folder
+    }];
+
+    while (pendingFolders.length > 0) {
+      const currentFolder = pendingFolders[0];
+      const [folderContentPromise] = this.getFolderContent(currentFolder.data.id);
+      const { files, folders } = await folderContentPromise;
+
+      pendingFolders.shift();
+
+      // * Renames current folder files
+      for (const file of files) {
+        const { name, type } = file;
+        const relativePath = `${currentFolder.destinationPath}/${name}${type ? '.' + type : ''}`;
+        renameFileInNetwork(file.fileId, payload.bucketId, relativePath);
+      }
+
+      // * Adds current folder folders to pending
+      pendingFolders.push(
+        ...folders.map((folderData) => ({
+          destinationPath: `${currentFolder.destinationPath}/${folderData.name}`,
+          data: folderData,
+        })),
+      );
+    }
+
+    return moveFolderResponse;
   }
 
   public getFolderContent(folderId: number): [
