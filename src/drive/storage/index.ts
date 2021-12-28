@@ -6,7 +6,7 @@ import {
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
-  FileEntry, MoveFolderPayload, MoveFolderResponse, RenameFileInNetwork
+  FileEntry, HashPath, MoveFolderPayload, MoveFolderResponse, UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
@@ -32,6 +32,10 @@ export class Storage {
     this.token = token;
   }
 
+  /**
+   * Creates a new folder
+   * @param payload
+   */
   public createFolder(payload: CreateFolderPayload): [
     Promise<CreateFolderResponse>,
     CancelTokenSource
@@ -55,9 +59,14 @@ export class Storage {
     return [promise, cancelTokenSource];
   }
 
+  /**
+   * Moves a specific folder to a new location
+   * @param payload
+   * @param hashPath
+   */
   public async moveFolder(
     payload: MoveFolderPayload,
-    renameFileInNetwork: RenameFileInNetwork
+    hashPath: HashPath
   ): Promise<MoveFolderResponse> {
     const moveFolderResponse = await this.axios
       .post(`${this.apiUrl}/api/storage/move/folder`, {
@@ -70,38 +79,46 @@ export class Storage {
         return response.data;
       });
 
-    // * Renames files iterating over folders
-    const pendingFolders = [{
-      destinationPath: `${payload.destinationPath}/${payload.folder.name}`,
-      data: payload.folder
-    }];
-
-    while (pendingFolders.length > 0) {
-      const currentFolder = pendingFolders[0];
-      const [folderContentPromise] = this.getFolderContent(currentFolder.data.id);
-      const { files, folders } = await folderContentPromise;
-
-      pendingFolders.shift();
-
-      // * Renames current folder files
-      for (const file of files) {
-        const { name, type } = file;
-        const relativePath = `${currentFolder.destinationPath}/${name}${type ? '.' + type : ''}`;
-        renameFileInNetwork(file.fileId, payload.bucketId, relativePath);
-      }
-
-      // * Adds current folder folders to pending
-      pendingFolders.push(
-        ...folders.map((folderData) => ({
-          destinationPath: `${currentFolder.destinationPath}/${folderData.name}`,
-          data: folderData,
-        })),
-      );
-    }
+    const finalFolderPath = `${payload.destinationPath}/${payload.folder.name}`;
+    await this.updateFolderContents(
+      payload.folder.id,
+      finalFolderPath,
+      payload.bucketId,
+      hashPath
+    );
 
     return moveFolderResponse;
   }
 
+  /**
+   * Updates the metadata of a folder
+   * @param payload
+   * @param hashPath
+   */
+  public async updateFolder(
+    payload: UpdateFolderMetadataPayload,
+    hashPath: HashPath
+  ): Promise<void> {
+    await this.axios
+      .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, payload.changes, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+
+    await this.updateFolderContents(
+      payload.folderId,
+      payload.destinationPath,
+      payload.bucketId,
+      hashPath
+    );
+  }
+
+  /**
+   * Fetches & returns the contents of a specific folder
+   * @param folderId
+   */
   public getFolderContent(folderId: number): [
     Promise<{
       folders: DriveFolderData[];
@@ -128,6 +145,74 @@ export class Storage {
     return [promise, cancelTokenSource];
   }
 
+  /**
+   * Updates all the elements contained in a specific folder
+   * @param folderId
+   * @param finalPath
+   * @param bucketId
+   * @param hashPath
+   * @private
+   */
+  private async updateFolderContents(folderId: number, finalPath: string, bucketId: string, hashPath: HashPath) {
+    // * Renames files iterating over folders
+    const pendingFolders = [{
+      destinationPath: finalPath,
+      folderId: folderId
+    }];
+
+    while (pendingFolders.length > 0) {
+      const currentFolder = pendingFolders[0];
+      const [folderContentPromise] = this.getFolderContent(currentFolder.folderId);
+      const { files, folders } = await folderContentPromise;
+
+      pendingFolders.shift();
+
+      // * Renames current folder files
+      for (const file of files) {
+        const relativePath = `${currentFolder.destinationPath}/${this.fileDisplayName(file)}`;
+        const hashedPath = hashPath(relativePath);
+        await this.updateFileReference(file.fileId, bucketId, hashedPath);
+      }
+
+      // * Adds current folder folders to pending
+      pendingFolders.push(
+        ...folders.map((folderData) => ({
+          destinationPath: `${currentFolder.destinationPath}/${folderData.name}`,
+          folderId: folderData.id,
+        })),
+      );
+    }
+  }
+
+  /**
+   * Updates the stored reference of a file in the centralized persistence
+   * @param fileId
+   * @param bucketId
+   * @param hashedPath
+   * @private
+   */
+  private updateFileReference(
+    fileId: string,
+    bucketId: string,
+    hashedPath: string,
+  ): Promise<void> {
+    return this.axios
+      .post(`${this.apiUrl}/api/storage/rename-file-in-network`, {
+        fileId: fileId,
+        bucketId: bucketId,
+        relativePath: hashedPath,
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Creates a new file entry in the centralized persistence
+   * @param fileEntry
+   */
   public createFileEntry(fileEntry: FileEntry): Promise<unknown> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/file`, {
@@ -149,7 +234,25 @@ export class Storage {
       });
   }
 
+  /**
+   * Returns the needed headers for the module requests
+   * @private
+   */
   private headers() {
     return headersWithToken(this.clientName, this.clientVersion, this.token);
   }
+
+  /**
+   * Returns the file name correctly formatted
+   * @param item
+   * @private
+   */
+  private fileDisplayName(item: {
+    name: string;
+    type?: string;
+  }): string {
+    const { name, type } = item;
+    return `${name}${type ? '.' + type : ''}`;
+  }
+
 }

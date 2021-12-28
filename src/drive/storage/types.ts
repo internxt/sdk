@@ -105,8 +105,15 @@ export interface MoveFolderResponse {
   moved: boolean;
 }
 
-export type RenameFileInNetwork = (
-  fileId: string,
+export type HashPath = (path: string) => string;
+
+export interface UpdateFolderMetadataPayload {
+  folderId: number,
   bucketId: string,
-  relativePath: string,
-) => void;
+  destinationPath: string,
+  changes: {
+    itemName?: string;
+    color?: string;
+    icon?: string;
+  }
+}

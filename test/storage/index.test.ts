@@ -7,7 +7,7 @@ import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse, RenameFileInNetwork
+  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 
@@ -118,7 +118,7 @@ describe('# storage service tests', () => {
       it('Should call with right arguments & bubble up the error', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
-        const renameFunction: RenameFileInNetwork = () => null;
+        const hashPath: HashPath = () => '';
         const callStub = sinon.stub(axios, 'post')
           .onFirstCall()
           .rejects(new Error('first call error'));
@@ -126,7 +126,7 @@ describe('# storage service tests', () => {
         const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
 
         // Act
-        const call = storageClient.moveFolder(payload, renameFunction);
+        const call = storageClient.moveFolder(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -172,18 +172,91 @@ describe('# storage service tests', () => {
           },
           moved: false
         };
-        const renameFunction: RenameFileInNetwork = () => null;
+        const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
         sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
         const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
         const spy = sinon.spy(storageClient, 'getFolderContent');
 
         // Act
-        const body = await storageClient.moveFolder(payload, renameFunction);
+        const body = await storageClient.moveFolder(payload, hashPath);
 
         // Assert
         expect(spy.callCount).toEqual(1);
         expect(body).toEqual(moveFolderResponse);
+      });
+
+    });
+
+    describe('update folder metadata', () => {
+
+      it('Should call with right arguments & bubble up the error', async () => {
+        // Arrange
+        const payload: UpdateFolderMetadataPayload = {
+          bucketId: '',
+          folderId: 2,
+          destinationPath: '',
+          changes: {
+            itemName: 'new name',
+            color: 'new color',
+            icon: 'new icon',
+          },
+        };
+        const hashPath: HashPath = () => '';
+        const callStub = sinon.stub(axios, 'post')
+          .rejects(new Error('first call error'));
+
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.updateFolder(payload, hashPath);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/folder/2/meta',
+          {
+            itemName: 'new name',
+            color: 'new color',
+            icon: 'new icon',
+          },
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+      it('Should call for details one time & return correct response', async () => {
+        // Arrange
+        const payload: UpdateFolderMetadataPayload = {
+          bucketId: '',
+          folderId: 2,
+          destinationPath: '',
+          changes: {
+            itemName: 'new name',
+            color: 'new color',
+            icon: 'new icon',
+          },
+        };
+        const folderContentResponse = randomFolderContentResponse(0, 3);
+        const hashPath: HashPath = () => '';
+        sinon.stub(axios, 'post').resolves(validResponse({}));
+        sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const spyFolder = sinon.spy(storageClient, 'getFolderContent');
+        const spyFiles = sinon.spy(storageClient as any, 'updateFileReference');
+
+        // Act
+        await storageClient.updateFolder(payload, hashPath);
+
+        // Assert
+        expect(spyFolder.callCount).toEqual(1);
+        expect(spyFiles.callCount).toEqual(3);
       });
 
     });
