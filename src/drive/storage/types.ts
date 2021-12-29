@@ -117,3 +117,14 @@ export interface UpdateFolderMetadataPayload {
     icon?: string;
   }
 }
+
+// Files
+
+export interface UpdateFilePayload {
+  fileId: string,
+  bucketId: string,
+  destinationPath: string,
+  metadata: {
+    itemName?: string;
+  },
+}

@@ -6,7 +6,7 @@ import {
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
-  FileEntry, HashPath, MoveFolderPayload, MoveFolderResponse, UpdateFolderMetadataPayload
+  FileEntry, HashPath, MoveFolderPayload, MoveFolderResponse, UpdateFilePayload, UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
@@ -220,8 +220,9 @@ export class Storage {
       });
   }
 
+
   /**
-   * Creates a new file entry in the centralized persistence
+   * Creates a new file entry
    * @param fileEntry
    */
   public createFileEntry(fileEntry: FileEntry): Promise<unknown> {
@@ -246,13 +247,29 @@ export class Storage {
   }
 
   /**
+   * Updates the details of a file entry
+   * @param payload
+   * @param hashPath
+   */
+  public updateFile(payload: UpdateFilePayload, hashPath: HashPath) {
+    const hashedPath = hashPath(payload.destinationPath);
+    return this.axios
+      .post(`${this.apiUrl}/api/storage/file/${payload.fileId}/meta`, {
+        metadata: payload.metadata,
+        bucketId: payload.bucketId,
+        relativePath: hashedPath,
+      }, {
+        headers: this.headers()
+      });
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
   private headers() {
     return headersWithToken(this.clientName, this.clientVersion, this.token);
   }
-
 
   /**
    * Returns the file name correctly formatted

@@ -7,7 +7,7 @@ import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload
+  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 
@@ -337,6 +337,70 @@ describe('# storage service tests', () => {
             folder_id: '',
             name: 'xtz',
             encrypt_version: '',
+          },
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+    });
+
+    describe('update file metadata', () => {
+
+      it('Should call bubble up the error', async () => {
+        // Arrange
+        const payload: UpdateFilePayload = {
+          bucketId: '',
+          destinationPath: '',
+          fileId: '',
+          metadata: {
+            itemName: ''
+          }
+        };
+        const hashPath: HashPath = () => '';
+        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.updateFile(payload, hashPath);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+      });
+
+      it('Should call with right params & return control', async () => {
+        // Arrange
+        const payload: UpdateFilePayload = {
+          bucketId: 'bucket',
+          destinationPath: '',
+          fileId: '6',
+          metadata: {
+            itemName: 'new name'
+          }
+        };
+        const hashPath: HashPath = () => 'hashed_path';
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        await storageClient.updateFile(payload, hashPath);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/file/6/meta',
+          {
+            metadata: {
+              itemName: 'new name'
+            },
+            bucketId: 'bucket',
+            relativePath: 'hashed_path',
           },
           {
             headers: {
