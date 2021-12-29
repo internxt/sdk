@@ -8,7 +8,7 @@ export interface Device {
   id: DeviceId;
   mac: string;
   name: string;
-  userUuid: string;
+  userId: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -16,17 +16,27 @@ export interface Device {
 export type PhotoType = string;
 export type FileId = string;
 export type PhotoId = string;
+
+export enum PhotoStatus {
+  Exists = 'EXISTS',
+  Trashed = 'TRASHED',
+  Deleted = 'DELETED',
+}
+
 export interface Photo {
   id: PhotoId;
   name: string;
   type: PhotoType;
   size: number;
   width: number;
-  heigth: number;
+  height: number;
   fileId: FileId;
   previewId: FileId;
   deviceId: DeviceId;
-  userUuid: string;
+  userId: string;
+  status: PhotoStatus;
+  lastStatusChangeAt: string;
+  creationDate: string;
   createdAt: string;
   updatedAt: string;
 }
