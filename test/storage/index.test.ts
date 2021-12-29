@@ -7,9 +7,10 @@ import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload, DeleteFilePayload
+  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload, DeleteFilePayload, MoveFilePayload
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
+import { randomMoveFilePayload } from './moveFilePayload.mother';
 
 describe('# storage service tests', () => {
 
@@ -446,6 +447,59 @@ describe('# storage service tests', () => {
         // Assert
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/folder/2/file/5',
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+    });
+
+    describe('move file', () => {
+
+      it('Should bubble up the error', async () => {
+        // Arrange
+        const payload = randomMoveFilePayload();
+        const hashPath = () => '';
+        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.moveFile(payload, hashPath);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+      });
+
+      it('Should call with right arguments & return content', async () => {
+        // Arrange
+        const payload = randomMoveFilePayload();
+        const hashPath = () => '+hash+';
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+          content: 'test'
+        }));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const body = await storageClient.moveFile(payload, hashPath);
+
+        // Assert
+        expect(body).toEqual({
+          content: 'test'
+        });
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/move/file',
+          {
+            fileId: payload.fileId,
+            destination: payload.destination,
+            relativePath: '+hash+',
+            bucketId: payload.bucketId,
+          },
           {
             headers: {
               'content-type': 'application/json; charset=utf-8',

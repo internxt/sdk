@@ -133,3 +133,16 @@ export interface DeleteFilePayload {
   fileId: number,
   folderId: number,
 }
+
+export interface MoveFilePayload {
+  fileId: string
+  destination: number
+  destinationPath: string
+  bucketId: string
+}
+
+export interface MoveFileResponse {
+  item: DriveFileData
+  destination: number
+  moved: boolean
+}

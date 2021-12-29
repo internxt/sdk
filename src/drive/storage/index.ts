@@ -2,11 +2,18 @@ import axios, { AxiosStatic, CancelTokenSource } from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
 import {
   CreateFolderPayload,
-  CreateFolderResponse, DeleteFilePayload,
+  CreateFolderResponse,
+  DeleteFilePayload,
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
-  FileEntry, HashPath, MoveFolderPayload, MoveFolderResponse, UpdateFilePayload, UpdateFolderMetadataPayload
+  FileEntry,
+  HashPath,
+  MoveFilePayload, MoveFileResponse,
+  MoveFolderPayload,
+  MoveFolderResponse,
+  UpdateFilePayload,
+  UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
 import { headersWithToken } from '../../shared/headers';
@@ -271,6 +278,27 @@ export class Storage {
     return this.axios
       .delete(`${this.apiUrl}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
+      });
+  }
+
+  /**
+   * Updates the persisted path of a file entry
+   * @param payload
+   * @param hashPath
+   */
+  public moveFile(payload: MoveFilePayload, hashPath: HashPath): Promise<MoveFileResponse> {
+    const hashedPath = hashPath(payload.destinationPath);
+    return this.axios
+      .post(`${this.apiUrl}/api/storage/move/file`, {
+        fileId: payload.fileId,
+        destination: payload.destination,
+        relativePath: hashedPath,
+        bucketId: payload.bucketId,
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
       });
   }
 
