@@ -128,3 +128,8 @@ export interface UpdateFilePayload {
     itemName?: string;
   },
 }
+
+export interface DeleteFilePayload {
+  fileId: number,
+  folderId: number,
+}

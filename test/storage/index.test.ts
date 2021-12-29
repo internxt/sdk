@@ -7,7 +7,7 @@ import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload
+  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload, DeleteFilePayload
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 
@@ -263,11 +263,9 @@ describe('# storage service tests', () => {
 
     describe('delete folder', () => {
 
-      it('Should call with right arguments & bubble up the error', async () => {
+      it('Should bubble up the error', async () => {
         // Arrange
-        sinon.stub(axios, 'delete')
-          .rejects(new Error('first call error'));
-
+        sinon.stub(axios, 'delete').rejects(new Error('first call error'));
         const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
 
         // Act
@@ -402,6 +400,52 @@ describe('# storage service tests', () => {
             bucketId: 'bucket',
             relativePath: 'hashed_path',
           },
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+    });
+
+    describe('delete file', () => {
+
+      it('Should bubble up the error', async () => {
+        // Arrange
+        sinon.stub(axios, 'delete').rejects(new Error('first call error'));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const payload: DeleteFilePayload = {
+          fileId: 5,
+          folderId: 2
+        };
+
+        // Act
+        const call = storageClient.deleteFile(payload);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+      });
+
+      it('Should call with right arguments and return control', async () => {
+        // Arrange
+        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const payload: DeleteFilePayload = {
+          fileId: 5,
+          folderId: 2
+        };
+
+        // Act
+        await storageClient.deleteFile(payload);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/folder/2/file/5',
           {
             headers: {
               'content-type': 'application/json; charset=utf-8',

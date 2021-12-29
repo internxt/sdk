@@ -2,7 +2,7 @@ import axios, { AxiosStatic, CancelTokenSource } from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
 import {
   CreateFolderPayload,
-  CreateFolderResponse,
+  CreateFolderResponse, DeleteFilePayload,
   DriveFileData,
   DriveFolderData,
   FetchFolderContentResponse,
@@ -259,6 +259,17 @@ export class Storage {
         bucketId: payload.bucketId,
         relativePath: hashedPath,
       }, {
+        headers: this.headers()
+      });
+  }
+
+  /**
+   * Deletes a specific file entry
+   * @param payload
+   */
+  public deleteFile(payload: DeleteFilePayload) {
+    return this.axios
+      .delete(`${this.apiUrl}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
       });
   }
