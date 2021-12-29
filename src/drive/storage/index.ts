@@ -146,6 +146,17 @@ export class Storage {
   }
 
   /**
+   * Removes a specific folder from the centralized persistence
+   * @param folderId
+   */
+  public deleteFolder(folderId: number): Promise<void> {
+    return this.axios
+      .delete(`${this.apiUrl}/api/storage/folder/${folderId}`, {
+        headers: this.headers()
+      });
+  }
+
+  /**
    * Updates all the elements contained in a specific folder
    * @param folderId
    * @param finalPath
@@ -242,6 +253,7 @@ export class Storage {
     return headersWithToken(this.clientName, this.clientVersion, this.token);
   }
 
+
   /**
    * Returns the file name correctly formatted
    * @param item
@@ -254,5 +266,4 @@ export class Storage {
     const { name, type } = item;
     return `${name}${type ? '.' + type : ''}`;
   }
-
 }

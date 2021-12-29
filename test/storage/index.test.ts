@@ -261,6 +261,48 @@ describe('# storage service tests', () => {
 
     });
 
+    describe('delete folder', () => {
+
+      it('Should call with right arguments & bubble up the error', async () => {
+        // Arrange
+        sinon.stub(axios, 'delete')
+          .rejects(new Error('first call error'));
+
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.deleteFolder(2);
+
+        // Assert
+        await expect(call).rejects.toThrowError('first call error');
+      });
+
+      it('Should call with right arguments & return control', async () => {
+        // Arrange
+        const callStub = sinon.stub(axios, 'delete')
+          .resolves(validResponse({}));
+
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        await storageClient.deleteFolder(2);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/folder/2',
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+      });
+
+    });
+
   });
 
   describe('-> files', () => {
