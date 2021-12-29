@@ -513,6 +513,49 @@ describe('# storage service tests', () => {
 
     });
 
+    describe('get recent files', () => {
+
+      it('Should bubble up the error', async () => {
+        // Arrange
+        sinon.stub(axios, 'get').rejects(new Error('custom'));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const call = storageClient.recentFiles(5);
+
+        // Assert
+        await expect(call).rejects.toThrowError('custom');
+      });
+
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+          files: []
+        }));
+        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+
+        // Act
+        const body = await storageClient.recentFiles(5);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/recents?limit=5',
+          {
+            headers: {
+              'content-type': 'application/json; charset=utf-8',
+              'internxt-version': '0.1',
+              'internxt-client': 'c-name',
+              'Authorization': 'Bearer my-token',
+            }
+          }
+        ]);
+        expect(body).toEqual({
+          files: []
+        });
+      });
+
+    });
+
   });
 
 });

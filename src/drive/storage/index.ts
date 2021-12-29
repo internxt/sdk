@@ -303,6 +303,20 @@ export class Storage {
   }
 
   /**
+   * Returns a list of the n most recent files
+   * @param limit
+   */
+  public recentFiles(limit: number): Promise<DriveFileData[]> {
+    return this.axios
+      .get(`${this.apiUrl}/api/storage/recents?limit=${limit}`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
