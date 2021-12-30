@@ -31,6 +31,7 @@ export class Auth {
     return this.axios
       .post(`${this.apiUrl}/api/register`, {
         name: registerDetails.name,
+        captcha: registerDetails.captcha,
         lastname: registerDetails.lastname,
         email: registerDetails.email,
         password: registerDetails.password,
