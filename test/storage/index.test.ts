@@ -1,20 +1,19 @@
 import sinon from 'sinon';
 import { Storage, StorageTypes } from '../../src';
 import axios from 'axios';
-import { emptyFolderContentResponse, randomFolderContentResponse } from './folderContentResponse.mother';
+import { randomFolderContentResponse } from './folderContentResponse.mother';
 import { validResponse } from '../shared/response';
 import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
   MoveFolderResponse,
-  HashPath,
   UpdateFilePayload,
   DeleteFilePayload,
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
-import { randomMoveFilePayload } from './moveFilePayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
+import { randomMoveFilePayload } from './moveFilePayload.mother';
 
 describe('# storage service tests', () => {
 
@@ -397,12 +396,11 @@ describe('# storage service tests', () => {
       it('Should bubble up the error', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
-        const hashPath = () => '';
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
 
         // Act
-        const call = client.moveFile(payload, hashPath);
+        const call = client.moveFile(payload);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -411,14 +409,13 @@ describe('# storage service tests', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
-        const hashPath = () => '+hash+';
         const callStub = sinon.stub(axios, 'post').resolves(validResponse({
           content: 'test'
         }));
         const { client, headers } = clientAndHeaders();
 
         // Act
-        const body = await client.moveFile(payload, hashPath);
+        const body = await client.moveFile(payload);
 
         // Assert
         expect(body).toEqual({
@@ -429,7 +426,7 @@ describe('# storage service tests', () => {
           {
             fileId: payload.fileId,
             destination: payload.destination,
-            relativePath: '+hash+',
+            relativePath: payload.destinationPath,
             bucketId: payload.bucketId,
           },
           {

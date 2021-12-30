@@ -266,15 +266,13 @@ export class Storage {
   /**
    * Updates the persisted path of a file entry
    * @param payload
-   * @param hashPath
    */
-  public moveFile(payload: MoveFilePayload, hashPath: HashPath): Promise<MoveFileResponse> {
-    const hashedPath = hashPath(payload.destinationPath);
+  public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/move/file`, {
         fileId: payload.fileId,
         destination: payload.destination,
-        relativePath: hashedPath,
+        relativePath: payload.destinationPath,
         bucketId: payload.bucketId,
       }, {
         headers: this.headers()
