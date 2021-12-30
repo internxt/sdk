@@ -75,13 +75,9 @@ export class Storage {
   /**
    * Moves a specific folder to a new location
    * @param payload
-   * @param hashPath
    */
-  public async moveFolder(
-    payload: MoveFolderPayload,
-    hashPath: HashPath
-  ): Promise<MoveFolderResponse> {
-    const moveFolderResponse = await this.axios
+  public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
+    return this.axios
       .post(`${this.apiUrl}/api/storage/move/folder`, {
         folderId: payload.folder.id,
         destination: payload.destinationFolderId,
@@ -91,16 +87,6 @@ export class Storage {
       .then(response => {
         return response.data;
       });
-
-    const finalFolderPath = `${payload.destinationPath}/${payload.folder.name}`;
-    await this.updateFolderContents(
-      payload.folder.id,
-      finalFolderPath,
-      payload.bucketId,
-      hashPath
-    );
-
-    return moveFolderResponse;
   }
 
   /**

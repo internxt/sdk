@@ -93,10 +93,8 @@ export interface CreateFolderResponse {
 }
 
 export interface MoveFolderPayload {
-  folder: DriveFolderData,
-  destinationFolderId: number,
-  destinationPath: string,
-  bucketId: string,
+  folder: DriveFolderData
+  destinationFolderId: number
 }
 
 export interface MoveFolderResponse {

@@ -113,22 +113,20 @@ describe('# storage service tests', () => {
       it('Should call bubble up the error', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
-        const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
 
         const { client } = clientAndHeaders();
 
         // Act
-        const call = client.moveFolder(payload, hashPath);
+        const call = client.moveFolder(payload);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
       });
 
-      it('Should call with right params, ask details once & return correct response', async () => {
+      it('Should call with right params & return correct response', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
-        const folderContentResponse = emptyFolderContentResponse();
         const moveFolderResponse: MoveFolderResponse = {
           destination: 0,
           item: <DriveFolderData>{
@@ -150,14 +148,11 @@ describe('# storage service tests', () => {
           },
           moved: false
         };
-        const hashPath: HashPath = () => '';
         const callStub = sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
-        sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
         const { client, headers } = clientAndHeaders();
-        const spy = sinon.spy(client, 'getFolderContent');
 
         // Act
-        const body = await client.moveFolder(payload, hashPath);
+        const body = await client.moveFolder(payload);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -170,7 +165,6 @@ describe('# storage service tests', () => {
             headers: headers
           }
         ]);
-        expect(spy.callCount).toEqual(1);
         expect(body).toEqual(moveFolderResponse);
       });
 

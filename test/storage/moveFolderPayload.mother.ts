@@ -20,7 +20,5 @@ export function randomMoveFolderPayload(): MoveFolderPayload {
       user_id: 1,
     },
     destinationFolderId: 3,
-    destinationPath: '',
-    bucketId: '',
   };
 }
