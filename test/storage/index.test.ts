@@ -302,12 +302,11 @@ describe('# storage service tests', () => {
             itemName: ''
           }
         };
-        const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
 
         // Act
-        const call = client.updateFile(payload, hashPath);
+        const call = client.updateFile(payload);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -317,18 +316,19 @@ describe('# storage service tests', () => {
         // Arrange
         const payload: UpdateFilePayload = {
           bucketId: 'bucket',
-          destinationPath: '',
+          destinationPath: 'x',
           fileId: '6',
           metadata: {
             itemName: 'new name'
           }
         };
-        const hashPath: HashPath = () => 'hashed_path';
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+          valid: true
+        }));
         const { client, headers } = clientAndHeaders();
 
         // Act
-        await client.updateFile(payload, hashPath);
+        const body = await client.updateFile(payload);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -338,12 +338,15 @@ describe('# storage service tests', () => {
               itemName: 'new name'
             },
             bucketId: 'bucket',
-            relativePath: 'hashed_path',
+            relativePath: 'x',
           },
           {
             headers: headers
           }
         ]);
+        expect(body).toEqual({
+          valid: true
+        });
       });
 
     });

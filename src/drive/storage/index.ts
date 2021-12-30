@@ -237,17 +237,18 @@ export class Storage {
   /**
    * Updates the details of a file entry
    * @param payload
-   * @param hashPath
    */
-  public updateFile(payload: UpdateFilePayload, hashPath: HashPath) {
-    const hashedPath = hashPath(payload.destinationPath);
+  public updateFile(payload: UpdateFilePayload): Promise<any> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/file/${payload.fileId}/meta`, {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
-        relativePath: hashedPath,
+        relativePath: payload.destinationPath,
       }, {
         headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
       });
   }
 
