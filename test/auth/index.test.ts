@@ -25,6 +25,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.privateKeyEncrypted = '7';
       registerDetails.keys.publicKey = '8';
       registerDetails.keys.revocationCertificate = '9';
+      registerDetails.captcha = '10';
 
       const postCall = sinon.stub(axios, 'post').resolves(validResponse({}));
       const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
@@ -47,6 +48,7 @@ describe('# auth service tests', () => {
           revocationKey: registerDetails.keys.revocationCertificate,
           referral: registerDetails.referral,
           referrer: registerDetails.referrer,
+          captcha: registerDetails.captcha
         },
         {
           headers: {
