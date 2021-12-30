@@ -1,7 +1,9 @@
-import {Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails} from '../../src';
+import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails } from '../../src';
+import { Token } from '../../src/shared/types/userSettings';
 import axios from 'axios';
 import sinon from 'sinon';
-import {emptyRegisterDetails} from './registerDetails.mother';
+import { emptyRegisterDetails } from './registerDetails.mother';
+import { validResponse } from '../shared/response';
 
 describe('# auth service tests', () => {
 
@@ -24,9 +26,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.publicKey = '8';
       registerDetails.keys.revocationCertificate = '9';
 
-      const postCall = sinon.stub(axios, 'post').resolves({
-        status: 200
-      });
+      const postCall = sinon.stub(axios, 'post').resolves(validResponse({}));
       const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
 
       // Act
@@ -74,12 +74,11 @@ describe('# auth service tests', () => {
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(axios, 'post').resolves({
-        status: 200,
-        data: {
+      sinon.stub(axios, 'post').resolves(
+        validResponse({
           valid: true
-        }
-      });
+        })
+      );
       const authClient = new Auth(axios, '', '', '');
       const registerDetails: RegisterDetails = emptyRegisterDetails();
 
@@ -107,14 +106,14 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: () => '',
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
             revocationCertificate: ''
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
 
@@ -135,24 +134,24 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: () => '',
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
             revocationCertificate: ''
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
       const postStub = sinon.stub(axios, 'post');
       postStub
         .onFirstCall()
-        .resolves({
-          data: {
+        .resolves(
+          validResponse({
             sKey: 'encrypted_salt'
-          }
-        })
+          })
+        )
         .onSecondCall()
         .rejects(error);
 
@@ -172,14 +171,14 @@ describe('# auth service tests', () => {
         tfaCode: undefined
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPassword: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: 'priv',
             publicKey: 'pub',
             revocationCertificate: 'rev'
           };
-          return keys;
+          return Promise.resolve(keys);
         }
       };
       const config = {
@@ -192,17 +191,17 @@ describe('# auth service tests', () => {
       const postStub = sinon.stub(axios, 'post');
       postStub
         .onFirstCall()
-        .resolves({
-          data: {
+        .resolves(
+          validResponse({
             sKey: 'encrypted_salt'
-          }
-        })
+          })
+        )
         .onSecondCall()
-        .resolves({
-          data: {
+        .resolves(
+          validResponse({
             user: 'user'
-          }
-        });
+          })
+        );
 
       // Act
       const body = await authClient.login(loginDetails, cryptoProvider);
@@ -232,6 +231,42 @@ describe('# auth service tests', () => {
       });
     });
 
+  });
+
+  describe('-> update keys use case', () => {
+
+    it('Should have a header with the auth token', async () => {
+      // Arrange
+      const authClient = new Auth(axios, '', '.t', '.9');
+      const keys: Keys = {
+        privateKeyEncrypted: 'prik',
+        publicKey: 'pubk',
+        revocationCertificate: 'crt'
+      };
+      const token: Token = 'my-secure-token';
+      const axiosStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
+
+      // Act
+      await authClient.updateKeys(keys, token);
+
+      // Assert
+      expect(axiosStub.firstCall.args).toEqual([
+        '/api/user/keys',
+        {
+          publicKey: 'pubk',
+          privateKey: 'prik',
+          revocationKey: 'crt',
+        },
+        {
+          headers: {
+            'content-type': 'application/json; charset=utf-8',
+            'internxt-version': '.9',
+            'internxt-client': '.t',
+            'Authorization': 'Bearer my-secure-token',
+          }
+        }
+      ]);
+    });
   });
 
 });

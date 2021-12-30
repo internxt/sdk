@@ -1,8 +1,8 @@
-import axios, {AxiosStatic} from 'axios';
-import {extractAxiosErrorMessage} from '../utils';
-import {CryptoProvider, LoginDetails, RegisterDetails} from './types';
-import {Token, UserSettings, UUID} from '../shared/types/userSettings';
-import {TeamsSettings} from '../shared/types/teams';
+import axios, { AxiosStatic } from 'axios';
+import { extractAxiosErrorMessage } from '../utils';
+import { CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { Token, UserSettings, UUID } from '../shared/types/userSettings';
+import { TeamsSettings } from '../shared/types/teams';
 
 export * from './types';
 
@@ -45,13 +45,10 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
-        if (response.status === 200) {
-          return response.data;
-        } else if (response.data.error) {
-          throw new Error(response.data.error);
-        } else {
-          throw new Error('Internal Server Error');
+        if (response.status !== 200) {
+          throw new Error(response.data.error || 'Internal Server Error');
         }
+        return response.data;
       })
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));
@@ -70,6 +67,12 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
+        if (response.status === 400) {
+          throw new Error(response.data.error || 'Can not connect to server');
+        }
+        if (response.status !== 200) {
+          throw new Error('This account does not exist');
+        }
         return response.data;
       })
       .catch(error => {
@@ -77,13 +80,13 @@ export class Auth {
       });
 
     const encryptedSalt = loginResponse.sKey;
-    const encryptedPassword = cryptoProvider.encryptPassword(details.password, encryptedSalt);
-    const keys = cryptoProvider.generateKeys(details.password);
+    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+    const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
       .post(`${this.apiUrl}/api/access`, {
         email: details.email,
-        password: encryptedPassword,
+        password: encryptedPasswordHash,
         tfa: details.tfaCode,
         privateKey: keys.privateKeyEncrypted,
         publicKey: keys.publicKey,
@@ -92,6 +95,29 @@ export class Auth {
         headers: this.headers(),
       })
       .then(response => {
+        if (response.status !== 200) {
+          throw new UserAccessError(response.data.error || response.data);
+        }
+        return response.data;
+      })
+      .catch(error => {
+        throw new Error(extractAxiosErrorMessage(error));
+      });
+  }
+
+  public updateKeys(keys: Keys, token: Token) {
+    return this.axios
+      .patch(`${this.apiUrl}/api/user/keys`, {
+        publicKey: keys.publicKey,
+        privateKey: keys.privateKeyEncrypted,
+        revocationKey: keys.revocationCertificate,
+      }, {
+        headers: this.headersWithToken(token),
+      })
+      .then(response => {
+        if (response.status !== 200) {
+          throw new Error(response.data.error || response.data);
+        }
         return response.data;
       })
       .catch(error => {
@@ -104,6 +130,17 @@ export class Auth {
       'content-type': 'application/json; charset=utf-8',
       'internxt-version': this.clientVersion,
       'internxt-client': this.clientName
+    };
+  }
+
+  private headersWithToken(token: Token) {
+    const headers = this.headers();
+    const extra = {
+      Authorization: 'Bearer ' + token
+    };
+    return {
+      ...headers,
+      ...extra
     };
   }
 }
