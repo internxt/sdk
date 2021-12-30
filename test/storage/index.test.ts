@@ -25,11 +25,11 @@ describe('# storage service tests', () => {
       it('Should return the expected elements', async () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
         sinon.stub(axios, 'get').resolves(validResponse(response));
 
         // Act
-        const [promise, cancelToken] = storageClient.getFolderContent(1);
+        const [promise, cancelToken] = client.getFolderContent(1);
         const body = await promise;
 
         // Assert
@@ -39,10 +39,10 @@ describe('# storage service tests', () => {
 
       it('Should cancel the request', async () => {
         // Arrange
-        const storageClient = new Storage(axios, '', '', '', '');
+        const { client } = clientAndHeaders();
 
         // Act
-        const [promise, cancelToken] = storageClient.getFolderContent(1);
+        const [promise, cancelToken] = client.getFolderContent(1);
         cancelToken.cancel('My cancel message');
 
         // Assert
@@ -68,12 +68,11 @@ describe('# storage service tests', () => {
           updatedAt: '',
           userId: 1
         };
-        const callStub = sinon.stub(axios, 'post')
-          .resolves(validResponse(createFolderResponse));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse(createFolderResponse));
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        const [promise, cancelTokenSource] = storageClient.createFolder(createFolderPayload);
+        const [promise, cancelTokenSource] = client.createFolder(createFolderPayload);
         const body = await promise;
 
         // Assert
@@ -85,12 +84,7 @@ describe('# storage service tests', () => {
           },
           {
             cancelToken: expect.anything(),
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
         expect(body).toEqual(createFolderResponse);
@@ -102,10 +96,10 @@ describe('# storage service tests', () => {
           folderName: 'ma-fol',
           parentFolderId: 34
         };
-        const storageClient = new Storage(axios, '', '', '', '');
+        const client = new Storage(axios, '', '', '', '');
 
         // Act
-        const [promise, cancelTokenSource] = storageClient.createFolder(createFolderPayload);
+        const [promise, cancelTokenSource] = client.createFolder(createFolderPayload);
         cancelTokenSource.cancel('My cancel message');
 
         // Assert
@@ -124,10 +118,10 @@ describe('# storage service tests', () => {
           .onFirstCall()
           .rejects(new Error('first call error'));
 
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        const call = storageClient.moveFolder(payload, hashPath);
+        const call = client.moveFolder(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -138,12 +132,7 @@ describe('# storage service tests', () => {
             destination: payload.destinationFolderId,
           },
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -176,11 +165,11 @@ describe('# storage service tests', () => {
         const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
         sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
-        const spy = sinon.spy(storageClient, 'getFolderContent');
+        const { client } = clientAndHeaders();
+        const spy = sinon.spy(client, 'getFolderContent');
 
         // Act
-        const body = await storageClient.moveFolder(payload, hashPath);
+        const body = await client.moveFolder(payload, hashPath);
 
         // Assert
         expect(spy.callCount).toEqual(1);
@@ -207,10 +196,10 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(axios, 'post')
           .rejects(new Error('first call error'));
 
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        const call = storageClient.updateFolder(payload, hashPath);
+        const call = client.updateFolder(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -222,12 +211,7 @@ describe('# storage service tests', () => {
             icon: 'new icon',
           },
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -248,12 +232,12 @@ describe('# storage service tests', () => {
         const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').resolves(validResponse({}));
         sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
-        const spyFolder = sinon.spy(storageClient, 'getFolderContent');
-        const spyFiles = sinon.spy(storageClient as any, 'updateFileReference');
+        const { client } = clientAndHeaders();
+        const spyFolder = sinon.spy(client, 'getFolderContent');
+        const spyFiles = sinon.spy(client as any, 'updateFileReference');
 
         // Act
-        await storageClient.updateFolder(payload, hashPath);
+        await client.updateFolder(payload, hashPath);
 
         // Assert
         expect(spyFolder.callCount).toEqual(1);
@@ -267,10 +251,10 @@ describe('# storage service tests', () => {
       it('Should bubble up the error', async () => {
         // Arrange
         sinon.stub(axios, 'delete').rejects(new Error('first call error'));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
 
         // Act
-        const call = storageClient.deleteFolder(2);
+        const call = client.deleteFolder(2);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -278,24 +262,17 @@ describe('# storage service tests', () => {
 
       it('Should call with right arguments & return control', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'delete')
-          .resolves(validResponse({}));
-
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        await storageClient.deleteFolder(2);
+        await client.deleteFolder(2);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/folder/2',
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -311,7 +288,7 @@ describe('# storage service tests', () => {
       it('Should have all the correct params on call', async () => {
         // Arrange
         const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
         const fileEntry: StorageTypes.FileEntry = {
           id: '1',
           type: 'type',
@@ -323,7 +300,7 @@ describe('# storage service tests', () => {
         };
 
         // Act
-        await storageClient.createFileEntry(fileEntry);
+        await client.createFileEntry(fileEntry);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -338,12 +315,7 @@ describe('# storage service tests', () => {
             encrypt_version: '',
           },
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -364,11 +336,10 @@ describe('# storage service tests', () => {
         };
         const hashPath: HashPath = () => '';
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
-
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
 
         // Act
-        const call = storageClient.updateFile(payload, hashPath);
+        const call = client.updateFile(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -386,10 +357,10 @@ describe('# storage service tests', () => {
         };
         const hashPath: HashPath = () => 'hashed_path';
         const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        await storageClient.updateFile(payload, hashPath);
+        await client.updateFile(payload, hashPath);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -402,12 +373,7 @@ describe('# storage service tests', () => {
             relativePath: 'hashed_path',
           },
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -419,14 +385,14 @@ describe('# storage service tests', () => {
       it('Should bubble up the error', async () => {
         // Arrange
         sinon.stub(axios, 'delete').rejects(new Error('first call error'));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
         const payload: DeleteFilePayload = {
           fileId: 5,
           folderId: 2
         };
 
         // Act
-        const call = storageClient.deleteFile(payload);
+        const call = client.deleteFile(payload);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -435,25 +401,20 @@ describe('# storage service tests', () => {
       it('Should call with right arguments and return control', async () => {
         // Arrange
         const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
         const payload: DeleteFilePayload = {
           fileId: 5,
           folderId: 2
         };
 
         // Act
-        await storageClient.deleteFile(payload);
+        await client.deleteFile(payload);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/folder/2/file/5',
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -467,10 +428,10 @@ describe('# storage service tests', () => {
         const payload = randomMoveFilePayload();
         const hashPath = () => '';
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
 
         // Act
-        const call = storageClient.moveFile(payload, hashPath);
+        const call = client.moveFile(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
@@ -483,10 +444,10 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(axios, 'post').resolves(validResponse({
           content: 'test'
         }));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        const body = await storageClient.moveFile(payload, hashPath);
+        const body = await client.moveFile(payload, hashPath);
 
         // Assert
         expect(body).toEqual({
@@ -501,12 +462,7 @@ describe('# storage service tests', () => {
             bucketId: payload.bucketId,
           },
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
       });
@@ -518,10 +474,10 @@ describe('# storage service tests', () => {
       it('Should bubble up the error', async () => {
         // Arrange
         sinon.stub(axios, 'get').rejects(new Error('custom'));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client } = clientAndHeaders();
 
         // Act
-        const call = storageClient.recentFiles(5);
+        const call = client.recentFiles(5);
 
         // Assert
         await expect(call).rejects.toThrowError('custom');
@@ -532,21 +488,16 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(axios, 'get').resolves(validResponse({
           files: []
         }));
-        const storageClient = new Storage(axios, '', 'c-name', '0.1', 'my-token');
+        const { client, headers } = clientAndHeaders();
 
         // Act
-        const body = await storageClient.recentFiles(5);
+        const body = await client.recentFiles(5);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/recents?limit=5',
           {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-              'internxt-version': '0.1',
-              'internxt-client': 'c-name',
-              'Authorization': 'Bearer my-token',
-            }
+            headers: headers
           }
         ]);
         expect(body).toEqual({
@@ -559,3 +510,17 @@ describe('# storage service tests', () => {
   });
 
 });
+
+function clientAndHeaders(apiUrl = '', clientName = 'c-name', clientVersion = '0.1', token = 'my-token'): {
+  client: Storage,
+  headers: object
+} {
+  const client = new Storage(axios, apiUrl, clientName, clientVersion, token);
+  const headers = {
+    'content-type': 'application/json; charset=utf-8',
+    'internxt-version': clientVersion,
+    'internxt-client': clientName,
+    'Authorization': `Bearer ${token}`,
+  };
+  return { client, headers };
+}
