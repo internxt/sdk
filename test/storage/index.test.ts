@@ -53,7 +53,7 @@ describe('# storage service tests', () => {
 
     describe('create folder entry', () => {
 
-      it('Should call with correct params', async () => {
+      it('Should call with correct params & return content', async () => {
         // Arrange
         const createFolderPayload: CreateFolderPayload = {
           folderName: 'ma-fol',
@@ -110,34 +110,22 @@ describe('# storage service tests', () => {
 
     describe('move folder', () => {
 
-      it('Should call with right arguments & bubble up the error', async () => {
+      it('Should call bubble up the error', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
         const hashPath: HashPath = () => '';
-        const callStub = sinon.stub(axios, 'post')
-          .onFirstCall()
-          .rejects(new Error('first call error'));
+        sinon.stub(axios, 'post').rejects(new Error('first call error'));
 
-        const { client, headers } = clientAndHeaders();
+        const { client } = clientAndHeaders();
 
         // Act
         const call = client.moveFolder(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
-        expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/folder',
-          {
-            folderId: payload.folder.id,
-            destination: payload.destinationFolderId,
-          },
-          {
-            headers: headers
-          }
-        ]);
       });
 
-      it('Should call for details one time & return correct response', async () => {
+      it('Should call with right params, ask details once & return correct response', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
         const folderContentResponse = emptyFolderContentResponse();
@@ -163,15 +151,25 @@ describe('# storage service tests', () => {
           moved: false
         };
         const hashPath: HashPath = () => '';
-        sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
         sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
-        const { client } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders();
         const spy = sinon.spy(client, 'getFolderContent');
 
         // Act
         const body = await client.moveFolder(payload, hashPath);
 
         // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/move/folder',
+          {
+            folderId: payload.folder.id,
+            destination: payload.destinationFolderId,
+          },
+          {
+            headers: headers
+          }
+        ]);
         expect(spy.callCount).toEqual(1);
         expect(body).toEqual(moveFolderResponse);
       });
@@ -180,7 +178,7 @@ describe('# storage service tests', () => {
 
     describe('update folder metadata', () => {
 
-      it('Should call with right arguments & bubble up the error', async () => {
+      it('Should bubble up the error', async () => {
         // Arrange
         const payload: UpdateFolderMetadataPayload = {
           bucketId: '',
@@ -193,30 +191,17 @@ describe('# storage service tests', () => {
           },
         };
         const hashPath: HashPath = () => '';
-        const callStub = sinon.stub(axios, 'post')
-          .rejects(new Error('first call error'));
-
-        const { client, headers } = clientAndHeaders();
+        const { client } = clientAndHeaders();
+        sinon.stub(axios, 'post').rejects(new Error('first call error'));
 
         // Act
         const call = client.updateFolder(payload, hashPath);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
-        expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2/meta',
-          {
-            itemName: 'new name',
-            color: 'new color',
-            icon: 'new icon',
-          },
-          {
-            headers: headers
-          }
-        ]);
       });
 
-      it('Should call for details one time & return correct response', async () => {
+      it('Should call with right params, call for details & return correct response', async () => {
         // Arrange
         const payload: UpdateFolderMetadataPayload = {
           bucketId: '',
@@ -230,9 +215,9 @@ describe('# storage service tests', () => {
         };
         const folderContentResponse = randomFolderContentResponse(0, 3);
         const hashPath: HashPath = () => '';
-        sinon.stub(axios, 'post').resolves(validResponse({}));
+        const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
         sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
-        const { client } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders();
         const spyFolder = sinon.spy(client, 'getFolderContent');
         const spyFiles = sinon.spy(client as any, 'updateFileReference');
 
@@ -242,6 +227,17 @@ describe('# storage service tests', () => {
         // Assert
         expect(spyFolder.callCount).toEqual(1);
         expect(spyFiles.callCount).toEqual(3);
+        expect(callStub.firstCall.args).toEqual([
+          '/api/storage/folder/2/meta',
+          {
+            itemName: 'new name',
+            color: 'new color',
+            icon: 'new icon',
+          },
+          {
+            headers: headers
+          }
+        ]);
       });
 
     });
