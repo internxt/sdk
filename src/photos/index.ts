@@ -1,10 +1,10 @@
-import { PhotosModel } from './types';
+import { PhotosSdkModel } from './types';
 import DevicesSubmodule from './devices';
 import PhotosSubmodule from './photos';
 import SharesSubmodule from './shares';
 
 export class Photos {
-  private readonly model: PhotosModel;
+  private readonly model: PhotosSdkModel;
 
   public readonly photos: PhotosSubmodule;
   public readonly devices: DevicesSubmodule;
