@@ -9,7 +9,6 @@ import {
   DriveFolderData,
   FetchFolderContentResponse,
   FileEntry,
-  HashPath,
   MoveFilePayload, MoveFileResponse,
   MoveFolderPayload,
   MoveFolderResponse,
@@ -145,71 +144,6 @@ export class Storage {
   }
 
   /**
-   * Updates all the elements contained in a specific folder
-   * @param folderId
-   * @param finalPath
-   * @param bucketId
-   * @param hashPath
-   * @private
-   */
-  private async updateFolderContents(folderId: number, finalPath: string, bucketId: string, hashPath: HashPath) {
-    // * Renames files iterating over folders
-    const pendingFolders = [{
-      destinationPath: finalPath,
-      folderId: folderId
-    }];
-
-    while (pendingFolders.length > 0) {
-      const currentFolder = pendingFolders[0];
-      const [folderContentPromise] = this.getFolderContent(currentFolder.folderId);
-      const { files, folders } = await folderContentPromise;
-
-      pendingFolders.shift();
-
-      // * Renames current folder files
-      for (const file of files) {
-        const relativePath = `${currentFolder.destinationPath}/${this.fileDisplayName(file)}`;
-        const hashedPath = hashPath(relativePath);
-        await this.updateFileReference(file.fileId, bucketId, hashedPath);
-      }
-
-      // * Adds current folder folders to pending
-      pendingFolders.push(
-        ...folders.map((folderData) => ({
-          destinationPath: `${currentFolder.destinationPath}/${folderData.name}`,
-          folderId: folderData.id,
-        })),
-      );
-    }
-  }
-
-  /**
-   * Updates the stored reference of a file in the centralized persistence
-   * @param fileId
-   * @param bucketId
-   * @param hashedPath
-   * @private
-   */
-  private updateFileReference(
-    fileId: string,
-    bucketId: string,
-    hashedPath: string,
-  ): Promise<void> {
-    return this.axios
-      .post(`${this.apiUrl}/api/storage/rename-file-in-network`, {
-        fileId: fileId,
-        bucketId: bucketId,
-        relativePath: hashedPath,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-
-  /**
    * Creates a new file entry
    * @param fileEntry
    */
@@ -304,16 +238,4 @@ export class Storage {
     return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
   }
 
-  /**
-   * Returns the file name correctly formatted
-   * @param item
-   * @private
-   */
-  private fileDisplayName(item: {
-    name: string;
-    type?: string;
-  }): string {
-    const { name, type } = item;
-    return `${name}${type ? '.' + type : ''}`;
-  }
 }

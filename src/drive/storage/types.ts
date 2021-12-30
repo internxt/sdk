@@ -103,8 +103,6 @@ export interface MoveFolderResponse {
   moved: boolean;
 }
 
-export type HashPath = (path: string) => string;
-
 export interface UpdateFolderMetadataPayload {
   folderId: number,
   changes: {
