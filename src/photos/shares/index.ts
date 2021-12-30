@@ -1,12 +1,12 @@
 import axios from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
 
-import { CreatePhotoShareBody, PhotosModel, Share } from '..';
+import { CreatePhotoShareBody, PhotosSdkModel, Share } from '..';
 
 export default class SharesSubmodule {
-  private model: PhotosModel;
+  private model: PhotosSdkModel;
 
-  constructor(model: PhotosModel) {
+  constructor(model: PhotosSdkModel) {
     this.model = model;
   }
 

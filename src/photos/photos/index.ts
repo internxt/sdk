@@ -1,31 +1,29 @@
 import axios from 'axios';
 
 import { extractAxiosErrorMessage } from '../../utils';
-import { Photo, PhotoId, PhotosModel } from '..';
+import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel } from '..';
 
 export default class PhotosSubmodule {
-  private model: PhotosModel;
+  private model: PhotosSdkModel;
 
-  constructor(model: PhotosModel) {
+  constructor(model: PhotosSdkModel) {
     this.model = model;
   }
 
-  getPhotoById(photoId: PhotoId): Promise<Photo> {
+  public getPhotoById(photoId: PhotoId): Promise<Photo> {
     return axios
-      .get<Photo>(`${this.model.baseUrl}/photos/${photoId}`, {
+      .get<PhotoJSON>(`${this.model.baseUrl}/photos/${photoId}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => {
-        return res.data;
-      })
+      .then((res) => this.parse(res.data))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
 
-  getPhotos(offset: number, limit: number): Promise<Photo[]> {
+  public getPhotos(offset: number, limit: number): Promise<Photo[]> {
     if (limit > 200 || limit < 1) {
       throw new Error('Invalid limit. Limit should be positive and lower than 201. Provided limit was: ' + limit);
     }
@@ -35,20 +33,18 @@ export default class PhotosSubmodule {
     }
 
     return axios
-      .get<Photo[]>(`${this.model.baseUrl}/photos/?offset=${offset}&limit=${limit}`, {
+      .get<PhotoJSON[]>(`${this.model.baseUrl}/photos/?offset=${offset}&limit=${limit}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => {
-        return res.data;
-      })
+      .then((res) => res.data.map((photoJson) => this.parse(photoJson)))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
 
-  getPhotosCountByMonth(month: number, year: number): Promise<number> {
+  public getPhotosCountByMonth(month: number, year: number): Promise<number> {
     return axios
       .get<number>(`${this.model.baseUrl}/photos/?month=${month}&year=${year}`, {
         headers: {
@@ -63,7 +59,7 @@ export default class PhotosSubmodule {
       });
   }
 
-  getPhotosCountByYear(year: number): Promise<number> {
+  public getPhotosCountByYear(year: number): Promise<number> {
     return axios
       .get<number>(`${this.model.baseUrl}/photos/?year=${year}`, {
         headers: {
@@ -78,30 +74,39 @@ export default class PhotosSubmodule {
       });
   }
 
-  createPhoto(photo: Omit<Photo, 'id'>): Promise<PhotoId> {
+  public createPhoto(data: CreatePhotoData): Promise<Photo> {
     return axios
-      .post<PhotoId>(`${this.model.baseUrl}/photos`, photo, {
+      .post<PhotoJSON>(`${this.model.baseUrl}/photos`, data, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => {
-        return res.data;
-      })
+      .then((res) => this.parse(res.data))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
 
-  deletePhotoById(photoId: PhotoId): Promise<unknown> {
+  public deletePhotoById(photoId: PhotoId): Promise<void> {
     return axios
       .delete(`${this.model.baseUrl}/photos/${photoId}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
+      .then(() => undefined)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
+  }
+
+  private parse(json: PhotoJSON): Photo {
+    return {
+      ...json,
+      creationDate: new Date(json.creationDate),
+      lastStatusChangeAt: new Date(json.lastStatusChangeAt),
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt),
+    };
   }
 }

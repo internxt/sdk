@@ -1,54 +1,59 @@
 import axios from 'axios';
 
 import { extractAxiosErrorMessage } from '../../utils';
-import { Device, DeviceId, PhotosModel } from '..';
+import { CreateDeviceData, Device, DeviceId, DeviceJSON, PhotosSdkModel } from '..';
 
 export default class DevicesSubmodule {
-  private model: PhotosModel;
+  private model: PhotosSdkModel;
 
-  constructor(model: PhotosModel) {
+  constructor(model: PhotosSdkModel) {
     this.model = model;
   }
 
-  getDeviceById(deviceId: DeviceId): Promise<Device> {
+  public getDeviceById(deviceId: DeviceId): Promise<Device> {
     return axios
-      .get<Device>(`${this.model.baseUrl}/photos/${deviceId}`, {
+      .get<DeviceJSON>(`${this.model.baseUrl}/devices/${deviceId}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => {
-        return res.data;
-      })
+      .then((res) => this.parse(res.data))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
 
-  createDevice(device: Omit<Device, 'id'>): Promise<DeviceId> {
+  public createDevice(data: CreateDeviceData): Promise<Device> {
     return axios
-      .post<DeviceId>(`${this.model.baseUrl}/photos`, device, {
+      .post<DeviceJSON>(`${this.model.baseUrl}/devices`, data, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => {
-        return res.data;
-      })
+      .then((res) => this.parse(res.data))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
 
-  deleteDevice(deviceId: DeviceId): Promise<unknown> {
+  public deleteDevice(deviceId: DeviceId): Promise<void> {
     return axios
       .delete(`${this.model.baseUrl}/devices/${deviceId}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
+      .then(() => undefined)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
+  }
+
+  private parse(json: DeviceJSON): Device {
+    return {
+      ...json,
+      createdAt: new Date(json.createdAt),
+      updatedAt: new Date(json.updatedAt),
+    };
   }
 }
