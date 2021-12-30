@@ -9,8 +9,20 @@ export function basicHeaders(clientName: string, clientVersion: string) {
 }
 
 export function headersWithToken(clientName: string, clientVersion: string, token: Token) {
-  const headers = basicHeaders(clientName, clientVersion), extra = {
+  const headers = basicHeaders(clientName, clientVersion);
+  const extra = {
     Authorization: 'Bearer ' + token
+  };
+  return {
+    ...headers,
+    ...extra
+  };
+}
+
+export function headersWithTokenAndMnemonic(clientName: string, clientVersion: string, token: Token, mnemonic: string) {
+  const headers = headersWithToken(clientName, clientVersion, token);
+  const extra = {
+    'internxt-mnemonic': mnemonic
   };
   return {
     ...headers,

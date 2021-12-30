@@ -1,5 +1,6 @@
 import axios, { AxiosStatic, CancelTokenSource } from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
+import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
@@ -16,7 +17,6 @@ import {
   UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
-import { headersWithToken } from '../../shared/headers';
 
 export * as StorageTypes from './types';
 
@@ -26,17 +26,23 @@ export class Storage {
   private readonly clientName: string;
   private readonly clientVersion: string;
   private readonly token: Token;
+  private readonly mnemonic: string;
 
-  public static client(apiUrl: string, clientName: string, clientVersion: string, token: Token) {
-    return new Storage(axios, apiUrl, clientName, clientVersion, token);
+  public static client(
+    apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
+  ) {
+    return new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token) {
+  constructor(
+    axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
+  ) {
     this.axios = axios;
     this.apiUrl = apiUrl;
     this.clientName = clientName;
     this.clientVersion = clientVersion;
     this.token = token;
+    this.mnemonic = mnemonic;
   }
 
   /**
@@ -321,7 +327,7 @@ export class Storage {
    * @private
    */
   private headers() {
-    return headersWithToken(this.clientName, this.clientVersion, this.token);
+    return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
   }
 
   /**

@@ -96,7 +96,7 @@ describe('# storage service tests', () => {
           folderName: 'ma-fol',
           parentFolderId: 34
         };
-        const client = new Storage(axios, '', '', '', '');
+        const { client } = clientAndHeaders();
 
         // Act
         const [promise, cancelTokenSource] = client.createFolder(createFolderPayload);
@@ -507,15 +507,22 @@ describe('# storage service tests', () => {
 
 });
 
-function clientAndHeaders(apiUrl = '', clientName = 'c-name', clientVersion = '0.1', token = 'my-token'): {
+function clientAndHeaders(
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+  token = 'my-token',
+  mnemonic = 'nemo'
+): {
   client: Storage,
   headers: object
 } {
-  const client = new Storage(axios, apiUrl, clientName, clientVersion, token);
+  const client = new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
   const headers = {
     'content-type': 'application/json; charset=utf-8',
     'internxt-version': clientVersion,
     'internxt-client': clientName,
+    'internxt-mnemonic': mnemonic,
     'Authorization': `Bearer ${token}`,
   };
   return { client, headers };
