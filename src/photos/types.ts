@@ -3,6 +3,25 @@ export interface PhotosSdkModel {
   accessToken?: string;
 }
 
+export type UserId = string;
+export interface User {
+  id: UserId;
+  uuid: string;
+  bucketId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+export interface UserJSON extends Omit<User, 'createdAt' | 'updatedAt'> {
+  createdAt: string;
+  updatedAt: string;
+}
+export interface InitializeUserData {
+  mac: string;
+  name: string;
+  bridgeUser: string;
+  bridgePassword: string;
+}
+
 export type DeviceId = string;
 export interface Device {
   id: DeviceId;
