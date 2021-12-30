@@ -107,8 +107,6 @@ export type HashPath = (path: string) => string;
 
 export interface UpdateFolderMetadataPayload {
   folderId: number,
-  bucketId: string,
-  destinationPath: string,
   changes: {
     itemName?: string;
     color?: string;

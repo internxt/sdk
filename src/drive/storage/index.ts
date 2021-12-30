@@ -92,12 +92,8 @@ export class Storage {
   /**
    * Updates the metadata of a folder
    * @param payload
-   * @param hashPath
    */
-  public async updateFolder(
-    payload: UpdateFolderMetadataPayload,
-    hashPath: HashPath
-  ): Promise<void> {
+  public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
       .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, payload.changes, {
         headers: this.headers()
@@ -105,13 +101,6 @@ export class Storage {
       .then(response => {
         return response.data;
       });
-
-    await this.updateFolderContents(
-      payload.folderId,
-      payload.destinationPath,
-      payload.bucketId,
-      hashPath
-    );
   }
 
   /**

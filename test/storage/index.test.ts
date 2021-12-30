@@ -7,10 +7,14 @@ import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
   MoveFolderPayload,
-  MoveFolderResponse, HashPath, UpdateFolderMetadataPayload, UpdateFilePayload, DeleteFilePayload, MoveFilePayload
+  MoveFolderResponse,
+  HashPath,
+  UpdateFilePayload,
+  DeleteFilePayload,
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
+import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 
 describe('# storage service tests', () => {
 
@@ -174,59 +178,33 @@ describe('# storage service tests', () => {
 
       it('Should bubble up the error', async () => {
         // Arrange
-        const payload: UpdateFolderMetadataPayload = {
-          bucketId: '',
-          folderId: 2,
-          destinationPath: '',
-          changes: {
-            itemName: 'new name',
-            color: 'new color',
-            icon: 'new icon',
-          },
-        };
-        const hashPath: HashPath = () => '';
+        const payload = randomUpdateFolderMetadataPayload();
         const { client } = clientAndHeaders();
         sinon.stub(axios, 'post').rejects(new Error('first call error'));
 
         // Act
-        const call = client.updateFolder(payload, hashPath);
+        const call = client.updateFolder(payload);
 
         // Assert
         await expect(call).rejects.toThrowError('first call error');
       });
 
-      it('Should call with right params, call for details & return correct response', async () => {
+      it('Should call with right params & return correct response', async () => {
         // Arrange
-        const payload: UpdateFolderMetadataPayload = {
-          bucketId: '',
-          folderId: 2,
-          destinationPath: '',
-          changes: {
-            itemName: 'new name',
-            color: 'new color',
-            icon: 'new icon',
-          },
-        };
-        const folderContentResponse = randomFolderContentResponse(0, 3);
-        const hashPath: HashPath = () => '';
+        const payload = randomUpdateFolderMetadataPayload();
         const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
-        sinon.stub(axios, 'get').resolves(validResponse(folderContentResponse));
         const { client, headers } = clientAndHeaders();
-        const spyFolder = sinon.spy(client, 'getFolderContent');
-        const spyFiles = sinon.spy(client as any, 'updateFileReference');
 
         // Act
-        await client.updateFolder(payload, hashPath);
+        await client.updateFolder(payload);
 
         // Assert
-        expect(spyFolder.callCount).toEqual(1);
-        expect(spyFiles.callCount).toEqual(3);
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/folder/2/meta',
           {
-            itemName: 'new name',
-            color: 'new color',
-            icon: 'new icon',
+            itemName: payload.changes.itemName,
+            color: payload.changes.color,
+            icon: payload.changes.icon,
           },
           {
             headers: headers
