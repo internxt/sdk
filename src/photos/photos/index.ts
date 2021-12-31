@@ -44,6 +44,19 @@ export default class PhotosSubmodule {
       });
   }
 
+  public async getPhotosSince(date: Date, limit: number, skip: number): Promise<Photo[]> {
+    return axios
+      .get<PhotoJSON[]>(`${this.model.baseUrl}/photos?from=${date}&limit=${limit}&skip=${skip}`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((res) => res.data.map((photoJson) => this.parse(photoJson)))
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public getPhotosCountByMonth(month: number, year: number): Promise<number> {
     return axios
       .get<number>(`${this.model.baseUrl}/photos/?month=${month}&year=${year}`, {
