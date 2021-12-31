@@ -147,20 +147,25 @@ export class Storage {
    * Creates a new file entry
    * @param fileEntry
    */
-  public createFileEntry(fileEntry: FileEntry): Promise<unknown> {
+  public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/file`, {
-        fileId: fileEntry.id,
-        type: fileEntry.type,
-        bucket: fileEntry.bucket,
-        size: fileEntry.size,
-        folder_id: fileEntry.folder_id,
-        name: fileEntry.name,
-        encrypt_version: fileEntry.encrypt_version,
+        file: {
+          fileId: fileEntry.id,
+          type: fileEntry.type,
+          bucket: fileEntry.bucket,
+          size: fileEntry.size,
+          folder_id: fileEntry.folder_id,
+          name: fileEntry.name,
+          encrypt_version: fileEntry.encrypt_version,
+        }
       }, {
         headers: this.headers()
       })
       .then(response => {
+        if (response.status === 402) {
+          throw new Error('Rate limited');
+        }
         return response.data;
       })
       .catch(error => {

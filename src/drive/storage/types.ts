@@ -73,7 +73,7 @@ export interface FileEntry {
   size: number,
   name: string,
   bucket: string,
-  folder_id: string,
+  folder_id: number,
   encrypt_version: string,
 }
 

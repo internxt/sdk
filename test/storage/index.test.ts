@@ -263,7 +263,7 @@ describe('# storage service tests', () => {
           size: 2,
           bucket: '',
           encrypt_version: '',
-          folder_id: '',
+          folder_id: 0,
         };
 
         // Act
@@ -273,13 +273,15 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/file',
           {
-            fileId: '1',
-            type: 'type',
-            bucket: '',
-            size: 2,
-            folder_id: '',
-            name: 'xtz',
-            encrypt_version: '',
+            file: {
+              fileId: fileEntry.id,
+              type: fileEntry.type,
+              bucket: fileEntry.bucket,
+              size: fileEntry.size,
+              folder_id: fileEntry.folder_id,
+              name: fileEntry.name,
+              encrypt_version: fileEntry.encrypt_version,
+            }
           },
           {
             headers: headers
