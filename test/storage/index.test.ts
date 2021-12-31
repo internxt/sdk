@@ -201,9 +201,11 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/folder/2/meta',
           {
-            itemName: payload.changes.itemName,
-            color: payload.changes.color,
-            icon: payload.changes.icon,
+            metadata: {
+              itemName: payload.changes.itemName,
+              color: payload.changes.color,
+              icon: payload.changes.icon,
+            }
           },
           {
             headers: headers

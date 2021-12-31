@@ -94,7 +94,9 @@ export class Storage {
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
-      .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, payload.changes, {
+      .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, {
+        metadata: payload.changes
+      }, {
         headers: this.headers()
       })
       .then(response => {
