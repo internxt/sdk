@@ -229,13 +229,15 @@ describe('# storage service tests', () => {
         await expect(call).rejects.toThrowError('first call error');
       });
 
-      it('Should call with right arguments & return control', async () => {
+      it('Should call with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({
+          valid: true
+        }));
         const { client, headers } = clientAndHeaders();
 
         // Act
-        await client.deleteFolder(2);
+        const body = await client.deleteFolder(2);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -244,6 +246,9 @@ describe('# storage service tests', () => {
             headers: headers
           }
         ]);
+        expect(body).toEqual({
+          valid: true
+        });
       });
 
     });
@@ -374,7 +379,9 @@ describe('# storage service tests', () => {
 
       it('Should call with right arguments and return control', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({
+          valid: true
+        }));
         const { client, headers } = clientAndHeaders();
         const payload: DeleteFilePayload = {
           fileId: 5,
@@ -382,7 +389,7 @@ describe('# storage service tests', () => {
         };
 
         // Act
-        await client.deleteFile(payload);
+        const body = await client.deleteFile(payload);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -391,6 +398,9 @@ describe('# storage service tests', () => {
             headers: headers
           }
         ]);
+        expect(body).toEqual({
+          valid: true
+        });
       });
 
     });

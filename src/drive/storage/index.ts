@@ -131,10 +131,13 @@ export class Storage {
    * Removes a specific folder from the centralized persistence
    * @param folderId
    */
-  public deleteFolder(folderId: number): Promise<void> {
+  public deleteFolder(folderId: number): Promise<unknown> {
     return this.axios
       .delete(`${this.apiUrl}/api/storage/folder/${folderId}`, {
         headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
       });
   }
 
@@ -187,10 +190,13 @@ export class Storage {
    * Deletes a specific file entry
    * @param payload
    */
-  public deleteFile(payload: DeleteFilePayload) {
+  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.axios
       .delete(`${this.apiUrl}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
       });
   }
 
