@@ -1,5 +1,4 @@
 import axios, { AxiosStatic, CancelTokenSource } from 'axios';
-import { extractAxiosErrorMessage } from '../../utils';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
@@ -63,9 +62,6 @@ export class Storage {
       })
       .then(response => {
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
 
     return [promise, cancelTokenSource];
@@ -126,9 +122,6 @@ export class Storage {
           folders: response.data.children.map(folder => ({ ...folder, isFolder: true })),
           files: response.data.files,
         };
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
 
     return [promise, cancelTokenSource];
@@ -169,9 +162,6 @@ export class Storage {
           throw new Error('Rate limited');
         }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 

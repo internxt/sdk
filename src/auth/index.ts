@@ -1,5 +1,4 @@
 import axios, { AxiosStatic } from 'axios';
-import { extractAxiosErrorMessage } from '../utils';
 import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -51,9 +50,6 @@ export class Auth {
           throw new Error(response.data.error || 'Internal Server Error');
         }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 
@@ -76,9 +72,6 @@ export class Auth {
           throw new Error('This account does not exist');
         }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
 
     const encryptedSalt = loginResponse.sKey;
@@ -103,9 +96,6 @@ export class Auth {
         const data = response.data;
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 
@@ -123,9 +113,6 @@ export class Auth {
           throw new Error(response.data.error || response.data);
         }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 
