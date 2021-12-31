@@ -49,7 +49,7 @@ describe('# storage service tests', () => {
         cancelToken.cancel('My cancel message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('My cancel message');
+        await expect(promise).rejects.toEqual(new axios.Cancel('My cancel message'));
       });
 
     });
@@ -106,7 +106,7 @@ describe('# storage service tests', () => {
         cancelTokenSource.cancel('My cancel message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('My cancel message');
+        await expect(promise).rejects.toEqual(new axios.Cancel('My cancel message'));
       });
 
     });
