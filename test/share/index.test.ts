@@ -2,7 +2,7 @@ import axios from 'axios';
 import sinon from 'sinon';
 import { GenerateShareLinkPayload } from '../../src/drive/share/types';
 import { validResponse } from '../shared/response';
-import { Share } from '../../src';
+import { Share } from '../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
 
 describe('# share service tests', () => {

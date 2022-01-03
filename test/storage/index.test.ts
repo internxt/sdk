@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { Storage, StorageTypes } from '../../src';
+import { Storage, StorageTypes } from '../../src/drive';
 import axios from 'axios';
 import { randomFolderContentResponse } from './folderContentResponse.mother';
 import { validResponse } from '../shared/response';
