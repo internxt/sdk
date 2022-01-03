@@ -1,7 +1,7 @@
 import axios, { AxiosStatic } from 'axios';
 import { Token } from '../../auth';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { GenerateShareLinkPayload, GetShareInfoResponse } from './types';
+import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
 
 export * as ShareTypes from './types';
 
@@ -67,11 +67,23 @@ export class Share {
   }
 
   /**
+   * Fetches the list of shared items
+   */
+  public getShareList(): Promise<IShare> {
+    return this.axios
+      .get(`${this.apiUrl}/api/share/list`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
   private headers() {
     return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
   }
-
 }

@@ -11,7 +11,6 @@ describe('# share service tests', () => {
     sinon.restore();
   });
 
-
   describe('generate share file link', () => {
 
     it('Should bubble up the error', async () => {
@@ -110,6 +109,44 @@ describe('# share service tests', () => {
         info: 'some'
       });
     });
+  });
+
+  describe('get shares list', () => {
+
+    it('Should bubble up the error', async () => {
+      // Arrange
+      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      const { client } = clientAndHeaders();
+
+      // Act
+      const call = client.getShareList();
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('Should be called with right arguments & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+        list: 'some'
+      }));
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      const body = await client.getShareList();
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/share/list',
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        list: 'some'
+      });
+    });
+
   });
 
   function clientAndHeaders(
