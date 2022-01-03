@@ -14,6 +14,7 @@ import {
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
+import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
 
 describe('# storage service tests', () => {
 
@@ -504,12 +505,6 @@ function clientAndHeaders(
   headers: object
 } {
   const client = new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
-  const headers = {
-    'content-type': 'application/json; charset=utf-8',
-    'internxt-version': clientVersion,
-    'internxt-client': clientName,
-    'internxt-mnemonic': mnemonic,
-    'Authorization': `Bearer ${token}`,
-  };
+  const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }
