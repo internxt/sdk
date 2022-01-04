@@ -1,7 +1,7 @@
 import axios, { AxiosStatic } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
-import { ApiSecureConnectionDetails } from '../../shared/types/apiConnection';
+import { ApiSecureConnectionDetails } from '../../shared';
 
 export * as ShareTypes from './types';
 

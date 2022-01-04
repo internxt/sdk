@@ -13,8 +13,8 @@ import {
   UpdateFilePayload,
   UpdateFolderMetadataPayload
 } from './types';
-import { ApiSecureConnectionDetails } from '../../shared/types/apiConnection';
 import { AppModule } from '../../shared/modules';
+import { ApiSecureConnectionDetails } from '../../shared';
 
 export * as StorageTypes from './types';
 

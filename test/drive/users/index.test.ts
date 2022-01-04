@@ -54,6 +54,43 @@ describe('# users service tests', () => {
 
   });
 
+  describe('get referrals', () => {
+
+    it('should bubble up and error if request fails', async () => {
+      // Arrange
+      const { client } = clientAndHeaders();
+      sinon.stub(axios, 'get').rejects(new Error('custom'));
+
+      // Act
+      const call = client.getReferrals();
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('should call with right params & return response', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+        referrals: [1, 2]
+      }));
+
+      // Act
+      const body = await client.getReferrals();
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/users-referrals',
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        referrals: [1, 2]
+      });
+    });
+  });
+
 });
 
 function clientAndHeaders(
