@@ -105,10 +105,7 @@ export class Storage {
    * @param folderId
    */
   public getFolderContent(folderId: number): [
-    Promise<{
-      folders: DriveFolderData[];
-      files: DriveFileData[]
-    }>,
+    Promise<FetchFolderContentResponse>,
     CancelTokenSource
   ] {
     const cancelTokenSource = axios.CancelToken.source();
@@ -118,10 +115,7 @@ export class Storage {
         headers: this.headers()
       })
       .then(response => {
-        return {
-          folders: response.data.children.map(folder => ({ ...folder, isFolder: true })),
-          files: response.data.files,
-        };
+        return response.data;
       });
 
     return [promise, cancelTokenSource];

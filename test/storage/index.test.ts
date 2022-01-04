@@ -37,7 +37,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(body.files).toHaveLength(2);
-        expect(body.folders).toHaveLength(2);
+        expect(body.children).toHaveLength(2);
       });
 
       it('Should cancel the request', async () => {
