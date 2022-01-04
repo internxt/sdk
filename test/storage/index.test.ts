@@ -9,7 +9,7 @@ import {
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
-  DeleteFilePayload,
+  DeleteFilePayload, EncryptionVersion,
 } from '../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
@@ -269,7 +269,7 @@ describe('# storage service tests', () => {
           name: 'xtz',
           size: 2,
           bucket: '',
-          encrypt_version: '',
+          encrypt_version: EncryptionVersion.Aes03,
           folder_id: 0,
         };
 

@@ -67,6 +67,10 @@ export interface FetchFolderContentResponse {
   user_id: number;
 }
 
+export enum EncryptionVersion {
+  Aes03 = '03-aes',
+}
+
 export interface FileEntry {
   id: string,
   type: string,
@@ -74,7 +78,7 @@ export interface FileEntry {
   name: string,
   bucket: string,
   folder_id: number,
-  encrypt_version: string,
+  encrypt_version: EncryptionVersion,
 }
 
 export interface CreateFolderPayload {

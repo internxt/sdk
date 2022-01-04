@@ -5,7 +5,6 @@ import {
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFileData,
-  DriveFolderData,
   FetchFolderContentResponse,
   FileEntry,
   MoveFilePayload, MoveFileResponse,
