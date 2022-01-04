@@ -3,24 +3,21 @@ import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessE
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
+import { ApiPublicConnectionDetails } from '../shared/types/apiConnection';
 import { AppModule } from '../shared/modules';
 
 export * from './types';
 
 export class Auth extends AppModule {
-  private readonly apiUrl: string;
-  private readonly clientName: string;
-  private readonly clientVersion: string;
+  private readonly apiDetails: ApiPublicConnectionDetails;
 
-  public static client(apiUrl: string, clientName: string, clientVersion: string) {
-    return new Auth(axios, apiUrl, clientName, clientVersion);
+  public static client(apiDetails: ApiPublicConnectionDetails) {
+    return new Auth(axios, apiDetails);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
+  constructor(axios: AxiosStatic, apiDetails: ApiPublicConnectionDetails) {
     super(axios);
-    this.apiUrl = apiUrl;
-    this.clientName = clientName;
-    this.clientVersion = clientVersion;
+    this.apiDetails = apiDetails;
   }
 
   public register(registerDetails: RegisterDetails): Promise<{
@@ -29,7 +26,7 @@ export class Auth extends AppModule {
     uuid: UUID
   }> {
     return this.axios
-      .post(`${this.apiUrl}/api/register`, {
+      .post(`${this.apiDetails.url}/api/register`, {
         name: registerDetails.name,
         captcha: registerDetails.captcha,
         lastname: registerDetails.lastname,
@@ -43,7 +40,7 @@ export class Auth extends AppModule {
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         return response.data;
@@ -56,10 +53,10 @@ export class Auth extends AppModule {
     userTeam: TeamsSettings | null
   }> {
     const loginResponse = await this.axios
-      .post(`${this.apiUrl}/api/login`, {
+      .post(`${this.apiDetails.url}/api/login`, {
         email: details.email
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         return response.data;
@@ -70,7 +67,7 @@ export class Auth extends AppModule {
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
-      .post(`${this.apiUrl}/api/access`, {
+      .post(`${this.apiDetails.url}/api/access`, {
         email: details.email,
         password: encryptedPasswordHash,
         tfa: details.tfaCode,
@@ -78,7 +75,7 @@ export class Auth extends AppModule {
         publicKey: keys.publicKey,
         revocateKey: keys.revocationCertificate,
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         const data = response.data;
@@ -92,16 +89,24 @@ export class Auth extends AppModule {
 
   public updateKeys(keys: Keys, token: Token) {
     return this.axios
-      .patch(`${this.apiUrl}/api/user/keys`, {
+      .patch(`${this.apiDetails.url}/api/user/keys`, {
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
       }, {
-        headers: headersWithToken(this.clientName, this.clientVersion, token),
+        headers: this.headersWithToken(token),
       })
       .then(response => {
         return response.data;
       });
+  }
+
+  private basicHeaders() {
+    return basicHeaders(this.apiDetails.clientName, this.apiDetails.clientVersion);
+  }
+
+  private headersWithToken(token: Token) {
+    return headersWithToken(this.apiDetails.clientName, this.apiDetails.clientVersion, token);
   }
 
 }

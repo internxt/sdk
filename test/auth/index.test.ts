@@ -3,6 +3,8 @@ import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
 import { validResponse } from '../shared/response';
+import { ApiPublicConnectionDetails } from '../../src/shared/types/apiConnection';
+import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
 
 describe('# auth service tests', () => {
 
@@ -27,10 +29,10 @@ describe('# auth service tests', () => {
       registerDetails.captcha = '10';
 
       const postCall = sinon.stub(axios, 'post').resolves(validResponse({}));
-      const authClient = new Auth(axios, 'apiUrl', 'client-test-name', '0.1');
+      const { client, headers } = clientAndHeaders('apiUrl');
 
       // Act
-      await authClient.register(registerDetails);
+      await client.register(registerDetails);
 
       // Assert
       expect(postCall.firstCall.args).toEqual([
@@ -50,11 +52,7 @@ describe('# auth service tests', () => {
           captcha: registerDetails.captcha
         },
         {
-          headers: {
-            'content-type': 'application/json; charset=utf-8',
-            'internxt-version': '0.1',
-            'internxt-client': 'client-test-name',
-          },
+          headers: headers,
         }
       ]);
     });
@@ -63,11 +61,11 @@ describe('# auth service tests', () => {
       // Arrange
       const error = new Error('Network error');
       sinon.stub(axios, 'post').rejects(error);
-      const authClient = new Auth(axios, '', '', '');
+      const { client } = clientAndHeaders();
       const registerDetails: RegisterDetails = emptyRegisterDetails();
 
       // Act
-      const call = authClient.register(registerDetails);
+      const call = client.register(registerDetails);
 
       // Assert
       await expect(call).rejects.toEqual(error);
@@ -80,11 +78,11 @@ describe('# auth service tests', () => {
           valid: true
         })
       );
-      const authClient = new Auth(axios, '', '', '');
+      const { client } = clientAndHeaders();
       const registerDetails: RegisterDetails = emptyRegisterDetails();
 
       // Act
-      const body = await authClient.register(registerDetails);
+      const body = await client.register(registerDetails);
 
       // Assert
       expect(body).toEqual({
@@ -100,7 +98,7 @@ describe('# auth service tests', () => {
       // Arrange
       const error = new Error('Network error');
       sinon.stub(axios, 'post').rejects(error);
-      const authClient = new Auth(axios, '', '', '');
+      const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
         password: '',
@@ -119,7 +117,7 @@ describe('# auth service tests', () => {
       };
 
       // Act
-      const call = authClient.login(loginDetails, cryptoProvider);
+      const call = client.login(loginDetails, cryptoProvider);
 
       // Assert
       await expect(call).rejects.toEqual(error);
@@ -128,7 +126,7 @@ describe('# auth service tests', () => {
     it('Should bubble up the error on second call failure', async () => {
       // Arrange
       const error = new Error('Network error');
-      const authClient = new Auth(axios, '', '', '');
+      const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
         password: '',
@@ -157,7 +155,7 @@ describe('# auth service tests', () => {
         .rejects(error);
 
       // Act
-      const call = authClient.login(loginDetails, cryptoProvider);
+      const call = client.login(loginDetails, cryptoProvider);
 
       // Assert
       await expect(call).rejects.toEqual(error);
@@ -165,7 +163,7 @@ describe('# auth service tests', () => {
 
     it('Should call access with correct parameters', async () => {
       // Arrange
-      const authClient = new Auth(axios, '', '', '');
+      const { client, headers } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: 'my_email',
         password: 'password',
@@ -181,13 +179,6 @@ describe('# auth service tests', () => {
           };
           return Promise.resolve(keys);
         }
-      };
-      const config = {
-        headers: {
-          'content-type': 'application/json; charset=utf-8',
-          'internxt-version': '',
-          'internxt-client': '',
-        },
       };
       const postStub = sinon.stub(axios, 'post');
       postStub
@@ -207,7 +198,7 @@ describe('# auth service tests', () => {
         );
 
       // Act
-      const body = await authClient.login(loginDetails, cryptoProvider);
+      const body = await client.login(loginDetails, cryptoProvider);
 
       // Assert
       expect(postStub.firstCall.args).toEqual([
@@ -215,7 +206,9 @@ describe('# auth service tests', () => {
         {
           email: loginDetails.email
         },
-        config
+        {
+          headers: headers,
+        }
       ]);
       expect(postStub.secondCall.args).toEqual([
         '/api/access',
@@ -227,7 +220,9 @@ describe('# auth service tests', () => {
           publicKey: 'pub',
           revocateKey: 'rev',
         },
-        config
+        {
+          headers: headers,
+        }
       ]);
       expect(body).toEqual({
         user: {
@@ -243,17 +238,17 @@ describe('# auth service tests', () => {
 
     it('Should have a header with the auth token', async () => {
       // Arrange
-      const authClient = new Auth(axios, '', '.t', '.9');
+      const token: Token = 'my-secure-token';
+      const { client, headers } = clientAndHeadersWithToken('', 'name', '0.1', token);
       const keys: Keys = {
         privateKeyEncrypted: 'prik',
         publicKey: 'pubk',
         revocationCertificate: 'crt'
       };
-      const token: Token = 'my-secure-token';
       const axiosStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
 
       // Act
-      await authClient.updateKeys(keys, token);
+      await client.updateKeys(keys, token);
 
       // Assert
       expect(axiosStub.firstCall.args).toEqual([
@@ -264,15 +259,48 @@ describe('# auth service tests', () => {
           revocationKey: 'crt',
         },
         {
-          headers: {
-            'content-type': 'application/json; charset=utf-8',
-            'internxt-version': '.9',
-            'internxt-client': '.t',
-            'Authorization': 'Bearer my-secure-token',
-          }
+          headers: headers
         }
       ]);
     });
   });
+
+  function clientAndHeaders(
+    apiUrl = '',
+    clientName = 'c-name',
+    clientVersion = '0.1',
+  ): {
+    client: Auth,
+    headers: object
+  } {
+    const apiDetails: ApiPublicConnectionDetails = {
+      url: apiUrl,
+      clientName: clientName,
+      clientVersion: clientVersion,
+    };
+    const client = new Auth(axios, apiDetails);
+    const headers = testBasicHeaders(clientName, clientVersion);
+    return { client, headers };
+  }
+
+  function clientAndHeadersWithToken(
+    apiUrl = '',
+    clientName = 'c-name',
+    clientVersion = '0.1',
+    token = 'token'
+  ): {
+    client: Auth,
+    headers: object
+  } {
+    const apiDetails: ApiPublicConnectionDetails = {
+      url: apiUrl,
+      clientName: clientName,
+      clientVersion: clientVersion,
+    };
+    const client = new Auth(axios, apiDetails);
+    const headers = testHeadersWithToken(clientName, clientVersion, token);
+    return { client, headers };
+  }
+
 
 });

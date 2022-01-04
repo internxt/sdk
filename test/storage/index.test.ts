@@ -15,6 +15,7 @@ import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
 import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
+import { ApiSecureConnectionDetails } from '../../src/shared/types/apiConnection';
 
 describe('# storage service tests', () => {
 
@@ -504,7 +505,14 @@ function clientAndHeaders(
   client: Storage,
   headers: object
 } {
-  const client = new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+  const apiDetails: ApiSecureConnectionDetails = {
+    url: apiUrl,
+    clientName: clientName,
+    clientVersion: clientVersion,
+    mnemonic: mnemonic,
+    token: token,
+  };
+  const client = new Storage(axios, apiDetails);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

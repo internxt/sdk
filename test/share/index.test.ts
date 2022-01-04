@@ -4,6 +4,7 @@ import { GenerateShareLinkPayload } from '../../src/drive/share/types';
 import { validResponse } from '../shared/response';
 import { Share } from '../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
+import { ApiSecureConnectionDetails } from '../../src/shared/types/apiConnection';
 
 describe('# share service tests', () => {
 
@@ -159,7 +160,14 @@ describe('# share service tests', () => {
     client: Share,
     headers: object
   } {
-    const client = new Share(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+    const apiDetails: ApiSecureConnectionDetails = {
+      url: apiUrl,
+      clientName: clientName,
+      clientVersion: clientVersion,
+      mnemonic: mnemonic,
+      token: token,
+    };
+    const client = new Share(axios, apiDetails);
     const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
     return { client, headers };
   }

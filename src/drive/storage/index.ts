@@ -13,33 +13,21 @@ import {
   UpdateFilePayload,
   UpdateFolderMetadataPayload
 } from './types';
-import { Token } from '../../auth';
+import { ApiSecureConnectionDetails } from '../../shared/types/apiConnection';
 import { AppModule } from '../../shared/modules';
 
 export * as StorageTypes from './types';
 
 export class Storage extends AppModule {
-  private readonly apiUrl: string;
-  private readonly clientName: string;
-  private readonly clientVersion: string;
-  private readonly token: Token;
-  private readonly mnemonic: string;
+  private readonly apiDetails: ApiSecureConnectionDetails;
 
-  public static client(
-    apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
-    return new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+  public static client(apiDetails: ApiSecureConnectionDetails) {
+    return new Storage(axios, apiDetails);
   }
 
-  constructor(
-    axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
+  constructor(axios: AxiosStatic, apiDetails: ApiSecureConnectionDetails) {
     super(axios);
-    this.apiUrl = apiUrl;
-    this.clientName = clientName;
-    this.clientVersion = clientVersion;
-    this.token = token;
-    this.mnemonic = mnemonic;
+    this.apiDetails = apiDetails;
   }
 
   /**
@@ -52,7 +40,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .post(`${this.apiUrl}/api/storage/folder`, {
+      .post(`${this.apiDetails.url}/api/storage/folder`, {
         parentFolderId: payload.parentFolderId,
         folderName: payload.folderName,
       }, {
@@ -72,7 +60,7 @@ export class Storage extends AppModule {
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/move/folder`, {
+      .post(`${this.apiDetails.url}/api/storage/move/folder`, {
         folderId: payload.folderId,
         destination: payload.destinationFolderId,
       }, {
@@ -89,7 +77,7 @@ export class Storage extends AppModule {
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
-      .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, {
+      .post(`${this.apiDetails.url}/api/storage/folder/${payload.folderId}/meta`, {
         metadata: payload.changes
       }, {
         headers: this.headers()
@@ -109,7 +97,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .get<FetchFolderContentResponse>(`${this.apiUrl}/api/storage/v2/folder/${folderId}`, {
+      .get<FetchFolderContentResponse>(`${this.apiDetails.url}/api/storage/v2/folder/${folderId}`, {
         cancelToken: cancelTokenSource.token,
         headers: this.headers()
       })
@@ -126,7 +114,7 @@ export class Storage extends AppModule {
    */
   public deleteFolder(folderId: number): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiUrl}/api/storage/folder/${folderId}`, {
+      .delete(`${this.apiDetails.url}/api/storage/folder/${folderId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -140,7 +128,7 @@ export class Storage extends AppModule {
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/file`, {
+      .post(`${this.apiDetails.url}/api/storage/file`, {
         file: {
           fileId: fileEntry.id,
           type: fileEntry.type,
@@ -164,7 +152,7 @@ export class Storage extends AppModule {
    */
   public updateFile(payload: UpdateFilePayload): Promise<any> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/file/${payload.fileId}/meta`, {
+      .post(`${this.apiDetails.url}/api/storage/file/${payload.fileId}/meta`, {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
@@ -182,7 +170,7 @@ export class Storage extends AppModule {
    */
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiUrl}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
+      .delete(`${this.apiDetails.url}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -196,7 +184,7 @@ export class Storage extends AppModule {
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/move/file`, {
+      .post(`${this.apiDetails.url}/api/storage/move/file`, {
         fileId: payload.fileId,
         destination: payload.destination,
         relativePath: payload.destinationPath,
@@ -215,7 +203,7 @@ export class Storage extends AppModule {
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
-      .get(`${this.apiUrl}/api/storage/recents?limit=${limit}`, {
+      .get(`${this.apiDetails.url}/api/storage/recents?limit=${limit}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -228,7 +216,12 @@ export class Storage extends AppModule {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
+    return headersWithTokenAndMnemonic(
+      this.apiDetails.clientName,
+      this.apiDetails.clientVersion,
+      this.apiDetails.token,
+      this.apiDetails.mnemonic
+    );
   }
 
 }

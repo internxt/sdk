@@ -1,33 +1,21 @@
 import axios, { AxiosStatic } from 'axios';
-import { Token } from '../../auth';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
+import { ApiSecureConnectionDetails } from '../../shared/types/apiConnection';
 
 export * as ShareTypes from './types';
 
 export class Share {
   private readonly axios: AxiosStatic;
-  private readonly apiUrl: string;
-  private readonly clientName: string;
-  private readonly clientVersion: string;
-  private readonly token: Token;
-  private readonly mnemonic: string;
+  private readonly apiDetails: ApiSecureConnectionDetails;
 
-  public static client(
-    apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
-    return new Share(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+  public static client(apiDetails: ApiSecureConnectionDetails) {
+    return new Share(axios, apiDetails);
   }
 
-  constructor(
-    axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
+  constructor(axios: AxiosStatic, apiDetails: ApiSecureConnectionDetails) {
     this.axios = axios;
-    this.apiUrl = apiUrl;
-    this.clientName = clientName;
-    this.clientVersion = clientVersion;
-    this.token = token;
-    this.mnemonic = mnemonic;
+    this.apiDetails = apiDetails;
   }
 
   /**
@@ -38,7 +26,7 @@ export class Share {
     token: string
   }> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/share/file/${payload.fileId}`, {
+      .post(`${this.apiDetails.url}/api/storage/share/file/${payload.fileId}`, {
         isFolder: payload.isFolder,
         views: payload.views,
         encryptionKey: payload.encryptionKey,
@@ -58,7 +46,7 @@ export class Share {
    */
   public getShareByToken(token: string): Promise<GetShareInfoResponse> {
     return this.axios
-      .get(`${this.apiUrl}/api/storage/share/${token}`, {
+      .get(`${this.apiDetails.url}/api/storage/share/${token}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -71,7 +59,7 @@ export class Share {
    */
   public getShareList(): Promise<IShare> {
     return this.axios
-      .get(`${this.apiUrl}/api/share/list`, {
+      .get(`${this.apiDetails.url}/api/share/list`, {
         headers: this.headers()
       })
       .then(response => {
@@ -84,6 +72,11 @@ export class Share {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
+    return headersWithTokenAndMnemonic(
+      this.apiDetails.clientName,
+      this.apiDetails.clientVersion,
+      this.apiDetails.token,
+      this.apiDetails.mnemonic
+    );
   }
 }
