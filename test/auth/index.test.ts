@@ -3,7 +3,7 @@ import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
 import { validResponse } from '../shared/response';
-import { ApiPublicConnectionDetails } from '../../src/shared/types/apiConnection';
+import { ApiPublicConnectionDetails } from '../../src/shared';
 import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
 
 describe('# auth service tests', () => {

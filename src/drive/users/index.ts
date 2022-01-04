@@ -1,5 +1,5 @@
 import axios, { AxiosStatic } from 'axios';
-import { ApiSecureConnectionDetails } from '../../shared/types/apiConnection';
+import { ApiSecureConnectionDetails } from '../../shared';
 
 export class Users {
   private readonly axios: AxiosStatic;

@@ -15,7 +15,7 @@ import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
 import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
-import { ApiSecureConnectionDetails } from '../../src/shared/types/apiConnection';
+import { ApiSecureConnectionDetails } from '../../src/shared';
 
 describe('# storage service tests', () => {
 

@@ -4,7 +4,7 @@ import { GenerateShareLinkPayload } from '../../src/drive/share/types';
 import { validResponse } from '../shared/response';
 import { Share } from '../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
-import { ApiSecureConnectionDetails } from '../../src/shared/types/apiConnection';
+import { ApiSecureConnectionDetails } from '../../src/shared';
 
 describe('# share service tests', () => {
 
