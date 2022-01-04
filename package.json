@@ -1,6 +1,6 @@
 {
   "name": "@internxt/sdk",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
