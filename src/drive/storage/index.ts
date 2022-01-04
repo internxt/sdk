@@ -14,6 +14,7 @@ import {
   UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
+import AppError from '../../shared/types/errors';
 
 export * as StorageTypes from './types';
 
@@ -155,7 +156,7 @@ export class Storage {
       })
       .then(response => {
         if (response.status === 402) {
-          throw new Error('Rate limited');
+          throw new AppError('Rate limited', response.status);
         }
         return response.data;
       });
