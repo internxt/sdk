@@ -99,7 +99,9 @@ export class Auth {
         if (response.status !== 200) {
           throw new UserAccessError(response.data.error || response.data);
         }
-        return response.data;
+        const data = response.data;
+        data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
+        return data;
       })
       .catch(error => {
         throw new Error(extractAxiosErrorMessage(error));

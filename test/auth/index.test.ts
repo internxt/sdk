@@ -201,7 +201,9 @@ describe('# auth service tests', () => {
         .onSecondCall()
         .resolves(
           validResponse({
-            user: 'user'
+            user: {
+              revocateKey: 'key'
+            }
           })
         );
 
@@ -229,7 +231,10 @@ describe('# auth service tests', () => {
         config
       ]);
       expect(body).toEqual({
-        user: 'user'
+        user: {
+          revocateKey: 'key',
+          revocationKey: 'key',
+        }
       });
     });
 
