@@ -1,8 +1,8 @@
 import sinon from 'sinon';
-import { Storage, StorageTypes } from '../../src/drive';
+import { Storage, StorageTypes } from '../../../src/drive';
 import axios from 'axios';
 import { randomFolderContentResponse } from './folderContentResponse.mother';
-import { validResponse } from '../shared/response';
+import { validResponse } from '../../shared/response';
 import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
@@ -10,12 +10,12 @@ import {
   MoveFolderResponse,
   UpdateFilePayload,
   DeleteFilePayload, EncryptionVersion,
-} from '../../src/drive/storage/types';
+} from '../../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
-import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
-import { ApiSecureConnectionDetails } from '../../src/shared';
+import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { ApiSecureConnectionDetails } from '../../../src/shared';
 
 describe('# storage service tests', () => {
 

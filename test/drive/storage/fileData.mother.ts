@@ -1,4 +1,4 @@
-import { DriveFileData } from '../../dist/drive/storage/types';
+import { DriveFileData } from '../../../dist/drive/storage/types';
 
 export function randomFileData(): DriveFileData {
   return <DriveFileData>{

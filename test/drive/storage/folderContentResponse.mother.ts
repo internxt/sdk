@@ -1,4 +1,4 @@
-import { DriveFileData, FetchFolderContentResponse, FolderChild } from '../../src/drive/storage/types';
+import { DriveFileData, FetchFolderContentResponse, FolderChild } from '../../../src/drive/storage/types';
 
 export function emptyFolderContentResponse() {
   const response: FetchFolderContentResponse = {

@@ -1,10 +1,10 @@
 import axios from 'axios';
 import sinon from 'sinon';
-import { GenerateShareLinkPayload } from '../../src/drive/share/types';
-import { validResponse } from '../shared/response';
-import { Share } from '../../src/drive';
-import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
-import { ApiSecureConnectionDetails } from '../../src/shared';
+import { GenerateShareLinkPayload } from '../../../src/drive/share/types';
+import { validResponse } from '../../shared/response';
+import { Share } from '../../../src/drive';
+import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { ApiSecureConnectionDetails } from '../../../src/shared';
 
 describe('# share service tests', () => {
 
