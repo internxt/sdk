@@ -34,3 +34,8 @@ export interface ChangePasswordPayload {
   encryptedMnemonic: string
   encryptedPrivateKey: string
 }
+
+export interface UsageResponse {
+  _id: string;
+  total: number;
+}

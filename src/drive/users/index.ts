@@ -1,7 +1,7 @@
 import axios, { AxiosStatic } from 'axios';
 import { ApiSecureConnectionDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { ChangePasswordPayload, InitializeUserResponse, UserReferral } from './types';
+import { ChangePasswordPayload, InitializeUserResponse, UsageResponse, UserReferral } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import AppError from '../../shared/types/errors';
 
@@ -105,6 +105,19 @@ export class Users {
         } else if (response.status !== 200) {
           throw new AppError(response.data.error, response.status);
         }
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space usage of the user
+   */
+  public spaceUsage(): Promise<UsageResponse> {
+    return this.axios
+      .get(`${this.apiDetails.url}/api/usage`, {
+        headers: this.headers()
+      })
+      .then(response => {
         return response.data;
       });
   }
