@@ -14,12 +14,11 @@ import {
   UpdateFolderMetadataPayload
 } from './types';
 import { Token } from '../../auth';
-import AppError from '../../shared/types/errors';
+import { AppModule } from '../../shared/modules';
 
 export * as StorageTypes from './types';
 
-export class Storage {
-  private readonly axios: AxiosStatic;
+export class Storage extends AppModule {
   private readonly apiUrl: string;
   private readonly clientName: string;
   private readonly clientVersion: string;
@@ -35,7 +34,7 @@ export class Storage {
   constructor(
     axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
   ) {
-    this.axios = axios;
+    super(axios);
     this.apiUrl = apiUrl;
     this.clientName = clientName;
     this.clientVersion = clientVersion;
@@ -155,9 +154,6 @@ export class Storage {
         headers: this.headers()
       })
       .then(response => {
-        if (response.status === 402) {
-          throw new AppError('Rate limited', response.status);
-        }
         return response.data;
       });
   }

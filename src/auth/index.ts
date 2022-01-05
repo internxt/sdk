@@ -3,11 +3,11 @@ import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessE
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
+import { AppModule } from '../shared/modules';
 
 export * from './types';
 
-export class Auth {
-  private axios: AxiosStatic;
+export class Auth extends AppModule {
   private readonly apiUrl: string;
   private readonly clientName: string;
   private readonly clientVersion: string;
@@ -17,7 +17,7 @@ export class Auth {
   }
 
   constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
-    this.axios = axios;
+    super(axios);
     this.apiUrl = apiUrl;
     this.clientName = clientName;
     this.clientVersion = clientVersion;
@@ -46,9 +46,6 @@ export class Auth {
         headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new Error(response.data.error || 'Internal Server Error');
-        }
         return response.data;
       });
   }
@@ -65,12 +62,6 @@ export class Auth {
         headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status === 400) {
-          throw new Error(response.data.error || 'Can not connect to server');
-        }
-        if (response.status !== 200) {
-          throw new Error('This account does not exist');
-        }
         return response.data;
       });
 
@@ -90,12 +81,12 @@ export class Auth {
         headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new UserAccessError(response.data.error || response.data);
-        }
         const data = response.data;
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
+      })
+      .catch(error => {
+        throw new UserAccessError(error.message);
       });
   }
 
@@ -109,9 +100,6 @@ export class Auth {
         headers: headersWithToken(this.clientName, this.clientVersion, token),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new Error(response.data.error || response.data);
-        }
         return response.data;
       });
   }
