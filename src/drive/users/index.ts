@@ -1,7 +1,8 @@
 import axios, { AxiosStatic } from 'axios';
 import { ApiSecureConnectionDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { UserReferral } from './types';
+import { InitializeUserResponse, UserReferral } from './types';
+import { restore } from 'sinon';
 
 export * as UserTypes from './types';
 
@@ -44,6 +45,25 @@ export class Users {
       })
       .then(response => {
         return response.data;
+      });
+  }
+
+  /**
+   * Initialize basic state of user and returns data after registration process
+   * @param email
+   * @param mnemonic
+   */
+  public initialize(email: string, mnemonic: string): Promise<InitializeUserResponse> {
+    return this.axios
+      .post(`${this.apiDetails.url}/api/initialize`, {
+          email: email,
+          mnemonic: mnemonic
+        },
+        {
+          headers: this.headers()
+        })
+      .then(response => {
+        return response.data.user;
       });
   }
 

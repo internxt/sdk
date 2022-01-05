@@ -91,6 +91,52 @@ describe('# users service tests', () => {
     });
   });
 
+  describe('initialize', () => {
+
+    it('should bubble up and error if request fails', async () => {
+      // Arrange
+      const { client } = clientAndHeaders();
+      sinon.stub(axios, 'post').rejects(new Error('custom'));
+      const email = '', mnemonic = '';
+
+      // Act
+      const call = client.initialize(email, mnemonic);
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('should call with right params & return response', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+        user: {
+          root_folder: 1
+        }
+      }));
+      const email = 'e', mnemonic = 'm';
+
+      // Act
+      const body = await client.initialize(email, mnemonic);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/initialize',
+        {
+          email: email,
+          mnemonic: mnemonic
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        root_folder: 1
+      });
+    });
+
+  });
+
 });
 
 function clientAndHeaders(

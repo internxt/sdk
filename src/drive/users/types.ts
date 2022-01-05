@@ -19,3 +19,10 @@ export interface UserReferral {
   credit: number
   type: ReferralType
 }
+
+export interface InitializeUserResponse {
+  email: string
+  bucket: string
+  mnemonic: string
+  root_folder_id: number
+}
