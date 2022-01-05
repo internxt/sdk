@@ -137,6 +137,46 @@ describe('# users service tests', () => {
 
   });
 
+  describe('refresh', () => {
+
+    it('should bubble up and error if request fails', async () => {
+      // Arrange
+      const { client } = clientAndHeaders();
+      sinon.stub(axios, 'get').rejects(new Error('custom'));
+
+      // Act
+      const call = client.refreshUser();
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('should call with right params & return response', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+        user: {},
+        token: 't',
+      }));
+
+      // Act
+      const body = await client.refreshUser();
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/user/refresh',
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        user: {},
+        token: 't',
+      });
+    });
+
+  });
+
 });
 
 function clientAndHeaders(

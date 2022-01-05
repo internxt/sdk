@@ -2,7 +2,7 @@ import axios, { AxiosStatic } from 'axios';
 import { ApiSecureConnectionDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { InitializeUserResponse, UserReferral } from './types';
-import { restore } from 'sinon';
+import { UserSettings } from '../../shared/types/userSettings';
 
 export * as UserTypes from './types';
 
@@ -64,6 +64,22 @@ export class Users {
         })
       .then(response => {
         return response.data.user;
+      });
+  }
+
+  /**
+   * Returns fresh data of the user
+   */
+  public refreshUser(): Promise<{
+    user: UserSettings
+    token: string
+  }> {
+    return this.axios
+      .get(`${this.apiDetails.url}/api/user/refresh`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
       });
   }
 
