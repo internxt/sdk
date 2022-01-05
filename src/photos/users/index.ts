@@ -12,13 +12,20 @@ export default class UsersSubmodule {
 
   public initialize(data: InitializeUserData): Promise<User> {
     return axios
-      .post<UserJSON>(`${this.model.baseUrl}/users`, data, {
-        headers: {
-          Authorization: `Bearer ${this.model.accessToken}`,
-          'internxt-network-pass': data.bridgePassword,
-          'internxt-network-user': data.bridgeUser,
+      .post<UserJSON>(
+        `${this.model.baseUrl}/users`,
+        {
+          mac: data.mac,
+          name: data.name,
         },
-      })
+        {
+          headers: {
+            Authorization: `Bearer ${this.model.accessToken}`,
+            'internxt-network-pass': data.bridgePassword,
+            'internxt-network-user': data.bridgeUser,
+          },
+        },
+      )
       .then((res) => this.parse(res.data))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
