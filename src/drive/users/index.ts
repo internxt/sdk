@@ -1,7 +1,13 @@
 import axios, { AxiosStatic } from 'axios';
 import { ApiSecureConnectionDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { ChangePasswordPayload, InitializeUserResponse, UsageResponse, UserReferral } from './types';
+import {
+  ChangePasswordPayload,
+  FetchLimitResponse,
+  InitializeUserResponse,
+  UsageResponse,
+  UserReferral
+} from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import AppError from '../../shared/types/errors';
 
@@ -115,6 +121,19 @@ export class Users {
   public spaceUsage(): Promise<UsageResponse> {
     return this.axios
       .get(`${this.apiDetails.url}/api/usage`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space limit for the user
+   */
+  public spaceLimit(): Promise<FetchLimitResponse> {
+    return this.axios
+      .get(`${this.apiDetails.url}/api/limit`, {
         headers: this.headers()
       })
       .then(response => {
