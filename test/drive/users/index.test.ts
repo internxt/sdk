@@ -4,6 +4,7 @@ import { ApiSecureConnectionDetails } from '../../../src/shared';
 import axios from 'axios';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { validResponse } from '../../shared/response';
+import { ChangePasswordPayload } from '../../../src/drive/users/types';
 
 describe('# users service tests', () => {
 
@@ -173,6 +174,61 @@ describe('# users service tests', () => {
         user: {},
         token: 't',
       });
+    });
+
+  });
+
+  describe('change password', () => {
+
+    it('should bubble up and error if request fails', async () => {
+      // Arrange
+      const { client } = clientAndHeaders();
+      sinon.stub(axios, 'patch').rejects(new Error('custom'));
+      const payload: ChangePasswordPayload = {
+        currentEncryptedPassword: '1',
+        encryptedMnemonic: '2',
+        encryptedPrivateKey: '3',
+        newEncryptedPassword: '4',
+        newEncryptedSalt: '5'
+      };
+
+      // Act
+      const call = client.changePassword(payload);
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('should call with right params & return response', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const callStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
+      const payload: ChangePasswordPayload = {
+        currentEncryptedPassword: '1',
+        encryptedMnemonic: '2',
+        encryptedPrivateKey: '3',
+        newEncryptedPassword: '4',
+        newEncryptedSalt: '5'
+      };
+
+      // Act
+      const body = await client.changePassword(payload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/api/user/password',
+        {
+          currentPassword: payload.currentEncryptedPassword,
+          newPassword: payload.newEncryptedPassword,
+          newSalt: payload.newEncryptedSalt,
+          mnemonic: payload.encryptedMnemonic,
+          privateKey: payload.encryptedPrivateKey,
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
     });
 
   });

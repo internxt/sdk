@@ -1,8 +1,9 @@
 import axios, { AxiosStatic } from 'axios';
 import { ApiSecureConnectionDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { InitializeUserResponse, UserReferral } from './types';
+import { ChangePasswordPayload, InitializeUserResponse, UserReferral } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
+import AppError from '../../shared/types/errors';
 
 export * as UserTypes from './types';
 
@@ -79,6 +80,31 @@ export class Users {
         headers: this.headers()
       })
       .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Updates the authentication credentials
+   * @param payload
+   */
+  public changePassword(payload: ChangePasswordPayload) {
+    return this.axios
+      .patch(`${this.apiDetails.url}/api/user/password`, {
+        currentPassword: payload.currentEncryptedPassword,
+        newPassword: payload.newEncryptedPassword,
+        newSalt: payload.newEncryptedSalt,
+        mnemonic: payload.encryptedMnemonic,
+        privateKey: payload.encryptedPrivateKey,
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        if (response.status === 500) {
+          throw new AppError('WRONG_PASSWORD', response.status);
+        } else if (response.status !== 200) {
+          throw new AppError(response.data.error, response.status);
+        }
         return response.data;
       });
   }
