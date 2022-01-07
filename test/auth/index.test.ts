@@ -1,5 +1,4 @@
-import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails } from '../../src';
-import { Token } from '../../src/shared/types/userSettings';
+import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
 import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';

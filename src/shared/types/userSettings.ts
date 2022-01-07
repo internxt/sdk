@@ -1,7 +1,6 @@
 import {AppSumoDetails} from './appsumo';
 
 export type UUID = string;
-export type Token = string;
 
 export interface UserSettings {
   userId: string;

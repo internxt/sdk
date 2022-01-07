@@ -1,13 +1,13 @@
 import axios, { AxiosStatic } from 'axios';
-import { extractAxiosErrorMessage } from '../utils';
-import { CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
-import { Token, UserSettings, UUID } from '../shared/types/userSettings';
+import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
+import { basicHeaders, headersWithToken } from '../shared/headers';
+import { AppModule } from '../shared/modules';
 
 export * from './types';
 
-export class Auth {
-  private axios: AxiosStatic;
+export class Auth extends AppModule {
   private readonly apiUrl: string;
   private readonly clientName: string;
   private readonly clientVersion: string;
@@ -17,7 +17,7 @@ export class Auth {
   }
 
   constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
-    this.axios = axios;
+    super(axios);
     this.apiUrl = apiUrl;
     this.clientName = clientName;
     this.clientVersion = clientVersion;
@@ -43,16 +43,10 @@ export class Auth {
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new Error(response.data.error || 'Internal Server Error');
-        }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 
@@ -65,19 +59,10 @@ export class Auth {
       .post(`${this.apiUrl}/api/login`, {
         email: details.email
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status === 400) {
-          throw new Error(response.data.error || 'Can not connect to server');
-        }
-        if (response.status !== 200) {
-          throw new Error('This account does not exist');
-        }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
 
     const encryptedSalt = loginResponse.sKey;
@@ -93,18 +78,15 @@ export class Auth {
         publicKey: keys.publicKey,
         revocateKey: keys.revocationCertificate,
       }, {
-        headers: this.headers(),
+        headers: basicHeaders(this.clientName, this.clientVersion),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new UserAccessError(response.data.error || response.data);
-        }
         const data = response.data;
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
       })
       .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
+        throw new UserAccessError(error.message);
       });
   }
 
@@ -115,35 +97,11 @@ export class Auth {
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
       }, {
-        headers: this.headersWithToken(token),
+        headers: headersWithToken(this.clientName, this.clientVersion, token),
       })
       .then(response => {
-        if (response.status !== 200) {
-          throw new Error(response.data.error || response.data);
-        }
         return response.data;
-      })
-      .catch(error => {
-        throw new Error(extractAxiosErrorMessage(error));
       });
   }
 
-  private headers() {
-    return {
-      'content-type': 'application/json; charset=utf-8',
-      'internxt-version': this.clientVersion,
-      'internxt-client': this.clientName
-    };
-  }
-
-  private headersWithToken(token: Token) {
-    const headers = this.headers();
-    const extra = {
-      Authorization: 'Bearer ' + token
-    };
-    return {
-      ...headers,
-      ...extra
-    };
-  }
 }
