@@ -8,16 +8,20 @@ export class AppModule {
     axios.interceptors.response.use(undefined, (error: AxiosError): AppError => {
       let errorMessage: string;
       let errorStatus: number;
-      const serverUnavailable = !!error.request;
-      const isServerError = !!error.response;
 
-      if (serverUnavailable) {
+      if (error.response) {
+        const response = error.response as AxiosResponse<{ error: string }>;
+        if (response.data.error !== undefined) {
+          errorMessage = response.data.error;
+        } else {
+          // TODO : remove when endpoints of updateMetadata(file/folder) are updated
+          // after all clients use th SDK
+          errorMessage = String(response.data);
+        }
+        errorStatus = response.status;
+      } else if (error.request) {
         errorMessage = 'Server unavailable';
         errorStatus = 500;
-      } else if (isServerError) {
-        const response = error.response as AxiosResponse<{ error: string }>;
-        errorMessage = response.data.error;
-        errorStatus = response.status;
       } else {
         errorMessage = error.message;
         errorStatus = 400;
