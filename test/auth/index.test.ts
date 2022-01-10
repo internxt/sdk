@@ -354,6 +354,7 @@ describe('# auth service tests', () => {
     it('Should call with right params & return data', async () => {
       // Arrange
       const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+        qr: 'qr',
         code: 'code'
       }));
       const { client, headers } = clientAndHeadersWithToken();
@@ -369,7 +370,8 @@ describe('# auth service tests', () => {
         }
       ]);
       expect(body).toEqual({
-        code: 'code'
+        qr: 'qr',
+        backupKey: 'code'
       });
     });
 
@@ -379,7 +381,7 @@ describe('# auth service tests', () => {
 
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
-      sinon.stub(axios, 'delete').rejects(new Error('Network error'));
+      sinon.stub(myAxios, 'delete').rejects(new Error('Network error'));
       const { client } = clientAndHeadersWithToken();
       const pass = 'pass', code = 'code';
 
@@ -392,7 +394,7 @@ describe('# auth service tests', () => {
 
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+      const callStub = sinon.stub(myAxios, 'delete').resolves(validResponse({}));
       const { client, headers } = clientAndHeadersWithToken();
       const pass = 'pass', code = 'code';
 
@@ -415,6 +417,45 @@ describe('# auth service tests', () => {
 
   });
 
+  describe('-> store twoFactorAuth key', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'put').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+      const backupKey = 'key', code = 'code';
+
+      // Act
+      const call = client.storeTwoFactorAuthKey(backupKey, code);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'put').resolves(validResponse({}));
+      const { client, headers } = clientAndHeadersWithToken();
+      const backupKey = 'key', code = 'code';
+
+      // Act
+      const body = await client.storeTwoFactorAuthKey(backupKey, code);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          key: backupKey,
+          code: code,
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
 
 });
 
