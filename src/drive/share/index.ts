@@ -31,10 +31,10 @@ export class Share {
   }
 
   /**
-   * Generates a new link to share a file
+   * Creates a new link to share a file
    * @param payload
    */
-  public generateShareLink(payload: GenerateShareLinkPayload): Promise<{
+  public createShareLink(payload: GenerateShareLinkPayload): Promise<{
     token: string
   }> {
     return this.axios
@@ -53,10 +53,10 @@ export class Share {
   }
 
   /**
-   * Fetches info about a specific token
+   * Fetches info about a specific share
    * @param token
    */
-  public getShareTokenInfo(token: string): Promise<GetShareInfoResponse> {
+  public getShareByToken(token: string): Promise<GetShareInfoResponse> {
     return this.axios
       .get(`${this.apiUrl}/api/storage/share/${token}`, {
         headers: this.headers()

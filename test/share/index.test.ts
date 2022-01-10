@@ -27,7 +27,7 @@ describe('# share service tests', () => {
       };
 
       // Act
-      const call = client.generateShareLink(payload);
+      const call = client.createShareLink(payload);
 
       // Assert
       await expect(call).rejects.toThrowError('custom');
@@ -49,7 +49,7 @@ describe('# share service tests', () => {
       };
 
       // Act
-      const body = await client.generateShareLink(payload);
+      const body = await client.createShareLink(payload);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
@@ -81,7 +81,7 @@ describe('# share service tests', () => {
       const token = '';
 
       // Act
-      const call = client.getShareTokenInfo(token);
+      const call = client.getShareByToken(token);
 
       // Assert
       await expect(call).rejects.toThrowError('custom');
@@ -96,7 +96,7 @@ describe('# share service tests', () => {
       const token = 'ma-token';
 
       // Act
-      const body = await client.getShareTokenInfo(token);
+      const body = await client.getShareByToken(token);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
