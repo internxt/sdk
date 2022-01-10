@@ -271,44 +271,109 @@ describe('# auth service tests', () => {
     });
   });
 
-  function clientAndHeaders(
-    apiUrl = '',
-    clientName = 'c-name',
-    clientVersion = '0.1',
-  ): {
-    client: Auth,
-    headers: object
-  } {
-    const appDetails: AppDetails = {
-      clientName: clientName,
-      clientVersion: clientVersion,
-    };
-    const client = Auth.client(apiUrl, appDetails);
-    const headers = testBasicHeaders(clientName, clientVersion);
-    return { client, headers };
-  }
+  describe('-> security details', () => {
 
-  function clientAndHeadersWithToken(
-    apiUrl = '',
-    clientName = 'c-name',
-    clientVersion = '0.1',
-    token = 'token'
-  ): {
-    client: Auth,
-    headers: object
-  } {
-    const appDetails: AppDetails = {
-      clientName: clientName,
-      clientVersion: clientVersion,
-    };
-    const apiSecurity: ApiSecurity = {
-      token: token,
-      mnemonic: '',
-    };
-    const client = Auth.client(apiUrl, appDetails, apiSecurity);
-    const headers = testHeadersWithToken(clientName, clientVersion, token);
-    return { client, headers };
-  }
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'post').rejects(new Error('Network error'));
+      const { client } = clientAndHeaders();
+      const email = '';
 
+      // Act
+      const call = client.securityDetails(email);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right parameters & return correct content', async () => {
+      // Arrange
+      const postStub = sinon.stub(myAxios, 'post').resolves(validResponse({
+        hasKeys: true,
+        sKey: 'gibberish',
+        tfa: true
+      }));
+      const { client, headers } = clientAndHeaders();
+      const email = 'my@email.com';
+
+      // Act
+      const body = await client.securityDetails(email);
+
+      // Assert
+      expect(postStub.firstCall.args).toEqual([
+        '/login',
+        {
+          email: email
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        encryptedSalt: 'gibberish',
+        tfaEnabled: true
+      });
+    });
+
+    it('Should return boolean value on null param response', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'post').resolves(validResponse({
+        hasKeys: true,
+        sKey: 'gibberish',
+        tfa: null
+      }));
+      const { client } = clientAndHeaders();
+      const email = 'my@email.com';
+
+      // Act
+      const body = await client.securityDetails(email);
+
+      // Assert
+      expect(body).toEqual({
+        encryptedSalt: 'gibberish',
+        tfaEnabled: false
+      });
+    });
+
+  });
 
 });
+
+function clientAndHeaders(
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+): {
+  client: Auth,
+  headers: object
+} {
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+  };
+  const client = Auth.client(apiUrl, appDetails);
+  const headers = testBasicHeaders(clientName, clientVersion);
+  return { client, headers };
+}
+
+function clientAndHeadersWithToken(
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+  token = 'token'
+): {
+  client: Auth,
+  headers: object
+} {
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+  };
+  const apiSecurity: ApiSecurity = {
+    token: token,
+    mnemonic: '',
+  };
+  const client = Auth.client(apiUrl, appDetails, apiSecurity);
+  const headers = testHeadersWithToken(clientName, clientVersion, token);
+  return { client, headers };
+}

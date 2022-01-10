@@ -34,3 +34,8 @@ export interface CryptoProvider {
 }
 
 export class UserAccessError extends Error {}
+
+export interface SecurityDetails {
+  encryptedSalt: string
+  tfaEnabled: boolean
+}
