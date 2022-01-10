@@ -133,7 +133,10 @@ export class Auth extends ApiModule {
         headers: this.headersWithToken(<string>this.apiSecurity?.token),
       })
       .then(response => {
-        return response.data;
+        return {
+          qr: response.data.qr,
+          backupKey: response.data.code,
+        };
       });
   }
 
@@ -149,6 +152,24 @@ export class Auth extends ApiModule {
           pass: pass,
           code: code
         },
+        headers: this.headersWithToken(<string>this.apiSecurity?.token),
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Store TwoFactorAuthentication details
+   * @param backupKey
+   * @param code
+   */
+  public storeTwoFactorAuthKey(backupKey: string, code: string): Promise<void> {
+    return this.axios
+      .put('/tfa', {
+        key: backupKey,
+        code: code,
+      }, {
         headers: this.headersWithToken(<string>this.apiSecurity?.token),
       })
       .then(response => {

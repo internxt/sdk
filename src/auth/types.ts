@@ -42,5 +42,5 @@ export interface SecurityDetails {
 
 export interface TwoFactorAuthQR {
   qr: string
-  code: string
+  backupKey: string
 }
