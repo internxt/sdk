@@ -1,3 +1,3 @@
 export * as photos from './photos';
 export * from './auth';
-export * from './drive';
+export * as Drive from './drive';
