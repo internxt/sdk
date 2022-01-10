@@ -125,11 +125,30 @@ export class Auth extends ApiModule {
   }
 
   /**
-   * Generates a new 2FactorAuth code
+   * Generates a new TwoFactorAuth code
    */
   public generateTwoFactorAuthQR(): Promise<TwoFactorAuthQR> {
     return this.axios
       .get('/tfa', {
+        headers: this.headersWithToken(<string>this.apiSecurity?.token),
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Disables TwoFactorAuthentication
+   * @param pass
+   * @param code
+   */
+  public disableTwoFactorAuth(pass: string, code: string): Promise<void> {
+    return this.axios
+      .delete('/tfa', {
+        data: {
+          pass: pass,
+          code: code
+        },
         headers: this.headersWithToken(<string>this.apiSecurity?.token),
       })
       .then(response => {
