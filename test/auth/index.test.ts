@@ -375,6 +375,47 @@ describe('# auth service tests', () => {
 
   });
 
+  describe('-> disable twoFactorAuth', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(axios, 'delete').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+      const pass = 'pass', code = 'code';
+
+      // Act
+      const call = client.disableTwoFactorAuth(pass, code);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(axios, 'delete').resolves(validResponse({}));
+      const { client, headers } = clientAndHeadersWithToken();
+      const pass = 'pass', code = 'code';
+
+      // Act
+      const body = await client.disableTwoFactorAuth(pass, code);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          data: {
+            pass: pass,
+            code: code,
+          },
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
+
+
 });
 
 function clientAndHeaders(
