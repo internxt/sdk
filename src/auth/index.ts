@@ -1,5 +1,5 @@
 import { Axios } from 'axios';
-import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
+import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError, SecurityDetails } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
@@ -56,17 +56,8 @@ export class Auth extends ApiModule {
     user: UserSettings;
     userTeam: TeamsSettings | null
   }> {
-    const loginResponse = await this.axios
-      .post('/login', {
-        email: details.email
-      }, {
-        headers: this.basicHeaders(),
-      })
-      .then(response => {
-        return response.data;
-      });
-
-    const encryptedSalt = loginResponse.sKey;
+    const securityDetails = await this.securityDetails(details.email);
+    const encryptedSalt = securityDetails.encryptedSalt;
     const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
@@ -102,6 +93,25 @@ export class Auth extends ApiModule {
       })
       .then(response => {
         return response.data;
+      });
+  }
+
+  /**
+   * Returns general security details
+   * @param email
+   */
+  public securityDetails(email: string): Promise<SecurityDetails> {
+    return this.axios
+      .post('/login', {
+        email: email
+      }, {
+        headers: this.basicHeaders()
+      })
+      .then(response => {
+        return {
+          encryptedSalt: response.data.sKey,
+          tfaEnabled: response.data.tfa === true,
+        };
       });
   }
 
