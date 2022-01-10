@@ -9,12 +9,11 @@ import {
   UserReferral
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
-import AppError from '../../shared/types/errors';
+import { AppModule } from '../../shared/modules';
 
 export * as UserTypes from './types';
 
-export class Users {
-  private readonly axios: AxiosStatic;
+export class Users extends AppModule {
   private readonly apiDetails: ApiSecureConnectionDetails;
 
   public static client(apiDetails: ApiSecureConnectionDetails) {
@@ -22,7 +21,7 @@ export class Users {
   }
 
   constructor(axios: AxiosStatic, apiDetails: ApiSecureConnectionDetails) {
-    this.axios = axios;
+    super(axios);
     this.apiDetails = apiDetails;
   }
 
@@ -106,11 +105,6 @@ export class Users {
         headers: this.headers()
       })
       .then(response => {
-        if (response.status === 500) {
-          throw new AppError('WRONG_PASSWORD', response.status);
-        } else if (response.status !== 200) {
-          throw new AppError(response.data.error, response.status);
-        }
         return response.data;
       });
   }
