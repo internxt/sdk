@@ -1,5 +1,14 @@
 import { Axios } from 'axios';
-import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError, SecurityDetails } from './types';
+import {
+  Token,
+  CryptoProvider,
+  Keys,
+  LoginDetails,
+  RegisterDetails,
+  UserAccessError,
+  SecurityDetails,
+  TwoFactorAuthQR
+} from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
@@ -112,6 +121,19 @@ export class Auth extends ApiModule {
           encryptedSalt: response.data.sKey,
           tfaEnabled: response.data.tfa === true,
         };
+      });
+  }
+
+  /**
+   * Generates a new 2FactorAuth code
+   */
+  public generateTwoFactorAuthQR(): Promise<TwoFactorAuthQR> {
+    return this.axios
+      .get('/tfa', {
+        headers: this.headersWithToken(<string>this.apiSecurity?.token),
+      })
+      .then(response => {
+        return response.data;
       });
   }
 

@@ -39,3 +39,8 @@ export interface SecurityDetails {
   encryptedSalt: string
   tfaEnabled: boolean
 }
+
+export interface TwoFactorAuthQR {
+  qr: string
+  code: string
+}

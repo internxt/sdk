@@ -337,6 +337,44 @@ describe('# auth service tests', () => {
 
   });
 
+  describe('-> generate twoFactorAuth code', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+
+      // Act
+      const call = client.generateTwoFactorAuthQR();
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return data', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+        code: 'code'
+      }));
+      const { client, headers } = clientAndHeadersWithToken();
+
+      // Act
+      const body = await client.generateTwoFactorAuthQR();
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        code: 'code'
+      });
+    });
+
+  });
+
 });
 
 function clientAndHeaders(
