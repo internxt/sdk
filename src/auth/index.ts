@@ -3,21 +3,23 @@ import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessE
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
-import { ApiPublicConnectionDetails } from '../shared/types/apiConnection';
+import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { AppModule } from '../shared/modules';
 
 export * from './types';
 
 export class Auth extends AppModule {
-  private readonly apiDetails: ApiPublicConnectionDetails;
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity?: ApiSecurity;
 
-  public static client(apiDetails: ApiPublicConnectionDetails) {
-    return new Auth(axios, apiDetails);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
+    return new Auth(axios, apiUrl, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiDetails: ApiPublicConnectionDetails) {
-    super(axios);
-    this.apiDetails = apiDetails;
+  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
+    super(axios, apiUrl);
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
   }
 
   public register(registerDetails: RegisterDetails): Promise<{
@@ -26,7 +28,7 @@ export class Auth extends AppModule {
     uuid: UUID
   }> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/register`, {
+      .post('/register', {
         name: registerDetails.name,
         captcha: registerDetails.captcha,
         lastname: registerDetails.lastname,
@@ -53,7 +55,7 @@ export class Auth extends AppModule {
     userTeam: TeamsSettings | null
   }> {
     const loginResponse = await this.axios
-      .post(`${this.apiDetails.url}/api/login`, {
+      .post('/login', {
         email: details.email
       }, {
         headers: this.basicHeaders(),
@@ -67,7 +69,7 @@ export class Auth extends AppModule {
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
-      .post(`${this.apiDetails.url}/api/access`, {
+      .post('/access', {
         email: details.email,
         password: encryptedPasswordHash,
         tfa: details.tfaCode,
@@ -89,7 +91,7 @@ export class Auth extends AppModule {
 
   public updateKeys(keys: Keys, token: Token) {
     return this.axios
-      .patch(`${this.apiDetails.url}/api/user/keys`, {
+      .patch('/user/keys', {
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
@@ -102,11 +104,11 @@ export class Auth extends AppModule {
   }
 
   private basicHeaders() {
-    return basicHeaders(this.apiDetails.clientName, this.apiDetails.clientVersion);
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }
 
   private headersWithToken(token: Token) {
-    return headersWithToken(this.apiDetails.clientName, this.apiDetails.clientVersion, token);
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, token);
   }
 
 }

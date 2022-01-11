@@ -14,20 +14,22 @@ import {
   UpdateFolderMetadataPayload
 } from './types';
 import { AppModule } from '../../shared/modules';
-import { ApiSecureConnectionDetails } from '../../shared';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 
 export * as StorageTypes from './types';
 
 export class Storage extends AppModule {
-  private readonly apiDetails: ApiSecureConnectionDetails;
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity: ApiSecurity;
 
-  public static client(apiDetails: ApiSecureConnectionDetails) {
-    return new Storage(axios, apiDetails);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    return new Storage(axios, apiUrl, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiDetails: ApiSecureConnectionDetails) {
-    super(axios);
-    this.apiDetails = apiDetails;
+  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios, apiUrl);
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
   }
 
   /**
@@ -40,7 +42,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .post(`${this.apiDetails.url}/api/storage/folder`, {
+      .post('/storage/folder', {
         parentFolderId: payload.parentFolderId,
         folderName: payload.folderName,
       }, {
@@ -60,7 +62,7 @@ export class Storage extends AppModule {
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/storage/move/folder`, {
+      .post('/storage/move/folder', {
         folderId: payload.folderId,
         destination: payload.destinationFolderId,
       }, {
@@ -77,7 +79,7 @@ export class Storage extends AppModule {
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
-      .post(`${this.apiDetails.url}/api/storage/folder/${payload.folderId}/meta`, {
+      .post(`/storage/folder/${payload.folderId}/meta`, {
         metadata: payload.changes
       }, {
         headers: this.headers()
@@ -97,7 +99,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .get<FetchFolderContentResponse>(`${this.apiDetails.url}/api/storage/v2/folder/${folderId}`, {
+      .get<FetchFolderContentResponse>(`/storage/v2/folder/${folderId}`, {
         cancelToken: cancelTokenSource.token,
         headers: this.headers()
       })
@@ -114,7 +116,7 @@ export class Storage extends AppModule {
    */
   public deleteFolder(folderId: number): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiDetails.url}/api/storage/folder/${folderId}`, {
+      .delete(`/storage/folder/${folderId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -128,7 +130,7 @@ export class Storage extends AppModule {
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/storage/file`, {
+      .post('/storage/file', {
         file: {
           fileId: fileEntry.id,
           type: fileEntry.type,
@@ -152,7 +154,7 @@ export class Storage extends AppModule {
    */
   public updateFile(payload: UpdateFilePayload): Promise<any> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/storage/file/${payload.fileId}/meta`, {
+      .post(`/storage/file/${payload.fileId}/meta`, {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
@@ -170,7 +172,7 @@ export class Storage extends AppModule {
    */
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiDetails.url}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
+      .delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -184,7 +186,7 @@ export class Storage extends AppModule {
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/storage/move/file`, {
+      .post('/storage/move/file', {
         fileId: payload.fileId,
         destination: payload.destination,
         relativePath: payload.destinationPath,
@@ -203,7 +205,7 @@ export class Storage extends AppModule {
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
-      .get(`${this.apiDetails.url}/api/storage/recents?limit=${limit}`, {
+      .get(`/storage/recents?limit=${limit}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -217,10 +219,10 @@ export class Storage extends AppModule {
    */
   private headers() {
     return headersWithTokenAndMnemonic(
-      this.apiDetails.clientName,
-      this.apiDetails.clientVersion,
-      this.apiDetails.token,
-      this.apiDetails.mnemonic
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.mnemonic
     );
   }
 

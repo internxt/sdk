@@ -1,5 +1,5 @@
 import axios, { AxiosStatic } from 'axios';
-import { ApiSecureConnectionDetails } from '../../shared';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   ChangePasswordPayload,
@@ -14,15 +14,17 @@ import { AppModule } from '../../shared/modules';
 export * as UserTypes from './types';
 
 export class Users extends AppModule {
-  private readonly apiDetails: ApiSecureConnectionDetails;
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity: ApiSecurity;
 
-  public static client(apiDetails: ApiSecureConnectionDetails) {
-    return new Users(axios, apiDetails);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    return new Users(axios, apiUrl, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiDetails: ApiSecureConnectionDetails) {
-    super(axios);
-    this.apiDetails = apiDetails;
+  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios, apiUrl);
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
   }
 
   /**
@@ -31,7 +33,7 @@ export class Users extends AppModule {
    */
   public sendInvitation(email: string): Promise<void> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/user/invite`, {
+      .post('/user/invite', {
         email: email
       }, {
         headers: this.headers()
@@ -46,7 +48,7 @@ export class Users extends AppModule {
    */
   public getReferrals(): Promise<UserReferral[]> {
     return this.axios
-      .get(`${this.apiDetails.url}/api/users-referrals`, {
+      .get('/users-referrals', {
         headers: this.headers()
       })
       .then(response => {
@@ -61,7 +63,7 @@ export class Users extends AppModule {
    */
   public initialize(email: string, mnemonic: string): Promise<InitializeUserResponse> {
     return this.axios
-      .post(`${this.apiDetails.url}/api/initialize`, {
+      .post('/initialize', {
           email: email,
           mnemonic: mnemonic
         },
@@ -81,7 +83,7 @@ export class Users extends AppModule {
     token: string
   }> {
     return this.axios
-      .get(`${this.apiDetails.url}/api/user/refresh`, {
+      .get('/user/refresh', {
         headers: this.headers()
       })
       .then(response => {
@@ -95,7 +97,7 @@ export class Users extends AppModule {
    */
   public changePassword(payload: ChangePasswordPayload) {
     return this.axios
-      .patch(`${this.apiDetails.url}/api/user/password`, {
+      .patch('/user/password', {
         currentPassword: payload.currentEncryptedPassword,
         newPassword: payload.newEncryptedPassword,
         newSalt: payload.newEncryptedSalt,
@@ -114,7 +116,7 @@ export class Users extends AppModule {
    */
   public spaceUsage(): Promise<UsageResponse> {
     return this.axios
-      .get(`${this.apiDetails.url}/api/usage`, {
+      .get('/usage', {
         headers: this.headers()
       })
       .then(response => {
@@ -127,7 +129,7 @@ export class Users extends AppModule {
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
     return this.axios
-      .get(`${this.apiDetails.url}/api/limit`, {
+      .get('/limit', {
         headers: this.headers()
       })
       .then(response => {
@@ -137,10 +139,10 @@ export class Users extends AppModule {
 
   private headers() {
     return headersWithTokenAndMnemonic(
-      this.apiDetails.clientName,
-      this.apiDetails.clientVersion,
-      this.apiDetails.token,
-      this.apiDetails.mnemonic
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.mnemonic
     );
   }
 }

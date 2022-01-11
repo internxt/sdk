@@ -3,8 +3,8 @@ import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
 import { validResponse } from '../shared/response';
-import { ApiPublicConnectionDetails } from '../../src/shared';
 import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
+import { ApiSecurity, AppDetails } from '../../src/shared';
 
 describe('# auth service tests', () => {
 
@@ -29,14 +29,14 @@ describe('# auth service tests', () => {
       registerDetails.captcha = '10';
 
       const postCall = sinon.stub(axios, 'post').resolves(validResponse({}));
-      const { client, headers } = clientAndHeaders('apiUrl');
+      const { client, headers } = clientAndHeaders();
 
       // Act
       await client.register(registerDetails);
 
       // Assert
       expect(postCall.firstCall.args).toEqual([
-        'apiUrl/api/register',
+        '/register',
         {
           name: registerDetails.name,
           lastname: registerDetails.lastname,
@@ -202,7 +202,7 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(postStub.firstCall.args).toEqual([
-        '/api/login',
+        '/login',
         {
           email: loginDetails.email
         },
@@ -211,7 +211,7 @@ describe('# auth service tests', () => {
         }
       ]);
       expect(postStub.secondCall.args).toEqual([
-        '/api/access',
+        '/access',
         {
           email: loginDetails.email,
           password: 'password-encrypted_salt',
@@ -252,7 +252,7 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(axiosStub.firstCall.args).toEqual([
-        '/api/user/keys',
+        '/user/keys',
         {
           publicKey: 'pubk',
           privateKey: 'prik',
@@ -273,12 +273,11 @@ describe('# auth service tests', () => {
     client: Auth,
     headers: object
   } {
-    const apiDetails: ApiPublicConnectionDetails = {
-      url: apiUrl,
+    const appDetails: AppDetails = {
       clientName: clientName,
       clientVersion: clientVersion,
     };
-    const client = new Auth(axios, apiDetails);
+    const client = new Auth(axios, apiUrl, appDetails);
     const headers = testBasicHeaders(clientName, clientVersion);
     return { client, headers };
   }
@@ -292,12 +291,15 @@ describe('# auth service tests', () => {
     client: Auth,
     headers: object
   } {
-    const apiDetails: ApiPublicConnectionDetails = {
-      url: apiUrl,
+    const appDetails: AppDetails = {
       clientName: clientName,
       clientVersion: clientVersion,
     };
-    const client = new Auth(axios, apiDetails);
+    const apiSecurity: ApiSecurity = {
+      token: token,
+      mnemonic: '',
+    };
+    const client = new Auth(axios, apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithToken(clientName, clientVersion, token);
     return { client, headers };
   }

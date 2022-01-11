@@ -1,10 +1,13 @@
 import { AxiosError, AxiosResponse, AxiosStatic } from 'axios';
 import AppError from '../types/errors';
+import { ApiUrl } from '../types/apiConnection';
 
 export class AppModule {
   protected readonly axios: AxiosStatic;
 
-  constructor(axios: AxiosStatic) {
+  constructor(axios: AxiosStatic, apiUrl: ApiUrl) {
+    axios.defaults.baseURL = apiUrl + '/api';
+
     axios.interceptors.response.use(undefined, (error: AxiosError): AppError => {
       let errorMessage: string;
       let errorStatus: number;

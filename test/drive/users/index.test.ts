@@ -1,10 +1,10 @@
 import sinon from 'sinon';
 import { Users } from '../../../src/drive';
-import { ApiSecureConnectionDetails } from '../../../src/shared';
 import axios from 'axios';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { validResponse } from '../../shared/response';
 import { ChangePasswordPayload } from '../../../src/drive/users/types';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
 
 describe('# users service tests', () => {
 
@@ -40,7 +40,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(postStub.firstCall.args).toEqual([
-        '/api/user/invite',
+        '/user/invite',
         {
           email: email
         },
@@ -81,7 +81,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/users-referrals',
+        '/users-referrals',
         {
           headers: headers
         }
@@ -122,7 +122,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/initialize',
+        '/initialize',
         {
           email: email,
           mnemonic: mnemonic
@@ -165,7 +165,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/user/refresh',
+        '/user/refresh',
         {
           headers: headers
         }
@@ -216,7 +216,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/user/password',
+        '/user/password',
         {
           currentPassword: payload.currentEncryptedPassword,
           newPassword: payload.newEncryptedPassword,
@@ -259,7 +259,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/usage',
+        '/usage',
         {
           headers: headers
         }
@@ -297,7 +297,7 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/limit',
+        '/limit',
         {
           headers: headers
         }
@@ -321,14 +321,15 @@ function clientAndHeaders(
   client: Users,
   headers: object
 } {
-  const apiDetails: ApiSecureConnectionDetails = {
-    url: apiUrl,
+  const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
-    mnemonic: mnemonic,
-    token: token,
   };
-  const client = new Users(axios, apiDetails);
+  const apiSecurity: ApiSecurity = {
+    token: token,
+    mnemonic: mnemonic,
+  };
+  const client = new Users(axios, apiUrl, appDetails, apiSecurity);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

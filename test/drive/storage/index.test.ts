@@ -15,7 +15,7 @@ import { randomMoveFolderPayload } from './moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './moveFilePayload.mother';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
-import { ApiSecureConnectionDetails } from '../../../src/shared';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
 
 describe('# storage service tests', () => {
 
@@ -82,7 +82,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder',
+          '/storage/folder',
           {
             parentFolderId: 34,
             folderName: 'ma-fol',
@@ -161,7 +161,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/folder',
+          '/storage/move/folder',
           {
             folderId: payload.folderId,
             destination: payload.destinationFolderId,
@@ -201,7 +201,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2/meta',
+          '/storage/folder/2/meta',
           {
             metadata: {
               itemName: payload.changes.itemName,
@@ -243,7 +243,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2',
+          '/storage/folder/2',
           {
             headers: headers
           }
@@ -280,7 +280,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/file',
+          '/storage/file',
           {
             file: {
               fileId: fileEntry.id,
@@ -342,7 +342,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/file/6/meta',
+          '/storage/file/6/meta',
           {
             metadata: {
               itemName: 'new name'
@@ -395,7 +395,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2/file/5',
+          '/storage/folder/2/file/5',
           {
             headers: headers
           }
@@ -438,7 +438,7 @@ describe('# storage service tests', () => {
           content: 'test'
         });
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/file',
+          '/storage/move/file',
           {
             fileId: payload.fileId,
             destination: payload.destination,
@@ -479,7 +479,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/recents?limit=5',
+          '/storage/recents?limit=5',
           {
             headers: headers
           }
@@ -505,14 +505,15 @@ function clientAndHeaders(
   client: Storage,
   headers: object
 } {
-  const apiDetails: ApiSecureConnectionDetails = {
-    url: apiUrl,
+  const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
-    mnemonic: mnemonic,
-    token: token,
   };
-  const client = new Storage(axios, apiDetails);
+  const apiSecurity: ApiSecurity = {
+    token: token,
+    mnemonic: mnemonic,
+  };
+  const client = new Storage(axios, apiUrl, appDetails, apiSecurity);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

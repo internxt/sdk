@@ -1,12 +1,13 @@
 import { Token } from '../../auth';
 
-export interface ApiPublicConnectionDetails {
-  url: string
+export type ApiUrl = string;
+
+export interface AppDetails {
   clientName: string
   clientVersion: string
 }
 
-export interface ApiSecureConnectionDetails extends ApiPublicConnectionDetails {
+export interface ApiSecurity {
   token: Token
   mnemonic: string
 }

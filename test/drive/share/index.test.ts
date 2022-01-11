@@ -4,7 +4,7 @@ import { GenerateShareLinkPayload } from '../../../src/drive/share/types';
 import { validResponse } from '../../shared/response';
 import { Share } from '../../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
-import { ApiSecureConnectionDetails } from '../../../src/shared';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
 
 describe('# share service tests', () => {
 
@@ -54,7 +54,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/storage/share/file/1',
+        '/storage/share/file/1',
         {
           isFolder: payload.isFolder,
           views: payload.views,
@@ -101,7 +101,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/storage/share/ma-token',
+        '/storage/share/ma-token',
         {
           headers: headers
         }
@@ -138,7 +138,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/share/list',
+        '/share/list',
         {
           headers: headers
         }
@@ -160,14 +160,15 @@ describe('# share service tests', () => {
     client: Share,
     headers: object
   } {
-    const apiDetails: ApiSecureConnectionDetails = {
-      url: apiUrl,
+    const appDetails: AppDetails = {
       clientName: clientName,
       clientVersion: clientVersion,
-      mnemonic: mnemonic,
-      token: token,
     };
-    const client = new Share(axios, apiDetails);
+    const apiSecurity: ApiSecurity = {
+      token: token,
+      mnemonic: mnemonic,
+    };
+    const client = new Share(axios, apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
     return { client, headers };
   }
