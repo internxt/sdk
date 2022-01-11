@@ -162,7 +162,7 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual([
           '/api/storage/move/folder',
           {
-            folderId: payload.folder.id,
+            folderId: payload.folderId,
             destination: payload.destinationFolderId,
           },
           {

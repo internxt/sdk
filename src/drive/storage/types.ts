@@ -97,7 +97,7 @@ export interface CreateFolderResponse {
 }
 
 export interface MoveFolderPayload {
-  folder: DriveFolderData
+  folderId: number
   destinationFolderId: number
 }
 
