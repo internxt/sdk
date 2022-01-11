@@ -73,7 +73,7 @@ export class Storage extends AppModule {
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.axios
       .post(`${this.apiUrl}/api/storage/move/folder`, {
-        folderId: payload.folder.id,
+        folderId: payload.folderId,
         destination: payload.destinationFolderId,
       }, {
         headers: this.headers()
