@@ -213,7 +213,7 @@ export class Storage extends AppModule {
    * Returns a list of the n most recent files
    * @param limit
    */
-  public recentFiles(limit: number): Promise<DriveFileData[]> {
+  public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
       .get(`${this.apiUrl}/api/storage/recents?limit=${limit}`, {
         headers: this.headers()

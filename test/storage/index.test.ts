@@ -460,7 +460,7 @@ describe('# storage service tests', () => {
         const { client } = clientAndHeaders();
 
         // Act
-        const call = client.recentFiles(5);
+        const call = client.getRecentFiles(5);
 
         // Assert
         await expect(call).rejects.toThrowError('custom');
@@ -474,7 +474,7 @@ describe('# storage service tests', () => {
         const { client, headers } = clientAndHeaders();
 
         // Act
-        const body = await client.recentFiles(5);
+        const body = await client.getRecentFiles(5);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
