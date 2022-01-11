@@ -33,6 +33,10 @@ export class Auth extends ApiModule {
     this.apiSecurity = apiSecurity;
   }
 
+  /**
+   * Tries to register a new user
+   * @param registerDetails
+   */
   public register(registerDetails: RegisterDetails): Promise<{
     token: Token,
     user: Omit<UserSettings, 'bucket'> & { referralCode: string },
@@ -60,6 +64,11 @@ export class Auth extends ApiModule {
       });
   }
 
+  /**
+   * Tries to log in a user given its login details
+   * @param details
+   * @param cryptoProvider
+   */
   public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
     token: Token;
     user: UserSettings;
@@ -91,6 +100,11 @@ export class Auth extends ApiModule {
       });
   }
 
+  /**
+   * Updates the asymmetric keys
+   * @param keys
+   * @param token
+   */
   public updateKeys(keys: Keys, token: Token) {
     return this.axios
       .patch('/user/keys', {
