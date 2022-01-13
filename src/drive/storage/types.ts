@@ -144,3 +144,12 @@ export interface MoveFileResponse {
   destination: number
   moved: boolean
 }
+
+export interface UsageResponse {
+  _id: string;
+  total: number;
+}
+
+export interface FetchLimitResponse {
+  maxSpaceBytes: number;
+}

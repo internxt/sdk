@@ -12,12 +12,3 @@ export interface ChangePasswordPayload {
   encryptedMnemonic: string
   encryptedPrivateKey: string
 }
-
-export interface UsageResponse {
-  _id: string;
-  total: number;
-}
-
-export interface FetchLimitResponse {
-  maxSpaceBytes: number;
-}

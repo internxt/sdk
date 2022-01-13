@@ -3,9 +3,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   ChangePasswordPayload,
-  FetchLimitResponse,
   InitializeUserResponse,
-  UsageResponse,
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { AppModule } from '../../shared/modules';
@@ -90,32 +88,6 @@ export class Users extends AppModule {
         mnemonic: payload.encryptedMnemonic,
         privateKey: payload.encryptedPrivateKey,
       }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  /**
-   * Returns the current space usage of the user
-   */
-  public spaceUsage(): Promise<UsageResponse> {
-    return this.axios
-      .get('/usage', {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  /**
-   * Returns the current space limit for the user
-   */
-  public spaceLimit(): Promise<FetchLimitResponse> {
-    return this.axios
-      .get('/limit', {
         headers: this.headers()
       })
       .then(response => {

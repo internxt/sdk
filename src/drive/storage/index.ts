@@ -11,7 +11,8 @@ import {
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
-  UpdateFolderMetadataPayload
+  UpdateFolderMetadataPayload,
+  FetchLimitResponse, UsageResponse
 } from './types';
 import { AppModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -206,6 +207,32 @@ export class Storage extends AppModule {
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
       .get(`/storage/recents?limit=${limit}`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space usage of the user
+   */
+  public spaceUsage(): Promise<UsageResponse> {
+    return this.axios
+      .get('/usage', {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space limit for the user
+   */
+  public spaceLimit(): Promise<FetchLimitResponse> {
+    return this.axios
+      .get('/limit', {
         headers: this.headers()
       })
       .then(response => {
