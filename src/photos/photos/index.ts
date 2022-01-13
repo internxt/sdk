@@ -29,7 +29,7 @@ export default class PhotosSubmodule {
     skip = 0,
     limit = 1,
   ): Promise<{ results: Photo[]; count: number }> {
-    const query = queryString.stringify(filter);
+    const query = queryString.stringify({ ...filter, skip, limit });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
