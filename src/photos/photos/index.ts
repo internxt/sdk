@@ -27,9 +27,9 @@ export default class PhotosSubmodule {
   public getPhotos(
     filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
     skip = 0,
-    limit = 0,
-  ): Promise<Photo[]> {
-    const query = queryString.stringify(filter);
+    limit = 1,
+  ): Promise<{ results: Photo[]; count: number }> {
+    const query = queryString.stringify({ ...filter, skip, limit });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
@@ -40,12 +40,12 @@ export default class PhotosSubmodule {
     }
 
     return axios
-      .get<PhotoJSON[]>(`${this.model.baseUrl}/photos/?${query}`, {
+      .get<{ results: PhotoJSON[]; count: number }>(`${this.model.baseUrl}/photos/?${query}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => res.data.map((photoJson) => this.parse(photoJson)))
+      .then((res) => ({ results: res.data.results.map((photoJson) => this.parse(photoJson)), count: res.data.count }))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
