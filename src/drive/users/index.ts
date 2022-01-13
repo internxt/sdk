@@ -6,7 +6,6 @@ import {
   FetchLimitResponse,
   InitializeUserResponse,
   UsageResponse,
-  UserReferral
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { AppModule } from '../../shared/modules';
@@ -36,19 +35,6 @@ export class Users extends AppModule {
       .post('/user/invite', {
         email: email
       }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
-  }
-
-  /**
-   * Returns a list of referrals of this user
-   */
-  public getReferrals(): Promise<UserReferral[]> {
-    return this.axios
-      .get('/users-referrals', {
         headers: this.headers()
       })
       .then(response => {
