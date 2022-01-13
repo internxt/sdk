@@ -7,12 +7,14 @@ import {
   DriveFileData,
   FetchFolderContentResponse,
   FileEntry,
-  MoveFilePayload, MoveFileResponse,
+  MoveFilePayload,
+  MoveFileResponse,
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
-  FetchLimitResponse, UsageResponse
+  FetchLimitResponse,
+  UsageResponse,
 } from './types';
 import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -39,20 +41,21 @@ export class Storage extends ApiModule {
    * Creates a new folder
    * @param payload
    */
-  public createFolder(payload: CreateFolderPayload): [
-    Promise<CreateFolderResponse>,
-    CancelTokenSource
-  ] {
+  public createFolder(payload: CreateFolderPayload): [Promise<CreateFolderResponse>, CancelTokenSource] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .post('/storage/folder', {
-        parentFolderId: payload.parentFolderId,
-        folderName: payload.folderName,
-      }, {
-        cancelToken: cancelTokenSource.token,
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        '/storage/folder',
+        {
+          parentFolderId: payload.parentFolderId,
+          folderName: payload.folderName,
+        },
+        {
+          cancelToken: cancelTokenSource.token,
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
 
@@ -65,13 +68,17 @@ export class Storage extends ApiModule {
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.axios
-      .post('/storage/move/folder', {
-        folderId: payload.folderId,
-        destination: payload.destinationFolderId,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        '/storage/move/folder',
+        {
+          folderId: payload.folderId,
+          destination: payload.destinationFolderId,
+        },
+        {
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
   }
@@ -82,12 +89,16 @@ export class Storage extends ApiModule {
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
-      .post(`/storage/folder/${payload.folderId}/meta`, {
-        metadata: payload.changes
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        `/storage/folder/${payload.folderId}/meta`,
+        {
+          metadata: payload.changes,
+        },
+        {
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
   }
@@ -96,17 +107,14 @@ export class Storage extends ApiModule {
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
-  public getFolderContent(folderId: number): [
-    Promise<FetchFolderContentResponse>,
-    CancelTokenSource
-  ] {
+  public getFolderContent(folderId: number): [Promise<FetchFolderContentResponse>, CancelTokenSource] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
       .get<FetchFolderContentResponse>(`/storage/v2/folder/${folderId}`, {
         cancelToken: cancelTokenSource.token,
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
 
@@ -120,9 +128,9 @@ export class Storage extends ApiModule {
   public deleteFolder(folderId: number): Promise<unknown> {
     return this.axios
       .delete(`/storage/folder/${folderId}`, {
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
   }
@@ -133,20 +141,24 @@ export class Storage extends ApiModule {
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
     return this.axios
-      .post('/storage/file', {
-        file: {
-          fileId: fileEntry.id,
-          type: fileEntry.type,
-          bucket: fileEntry.bucket,
-          size: fileEntry.size,
-          folder_id: fileEntry.folder_id,
-          name: fileEntry.name,
-          encrypt_version: fileEntry.encrypt_version,
-        }
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        '/storage/file',
+        {
+          file: {
+            fileId: fileEntry.id,
+            type: fileEntry.type,
+            bucket: fileEntry.bucket,
+            size: fileEntry.size,
+            folder_id: fileEntry.folder_id,
+            name: fileEntry.name,
+            encrypt_version: fileEntry.encrypt_version,
+          },
+        },
+        {
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
   }
@@ -155,16 +167,20 @@ export class Storage extends ApiModule {
    * Updates the details of a file entry
    * @param payload
    */
-  public updateFile(payload: UpdateFilePayload): Promise<any> {
+  public updateFile(payload: UpdateFilePayload): Promise<void> {
     return this.axios
-      .post(`/storage/file/${payload.fileId}/meta`, {
-        metadata: payload.metadata,
-        bucketId: payload.bucketId,
-        relativePath: payload.destinationPath,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        `/storage/file/${payload.fileId}/meta`,
+        {
+          metadata: payload.metadata,
+          bucketId: payload.bucketId,
+          relativePath: payload.destinationPath,
+        },
+        {
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
   }
@@ -176,9 +192,9 @@ export class Storage extends ApiModule {
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.axios
       .delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
   }
@@ -189,15 +205,19 @@ export class Storage extends ApiModule {
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.axios
-      .post('/storage/move/file', {
-        fileId: payload.fileId,
-        destination: payload.destination,
-        relativePath: payload.destinationPath,
-        bucketId: payload.bucketId,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
+      .post(
+        '/storage/move/file',
+        {
+          fileId: payload.fileId,
+          destination: payload.destination,
+          relativePath: payload.destinationPath,
+          bucketId: payload.bucketId,
+        },
+        {
+          headers: this.headers(),
+        },
+      )
+      .then((response) => {
         return response.data;
       });
   }
@@ -209,9 +229,9 @@ export class Storage extends ApiModule {
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
       .get(`/storage/recents?limit=${limit}`, {
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
   }
@@ -222,9 +242,9 @@ export class Storage extends ApiModule {
   public spaceUsage(): Promise<UsageResponse> {
     return this.axios
       .get('/usage', {
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
   }
@@ -235,9 +255,9 @@ export class Storage extends ApiModule {
   public spaceLimit(): Promise<FetchLimitResponse> {
     return this.axios
       .get('/limit', {
-        headers: this.headers()
+        headers: this.headers(),
       })
-      .then(response => {
+      .then((response) => {
         return response.data;
       });
   }
@@ -251,8 +271,7 @@ export class Storage extends ApiModule {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic
+      this.apiSecurity.mnemonic,
     );
   }
-
 }

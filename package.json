@@ -1,6 +1,6 @@
 {
   "name": "@internxt/sdk",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -39,6 +39,7 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "axios": "^0.24.0"
+    "axios": "^0.24.0",
+    "query-string": "^7.1.0"
   }
 }
