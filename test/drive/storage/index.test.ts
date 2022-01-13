@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { Storage, StorageTypes } from '../../../src/drive';
 import axios from 'axios';
-import { randomFolderContentResponse } from './folderContentResponse.mother';
+import { randomFolderContentResponse } from './mothers/folderContentResponse.mother';
 import { validResponse } from '../../shared/response';
 import {
   CreateFolderPayload,
@@ -11,9 +11,9 @@ import {
   UpdateFilePayload,
   DeleteFilePayload, EncryptionVersion,
 } from '../../../src/drive/storage/types';
-import { randomMoveFolderPayload } from './moveFolderPayload.mother';
-import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
-import { randomMoveFilePayload } from './moveFilePayload.mother';
+import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
+import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
+import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 

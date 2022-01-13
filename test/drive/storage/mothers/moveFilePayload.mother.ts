@@ -1,4 +1,4 @@
-import { MoveFilePayload } from '../../../src/drive/storage/types';
+import { MoveFilePayload } from '../../../../src/drive/storage/types';
 
 export function randomMoveFilePayload(): MoveFilePayload {
   return {
