@@ -60,18 +60,18 @@ export interface Photo {
   deviceId: DeviceId;
   userId: string;
   status: PhotoStatus;
-  lastStatusChangeAt: Date;
-  creationDate: Date;
+  statusChangedAt: Date;
+  takenAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
-export interface PhotoJSON extends Omit<Photo, 'lastStatusChangeAt' | 'creationDate' | 'createdAt' | 'updatedAt'> {
-  lastStatusChangeAt: string;
-  creationDate: string;
+export interface PhotoJSON extends Omit<Photo, 'statusChangedAt' | 'takenAt' | 'createdAt' | 'updatedAt'> {
+  statusChangedAt: string;
+  takenAt: string;
   createdAt: string;
   updatedAt: string;
 }
-export type CreatePhotoData = Omit<Photo, 'id' | 'status' | 'lastStatusChangeAt' | 'createdAt' | 'updatedAt'>;
+export type CreatePhotoData = Omit<Photo, 'id' | 'status' | 'statusChangedAt' | 'createdAt' | 'updatedAt'>;
 
 export type ShareId = string;
 export interface Share {
