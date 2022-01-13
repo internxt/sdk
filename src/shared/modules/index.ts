@@ -1,10 +1,10 @@
-import { AxiosError, AxiosResponse, AxiosStatic } from 'axios';
+import { Axios, AxiosError, AxiosResponse } from 'axios';
 import AppError from '../types/errors';
 
-export class AppModule {
-  protected readonly axios: AxiosStatic;
+export class ApiModule {
+  protected readonly axios: Axios;
 
-  constructor(axios: AxiosStatic) {
+  constructor(axios: Axios) {
     axios.interceptors.response.use(undefined, (error: AxiosError): AppError => {
       let errorMessage: string;
       let errorStatus: number;

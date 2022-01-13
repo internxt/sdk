@@ -1,11 +1,18 @@
 import axios from 'axios';
 import sinon from 'sinon';
-import { GenerateShareLinkPayload } from '../../src/drive/share/types';
-import { validResponse } from '../shared/response';
-import { Share } from '../../src/drive';
-import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
+import { GenerateShareLinkPayload } from '../../../src/drive/share/types';
+import { validResponse } from '../../shared/response';
+import { Share } from '../../../src/drive';
+import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
+
+const myAxios = axios.create();
 
 describe('# share service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -15,7 +22,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'post').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'post').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
       const payload: GenerateShareLinkPayload = {
         fileId: '1',
@@ -35,7 +42,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
         token: 'token'
       }));
       const { client, headers } = clientAndHeaders();
@@ -53,7 +60,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/storage/share/file/1',
+        '/storage/share/file/1',
         {
           isFolder: payload.isFolder,
           views: payload.views,
@@ -76,7 +83,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
       const token = '';
 
@@ -89,7 +96,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         info: 'some'
       }));
       const { client, headers } = clientAndHeaders();
@@ -100,7 +107,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/storage/share/ma-token',
+        '/storage/share/ma-token',
         {
           headers: headers
         }
@@ -115,7 +122,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
 
       // Act
@@ -127,7 +134,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         list: 'some'
       }));
       const { client, headers } = clientAndHeaders();
@@ -137,7 +144,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/api/share/list',
+        '/share/list',
         {
           headers: headers
         }
@@ -159,7 +166,15 @@ describe('# share service tests', () => {
     client: Share,
     headers: object
   } {
-    const client = new Share(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+    const appDetails: AppDetails = {
+      clientName: clientName,
+      clientVersion: clientVersion,
+    };
+    const apiSecurity: ApiSecurity = {
+      token: token,
+      mnemonic: mnemonic,
+    };
+    const client = Share.client(apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
     return { client, headers };
   }

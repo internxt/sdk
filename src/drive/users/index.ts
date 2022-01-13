@@ -1,0 +1,108 @@
+import { Axios } from 'axios';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import {
+  ChangePasswordPayload,
+  InitializeUserResponse,
+} from './types';
+import { UserSettings } from '../../shared/types/userSettings';
+import { ApiModule } from '../../shared/modules';
+import { getDriveAxiosClient } from '../shared/axios';
+
+export * as UserTypes from './types';
+
+export class Users extends ApiModule {
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity: ApiSecurity;
+
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Users(axios, appDetails, apiSecurity);
+  }
+
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios);
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
+  }
+
+  /**
+   * Sends an invitation to the specified email
+   * @param email
+   */
+  public sendInvitation(email: string): Promise<void> {
+    return this.axios
+      .post('/user/invite', {
+        email: email
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Initialize basic state of user and returns data after registration process
+   * @param email
+   * @param mnemonic
+   */
+  public initialize(email: string, mnemonic: string): Promise<InitializeUserResponse> {
+    return this.axios
+      .post('/initialize', {
+          email: email,
+          mnemonic: mnemonic
+        },
+        {
+          headers: this.headers()
+        })
+      .then(response => {
+        return response.data.user;
+      });
+  }
+
+  /**
+   * Returns fresh data of the user
+   */
+  public refreshUser(): Promise<{
+    user: UserSettings
+    token: string
+  }> {
+    return this.axios
+      .get('/user/refresh', {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Updates the authentication credentials
+   * @param payload
+   */
+  public changePassword(payload: ChangePasswordPayload) {
+    return this.axios
+      .patch('/user/password', {
+        currentPassword: payload.currentEncryptedPassword,
+        newPassword: payload.newEncryptedPassword,
+        newSalt: payload.newEncryptedSalt,
+        mnemonic: payload.encryptedMnemonic,
+        privateKey: payload.encryptedPrivateKey,
+      }, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  private headers() {
+    return headersWithTokenAndMnemonic(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.mnemonic
+    );
+  }
+}

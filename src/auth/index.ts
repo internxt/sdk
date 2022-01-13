@@ -1,26 +1,27 @@
-import axios, { AxiosStatic } from 'axios';
+import { Axios } from 'axios';
 import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
-import { AppModule } from '../shared/modules';
+import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
+import { ApiModule } from '../shared/modules';
+import { getDriveAxiosClient } from '../drive/shared/axios';
 
 export * from './types';
 
-export class Auth extends AppModule {
-  private readonly apiUrl: string;
-  private readonly clientName: string;
-  private readonly clientVersion: string;
+export class Auth extends ApiModule {
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity?: ApiSecurity;
 
-  public static client(apiUrl: string, clientName: string, clientVersion: string) {
-    return new Auth(axios, apiUrl, clientName, clientVersion);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Auth(axios, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string) {
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
     super(axios);
-    this.apiUrl = apiUrl;
-    this.clientName = clientName;
-    this.clientVersion = clientVersion;
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
   }
 
   public register(registerDetails: RegisterDetails): Promise<{
@@ -29,7 +30,7 @@ export class Auth extends AppModule {
     uuid: UUID
   }> {
     return this.axios
-      .post(`${this.apiUrl}/api/register`, {
+      .post('/register', {
         name: registerDetails.name,
         captcha: registerDetails.captcha,
         lastname: registerDetails.lastname,
@@ -43,7 +44,7 @@ export class Auth extends AppModule {
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         return response.data;
@@ -56,10 +57,10 @@ export class Auth extends AppModule {
     userTeam: TeamsSettings | null
   }> {
     const loginResponse = await this.axios
-      .post(`${this.apiUrl}/api/login`, {
+      .post('/login', {
         email: details.email
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         return response.data;
@@ -70,7 +71,7 @@ export class Auth extends AppModule {
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.axios
-      .post(`${this.apiUrl}/api/access`, {
+      .post('/access', {
         email: details.email,
         password: encryptedPasswordHash,
         tfa: details.tfaCode,
@@ -78,7 +79,7 @@ export class Auth extends AppModule {
         publicKey: keys.publicKey,
         revocateKey: keys.revocationCertificate,
       }, {
-        headers: basicHeaders(this.clientName, this.clientVersion),
+        headers: this.basicHeaders(),
       })
       .then(response => {
         const data = response.data;
@@ -92,16 +93,24 @@ export class Auth extends AppModule {
 
   public updateKeys(keys: Keys, token: Token) {
     return this.axios
-      .patch(`${this.apiUrl}/api/user/keys`, {
+      .patch('/user/keys', {
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
       }, {
-        headers: headersWithToken(this.clientName, this.clientVersion, token),
+        headers: this.headersWithToken(token),
       })
       .then(response => {
         return response.data;
       });
+  }
+
+  private basicHeaders() {
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+  }
+
+  private headersWithToken(token: Token) {
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, token);
   }
 
 }

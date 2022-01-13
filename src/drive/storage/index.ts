@@ -1,4 +1,4 @@
-import axios, { AxiosStatic, CancelTokenSource } from 'axios';
+import axios, { Axios, CancelTokenSource } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
@@ -11,35 +11,28 @@ import {
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
-  UpdateFolderMetadataPayload
+  UpdateFolderMetadataPayload,
+  FetchLimitResponse, UsageResponse
 } from './types';
-import { Token } from '../../auth';
-import { AppModule } from '../../shared/modules';
+import { ApiModule } from '../../shared/modules';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { getDriveAxiosClient } from '../shared/axios';
 
 export * as StorageTypes from './types';
 
-export class Storage extends AppModule {
-  private readonly apiUrl: string;
-  private readonly clientName: string;
-  private readonly clientVersion: string;
-  private readonly token: Token;
-  private readonly mnemonic: string;
+export class Storage extends ApiModule {
+  private readonly appDetails: AppDetails;
+  private readonly apiSecurity: ApiSecurity;
 
-  public static client(
-    apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
-    return new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Storage(axios, appDetails, apiSecurity);
   }
 
-  constructor(
-    axios: AxiosStatic, apiUrl: string, clientName: string, clientVersion: string, token: Token, mnemonic: string
-  ) {
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
     super(axios);
-    this.apiUrl = apiUrl;
-    this.clientName = clientName;
-    this.clientVersion = clientVersion;
-    this.token = token;
-    this.mnemonic = mnemonic;
+    this.appDetails = appDetails;
+    this.apiSecurity = apiSecurity;
   }
 
   /**
@@ -52,7 +45,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .post(`${this.apiUrl}/api/storage/folder`, {
+      .post('/storage/folder', {
         parentFolderId: payload.parentFolderId,
         folderName: payload.folderName,
       }, {
@@ -72,7 +65,7 @@ export class Storage extends AppModule {
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/move/folder`, {
+      .post('/storage/move/folder', {
         folderId: payload.folderId,
         destination: payload.destinationFolderId,
       }, {
@@ -89,7 +82,7 @@ export class Storage extends AppModule {
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
     await this.axios
-      .post(`${this.apiUrl}/api/storage/folder/${payload.folderId}/meta`, {
+      .post(`/storage/folder/${payload.folderId}/meta`, {
         metadata: payload.changes
       }, {
         headers: this.headers()
@@ -109,7 +102,7 @@ export class Storage extends AppModule {
   ] {
     const cancelTokenSource = axios.CancelToken.source();
     const promise = this.axios
-      .get<FetchFolderContentResponse>(`${this.apiUrl}/api/storage/v2/folder/${folderId}`, {
+      .get<FetchFolderContentResponse>(`/storage/v2/folder/${folderId}`, {
         cancelToken: cancelTokenSource.token,
         headers: this.headers()
       })
@@ -126,7 +119,7 @@ export class Storage extends AppModule {
    */
   public deleteFolder(folderId: number): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiUrl}/api/storage/folder/${folderId}`, {
+      .delete(`/storage/folder/${folderId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -140,7 +133,7 @@ export class Storage extends AppModule {
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/file`, {
+      .post('/storage/file', {
         file: {
           fileId: fileEntry.id,
           type: fileEntry.type,
@@ -164,7 +157,7 @@ export class Storage extends AppModule {
    */
   public updateFile(payload: UpdateFilePayload): Promise<any> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/file/${payload.fileId}/meta`, {
+      .post(`/storage/file/${payload.fileId}/meta`, {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
@@ -182,7 +175,7 @@ export class Storage extends AppModule {
    */
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.axios
-      .delete(`${this.apiUrl}/api/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
+      .delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
         headers: this.headers()
       })
       .then(response => {
@@ -196,7 +189,7 @@ export class Storage extends AppModule {
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.axios
-      .post(`${this.apiUrl}/api/storage/move/file`, {
+      .post('/storage/move/file', {
         fileId: payload.fileId,
         destination: payload.destination,
         relativePath: payload.destinationPath,
@@ -215,7 +208,33 @@ export class Storage extends AppModule {
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.axios
-      .get(`${this.apiUrl}/api/storage/recents?limit=${limit}`, {
+      .get(`/storage/recents?limit=${limit}`, {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space usage of the user
+   */
+  public spaceUsage(): Promise<UsageResponse> {
+    return this.axios
+      .get('/usage', {
+        headers: this.headers()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
+  /**
+   * Returns the current space limit for the user
+   */
+  public spaceLimit(): Promise<FetchLimitResponse> {
+    return this.axios
+      .get('/limit', {
         headers: this.headers()
       })
       .then(response => {
@@ -228,7 +247,12 @@ export class Storage extends AppModule {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(this.clientName, this.clientVersion, this.token, this.mnemonic);
+    return headersWithTokenAndMnemonic(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.mnemonic
+    );
   }
 
 }

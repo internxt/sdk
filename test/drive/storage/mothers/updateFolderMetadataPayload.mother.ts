@@ -1,4 +1,4 @@
-import { UpdateFolderMetadataPayload } from '../../src/drive/storage/types';
+import { UpdateFolderMetadataPayload } from '../../../../src/drive/storage/types';
 
 
 export function randomUpdateFolderMetadataPayload(): UpdateFolderMetadataPayload {

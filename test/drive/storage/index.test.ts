@@ -1,8 +1,8 @@
 import sinon from 'sinon';
-import { Storage, StorageTypes } from '../../src/drive';
+import { Storage, StorageTypes } from '../../../src/drive';
 import axios from 'axios';
-import { randomFolderContentResponse } from './folderContentResponse.mother';
-import { validResponse } from '../shared/response';
+import { randomFolderContentResponse } from './mothers/folderContentResponse.mother';
+import { validResponse } from '../../shared/response';
 import {
   CreateFolderPayload,
   CreateFolderResponse, DriveFolderData,
@@ -10,13 +10,20 @@ import {
   MoveFolderResponse,
   UpdateFilePayload,
   DeleteFilePayload, EncryptionVersion,
-} from '../../src/drive/storage/types';
-import { randomMoveFolderPayload } from './moveFolderPayload.mother';
-import { randomUpdateFolderMetadataPayload } from './updateFolderMetadataPayload.mother';
-import { randomMoveFilePayload } from './moveFilePayload.mother';
-import { testHeadersWithTokenAndMnemonic } from '../shared/headers';
+} from '../../../src/drive/storage/types';
+import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
+import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
+import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
+import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
+
+const myAxios = axios.create();
 
 describe('# storage service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -30,7 +37,7 @@ describe('# storage service tests', () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client } = clientAndHeaders();
-        sinon.stub(axios, 'get').resolves(validResponse(response));
+        sinon.stub(myAxios, 'get').resolves(validResponse(response));
 
         // Act
         const [promise, cancelToken] = client.getFolderContent(1);
@@ -72,7 +79,7 @@ describe('# storage service tests', () => {
           updatedAt: '',
           userId: 1
         };
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse(createFolderResponse));
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse(createFolderResponse));
         const { client, headers } = clientAndHeaders();
 
         // Act
@@ -81,7 +88,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder',
+          '/storage/folder',
           {
             parentFolderId: 34,
             folderName: 'ma-fol',
@@ -117,7 +124,7 @@ describe('# storage service tests', () => {
       it('Should call bubble up the error', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
-        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'post').rejects(new Error('first call error'));
 
         const { client } = clientAndHeaders();
 
@@ -152,7 +159,7 @@ describe('# storage service tests', () => {
           },
           moved: false
         };
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse(moveFolderResponse));
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse(moveFolderResponse));
         const { client, headers } = clientAndHeaders();
 
         // Act
@@ -160,7 +167,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/folder',
+          '/storage/move/folder',
           {
             folderId: payload.folderId,
             destination: payload.destinationFolderId,
@@ -180,7 +187,7 @@ describe('# storage service tests', () => {
         // Arrange
         const payload = randomUpdateFolderMetadataPayload();
         const { client } = clientAndHeaders();
-        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'post').rejects(new Error('first call error'));
 
         // Act
         const call = client.updateFolder(payload);
@@ -192,7 +199,7 @@ describe('# storage service tests', () => {
       it('Should call with right params & return correct response', async () => {
         // Arrange
         const payload = randomUpdateFolderMetadataPayload();
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({}));
         const { client, headers } = clientAndHeaders();
 
         // Act
@@ -200,7 +207,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2/meta',
+          '/storage/folder/2/meta',
           {
             metadata: {
               itemName: payload.changes.itemName,
@@ -220,7 +227,7 @@ describe('# storage service tests', () => {
 
       it('Should bubble up the error', async () => {
         // Arrange
-        sinon.stub(axios, 'delete').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'delete').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
 
         // Act
@@ -232,7 +239,7 @@ describe('# storage service tests', () => {
 
       it('Should call with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({
+        const callStub = sinon.stub(myAxios, 'delete').resolves(validResponse({
           valid: true
         }));
         const { client, headers } = clientAndHeaders();
@@ -242,7 +249,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2',
+          '/storage/folder/2',
           {
             headers: headers
           }
@@ -262,7 +269,7 @@ describe('# storage service tests', () => {
 
       it('Should have all the correct params on call', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse({}));
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({}));
         const { client, headers } = clientAndHeaders();
         const fileEntry: StorageTypes.FileEntry = {
           id: '1',
@@ -279,7 +286,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/file',
+          '/storage/file',
           {
             file: {
               fileId: fileEntry.id,
@@ -311,7 +318,7 @@ describe('# storage service tests', () => {
             itemName: ''
           }
         };
-        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'post').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
 
         // Act
@@ -331,7 +338,7 @@ describe('# storage service tests', () => {
             itemName: 'new name'
           }
         };
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
           valid: true
         }));
         const { client, headers } = clientAndHeaders();
@@ -341,7 +348,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/file/6/meta',
+          '/storage/file/6/meta',
           {
             metadata: {
               itemName: 'new name'
@@ -364,7 +371,7 @@ describe('# storage service tests', () => {
 
       it('Should bubble up the error', async () => {
         // Arrange
-        sinon.stub(axios, 'delete').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'delete').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
         const payload: DeleteFilePayload = {
           fileId: 5,
@@ -380,7 +387,7 @@ describe('# storage service tests', () => {
 
       it('Should call with right arguments and return control', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'delete').resolves(validResponse({
+        const callStub = sinon.stub(myAxios, 'delete').resolves(validResponse({
           valid: true
         }));
         const { client, headers } = clientAndHeaders();
@@ -394,7 +401,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/folder/2/file/5',
+          '/storage/folder/2/file/5',
           {
             headers: headers
           }
@@ -411,7 +418,7 @@ describe('# storage service tests', () => {
       it('Should bubble up the error', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
-        sinon.stub(axios, 'post').rejects(new Error('first call error'));
+        sinon.stub(myAxios, 'post').rejects(new Error('first call error'));
         const { client } = clientAndHeaders();
 
         // Act
@@ -424,7 +431,7 @@ describe('# storage service tests', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
-        const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+        const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
           content: 'test'
         }));
         const { client, headers } = clientAndHeaders();
@@ -437,7 +444,7 @@ describe('# storage service tests', () => {
           content: 'test'
         });
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/move/file',
+          '/storage/move/file',
           {
             fileId: payload.fileId,
             destination: payload.destination,
@@ -456,7 +463,7 @@ describe('# storage service tests', () => {
 
       it('Should bubble up the error', async () => {
         // Arrange
-        sinon.stub(axios, 'get').rejects(new Error('custom'));
+        sinon.stub(myAxios, 'get').rejects(new Error('custom'));
         const { client } = clientAndHeaders();
 
         // Act
@@ -468,7 +475,7 @@ describe('# storage service tests', () => {
 
       it('Should be called with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+        const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
           files: []
         }));
         const { client, headers } = clientAndHeaders();
@@ -478,13 +485,93 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
-          '/api/storage/recents?limit=5',
+          '/storage/recents?limit=5',
           {
             headers: headers
           }
         ]);
         expect(body).toEqual({
           files: []
+        });
+      });
+
+    });
+
+  });
+
+  describe('-> quotas', () => {
+
+    describe('space usage', () => {
+
+      it('should bubble up and error if request fails', async () => {
+        // Arrange
+        const { client } = clientAndHeaders();
+        sinon.stub(myAxios, 'get').rejects(new Error('custom'));
+
+        // Act
+        const call = client.spaceUsage();
+
+        // Assert
+        await expect(call).rejects.toThrowError('custom');
+      });
+
+      it('should call with right params & return response', async () => {
+        // Arrange
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+          total: 10
+        }));
+
+        // Act
+        const body = await client.spaceUsage();
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/usage',
+          {
+            headers: headers
+          }
+        ]);
+        expect(body).toEqual({
+          total: 10
+        });
+      });
+
+    });
+
+    describe('space limit', () => {
+
+      it('should bubble up and error if request fails', async () => {
+        // Arrange
+        const { client } = clientAndHeaders();
+        sinon.stub(myAxios, 'get').rejects(new Error('custom'));
+
+        // Act
+        const call = client.spaceLimit();
+
+        // Assert
+        await expect(call).rejects.toThrowError('custom');
+      });
+
+      it('should call with right params & return response', async () => {
+        // Arrange
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+          total: 10
+        }));
+
+        // Act
+        const body = await client.spaceLimit();
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/limit',
+          {
+            headers: headers
+          }
+        ]);
+        expect(body).toEqual({
+          total: 10
         });
       });
 
@@ -504,7 +591,15 @@ function clientAndHeaders(
   client: Storage,
   headers: object
 } {
-  const client = new Storage(axios, apiUrl, clientName, clientVersion, token, mnemonic);
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+  };
+  const apiSecurity: ApiSecurity = {
+    token: token,
+    mnemonic: mnemonic,
+  };
+  const client = Storage.client(apiUrl, appDetails, apiSecurity);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }
