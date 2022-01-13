@@ -1,10 +1,11 @@
-import axios, { AxiosStatic } from 'axios';
+import { Axios } from 'axios';
 import { Token, CryptoProvider, Keys, LoginDetails, RegisterDetails, UserAccessError } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { ApiModule } from '../shared/modules';
+import { getDriveAxiosClient } from '../drive/shared/axios';
 
 export * from './types';
 
@@ -13,11 +14,12 @@ export class Auth extends ApiModule {
   private readonly apiSecurity?: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    return new Auth(axios, apiUrl, appDetails, apiSecurity);
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Auth(axios, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    super(axios, apiUrl);
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
+    super(axios);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }

@@ -1,4 +1,4 @@
-import axios, { AxiosStatic, CancelTokenSource } from 'axios';
+import axios, { Axios, CancelTokenSource } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
@@ -16,6 +16,7 @@ import {
 } from './types';
 import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { getDriveAxiosClient } from '../shared/axios';
 
 export * as StorageTypes from './types';
 
@@ -24,11 +25,12 @@ export class Storage extends ApiModule {
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    return new Storage(axios, apiUrl, appDetails, apiSecurity);
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Storage(axios, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios, apiUrl);
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }

@@ -6,7 +6,13 @@ import { validResponse } from '../shared/response';
 import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 
+const myAxios = axios.create();
+
 describe('# auth service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -28,7 +34,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.revocationCertificate = '9';
       registerDetails.captcha = '10';
 
-      const postCall = sinon.stub(axios, 'post').resolves(validResponse({}));
+      const postCall = sinon.stub(myAxios, 'post').resolves(validResponse({}));
       const { client, headers } = clientAndHeaders();
 
       // Act
@@ -60,7 +66,7 @@ describe('# auth service tests', () => {
     it('Should return error on network error', async () => {
       // Arrange
       const error = new Error('Network error');
-      sinon.stub(axios, 'post').rejects(error);
+      sinon.stub(myAxios, 'post').rejects(error);
       const { client } = clientAndHeaders();
       const registerDetails: RegisterDetails = emptyRegisterDetails();
 
@@ -73,7 +79,7 @@ describe('# auth service tests', () => {
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(axios, 'post').resolves(
+      sinon.stub(myAxios, 'post').resolves(
         validResponse({
           valid: true
         })
@@ -97,7 +103,7 @@ describe('# auth service tests', () => {
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
       const error = new Error('Network error');
-      sinon.stub(axios, 'post').rejects(error);
+      sinon.stub(myAxios, 'post').rejects(error);
       const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
@@ -143,7 +149,7 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         }
       };
-      const postStub = sinon.stub(axios, 'post');
+      const postStub = sinon.stub(myAxios, 'post');
       postStub
         .onFirstCall()
         .resolves(
@@ -180,7 +186,7 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         }
       };
-      const postStub = sinon.stub(axios, 'post');
+      const postStub = sinon.stub(myAxios, 'post');
       postStub
         .onFirstCall()
         .resolves(
@@ -245,7 +251,7 @@ describe('# auth service tests', () => {
         publicKey: 'pubk',
         revocationCertificate: 'crt'
       };
-      const axiosStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
+      const axiosStub = sinon.stub(myAxios, 'patch').resolves(validResponse({}));
 
       // Act
       await client.updateKeys(keys, token);
@@ -277,7 +283,7 @@ describe('# auth service tests', () => {
       clientName: clientName,
       clientVersion: clientVersion,
     };
-    const client = new Auth(axios, apiUrl, appDetails);
+    const client = Auth.client(apiUrl, appDetails);
     const headers = testBasicHeaders(clientName, clientVersion);
     return { client, headers };
   }
@@ -299,7 +305,7 @@ describe('# auth service tests', () => {
       token: token,
       mnemonic: '',
     };
-    const client = new Auth(axios, apiUrl, appDetails, apiSecurity);
+    const client = Auth.client(apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithToken(clientName, clientVersion, token);
     return { client, headers };
   }

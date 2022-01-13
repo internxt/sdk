@@ -6,7 +6,13 @@ import { Share } from '../../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 
+const myAxios = axios.create();
+
 describe('# share service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -16,7 +22,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'post').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'post').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
       const payload: GenerateShareLinkPayload = {
         fileId: '1',
@@ -36,7 +42,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
         token: 'token'
       }));
       const { client, headers } = clientAndHeaders();
@@ -77,7 +83,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
       const token = '';
 
@@ -90,7 +96,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         info: 'some'
       }));
       const { client, headers } = clientAndHeaders();
@@ -116,7 +122,7 @@ describe('# share service tests', () => {
 
     it('Should bubble up the error', async () => {
       // Arrange
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
       const { client } = clientAndHeaders();
 
       // Act
@@ -128,7 +134,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         list: 'some'
       }));
       const { client, headers } = clientAndHeaders();
@@ -168,7 +174,7 @@ describe('# share service tests', () => {
       token: token,
       mnemonic: mnemonic,
     };
-    const client = new Share(axios, apiUrl, appDetails, apiSecurity);
+    const client = Share.client(apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
     return { client, headers };
   }

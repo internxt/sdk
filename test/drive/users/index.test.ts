@@ -6,7 +6,13 @@ import { validResponse } from '../../shared/response';
 import { ChangePasswordPayload } from '../../../src/drive/users/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 
+const myAxios = axios.create();
+
 describe('# users service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -17,7 +23,7 @@ describe('# users service tests', () => {
     it('should bubble up and error if request fails', async () => {
       // Arrange
       const { client } = clientAndHeaders();
-      sinon.stub(axios, 'post').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'post').rejects(new Error('custom'));
       const email = 'my@email.com';
 
       // Act
@@ -30,7 +36,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const postStub = sinon.stub(axios, 'post').resolves(validResponse({
+      const postStub = sinon.stub(myAxios, 'post').resolves(validResponse({
         sent: true
       }));
       const email = 'my@email.com';
@@ -60,7 +66,7 @@ describe('# users service tests', () => {
     it('should bubble up and error if request fails', async () => {
       // Arrange
       const { client } = clientAndHeaders();
-      sinon.stub(axios, 'post').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'post').rejects(new Error('custom'));
       const email = '', mnemonic = '';
 
       // Act
@@ -73,7 +79,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(axios, 'post').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
         user: {
           root_folder: 1
         }
@@ -106,7 +112,7 @@ describe('# users service tests', () => {
     it('should bubble up and error if request fails', async () => {
       // Arrange
       const { client } = clientAndHeaders();
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
 
       // Act
       const call = client.refreshUser();
@@ -118,7 +124,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         user: {},
         token: 't',
       }));
@@ -146,7 +152,7 @@ describe('# users service tests', () => {
     it('should bubble up and error if request fails', async () => {
       // Arrange
       const { client } = clientAndHeaders();
-      sinon.stub(axios, 'patch').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'patch').rejects(new Error('custom'));
       const payload: ChangePasswordPayload = {
         currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
@@ -165,7 +171,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(axios, 'patch').resolves(validResponse({}));
+      const callStub = sinon.stub(myAxios, 'patch').resolves(validResponse({}));
       const payload: ChangePasswordPayload = {
         currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
@@ -216,7 +222,7 @@ function clientAndHeaders(
     token: token,
     mnemonic: mnemonic,
   };
-  const client = new Users(axios, apiUrl, appDetails, apiSecurity);
+  const client = Users.client(apiUrl, appDetails, apiSecurity);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

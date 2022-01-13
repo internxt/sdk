@@ -1,8 +1,9 @@
-import axios, { AxiosStatic } from 'axios';
+import { Axios } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { ApiModule } from '../../shared/modules';
+import { getDriveAxiosClient } from '../shared/axios';
 
 export * as ShareTypes from './types';
 
@@ -11,11 +12,12 @@ export class Share extends ApiModule {
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    return new Share(axios, apiUrl, appDetails, apiSecurity);
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Share(axios, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios, apiUrl);
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }

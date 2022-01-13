@@ -1,12 +1,17 @@
 import sinon from 'sinon';
 import axios from 'axios';
 import { validResponse } from '../../shared/response';
-import { Users } from '../../../src/drive';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { Referrals } from '../../../src/drive/referrals';
 
+const myAxios = axios.create();
+
 describe('# users service tests', () => {
+
+  beforeEach(() => {
+    sinon.stub(axios, 'create').returns(myAxios);
+  });
 
   afterEach(() => {
     sinon.restore();
@@ -17,7 +22,7 @@ describe('# users service tests', () => {
     it('should bubble up and error if request fails', async () => {
       // Arrange
       const { client } = clientAndHeaders();
-      sinon.stub(axios, 'get').rejects(new Error('custom'));
+      sinon.stub(myAxios, 'get').rejects(new Error('custom'));
 
       // Act
       const call = client.getReferrals();
@@ -29,7 +34,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(axios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
         referrals: [1, 2]
       }));
 
@@ -69,7 +74,7 @@ function clientAndHeaders(
     token: token,
     mnemonic: mnemonic,
   };
-  const client = new Referrals(axios, apiUrl, appDetails, apiSecurity);
+  const client = Referrals.client(apiUrl, appDetails, apiSecurity);
   const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

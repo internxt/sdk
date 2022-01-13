@@ -1,4 +1,4 @@
-import axios, { AxiosStatic } from 'axios';
+import { Axios } from 'axios';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
@@ -7,6 +7,7 @@ import {
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { ApiModule } from '../../shared/modules';
+import { getDriveAxiosClient } from '../shared/axios';
 
 export * as UserTypes from './types';
 
@@ -15,11 +16,12 @@ export class Users extends ApiModule {
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    return new Users(axios, apiUrl, appDetails, apiSecurity);
+    const axios = getDriveAxiosClient(apiUrl);
+    return new Users(axios, appDetails, apiSecurity);
   }
 
-  constructor(axios: AxiosStatic, apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios, apiUrl);
+  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    super(axios);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
