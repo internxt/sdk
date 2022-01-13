@@ -14,12 +14,12 @@ import {
   UpdateFolderMetadataPayload,
   FetchLimitResponse, UsageResponse
 } from './types';
-import { AppModule } from '../../shared/modules';
+import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 
 export * as StorageTypes from './types';
 
-export class Storage extends AppModule {
+export class Storage extends ApiModule {
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 

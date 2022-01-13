@@ -2,11 +2,11 @@ import axios, { AxiosStatic } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { AppModule } from '../../shared/modules';
+import { ApiModule } from '../../shared/modules';
 
 export * as ShareTypes from './types';
 
-export class Share extends AppModule {
+export class Share extends ApiModule {
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 

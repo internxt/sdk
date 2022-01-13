@@ -1,12 +1,12 @@
 import axios, { AxiosStatic } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { AppModule } from '../../shared/modules';
+import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { UserReferral } from './types';
 
 export * as ReferralTypes from './types';
 
-export class Referrals extends AppModule {
+export class Referrals extends ApiModule {
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 

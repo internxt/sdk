@@ -2,7 +2,7 @@ import { AxiosError, AxiosResponse, AxiosStatic } from 'axios';
 import AppError from '../types/errors';
 import { ApiUrl } from '../types/apiConnection';
 
-export class AppModule {
+export class ApiModule {
   protected readonly axios: AxiosStatic;
 
   constructor(axios: AxiosStatic, apiUrl: ApiUrl) {

@@ -4,11 +4,11 @@ import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
-import { AppModule } from '../shared/modules';
+import { ApiModule } from '../shared/modules';
 
 export * from './types';
 
-export class Auth extends AppModule {
+export class Auth extends ApiModule {
   private readonly appDetails: AppDetails;
   private readonly apiSecurity?: ApiSecurity;
 

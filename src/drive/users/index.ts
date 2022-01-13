@@ -6,11 +6,11 @@ import {
   InitializeUserResponse,
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
-import { AppModule } from '../../shared/modules';
+import { ApiModule } from '../../shared/modules';
 
 export * as UserTypes from './types';
 
-export class Users extends AppModule {
+export class Users extends ApiModule {
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 
