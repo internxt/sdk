@@ -191,6 +191,20 @@ export class Auth extends ApiModule {
       });
   }
 
+  /**
+   * Sends request to send the email to delete the account
+   * @param email
+   */
+  public sendDeactivationEmail(email: string): Promise<void> {
+    return this.axios
+      .get(`/deactivate/${email}`, {
+        headers: this.basicHeaders()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
   private basicHeaders() {
     return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }

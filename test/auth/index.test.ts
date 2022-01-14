@@ -457,6 +457,41 @@ describe('# auth service tests', () => {
 
   });
 
+  describe('-> send email to deactivate account', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
+      const { client } = clientAndHeaders();
+      const email = 'my@email';
+
+      // Act
+      const call = client.sendDeactivationEmail(email);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({}));
+      const { client, headers } = clientAndHeaders();
+      const email = 'my@email';
+
+      // Act
+      const body = await client.sendDeactivationEmail(email);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        `/deactivate/${email}`,
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
 });
 
 function clientAndHeaders(
