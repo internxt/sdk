@@ -205,6 +205,20 @@ export class Auth extends ApiModule {
       });
   }
 
+  /**
+   * Confirms the account deactivation
+   * @param token
+   */
+  public confirmDeactivation(token: string): Promise<void> {
+    return this.axios
+      .get(`/confirmDeactivation/${token}`, {
+        headers: this.basicHeaders()
+      })
+      .then(response => {
+        return response.data;
+      });
+  }
+
   private basicHeaders() {
     return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }
