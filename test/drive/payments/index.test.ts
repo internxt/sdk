@@ -4,6 +4,7 @@ import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { testHeadersWithToken } from '../../shared/headers';
 import { Payments } from '../../../src/drive';
 import { validResponse } from '../../shared/response';
+import { CreatePaymentSessionPayload, StripeSessionMode } from '../../../src/drive/payments/types';
 
 const myAxios = axios.create();
 
@@ -53,6 +54,67 @@ describe('payments service', () => {
       });
     });
 
+  });
+
+  describe('create payment session', () => {
+
+    it('should bubble up an error if request fails', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'post').rejects(new Error('custom'));
+      const { client } = clientAndHeadersWithToken();
+      const payload: CreatePaymentSessionPayload = {
+        canceledUrl: '',
+        lifetime_tier: undefined,
+        mode: StripeSessionMode.Payment,
+        priceId: '',
+        successUrl: '',
+        test: false
+      };
+
+      // Act
+      const call = client.createSession(payload);
+
+      // Assert
+      await expect(call).rejects.toThrowError('custom');
+    });
+
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'post').resolves(validResponse({
+        id: 'ident'
+      }));
+      const { client, headers } = clientAndHeadersWithToken();
+      const payload: CreatePaymentSessionPayload = {
+        canceledUrl: '',
+        lifetime_tier: undefined,
+        mode: StripeSessionMode.Payment,
+        priceId: '',
+        successUrl: '',
+        test: false
+      };
+
+      // Act
+      const body = await client.createSession(payload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/v2/stripe/session',
+        {
+          test: payload.test,
+          lifetime_tier: payload.lifetime_tier,
+          mode: payload.mode,
+          priceId: payload.priceId,
+          successUrl: payload.successUrl,
+          canceledUrl: payload.canceledUrl,
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        id: 'ident'
+      });
+    });
 
   });
 

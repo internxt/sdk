@@ -62,3 +62,12 @@ export enum ProductPriceType {
   Recurring = 'recurring',
   OneTime = 'one_time',
 }
+
+export interface CreatePaymentSessionPayload {
+  test?: boolean;
+  lifetime_tier?: LifetimeTier;
+  mode: StripeSessionMode;
+  priceId: string;
+  successUrl?: string;
+  canceledUrl?: string;
+}
