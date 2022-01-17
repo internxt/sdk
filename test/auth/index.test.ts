@@ -271,44 +271,301 @@ describe('# auth service tests', () => {
     });
   });
 
-  function clientAndHeaders(
-    apiUrl = '',
-    clientName = 'c-name',
-    clientVersion = '0.1',
-  ): {
-    client: Auth,
-    headers: object
-  } {
-    const appDetails: AppDetails = {
-      clientName: clientName,
-      clientVersion: clientVersion,
-    };
-    const client = Auth.client(apiUrl, appDetails);
-    const headers = testBasicHeaders(clientName, clientVersion);
-    return { client, headers };
-  }
+  describe('-> security details', () => {
 
-  function clientAndHeadersWithToken(
-    apiUrl = '',
-    clientName = 'c-name',
-    clientVersion = '0.1',
-    token = 'token'
-  ): {
-    client: Auth,
-    headers: object
-  } {
-    const appDetails: AppDetails = {
-      clientName: clientName,
-      clientVersion: clientVersion,
-    };
-    const apiSecurity: ApiSecurity = {
-      token: token,
-      mnemonic: '',
-    };
-    const client = Auth.client(apiUrl, appDetails, apiSecurity);
-    const headers = testHeadersWithToken(clientName, clientVersion, token);
-    return { client, headers };
-  }
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'post').rejects(new Error('Network error'));
+      const { client } = clientAndHeaders();
+      const email = '';
 
+      // Act
+      const call = client.securityDetails(email);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right parameters & return correct content', async () => {
+      // Arrange
+      const postStub = sinon.stub(myAxios, 'post').resolves(validResponse({
+        hasKeys: true,
+        sKey: 'gibberish',
+        tfa: true
+      }));
+      const { client, headers } = clientAndHeaders();
+      const email = 'my@email.com';
+
+      // Act
+      const body = await client.securityDetails(email);
+
+      // Assert
+      expect(postStub.firstCall.args).toEqual([
+        '/login',
+        {
+          email: email
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        encryptedSalt: 'gibberish',
+        tfaEnabled: true
+      });
+    });
+
+    it('Should return boolean value on null param response', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'post').resolves(validResponse({
+        hasKeys: true,
+        sKey: 'gibberish',
+        tfa: null
+      }));
+      const { client } = clientAndHeaders();
+      const email = 'my@email.com';
+
+      // Act
+      const body = await client.securityDetails(email);
+
+      // Assert
+      expect(body).toEqual({
+        encryptedSalt: 'gibberish',
+        tfaEnabled: false
+      });
+    });
+
+  });
+
+  describe('-> generate twoFactorAuth code', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+
+      // Act
+      const call = client.generateTwoFactorAuthQR();
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return data', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+        qr: 'qr',
+        code: 'code'
+      }));
+      const { client, headers } = clientAndHeadersWithToken();
+
+      // Act
+      const body = await client.generateTwoFactorAuthQR();
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({
+        qr: 'qr',
+        backupKey: 'code'
+      });
+    });
+
+  });
+
+  describe('-> disable twoFactorAuth', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'delete').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+      const pass = 'pass', code = 'code';
+
+      // Act
+      const call = client.disableTwoFactorAuth(pass, code);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'delete').resolves(validResponse({}));
+      const { client, headers } = clientAndHeadersWithToken();
+      const pass = 'pass', code = 'code';
+
+      // Act
+      const body = await client.disableTwoFactorAuth(pass, code);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          data: {
+            pass: pass,
+            code: code,
+          },
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
+
+  describe('-> store twoFactorAuth key', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'put').rejects(new Error('Network error'));
+      const { client } = clientAndHeadersWithToken();
+      const backupKey = 'key', code = 'code';
+
+      // Act
+      const call = client.storeTwoFactorAuthKey(backupKey, code);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'put').resolves(validResponse({}));
+      const { client, headers } = clientAndHeadersWithToken();
+      const backupKey = 'key', code = 'code';
+
+      // Act
+      const body = await client.storeTwoFactorAuthKey(backupKey, code);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        '/tfa',
+        {
+          key: backupKey,
+          code: code,
+        },
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
+
+  describe('-> send email to deactivate account', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
+      const { client } = clientAndHeaders();
+      const email = 'my@email';
+
+      // Act
+      const call = client.sendDeactivationEmail(email);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({}));
+      const { client, headers } = clientAndHeaders();
+      const email = 'my@email';
+
+      // Act
+      const body = await client.sendDeactivationEmail(email);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        `/deactivate/${email}`,
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
+
+  describe('-> confirm account deactivation', () => {
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
+      const { client } = clientAndHeaders();
+      const token = 'token';
+
+      // Act
+      const call = client.confirmDeactivation(token);
+
+      // Assert
+      await expect(call).rejects.toThrowError('Network error');
+    });
+
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({}));
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+
+      // Act
+      const body = await client.confirmDeactivation(token);
+
+      // Assert
+      await expect(callStub.firstCall.args).toEqual([
+        `/confirmDeactivation/${token}`,
+        {
+          headers: headers
+        }
+      ]);
+      expect(body).toEqual({});
+    });
+
+  });
 
 });
+
+function clientAndHeaders(
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+): {
+  client: Auth,
+  headers: object
+} {
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+  };
+  const client = Auth.client(apiUrl, appDetails);
+  const headers = testBasicHeaders(clientName, clientVersion);
+  return { client, headers };
+}
+
+function clientAndHeadersWithToken(
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+  token = 'token'
+): {
+  client: Auth,
+  headers: object
+} {
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+  };
+  const apiSecurity: ApiSecurity = {
+    token: token,
+    mnemonic: '',
+  };
+  const client = Auth.client(apiUrl, appDetails, apiSecurity);
+  const headers = testHeadersWithToken(clientName, clientVersion, token);
+  return { client, headers };
+}
