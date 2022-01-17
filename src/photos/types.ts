@@ -28,10 +28,12 @@ export interface Device {
   mac: string;
   name: string;
   userId: string;
+  synchronizedAt: Date;
   createdAt: Date;
   updatedAt: Date;
 }
-export interface DeviceJSON extends Omit<Device, 'createdAt' | 'updatedAt'> {
+export interface DeviceJSON extends Omit<Device, 'synchronizedAt' | 'createdAt' | 'updatedAt'> {
+  synchronizedAt: string;
   createdAt: string;
   updatedAt: string;
 }
