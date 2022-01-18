@@ -1,4 +1,3 @@
-import { Axios } from 'axios';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
@@ -6,22 +5,21 @@ import {
   InitializeUserResponse,
 } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
-import { ApiModule } from '../../shared/modules';
-import { getDriveAxiosClient } from '../shared/axios';
+import { HttpClient } from '../../shared/http/client';
 
 export * as UserTypes from './types';
 
-export class Users extends ApiModule {
+export class Users {
+  private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    const axios = getDriveAxiosClient(apiUrl);
-    return new Users(axios, appDetails, apiSecurity);
+    return new Users(apiUrl, appDetails, apiSecurity);
   }
 
-  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    this.client = HttpClient.create(apiUrl);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -31,15 +29,14 @@ export class Users extends ApiModule {
    * @param email
    */
   public sendInvitation(email: string): Promise<void> {
-    return this.axios
-      .post('/user/invite', {
-        email: email
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .post(
+        '/user/invite',
+        {
+          email: email
+        },
+        this.headers()
+      );
   }
 
   /**
@@ -48,16 +45,19 @@ export class Users extends ApiModule {
    * @param mnemonic
    */
   public initialize(email: string, mnemonic: string): Promise<InitializeUserResponse> {
-    return this.axios
-      .post('/initialize', {
+    return this.client
+      .post<{
+        user: InitializeUserResponse
+      }>(
+        '/initialize',
+        {
           email: email,
           mnemonic: mnemonic
         },
-        {
-          headers: this.headers()
-        })
-      .then(response => {
-        return response.data.user;
+        this.headers()
+      )
+      .then(data => {
+        return data.user;
       });
   }
 
@@ -68,13 +68,11 @@ export class Users extends ApiModule {
     user: UserSettings
     token: string
   }> {
-    return this.axios
-      .get('/user/refresh', {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        '/user/refresh',
+        this.headers()
+      );
   }
 
   /**
@@ -82,19 +80,18 @@ export class Users extends ApiModule {
    * @param payload
    */
   public changePassword(payload: ChangePasswordPayload) {
-    return this.axios
-      .patch('/user/password', {
-        currentPassword: payload.currentEncryptedPassword,
-        newPassword: payload.newEncryptedPassword,
-        newSalt: payload.newEncryptedSalt,
-        mnemonic: payload.encryptedMnemonic,
-        privateKey: payload.encryptedPrivateKey,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .patch(
+        '/user/password',
+        {
+          currentPassword: payload.currentEncryptedPassword,
+          newPassword: payload.newEncryptedPassword,
+          newSalt: payload.newEncryptedSalt,
+          mnemonic: payload.encryptedMnemonic,
+          privateKey: payload.encryptedPrivateKey,
+        },
+        this.headers()
+      );
   }
 
   private headers() {
