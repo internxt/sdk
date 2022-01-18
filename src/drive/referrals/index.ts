@@ -1,23 +1,21 @@
-import { Axios } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { UserReferral } from './types';
-import { getDriveAxiosClient } from '../shared/axios';
+import { HttpClient } from '../../shared/http/client';
 
 export * as ReferralTypes from './types';
 
-export class Referrals extends ApiModule {
+export class Referrals {
+  private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    const axios = getDriveAxiosClient(apiUrl);
-    return new Referrals(axios, appDetails, apiSecurity);
+    return new Referrals(apiUrl, appDetails, apiSecurity);
   }
 
-  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    this.client = HttpClient.create(apiUrl);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -26,13 +24,11 @@ export class Referrals extends ApiModule {
    * Returns a list of referrals of this user
    */
   public getReferrals(): Promise<UserReferral[]> {
-    return this.axios
-      .get('/users-referrals', {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        '/users-referrals',
+        this.headers()
+      );
   }
 
   /**
