@@ -1,17 +1,16 @@
 import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
-import axios from 'axios';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
-import { validResponse } from '../shared/response';
 import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
+import { HttpClient } from '../../src/shared/http/client';
 
-const myAxios = axios.create();
+const httpClient = HttpClient.create();
 
 describe('# auth service tests', () => {
 
   beforeEach(() => {
-    sinon.stub(axios, 'create').returns(myAxios);
+    sinon.stub(HttpClient, 'create').returns(httpClient);
   });
 
   afterEach(() => {
@@ -34,7 +33,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.revocationCertificate = '9';
       registerDetails.captcha = '10';
 
-      const postCall = sinon.stub(myAxios, 'post').resolves(validResponse({}));
+      const postCall = sinon.stub(httpClient, 'post').resolves({});
       const { client, headers } = clientAndHeaders();
 
       // Act
@@ -57,33 +56,15 @@ describe('# auth service tests', () => {
           referrer: registerDetails.referrer,
           captcha: registerDetails.captcha
         },
-        {
-          headers: headers,
-        }
+        headers,
       ]);
-    });
-
-    it('Should return error on network error', async () => {
-      // Arrange
-      const error = new Error('Network error');
-      sinon.stub(myAxios, 'post').rejects(error);
-      const { client } = clientAndHeaders();
-      const registerDetails: RegisterDetails = emptyRegisterDetails();
-
-      // Act
-      const call = client.register(registerDetails);
-
-      // Assert
-      await expect(call).rejects.toEqual(error);
     });
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(myAxios, 'post').resolves(
-        validResponse({
-          valid: true
-        })
-      );
+      sinon.stub(httpClient, 'post').resolves({
+        valid: true
+      });
       const { client } = clientAndHeaders();
       const registerDetails: RegisterDetails = emptyRegisterDetails();
 
@@ -103,7 +84,7 @@ describe('# auth service tests', () => {
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
       const error = new Error('Network error');
-      sinon.stub(myAxios, 'post').rejects(error);
+      sinon.stub(httpClient, 'post').rejects(error);
       const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
@@ -149,14 +130,12 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         }
       };
-      const postStub = sinon.stub(myAxios, 'post');
+      const postStub = sinon.stub(httpClient, 'post');
       postStub
         .onFirstCall()
-        .resolves(
-          validResponse({
-            sKey: 'encrypted_salt'
-          })
-        )
+        .resolves({
+          sKey: 'encrypted_salt'
+        })
         .onSecondCall()
         .rejects(error);
 
@@ -186,22 +165,18 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         }
       };
-      const postStub = sinon.stub(myAxios, 'post');
+      const postStub = sinon.stub(httpClient, 'post');
       postStub
         .onFirstCall()
-        .resolves(
-          validResponse({
-            sKey: 'encrypted_salt'
-          })
-        )
+        .resolves({
+          sKey: 'encrypted_salt'
+        })
         .onSecondCall()
-        .resolves(
-          validResponse({
-            user: {
-              revocateKey: 'key'
-            }
-          })
-        );
+        .resolves({
+          user: {
+            revocateKey: 'key'
+          }
+        });
 
       // Act
       const body = await client.login(loginDetails, cryptoProvider);
@@ -212,9 +187,7 @@ describe('# auth service tests', () => {
         {
           email: loginDetails.email
         },
-        {
-          headers: headers,
-        }
+        headers,
       ]);
       expect(postStub.secondCall.args).toEqual([
         '/access',
@@ -226,9 +199,7 @@ describe('# auth service tests', () => {
           publicKey: 'pub',
           revocateKey: 'rev',
         },
-        {
-          headers: headers,
-        }
+        headers,
       ]);
       expect(body).toEqual({
         user: {
@@ -251,7 +222,7 @@ describe('# auth service tests', () => {
         publicKey: 'pubk',
         revocationCertificate: 'crt'
       };
-      const axiosStub = sinon.stub(myAxios, 'patch').resolves(validResponse({}));
+      const axiosStub = sinon.stub(httpClient, 'patch').resolves({});
 
       // Act
       await client.updateKeys(keys, token);
@@ -264,35 +235,20 @@ describe('# auth service tests', () => {
           privateKey: 'prik',
           revocationKey: 'crt',
         },
-        {
-          headers: headers
-        }
+        headers
       ]);
     });
   });
 
   describe('-> security details', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'post').rejects(new Error('Network error'));
-      const { client } = clientAndHeaders();
-      const email = '';
-
-      // Act
-      const call = client.securityDetails(email);
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right parameters & return correct content', async () => {
       // Arrange
-      const postStub = sinon.stub(myAxios, 'post').resolves(validResponse({
+      const postStub = sinon.stub(httpClient, 'post').resolves({
         hasKeys: true,
         sKey: 'gibberish',
         tfa: true
-      }));
+      });
       const { client, headers } = clientAndHeaders();
       const email = 'my@email.com';
 
@@ -305,9 +261,7 @@ describe('# auth service tests', () => {
         {
           email: email
         },
-        {
-          headers: headers
-        }
+        headers
       ]);
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
@@ -317,11 +271,11 @@ describe('# auth service tests', () => {
 
     it('Should return boolean value on null param response', async () => {
       // Arrange
-      sinon.stub(myAxios, 'post').resolves(validResponse({
+      sinon.stub(httpClient, 'post').resolves({
         hasKeys: true,
         sKey: 'gibberish',
         tfa: null
-      }));
+      });
       const { client } = clientAndHeaders();
       const email = 'my@email.com';
 
@@ -339,24 +293,12 @@ describe('# auth service tests', () => {
 
   describe('-> generate twoFactorAuth code', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
-      const { client } = clientAndHeadersWithToken();
-
-      // Act
-      const call = client.generateTwoFactorAuthQR();
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right params & return data', async () => {
       // Arrange
-      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({
+      const callStub = sinon.stub(httpClient, 'get').resolves({
         qr: 'qr',
         code: 'code'
-      }));
+      });
       const { client, headers } = clientAndHeadersWithToken();
 
       // Act
@@ -365,9 +307,7 @@ describe('# auth service tests', () => {
       // Assert
       await expect(callStub.firstCall.args).toEqual([
         '/tfa',
-        {
-          headers: headers
-        }
+        headers
       ]);
       expect(body).toEqual({
         qr: 'qr',
@@ -379,22 +319,9 @@ describe('# auth service tests', () => {
 
   describe('-> disable twoFactorAuth', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'delete').rejects(new Error('Network error'));
-      const { client } = clientAndHeadersWithToken();
-      const pass = 'pass', code = 'code';
-
-      // Act
-      const call = client.disableTwoFactorAuth(pass, code);
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(myAxios, 'delete').resolves(validResponse({}));
+      const callStub = sinon.stub(httpClient, 'delete').resolves({});
       const { client, headers } = clientAndHeadersWithToken();
       const pass = 'pass', code = 'code';
 
@@ -404,12 +331,10 @@ describe('# auth service tests', () => {
       // Assert
       await expect(callStub.firstCall.args).toEqual([
         '/tfa',
+        headers,
         {
-          data: {
-            pass: pass,
-            code: code,
-          },
-          headers: headers
+          pass: pass,
+          code: code,
         }
       ]);
       expect(body).toEqual({});
@@ -419,22 +344,9 @@ describe('# auth service tests', () => {
 
   describe('-> store twoFactorAuth key', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'put').rejects(new Error('Network error'));
-      const { client } = clientAndHeadersWithToken();
-      const backupKey = 'key', code = 'code';
-
-      // Act
-      const call = client.storeTwoFactorAuthKey(backupKey, code);
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(myAxios, 'put').resolves(validResponse({}));
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
       const { client, headers } = clientAndHeadersWithToken();
       const backupKey = 'key', code = 'code';
 
@@ -448,9 +360,7 @@ describe('# auth service tests', () => {
           key: backupKey,
           code: code,
         },
-        {
-          headers: headers
-        }
+        headers
       ]);
       expect(body).toEqual({});
     });
@@ -459,22 +369,9 @@ describe('# auth service tests', () => {
 
   describe('-> send email to deactivate account', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
-      const { client } = clientAndHeaders();
-      const email = 'my@email';
-
-      // Act
-      const call = client.sendDeactivationEmail(email);
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({}));
+      const callStub = sinon.stub(httpClient, 'get').resolves({});
       const { client, headers } = clientAndHeaders();
       const email = 'my@email';
 
@@ -484,9 +381,7 @@ describe('# auth service tests', () => {
       // Assert
       await expect(callStub.firstCall.args).toEqual([
         `/deactivate/${email}`,
-        {
-          headers: headers
-        }
+        headers
       ]);
       expect(body).toEqual({});
     });
@@ -495,22 +390,9 @@ describe('# auth service tests', () => {
 
   describe('-> confirm account deactivation', () => {
 
-    it('Should bubble up the error on first call failure', async () => {
-      // Arrange
-      sinon.stub(myAxios, 'get').rejects(new Error('Network error'));
-      const { client } = clientAndHeaders();
-      const token = 'token';
-
-      // Act
-      const call = client.confirmDeactivation(token);
-
-      // Assert
-      await expect(call).rejects.toThrowError('Network error');
-    });
-
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(myAxios, 'get').resolves(validResponse({}));
+      const callStub = sinon.stub(httpClient, 'get').resolves({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
 
@@ -520,9 +402,7 @@ describe('# auth service tests', () => {
       // Assert
       await expect(callStub.firstCall.args).toEqual([
         `/confirmDeactivation/${token}`,
-        {
-          headers: headers
-        }
+        headers
       ]);
       expect(body).toEqual({});
     });
