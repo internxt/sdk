@@ -28,12 +28,14 @@ export interface Device {
   mac: string;
   name: string;
   userId: string;
-  synchronizedAt: Date;
+  newestDate: Date;
+  oldestDate: Date;
   createdAt: Date;
   updatedAt: Date;
 }
-export interface DeviceJSON extends Omit<Device, 'synchronizedAt' | 'createdAt' | 'updatedAt'> {
-  synchronizedAt: string;
+export interface DeviceJSON extends Omit<Device, 'newestDate' | 'oldestDate' | 'createdAt' | 'updatedAt'> {
+  newestDate: string;
+  oldestDate: string;
   createdAt: string;
   updatedAt: string;
 }
