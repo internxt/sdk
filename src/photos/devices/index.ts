@@ -23,6 +23,19 @@ export default class DevicesSubmodule {
       });
   }
 
+  public getDevices(): Promise<Device[]> {
+    return axios
+      .get<{ results: DeviceJSON[]; count: number }>(`${this.model.baseUrl}/devices`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((res) => res.data.results.map((json) => this.parse(json)))
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public createDevice(data: CreateDeviceData): Promise<Device> {
     return axios
       .post<DeviceJSON>(`${this.model.baseUrl}/devices`, data, {
