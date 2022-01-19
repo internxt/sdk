@@ -52,7 +52,8 @@ export default class DevicesSubmodule {
   private parse(json: DeviceJSON): Device {
     return {
       ...json,
-      synchronizedAt: new Date(json.synchronizedAt),
+      newestDate: new Date(json.newestDate),
+      oldestDate: new Date(json.oldestDate),
       createdAt: new Date(json.createdAt),
       updatedAt: new Date(json.updatedAt),
     };
