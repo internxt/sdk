@@ -1,6 +1,6 @@
 import { HttpClient } from '../../shared/http/client';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { Device } from './types';
+import { Device, DeviceBackup } from './types';
 import { headersWithToken } from '../../shared/headers';
 
 export class Backups {
@@ -22,6 +22,14 @@ export class Backups {
     return this.client
       .get(
         '/backup/device',
+        this.headers()
+      );
+  }
+
+  public getAllBackups(mac: string): Promise<DeviceBackup[]> {
+    return this.client
+      .get(
+        `/api/backup/${mac}`,
         this.headers()
       );
   }

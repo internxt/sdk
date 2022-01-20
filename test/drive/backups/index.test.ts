@@ -40,6 +40,31 @@ describe('backups service', () => {
 
   });
 
+  describe('get all backups', () => {
+
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const {client, headers} = clientAndHeadersWithToken();
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        backups: 'some'
+      });
+      const mac = 'lololo';
+
+      // Act
+      const body = await client.getAllBackups(mac);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/api/backup/${mac}`,
+        headers
+      ]);
+      expect(body).toEqual({
+        backups: 'some'
+      });
+    });
+
+  });
+
 });
 
 function clientAndHeadersWithToken(
