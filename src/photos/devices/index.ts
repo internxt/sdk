@@ -66,7 +66,7 @@ export default class DevicesSubmodule {
     return {
       ...json,
       newestDate: new Date(json.newestDate),
-      oldestDate: new Date(json.oldestDate),
+      oldestDate: json.oldestDate === null ? json.oldestDate : new Date(json.oldestDate),
       createdAt: new Date(json.createdAt),
       updatedAt: new Date(json.updatedAt),
     };
