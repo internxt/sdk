@@ -65,13 +65,13 @@ describe('HttpClient', () => {
       });
 
       it('should return the received error message on valid response', () => {
-        const error = get_axios_error();
+        const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: {
             error: 'here-my-message'
           }
         };
-        assert_message_on_output_error(
+        assertMessageOnOutputError(
           myAxios,
           error,
           'here-my-message'
@@ -79,11 +79,11 @@ describe('HttpClient', () => {
       });
 
       it('should return the received data when no error message on valid response', () => {
-        const error = get_axios_error();
+        const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: 'at-least-this'
         };
-        assert_message_on_output_error(
+        assertMessageOnOutputError(
           myAxios,
           error,
           'at-least-this'
@@ -91,10 +91,10 @@ describe('HttpClient', () => {
       });
 
       it('should return generic message when request failed', () => {
-        const error = get_axios_error();
+        const error = getAxiosError();
         error.response = undefined;
         error.request = true;
-        assert_message_on_output_error(
+        assertMessageOnOutputError(
           myAxios,
           error,
           'Server unavailable'
@@ -102,16 +102,16 @@ describe('HttpClient', () => {
       });
 
       it('should return reason error message when setting request failed', () => {
-        const error = get_axios_error();
+        const error = getAxiosError();
         error.message = 'wat-did-u-do?';
-        assert_message_on_output_error(
+        assertMessageOnOutputError(
           myAxios,
           error,
           'wat-did-u-do?'
         );
       });
 
-      function get_axios_error(): AxiosError {
+      function getAxiosError(): AxiosError {
         return {
           config: <AxiosRequestConfig>{},
           isAxiosError: false,
@@ -126,7 +126,7 @@ describe('HttpClient', () => {
         };
       }
 
-      function assert_message_on_output_error(axios: Axios, error: AxiosError, message: string) {
+      function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: string) {
         // Arrange
         HttpClient.create();
 
