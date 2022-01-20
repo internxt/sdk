@@ -55,11 +55,36 @@ describe('backups service', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/api/backup/${mac}`,
+        `/backup/${mac}`,
         headers
       ]);
       expect(body).toEqual({
         backups: 'some'
+      });
+    });
+
+  });
+
+  describe('delete backup', () => {
+
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const {client, headers} = clientAndHeadersWithToken();
+      const callStub = sinon.stub(httpClient, 'delete').resolves({
+        done: true
+      });
+      const backupId = 1;
+
+      // Act
+      const body = await client.deleteBackup(backupId);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/backup/${backupId}`,
+        headers
+      ]);
+      expect(body).toEqual({
+        done: true
       });
     });
 

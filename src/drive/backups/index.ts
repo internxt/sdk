@@ -29,7 +29,15 @@ export class Backups {
   public getAllBackups(mac: string): Promise<DeviceBackup[]> {
     return this.client
       .get(
-        `/api/backup/${mac}`,
+        `/backup/${mac}`,
+        this.headers()
+      );
+  }
+
+  public deleteBackup(backupId: number): Promise<void> {
+    return this.client
+      .delete(
+        `/backup/${backupId}`,
         this.headers()
       );
   }
