@@ -29,13 +29,13 @@ export interface Device {
   name: string;
   userId: string;
   newestDate: Date;
-  oldestDate: Date;
+  oldestDate: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
 export interface DeviceJSON extends Omit<Device, 'newestDate' | 'oldestDate' | 'createdAt' | 'updatedAt'> {
   newestDate: string;
-  oldestDate: string;
+  oldestDate: string | null;
   createdAt: string;
   updatedAt: string;
 }
