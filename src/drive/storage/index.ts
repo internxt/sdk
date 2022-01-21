@@ -1,4 +1,3 @@
-import axios, { Axios, CancelTokenSource } from 'axios';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
@@ -16,23 +15,22 @@ import {
   FetchLimitResponse,
   UsageResponse,
 } from './types';
-import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { getDriveAxiosClient } from '../shared/axios';
+import { HttpClient, RequestCanceler } from '../../shared/http/client';
 
 export * as StorageTypes from './types';
 
-export class Storage extends ApiModule {
+export class Storage {
+  private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    const axios = getDriveAxiosClient(apiUrl);
-    return new Storage(axios, appDetails, apiSecurity);
+    return new Storage(apiUrl, appDetails, apiSecurity);
   }
 
-  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    this.client = HttpClient.create(apiUrl);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -41,25 +39,21 @@ export class Storage extends ApiModule {
    * Creates a new folder
    * @param payload
    */
-  public createFolder(payload: CreateFolderPayload): [Promise<CreateFolderResponse>, CancelTokenSource] {
-    const cancelTokenSource = axios.CancelToken.source();
-    const promise = this.axios
-      .post(
+  public createFolder(payload: CreateFolderPayload): [
+    Promise<CreateFolderResponse>,
+    RequestCanceler
+  ] {
+    const { promise, requestCanceler } = this.client
+      .postCancellable<CreateFolderResponse>(
         '/storage/folder',
         {
           parentFolderId: payload.parentFolderId,
           folderName: payload.folderName,
         },
-        {
-          cancelToken: cancelTokenSource.token,
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
 
-    return [promise, cancelTokenSource];
+    return [promise, requestCanceler];
   }
 
   /**
@@ -67,20 +61,15 @@ export class Storage extends ApiModule {
    * @param payload
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
-    return this.axios
+    return this.client
       .post(
         '/storage/move/folder',
         {
           folderId: payload.folderId,
           destination: payload.destinationFolderId,
         },
-        {
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
   }
 
   /**
@@ -88,37 +77,31 @@ export class Storage extends ApiModule {
    * @param payload
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
-    await this.axios
+    await this.client
       .post(
         `/storage/folder/${payload.folderId}/meta`,
         {
           metadata: payload.changes,
         },
-        {
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
   }
 
   /**
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
-  public getFolderContent(folderId: number): [Promise<FetchFolderContentResponse>, CancelTokenSource] {
-    const cancelTokenSource = axios.CancelToken.source();
-    const promise = this.axios
-      .get<FetchFolderContentResponse>(`/storage/v2/folder/${folderId}`, {
-        cancelToken: cancelTokenSource.token,
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+  public getFolderContent(folderId: number): [
+    Promise<FetchFolderContentResponse>,
+    RequestCanceler
+  ] {
+    const { promise, requestCanceler } = this.client
+      .getCancellable<FetchFolderContentResponse>(
+        `/storage/v2/folder/${folderId}`,
+        this.headers()
+      );
 
-    return [promise, cancelTokenSource];
+    return [promise, requestCanceler];
   }
 
   /**
@@ -126,13 +109,11 @@ export class Storage extends ApiModule {
    * @param folderId
    */
   public deleteFolder(folderId: number): Promise<unknown> {
-    return this.axios
-      .delete(`/storage/folder/${folderId}`, {
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+    return this.client
+      .delete(
+        `/storage/folder/${folderId}`,
+        this.headers()
+      );
   }
 
   /**
@@ -140,7 +121,7 @@ export class Storage extends ApiModule {
    * @param fileEntry
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
-    return this.axios
+    return this.client
       .post(
         '/storage/file',
         {
@@ -154,13 +135,8 @@ export class Storage extends ApiModule {
             encrypt_version: fileEntry.encrypt_version,
           },
         },
-        {
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
   }
 
   /**
@@ -168,7 +144,7 @@ export class Storage extends ApiModule {
    * @param payload
    */
   public updateFile(payload: UpdateFilePayload): Promise<void> {
-    return this.axios
+    return this.client
       .post(
         `/storage/file/${payload.fileId}/meta`,
         {
@@ -176,13 +152,8 @@ export class Storage extends ApiModule {
           bucketId: payload.bucketId,
           relativePath: payload.destinationPath,
         },
-        {
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
   }
 
   /**
@@ -190,13 +161,11 @@ export class Storage extends ApiModule {
    * @param payload
    */
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
-    return this.axios
-      .delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, {
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+    return this.client
+      .delete(
+        `/storage/folder/${payload.folderId}/file/${payload.fileId}`,
+        this.headers()
+      );
   }
 
   /**
@@ -204,7 +173,7 @@ export class Storage extends ApiModule {
    * @param payload
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
-    return this.axios
+    return this.client
       .post(
         '/storage/move/file',
         {
@@ -213,13 +182,8 @@ export class Storage extends ApiModule {
           relativePath: payload.destinationPath,
           bucketId: payload.bucketId,
         },
-        {
-          headers: this.headers(),
-        },
-      )
-      .then((response) => {
-        return response.data;
-      });
+        this.headers(),
+      );
   }
 
   /**
@@ -227,39 +191,33 @@ export class Storage extends ApiModule {
    * @param limit
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
-    return this.axios
-      .get(`/storage/recents?limit=${limit}`, {
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        `/storage/recents?limit=${limit}`,
+        this.headers()
+      );
   }
 
   /**
    * Returns the current space usage of the user
    */
   public spaceUsage(): Promise<UsageResponse> {
-    return this.axios
-      .get('/usage', {
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        '/usage',
+        this.headers()
+      );
   }
 
   /**
    * Returns the current space limit for the user
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
-    return this.axios
-      .get('/limit', {
-        headers: this.headers(),
-      })
-      .then((response) => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        '/limit',
+        this.headers()
+      );
   }
 
   /**

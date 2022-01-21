@@ -1,4 +1,3 @@
-import { Axios } from 'axios';
 import {
   Token,
   CryptoProvider,
@@ -13,22 +12,21 @@ import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
-import { ApiModule } from '../shared/modules';
-import { getDriveAxiosClient } from '../drive/shared/axios';
+import { HttpClient } from '../shared/http/client';
 
 export * from './types';
 
-export class Auth extends ApiModule {
+export class Auth {
+  private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity?: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    const axios = getDriveAxiosClient(apiUrl);
-    return new Auth(axios, appDetails, apiSecurity);
+    return new Auth(apiUrl, appDetails, apiSecurity);
   }
 
-  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    super(axios);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
+    this.client = HttpClient.create(apiUrl);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -42,26 +40,25 @@ export class Auth extends ApiModule {
     user: Omit<UserSettings, 'bucket'> & { referralCode: string },
     uuid: UUID
   }> {
-    return this.axios
-      .post('/register', {
-        name: registerDetails.name,
-        captcha: registerDetails.captcha,
-        lastname: registerDetails.lastname,
-        email: registerDetails.email,
-        password: registerDetails.password,
-        mnemonic: registerDetails.mnemonic,
-        salt: registerDetails.salt,
-        privateKey: registerDetails.keys.privateKeyEncrypted,
-        publicKey: registerDetails.keys.publicKey,
-        revocationKey: registerDetails.keys.revocationCertificate,
-        referral: registerDetails.referral,
-        referrer: registerDetails.referrer,
-      }, {
-        headers: this.basicHeaders(),
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .post(
+        '/register',
+        {
+          name: registerDetails.name,
+          captcha: registerDetails.captcha,
+          lastname: registerDetails.lastname,
+          email: registerDetails.email,
+          password: registerDetails.password,
+          mnemonic: registerDetails.mnemonic,
+          salt: registerDetails.salt,
+          privateKey: registerDetails.keys.privateKeyEncrypted,
+          publicKey: registerDetails.keys.publicKey,
+          revocationKey: registerDetails.keys.revocationCertificate,
+          referral: registerDetails.referral,
+          referrer: registerDetails.referrer,
+        },
+        this.basicHeaders(),
+      );
   }
 
   /**
@@ -79,19 +76,26 @@ export class Auth extends ApiModule {
     const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
-    return this.axios
-      .post('/access', {
-        email: details.email,
-        password: encryptedPasswordHash,
-        tfa: details.tfaCode,
-        privateKey: keys.privateKeyEncrypted,
-        publicKey: keys.publicKey,
-        revocateKey: keys.revocationCertificate,
-      }, {
-        headers: this.basicHeaders(),
-      })
-      .then(response => {
-        const data = response.data;
+    return this.client
+      .post<{
+        token: Token;
+        user: UserSettings;
+        userTeam: TeamsSettings | null
+      }>(
+        '/access',
+        {
+          email: details.email,
+          password: encryptedPasswordHash,
+          tfa: details.tfaCode,
+          privateKey: keys.privateKeyEncrypted,
+          publicKey: keys.publicKey,
+          revocateKey: keys.revocationCertificate,
+        },
+        this.basicHeaders()
+      )
+      .then(data => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
       })
@@ -106,17 +110,16 @@ export class Auth extends ApiModule {
    * @param token
    */
   public updateKeys(keys: Keys, token: Token) {
-    return this.axios
-      .patch('/user/keys', {
-        publicKey: keys.publicKey,
-        privateKey: keys.privateKeyEncrypted,
-        revocationKey: keys.revocationCertificate,
-      }, {
-        headers: this.headersWithToken(token),
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .patch(
+        '/user/keys',
+        {
+          publicKey: keys.publicKey,
+          privateKey: keys.privateKeyEncrypted,
+          revocationKey: keys.revocationCertificate,
+        },
+        this.headersWithToken(token)
+      );
   }
 
   /**
@@ -124,16 +127,21 @@ export class Auth extends ApiModule {
    * @param email
    */
   public securityDetails(email: string): Promise<SecurityDetails> {
-    return this.axios
-      .post('/login', {
-        email: email
-      }, {
-        headers: this.basicHeaders()
-      })
-      .then(response => {
+    return this.client
+      .post<{
+        sKey: string
+        tfa: boolean | null
+      }>(
+        '/login',
+        {
+          email: email
+        },
+        this.basicHeaders()
+      )
+      .then(data => {
         return {
-          encryptedSalt: response.data.sKey,
-          tfaEnabled: response.data.tfa === true,
+          encryptedSalt: data.sKey,
+          tfaEnabled: data.tfa === true,
         };
       });
   }
@@ -142,14 +150,18 @@ export class Auth extends ApiModule {
    * Generates a new TwoFactorAuth code
    */
   public generateTwoFactorAuthQR(): Promise<TwoFactorAuthQR> {
-    return this.axios
-      .get('/tfa', {
-        headers: this.headersWithToken(<string>this.apiSecurity?.token),
-      })
-      .then(response => {
+    return this.client
+      .get<{
+        qr: string
+        code: string
+      }>(
+        '/tfa',
+        this.headersWithToken(<string>this.apiSecurity?.token),
+      )
+      .then(data => {
         return {
-          qr: response.data.qr,
-          backupKey: response.data.code,
+          qr: data.qr,
+          backupKey: data.code,
         };
       });
   }
@@ -160,17 +172,15 @@ export class Auth extends ApiModule {
    * @param code
    */
   public disableTwoFactorAuth(pass: string, code: string): Promise<void> {
-    return this.axios
-      .delete('/tfa', {
-        data: {
+    return this.client
+      .delete(
+        '/tfa',
+        this.headersWithToken(<string>this.apiSecurity?.token),
+        {
           pass: pass,
           code: code
-        },
-        headers: this.headersWithToken(<string>this.apiSecurity?.token),
-      })
-      .then(response => {
-        return response.data;
-      });
+        }
+      );
   }
 
   /**
@@ -179,16 +189,15 @@ export class Auth extends ApiModule {
    * @param code
    */
   public storeTwoFactorAuthKey(backupKey: string, code: string): Promise<void> {
-    return this.axios
-      .put('/tfa', {
-        key: backupKey,
-        code: code,
-      }, {
-        headers: this.headersWithToken(<string>this.apiSecurity?.token),
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .put(
+        '/tfa',
+        {
+          key: backupKey,
+          code: code,
+        },
+        this.headersWithToken(<string>this.apiSecurity?.token)
+      );
   }
 
   /**
@@ -196,13 +205,11 @@ export class Auth extends ApiModule {
    * @param email
    */
   public sendDeactivationEmail(email: string): Promise<void> {
-    return this.axios
-      .get(`/deactivate/${email}`, {
-        headers: this.basicHeaders()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        `/deactivate/${email}`,
+        this.basicHeaders()
+      );
   }
 
   /**
@@ -210,13 +217,11 @@ export class Auth extends ApiModule {
    * @param token
    */
   public confirmDeactivation(token: string): Promise<void> {
-    return this.axios
-      .get(`/confirmDeactivation/${token}`, {
-        headers: this.basicHeaders()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        `/confirmDeactivation/${token}`,
+        this.basicHeaders()
+      );
   }
 
   private basicHeaders() {

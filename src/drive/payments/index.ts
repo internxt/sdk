@@ -1,22 +1,20 @@
-import { ApiModule } from '../../shared/modules';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { getDriveAxiosClient } from '../shared/axios';
-import { Axios } from 'axios';
 import { headersWithToken } from '../../shared/headers';
 import { CreatePaymentSessionPayload, ProductData } from './types';
+import { HttpClient } from '../../shared/http/client';
 
 
-export class Payments extends ApiModule {
+export class Payments {
+  private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity: ApiSecurity;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    const axios = getDriveAxiosClient(apiUrl);
-    return new Payments(axios, appDetails, apiSecurity);
+    return new Payments(apiUrl, appDetails, apiSecurity);
   }
 
-  private constructor(axios: Axios, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    super(axios);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
+    this.client = HttpClient.create(apiUrl);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -25,13 +23,11 @@ export class Payments extends ApiModule {
    * Fetches the existing products and its details
    */
   public getProducts(): Promise<ProductData[]> {
-    return this.axios
-      .get('/v3/stripe/products', {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .get(
+        '/v3/stripe/products',
+        this.headers()
+      );
   }
 
   /**
@@ -41,20 +37,19 @@ export class Payments extends ApiModule {
   public createSession(payload: CreatePaymentSessionPayload): Promise<{
     id: string
   }> {
-    return this.axios
-      .post('/v2/stripe/session', {
-        test: payload.test,
-        lifetime_tier: payload.lifetime_tier,
-        mode: payload.mode,
-        priceId: payload.priceId,
-        successUrl: payload.successUrl,
-        canceledUrl: payload.canceledUrl,
-      }, {
-        headers: this.headers()
-      })
-      .then(response => {
-        return response.data;
-      });
+    return this.client
+      .post(
+        '/v2/stripe/session',
+        {
+          test: payload.test,
+          lifetime_tier: payload.lifetime_tier,
+          mode: payload.mode,
+          priceId: payload.priceId,
+          successUrl: payload.successUrl,
+          canceledUrl: payload.canceledUrl,
+        },
+        this.headers()
+      );
   }
 
   /**
