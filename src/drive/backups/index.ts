@@ -42,6 +42,14 @@ export class Backups {
       );
   }
 
+  public deleteDevice(deviceId: number): Promise<void> {
+    return this.client
+      .delete(
+        `/backup/device/${deviceId}`,
+        this.headers()
+      );
+  }
+
   /**
    * Returns the needed headers for the module requests
    * @private

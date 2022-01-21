@@ -90,6 +90,31 @@ describe('backups service', () => {
 
   });
 
+  describe('delete device', () => {
+
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const {client, headers} = clientAndHeadersWithToken();
+      const callStub = sinon.stub(httpClient, 'delete').resolves({
+        done: true
+      });
+      const deviceId = 1;
+
+      // Act
+      const body = await client.deleteDevice(deviceId);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/backup/device/${deviceId}`,
+        headers
+      ]);
+      expect(body).toEqual({
+        done: true
+      });
+    });
+
+  });
+
 });
 
 function clientAndHeadersWithToken(
