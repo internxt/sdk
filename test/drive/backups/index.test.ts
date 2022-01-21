@@ -4,7 +4,7 @@ import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { testHeadersWithToken } from '../../shared/headers';
 import { Backups } from '../../../src/drive/backups';
 
-const httpClient = HttpClient.create();
+const httpClient = HttpClient.create('');
 
 describe('backups service', () => {
 

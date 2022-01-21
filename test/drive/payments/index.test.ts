@@ -5,7 +5,7 @@ import { Payments } from '../../../src/drive';
 import { CreatePaymentSessionPayload, StripeSessionMode } from '../../../src/drive/payments/types';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create();
+const httpClient = HttpClient.create('');
 
 describe('payments service', () => {
 

@@ -5,11 +5,11 @@ import { HttpClient } from '../../../src/shared/http/client';
 
 describe('HttpClient', () => {
 
-  describe('construction', () => {
+  afterEach(() => {
+    sinon.restore();
+  });
 
-    it('should initialize fine without base URL', () => {
-      HttpClient.create();
-    });
+  describe('construction', () => {
 
     it('should set the a given base URL', () => {
       // Arrange
@@ -22,29 +22,23 @@ describe('HttpClient', () => {
       expect(createSpy.calledOnceWith({
         baseURL: 'my-url'
       })).toBeTruthy();
-
-      sinon.restore();
     });
 
   });
 
   describe('requests', () => {
 
-    const myAxios = axios.create();
+    describe('interceptors without callback', () => {
 
-    beforeEach(() => {
-      sinon.stub(axios, 'create').returns(myAxios);
-    });
+      const myAxios = axios.create();
 
-    afterEach(() => {
-      sinon.restore();
-    });
-
-    describe('interceptors', () => {
+      beforeEach(() => {
+        sinon.stub(axios, 'create').returns(myAxios);
+      });
 
       it('should return only the data inside the response', () => {
         // Arrange
-        HttpClient.create();
+        HttpClient.create('');
         const responseFake = {
           data: {
             content: 'something-here'
@@ -111,43 +105,69 @@ describe('HttpClient', () => {
         );
       });
 
-      function getAxiosError(): AxiosError {
-        return {
-          config: <AxiosRequestConfig>{},
-          isAxiosError: false,
-          message: '',
-          name: '',
-          response: undefined,
-          request: undefined,
-          stack: '',
-          toJSON(): object {
-            return {};
-          }
+      it('should return unauthorized message if unauthorized callback is not present', () => {
+        const error = getAxiosError();
+        error.response = <AxiosResponse>{
+          data: {
+            error: 'not authorized'
+          },
+          status: 401
         };
-      }
+        assertMessageOnOutputError(
+          myAxios,
+          error,
+          'UNAUTHORIZED'
+        );
+      });
+    });
 
-      function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: string) {
+    describe('interceptor with callback', () => {
+
+      const myAxios = axios.create();
+
+      beforeEach(() => {
+        sinon.stub(axios, 'create').returns(myAxios);
+      });
+
+      it('should return unauthorized and execute callback if unauthorized callback is present', () => {
         // Arrange
-        HttpClient.create();
+        const error = getAxiosError();
+        error.response = <AxiosResponse>{
+          data: {
+            error: 'not authorized'
+          },
+          status: 401
+        };
+        const unauthorizedSpy = sinon.spy();
+        HttpClient.create('', unauthorizedSpy);
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const rejected = axios.interceptors.response.handlers[0].rejected;
+        const rejected = myAxios.interceptors.response.handlers[0].rejected;
 
-        // Act & Assert
-        expect(() => {
+        try {
+          // Act
           rejected(error);
-        }).toThrowError(message);
-      }
-
+        } catch (e) {
+          // Assert
+          expect(e).toEqual(new Error('UNAUTHORIZED'));
+          expect(unauthorizedSpy.calledOnce).toBeTruthy();
+        }
+      });
     });
 
     describe('calls', () => {
 
+      const myAxios = axios.create();
+
+      beforeEach(() => {
+        sinon.stub(axios, 'create').returns(myAxios);
+      });
+
       it('should execute GET request with correct parameters', async () => {
         // Arrange
         const callStub = sinon.stub(myAxios, 'get').resolves({});
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         await client.get('/some-path?with=arguments', {
@@ -167,7 +187,7 @@ describe('HttpClient', () => {
 
       it('should be able to cancel a GET request', async () => {
         // Arrange
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         const { promise, requestCanceler } = client.getCancellable('/some-path', {});
@@ -182,7 +202,7 @@ describe('HttpClient', () => {
         sinon.stub(myAxios, 'get').resolves({
           some: true
         });
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         const { promise } = client.getCancellable('/some-path', {});
@@ -196,7 +216,7 @@ describe('HttpClient', () => {
       it('should execute POST request with correct parameters', async () => {
         // Arrange
         const callStub = sinon.stub(myAxios, 'post').resolves({});
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         await client.post('/some-path', {
@@ -223,7 +243,7 @@ describe('HttpClient', () => {
 
       it('should be able to cancel a POST request', async () => {
         // Arrange
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         const { promise, requestCanceler } = client.postCancellable('/some-path', {}, {});
@@ -238,7 +258,7 @@ describe('HttpClient', () => {
         sinon.stub(myAxios, 'post').resolves({
           some: true
         });
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         const { promise } = client.postCancellable('/some-path', {}, {});
@@ -252,7 +272,7 @@ describe('HttpClient', () => {
       it('should execute PUT request with correct parameters', async () => {
         // Arrange
         const callStub = sinon.stub(myAxios, 'put').resolves({});
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         await client.put('/some-path', {
@@ -280,7 +300,7 @@ describe('HttpClient', () => {
       it('should execute PATCH request with correct parameters', async () => {
         // Arrange
         const callStub = sinon.stub(myAxios, 'patch').resolves({});
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         await client.patch('/some-path', {
@@ -308,7 +328,7 @@ describe('HttpClient', () => {
       it('should execute DELETE request with correct parameters', async () => {
         // Arrange
         const callStub = sinon.stub(myAxios, 'delete').resolves({});
-        const client = HttpClient.create();
+        const client = HttpClient.create('');
 
         // Act
         await client.delete('/some-path', {
@@ -339,3 +359,32 @@ describe('HttpClient', () => {
 
 });
 
+
+function getAxiosError(): AxiosError {
+  return {
+    config: <AxiosRequestConfig>{},
+    isAxiosError: false,
+    message: '',
+    name: '',
+    response: undefined,
+    request: undefined,
+    stack: '',
+    toJSON(): object {
+      return {};
+    }
+  };
+}
+
+function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: string) {
+  // Arrange
+  HttpClient.create('');
+
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const rejected = axios.interceptors.response.handlers[0].rejected;
+
+  // Act & Assert
+  expect(() => {
+    rejected(error);
+  }).toThrowError(message);
+}

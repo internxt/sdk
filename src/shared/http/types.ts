@@ -5,3 +5,5 @@ export type Parameters = Record<string, unknown>;
 export interface RequestCanceler {
   cancel: (message?: string) => void;
 }
+
+export type UnauthorizedCallback = () => void

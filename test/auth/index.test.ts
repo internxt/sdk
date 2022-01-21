@@ -5,7 +5,7 @@ import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
 
-const httpClient = HttpClient.create();
+const httpClient = HttpClient.create('');
 
 describe('# auth service tests', () => {
 

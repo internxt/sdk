@@ -26,7 +26,7 @@ export class Auth {
   }
 
   private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    this.client = HttpClient.create(apiUrl);
+    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }

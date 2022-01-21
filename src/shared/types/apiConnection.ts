@@ -1,4 +1,5 @@
 import { Token } from '../../auth';
+import { UnauthorizedCallback } from '../http/types';
 
 export type ApiUrl = string;
 
@@ -9,5 +10,6 @@ export interface AppDetails {
 
 export interface ApiSecurity {
   token: Token
-  mnemonic: string
+  mnemonic: string,
+  unauthorizedCallback?: UnauthorizedCallback
 }
