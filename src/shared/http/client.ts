@@ -1,20 +1,25 @@
 import axios, { Axios, AxiosError, AxiosResponse, CancelToken } from 'axios';
-import { Headers, URL, RequestCanceler, Parameters } from './types';
+import { Headers, URL, RequestCanceler, Parameters, UnauthorizedCallback } from './types';
 import AppError from '../types/errors';
 
 export { RequestCanceler } from './types';
 
 export class HttpClient {
   private readonly axios: Axios;
+  private readonly unauthorizedCallback: UnauthorizedCallback;
 
-  public static create(baseURL: URL = '') {
-    return new HttpClient(baseURL);
+  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
+    if (unauthorizedCallback === undefined) {
+      unauthorizedCallback = () => null;
+    }
+    return new HttpClient(baseURL, unauthorizedCallback);
   }
 
-  private constructor(baseURL: URL = '') {
+  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback) {
     this.axios = axios.create({
       baseURL: baseURL
     });
+    this.unauthorizedCallback = unauthorizedCallback;
     this.initializeMiddleware();
   }
 
@@ -132,7 +137,7 @@ export class HttpClient {
   private initializeMiddleware() {
     this.axios.interceptors.response.use(
       HttpClient.extractData,
-      HttpClient.normalizeError
+      this.normalizeError.bind(this)
     );
   }
 
@@ -150,11 +155,14 @@ export class HttpClient {
    * @param error
    * @private
    */
-  private static normalizeError(error: AxiosError) {
+  private normalizeError(error: AxiosError) {
     let errorMessage: string, errorStatus: number;
 
     if (error.response) {
       const response = error.response as AxiosResponse<{ error: string }>;
+      if (response.status === 401) {
+        this.unauthorizedCallback();
+      }
       if (response.data.error !== undefined) {
         errorMessage = response.data.error;
       } else {

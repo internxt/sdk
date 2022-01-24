@@ -5,7 +5,7 @@ import { ChangePasswordPayload } from '../../../src/drive/users/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create();
+const httpClient = HttpClient.create('');
 
 describe('# users service tests', () => {
 
