@@ -116,7 +116,7 @@ describe('HttpClient', () => {
         assertMessageOnOutputError(
           myAxios,
           error,
-          'UNAUTHORIZED'
+          'not authorized'
         );
       });
     });
@@ -150,7 +150,7 @@ describe('HttpClient', () => {
           rejected(error);
         } catch (e) {
           // Assert
-          expect(e).toEqual(new Error('UNAUTHORIZED'));
+          expect(e).toEqual(new Error('not authorized'));
           expect(unauthorizedSpy.calledOnce).toBeTruthy();
         }
       });

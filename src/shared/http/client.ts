@@ -162,9 +162,7 @@ export class HttpClient {
       const response = error.response as AxiosResponse<{ error: string }>;
       if (response.status === 401) {
         this.unauthorizedCallback();
-        throw new Error('UNAUTHORIZED');
       }
-
       if (response.data.error !== undefined) {
         errorMessage = response.data.error;
       } else {
