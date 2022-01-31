@@ -65,6 +65,7 @@ export interface Photo {
   userId: string;
   status: PhotoStatus;
   statusChangedAt: Date;
+  hash: string;
   takenAt: Date;
   createdAt: Date;
   updatedAt: Date;
