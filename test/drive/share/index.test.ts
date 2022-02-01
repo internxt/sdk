@@ -1,5 +1,5 @@
 import sinon from 'sinon';
-import { GenerateShareLinkPayload } from '../../../src/drive/share/types';
+import { GenerateShareFileLinkPayload, GenerateShareFolderLinkPayload } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
 import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
@@ -25,9 +25,8 @@ describe('# share service tests', () => {
         token: 'token'
       });
       const { client, headers } = clientAndHeaders();
-      const payload: GenerateShareLinkPayload = {
+      const payload: GenerateShareFileLinkPayload = {
         fileId: '1',
-        isFolder: false,
         views: 0,
         encryptionKey: '',
         fileToken: '',
@@ -35,17 +34,53 @@ describe('# share service tests', () => {
       };
 
       // Act
-      const body = await client.createShareLink(payload);
+      const body = await client.createShareFileLink(payload);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
         '/storage/share/file/1',
         {
-          isFolder: payload.isFolder,
           views: payload.views,
           encryptionKey: payload.encryptionKey,
           fileToken: payload.fileToken,
           bucket: payload.bucket,
+        },
+        headers
+      ]);
+      expect(body).toEqual({
+        token: 'token'
+      });
+    });
+
+  });
+
+  describe('generate share folder link', () => {
+
+    it('Should be called with right arguments & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        token: 'token',
+      });
+      const { client, headers } = clientAndHeaders();
+      const payload: GenerateShareFolderLinkPayload = {
+        folderId: 1,
+        views: 0,
+        bucketToken: '',
+        bucket: '',
+        encryptedMnemonic: 'lola'
+      };
+
+      // Act
+      const body = await client.createShareFolderLink(payload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/storage/share/folder/1',
+        {
+          views: payload.views,
+          bucketToken: payload.bucketToken,
+          bucket: payload.bucket,
+          mnemonic: payload.encryptedMnemonic,
         },
         headers
       ]);

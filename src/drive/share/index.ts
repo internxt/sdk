@@ -1,5 +1,5 @@
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { GenerateShareLinkPayload, GetShareInfoResponse, IShare } from './types';
+import { GenerateShareFileLinkPayload, GenerateShareFolderLinkPayload, GetShareInfoResponse, IShare } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
 
@@ -24,18 +24,37 @@ export class Share {
    * Creates a new link to share a file
    * @param payload
    */
-  public createShareLink(payload: GenerateShareLinkPayload): Promise<{
+  public createShareFileLink(payload: GenerateShareFileLinkPayload): Promise<{
     token: string
   }> {
     return this.client
       .post(
         `/storage/share/file/${payload.fileId}`,
         {
-          isFolder: payload.isFolder,
           views: payload.views,
           encryptionKey: payload.encryptionKey,
           fileToken: payload.fileToken,
           bucket: payload.bucket,
+        },
+        this.headers()
+      );
+  }
+
+  /**
+   * Creates a new link to share a folder
+   * @param payload
+   */
+  public createShareFolderLink(payload: GenerateShareFolderLinkPayload): Promise<{
+    token: string
+  }> {
+    return this.client
+      .post(
+        `/storage/share/folder/${payload.folderId}`,
+        {
+          views: payload.views,
+          bucketToken: payload.bucketToken,
+          bucket: payload.bucket,
+          mnemonic: payload.encryptedMnemonic
         },
         this.headers()
       );
