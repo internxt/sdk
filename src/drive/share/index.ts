@@ -1,5 +1,11 @@
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { GenerateShareFileLinkPayload, GenerateShareFolderLinkPayload, GetShareInfoResponse, IShare } from './types';
+import {
+  GenerateShareFileLinkPayload,
+  GenerateShareFolderLinkPayload, SharedDirectoryFiles, SharedDirectoryFolders,
+  GetSharedDirectoryFoldersPayload, SharedFolderInfo,
+  SharedFileInfo,
+  IShare, GetSharedDirectoryFilesPayload
+} from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
 
@@ -61,13 +67,62 @@ export class Share {
   }
 
   /**
-   * Fetches info about a specific share
+   * Fetches data of a shared file
    * @param token
    */
-  public getShareByToken(token: string): Promise<GetShareInfoResponse> {
+  public getSharedFileByToken(token: string): Promise<SharedFileInfo> {
     return this.client
       .get(
         `/storage/share/${token}`,
+        this.headers()
+      );
+  }
+
+  /**
+   * Fetches data of a shared folder
+   * @param token
+   */
+  public getSharedFolderByToken(token: string): Promise<SharedFolderInfo> {
+    return this.client
+      .get(
+        `/storage/shared-folder/${token}`,
+        this.headers()
+      );
+  }
+
+  /**
+   * Fetches paginated folders of a specific shared folder
+   * @param payload
+   */
+  public getSharedDirectoryFolders(payload: GetSharedDirectoryFoldersPayload): Promise<SharedDirectoryFolders> {
+    return this.client
+      .post(
+        '/storage/share/down/folders',
+        {
+          token: payload.token,
+          directoryId: payload.directoryId,
+          offset: payload.offset,
+          limit: payload.limit,
+        },
+        this.headers()
+      );
+  }
+
+  /**
+   * Fetches paginated files of a specific shared folder
+   * @param payload
+   */
+  public getSharedDirectoryFiles(payload: GetSharedDirectoryFilesPayload): Promise<SharedDirectoryFiles> {
+    return this.client
+      .post(
+        '/storage/share/down/files',
+        {
+          token: payload.token,
+          directoryId: payload.directoryId,
+          offset: payload.offset,
+          limit: payload.limit,
+          code: payload.code,
+        },
         this.headers()
       );
   }
