@@ -1,11 +1,18 @@
 
-export interface GenerateShareLinkPayload {
+export interface GenerateShareFileLinkPayload {
   fileId: string
-  isFolder: boolean
   views: number
   encryptionKey: string
   fileToken: string
   bucket: string
+}
+
+export interface GenerateShareFolderLinkPayload {
+  folderId: number
+  views: number
+  bucketToken: string
+  bucket: string,
+  encryptedMnemonic: string
 }
 
 export interface GetShareInfoResponse {
