@@ -117,6 +117,23 @@ export class Storage {
   }
 
   /**
+   * Returns the total size of a folder
+   * @param folderId
+   */
+  public getFolderSize(folderId: number): Promise<number> {
+    return this.client
+      .get<{
+        size: number
+      }>(
+        `/storage/folder/size/${folderId}`,
+        this.headers()
+      )
+      .then(response => {
+        return response.size;
+      });
+  }
+
+  /**
    * Creates a new file entry
    * @param fileEntry
    */
@@ -197,6 +214,7 @@ export class Storage {
         this.headers()
       );
   }
+
 
   /**
    * Returns the current space usage of the user
