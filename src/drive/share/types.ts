@@ -1,4 +1,3 @@
-
 export interface GenerateShareFileLinkPayload {
   fileId: string
   views: number
@@ -15,7 +14,18 @@ export interface GenerateShareFolderLinkPayload {
   encryptedMnemonic: string
 }
 
-export interface GetShareInfoResponse {
+export interface GetSharedDirectoryFoldersPayload {
+  token: string
+  directoryId: number | null
+  offset: number
+  limit: number
+}
+
+export interface GetSharedDirectoryFilesPayload extends GetSharedDirectoryFoldersPayload {
+  code: string
+}
+
+export interface SharedFileInfo {
   user: string;
   token: string;
   file: string;
@@ -31,6 +41,37 @@ export interface GetShareInfoResponse {
     type: string;
     size: number;
   };
+}
+
+export interface SharedFolderInfo {
+  folderId: number
+  name: string
+  size: number
+  bucket: string
+  bucketToken: string
+}
+
+export interface SharedDirectoryFolders {
+  folders: SharedDirectoryFolder[],
+  last: boolean
+}
+
+export interface SharedDirectoryFolder {
+  id: number
+  name: string
+}
+
+export interface SharedDirectoryFiles {
+  files: SharedDirectoryFile[],
+  last: boolean
+}
+
+export interface SharedDirectoryFile {
+  id: string
+  name: string
+  type: string
+  size: number
+  encryptionKey: string
 }
 
 export interface IShare {
