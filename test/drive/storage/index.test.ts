@@ -222,6 +222,28 @@ describe('# storage service tests', () => {
 
     });
 
+    describe('folder size', () => {
+
+      it('Should call with right arguments & return content', async () => {
+        // Arrange
+        const callStub = sinon.stub(httpClient, 'get').resolves({
+          size: 10
+        });
+        const { client, headers } = clientAndHeaders();
+
+        // Act
+        const body = await client.getFolderSize(2);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          '/storage/folder/size/2',
+          headers
+        ]);
+        expect(body).toEqual(10);
+      });
+
+    });
+
   });
 
   describe('-> files', () => {
