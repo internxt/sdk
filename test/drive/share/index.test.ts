@@ -172,7 +172,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = sinon.stub(httpClient, 'get').resolves({
         info: 'some'
       });
       const { client, headers } = clientAndHeaders();
@@ -188,13 +188,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/storage/share/down/folders',
-        {
-          token: payload.token,
-          directoryId: payload.directoryId,
-          offset: payload.offset,
-          limit: payload.limit,
-        },
+        `/storage/share/down/folders/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
         headers
       ]);
       expect(body).toEqual({
@@ -208,7 +202,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = sinon.stub(httpClient, 'get').resolves({
         info: 'some'
       });
       const { client, headers } = clientAndHeaders();
@@ -225,14 +219,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/storage/share/down/files',
-        {
-          token: payload.token,
-          directoryId: payload.directoryId,
-          offset: payload.offset,
-          limit: payload.limit,
-          code: payload.code,
-        },
+        `/storage/share/down/files/${payload.code}/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
         headers
       ]);
       expect(body).toEqual({

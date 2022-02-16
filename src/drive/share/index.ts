@@ -107,14 +107,8 @@ export class Share {
    */
   public getSharedDirectoryFolders(payload: GetSharedDirectoryFoldersPayload): Promise<SharedDirectoryFolders> {
     return this.client
-      .post(
-        '/storage/share/down/folders',
-        {
-          token: payload.token,
-          directoryId: payload.directoryId,
-          offset: payload.offset,
-          limit: payload.limit,
-        },
+      .get(
+        `/storage/share/down/folders/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
         this.basicHeaders()
       );
   }
@@ -125,15 +119,8 @@ export class Share {
    */
   public getSharedDirectoryFiles(payload: GetSharedDirectoryFilesPayload): Promise<SharedDirectoryFiles> {
     return this.client
-      .post(
-        '/storage/share/down/files',
-        {
-          token: payload.token,
-          directoryId: payload.directoryId,
-          offset: payload.offset,
-          limit: payload.limit,
-          code: payload.code,
-        },
+      .get(
+        `/storage/share/down/files/${payload.code}/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
         this.basicHeaders()
       );
   }
