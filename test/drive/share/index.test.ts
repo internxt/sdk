@@ -188,7 +188,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/folders/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
+        `/storage/share/down/folders?token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
         headers
       ]);
       expect(body).toEqual({
@@ -219,7 +219,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/files/${payload.code}/${payload.token}/${payload.directoryId}/${payload.offset}/${payload.limit}`,
+        `/storage/share/down/files?code=${payload.code}&token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
         headers
       ]);
       expect(body).toEqual({
