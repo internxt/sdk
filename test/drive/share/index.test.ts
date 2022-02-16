@@ -5,7 +5,7 @@ import {
   SharedDirectoryFolders, GetSharedDirectoryFoldersPayload, GetSharedDirectoryFilesPayload
 } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
-import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { testBasicHeaders, testHeadersWithToken, testHeadersWithTokenAndMnemonic } from '../../shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -28,7 +28,7 @@ describe('# share service tests', () => {
       const callStub = sinon.stub(httpClient, 'post').resolves({
         token: 'token'
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndHeadersWithToken();
       const payload: GenerateShareFileLinkPayload = {
         fileId: '1',
         views: 0,
@@ -65,7 +65,7 @@ describe('# share service tests', () => {
       const callStub = sinon.stub(httpClient, 'post').resolves({
         token: 'token',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndHeadersWithToken();
       const payload: GenerateShareFolderLinkPayload = {
         folderId: 1,
         views: 0,
@@ -126,7 +126,7 @@ describe('# share service tests', () => {
       const callStub = sinon.stub(httpClient, 'get').resolves({
         list: 'some'
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndHeadersWithToken();
 
       // Act
       const body = await client.getShareList();
@@ -242,7 +242,7 @@ describe('# share service tests', () => {
 
   });
 
-  function clientAndHeaders(
+  function clientAndHeadersWithToken(
     apiUrl = '',
     clientName = 'c-name',
     clientVersion = '0.1',
@@ -262,6 +262,27 @@ describe('# share service tests', () => {
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
     const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+    return { client, headers };
+  }
+
+  function clientAndHeaders(
+    apiUrl = '',
+    clientName = 'c-name',
+    clientVersion = '0.1',
+  ): {
+    client: Share,
+    headers: object
+  } {
+    const appDetails: AppDetails = {
+      clientName: clientName,
+      clientVersion: clientVersion,
+    };
+    const apiSecurity: ApiSecurity = {
+      token: '',
+      mnemonic: '',
+    };
+    const client = Share.client(apiUrl, appDetails, apiSecurity);
+    const headers = testBasicHeaders(clientName, clientVersion);
     return { client, headers };
   }
 

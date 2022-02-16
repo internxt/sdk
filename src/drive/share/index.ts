@@ -1,4 +1,4 @@
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   GenerateShareFileLinkPayload,
   GenerateShareFolderLinkPayload, SharedDirectoryFiles, SharedDirectoryFolders,
@@ -67,6 +67,17 @@ export class Share {
   }
 
   /**
+   * Fetches the list of shared items
+   */
+  public getShareList(): Promise<IShare> {
+    return this.client
+      .get(
+        '/share/list',
+        this.headers()
+      );
+  }
+
+  /**
    * Fetches data of a shared file
    * @param token
    */
@@ -74,7 +85,7 @@ export class Share {
     return this.client
       .get(
         `/storage/share/${token}`,
-        this.headers()
+        this.basicHeaders()
       );
   }
 
@@ -86,7 +97,7 @@ export class Share {
     return this.client
       .get(
         `/storage/shared-folder/${token}`,
-        this.headers()
+        this.basicHeaders()
       );
   }
 
@@ -104,7 +115,7 @@ export class Share {
           offset: payload.offset,
           limit: payload.limit,
         },
-        this.headers()
+        this.basicHeaders()
       );
   }
 
@@ -123,18 +134,7 @@ export class Share {
           limit: payload.limit,
           code: payload.code,
         },
-        this.headers()
-      );
-  }
-
-  /**
-   * Fetches the list of shared items
-   */
-  public getShareList(): Promise<IShare> {
-    return this.client
-      .get(
-        '/share/list',
-        this.headers()
+        this.basicHeaders()
       );
   }
 
@@ -148,6 +148,17 @@ export class Share {
       this.appDetails.clientVersion,
       this.apiSecurity.token,
       this.apiSecurity.mnemonic
+    );
+  }
+
+  /**
+   * Returns the needed headers for the module requests
+   * @private
+   */
+  private basicHeaders() {
+    return basicHeaders(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
     );
   }
 }
