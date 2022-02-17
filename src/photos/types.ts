@@ -61,6 +61,7 @@ export interface Photo {
   height: number;
   fileId: FileId;
   previewId: FileId;
+  previews?: { width: number; height: number; size: number; fileId: FileId }[];
   deviceId: DeviceId;
   userId: string;
   status: PhotoStatus;
