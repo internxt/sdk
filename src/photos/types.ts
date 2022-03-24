@@ -71,6 +71,11 @@ export interface Photo {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PhotoWithDownloadLink extends Photo {
+  previewLink: string;
+  previewIndex: string;
+}
 export interface PhotoJSON extends Omit<Photo, 'statusChangedAt' | 'takenAt' | 'createdAt' | 'updatedAt'> {
   statusChangedAt: string;
   takenAt: string;
