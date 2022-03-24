@@ -3,6 +3,7 @@ import queryString from 'query-string';
 
 import { extractAxiosErrorMessage } from '../../utils';
 import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel, PhotoStatus } from '..';
+import { PhotoWithDownloadLink } from '../types';
 
 export default class PhotosSubmodule {
   private model: PhotosSdkModel;
@@ -26,10 +27,23 @@ export default class PhotosSubmodule {
 
   public getPhotos(
     filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
+    skip: number,
+    limit: number,
+    includeDownloadLinks: false,
+  ): Promise<{ results: Photo[]; count: number }>;
+  public getPhotos(
+    filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
+    skip: number,
+    limit: number,
+    includeDownloadLinks: true,
+  ): Promise<{ results: PhotoWithDownloadLink[]; count: number }>;
+  public getPhotos(
+    filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
     skip = 0,
     limit = 1,
+    includeDownloadLinks: boolean = false,
   ): Promise<{ results: Photo[]; count: number }> {
-    const query = queryString.stringify({ ...filter, skip, limit });
+    const query = queryString.stringify({ ...filter, skip, limit, includeDownloadLinks });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);

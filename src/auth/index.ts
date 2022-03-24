@@ -6,7 +6,7 @@ import {
   RegisterDetails,
   UserAccessError,
   SecurityDetails,
-  TwoFactorAuthQR
+  TwoFactorAuthQR,
 } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -36,29 +36,28 @@ export class Auth {
    * @param registerDetails
    */
   public register(registerDetails: RegisterDetails): Promise<{
-    token: Token,
-    user: Omit<UserSettings, 'bucket'> & { referralCode: string },
-    uuid: UUID
+    token: Token;
+    user: Omit<UserSettings, 'bucket'> & { referralCode: string };
+    uuid: UUID;
   }> {
-    return this.client
-      .post(
-        '/register',
-        {
-          name: registerDetails.name,
-          captcha: registerDetails.captcha,
-          lastname: registerDetails.lastname,
-          email: registerDetails.email,
-          password: registerDetails.password,
-          mnemonic: registerDetails.mnemonic,
-          salt: registerDetails.salt,
-          privateKey: registerDetails.keys.privateKeyEncrypted,
-          publicKey: registerDetails.keys.publicKey,
-          revocationKey: registerDetails.keys.revocationCertificate,
-          referral: registerDetails.referral,
-          referrer: registerDetails.referrer,
-        },
-        this.basicHeaders(),
-      );
+    return this.client.post(
+      '/register',
+      {
+        name: registerDetails.name,
+        captcha: registerDetails.captcha,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
+        privateKey: registerDetails.keys.privateKeyEncrypted,
+        publicKey: registerDetails.keys.publicKey,
+        revocationKey: registerDetails.keys.revocationCertificate,
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
@@ -66,10 +65,14 @@ export class Auth {
    * @param details
    * @param cryptoProvider
    */
-  public async login(details: LoginDetails, cryptoProvider: CryptoProvider): Promise<{
+  public async login(
+    details: LoginDetails,
+    cryptoProvider: CryptoProvider,
+  ): Promise<{
     token: Token;
+    newToken: Token;
     user: UserSettings;
-    userTeam: TeamsSettings | null
+    userTeam: TeamsSettings | null;
   }> {
     const securityDetails = await this.securityDetails(details.email);
     const encryptedSalt = securityDetails.encryptedSalt;
@@ -79,8 +82,9 @@ export class Auth {
     return this.client
       .post<{
         token: Token;
+        newToken: Token;
         user: UserSettings;
-        userTeam: TeamsSettings | null
+        userTeam: TeamsSettings | null;
       }>(
         '/access',
         {
@@ -91,15 +95,15 @@ export class Auth {
           publicKey: keys.publicKey,
           revocateKey: keys.revocationCertificate,
         },
-        this.basicHeaders()
+        this.basicHeaders(),
       )
-      .then(data => {
+      .then((data) => {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
       })
-      .catch(error => {
+      .catch((error) => {
         throw new UserAccessError(error.message);
       });
   }
@@ -110,16 +114,15 @@ export class Auth {
    * @param token
    */
   public updateKeys(keys: Keys, token: Token) {
-    return this.client
-      .patch(
-        '/user/keys',
-        {
-          publicKey: keys.publicKey,
-          privateKey: keys.privateKeyEncrypted,
-          revocationKey: keys.revocationCertificate,
-        },
-        this.headersWithToken(token)
-      );
+    return this.client.patch(
+      '/user/keys',
+      {
+        publicKey: keys.publicKey,
+        privateKey: keys.privateKeyEncrypted,
+        revocationKey: keys.revocationCertificate,
+      },
+      this.headersWithToken(token),
+    );
   }
 
   /**
@@ -129,16 +132,16 @@ export class Auth {
   public securityDetails(email: string): Promise<SecurityDetails> {
     return this.client
       .post<{
-        sKey: string
-        tfa: boolean | null
+        sKey: string;
+        tfa: boolean | null;
       }>(
         '/login',
         {
-          email: email
+          email: email,
         },
-        this.basicHeaders()
+        this.basicHeaders(),
       )
-      .then(data => {
+      .then((data) => {
         return {
           encryptedSalt: data.sKey,
           tfaEnabled: data.tfa === true,
@@ -152,13 +155,10 @@ export class Auth {
   public generateTwoFactorAuthQR(): Promise<TwoFactorAuthQR> {
     return this.client
       .get<{
-        qr: string
-        code: string
-      }>(
-        '/tfa',
-        this.headersWithToken(<string>this.apiSecurity?.token),
-      )
-      .then(data => {
+        qr: string;
+        code: string;
+      }>('/tfa', this.headersWithToken(<string>this.apiSecurity?.token))
+      .then((data) => {
         return {
           qr: data.qr,
           backupKey: data.code,
@@ -172,15 +172,10 @@ export class Auth {
    * @param code
    */
   public disableTwoFactorAuth(pass: string, code: string): Promise<void> {
-    return this.client
-      .delete(
-        '/tfa',
-        this.headersWithToken(<string>this.apiSecurity?.token),
-        {
-          pass: pass,
-          code: code
-        }
-      );
+    return this.client.delete('/tfa', this.headersWithToken(<string>this.apiSecurity?.token), {
+      pass: pass,
+      code: code,
+    });
   }
 
   /**
@@ -189,15 +184,14 @@ export class Auth {
    * @param code
    */
   public storeTwoFactorAuthKey(backupKey: string, code: string): Promise<void> {
-    return this.client
-      .put(
-        '/tfa',
-        {
-          key: backupKey,
-          code: code,
-        },
-        this.headersWithToken(<string>this.apiSecurity?.token)
-      );
+    return this.client.put(
+      '/tfa',
+      {
+        key: backupKey,
+        code: code,
+      },
+      this.headersWithToken(<string>this.apiSecurity?.token),
+    );
   }
 
   /**
@@ -205,11 +199,7 @@ export class Auth {
    * @param email
    */
   public sendDeactivationEmail(email: string): Promise<void> {
-    return this.client
-      .get(
-        `/deactivate/${email}`,
-        this.basicHeaders()
-      );
+    return this.client.get(`/deactivate/${email}`, this.basicHeaders());
   }
 
   /**
@@ -217,11 +207,7 @@ export class Auth {
    * @param token
    */
   public confirmDeactivation(token: string): Promise<void> {
-    return this.client
-      .get(
-        `/confirmDeactivation/${token}`,
-        this.basicHeaders()
-      );
+    return this.client.get(`/confirmDeactivation/${token}`, this.basicHeaders());
   }
 
   private basicHeaders() {
@@ -231,5 +217,4 @@ export class Auth {
   private headersWithToken(token: Token) {
     return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, token);
   }
-
 }
