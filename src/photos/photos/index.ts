@@ -29,20 +29,19 @@ export default class PhotosSubmodule {
     filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
     skip: number,
     limit: number,
-    includeDownloadLinks: false,
   ): Promise<{ results: Photo[]; count: number }>;
   public getPhotos(
     filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
     skip: number,
     limit: number,
     includeDownloadLinks: true,
-  ): Promise<{ results: PhotoWithDownloadLink[]; count: number }>;
+  ): Promise<{ results: PhotoWithDownloadLink[]; count: number; bucketId: string }>;
   public getPhotos(
     filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
     skip = 0,
     limit = 1,
-    includeDownloadLinks: boolean = false,
-  ): Promise<{ results: Photo[]; count: number }> {
+    includeDownloadLinks?: true,
+  ): Promise<{ results: Photo[]; count: number; bucketId?: string }> {
     const query = queryString.stringify({ ...filter, skip, limit, includeDownloadLinks });
 
     if (skip < 0) {
@@ -54,12 +53,16 @@ export default class PhotosSubmodule {
     }
 
     return axios
-      .get<{ results: PhotoJSON[]; count: number }>(`${this.model.baseUrl}/photos/?${query}`, {
+      .get<{ results: PhotoJSON[]; count: number; bucketId?: string }>(`${this.model.baseUrl}/photos/?${query}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then((res) => ({ results: res.data.results.map((photoJson) => this.parse(photoJson)), count: res.data.count }))
+      .then((res) => ({
+        results: res.data.results.map((photoJson) => this.parse(photoJson)),
+        count: res.data.count,
+        bucketId: res.data.bucketId,
+      }))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
