@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
 
-import { CreatePhotoShareBody, PhotosSdkModel, Share } from '..';
+import { CreatePhotoShareBody, PhotosSdkModel } from '..';
+import { GetPhotoShareResponse } from '../types';
 
 export default class SharesSubmodule {
   private model: PhotosSdkModel;
@@ -10,13 +11,9 @@ export default class SharesSubmodule {
     this.model = model;
   }
 
-  public getShareByToken(token: string) {
+  public getShare(id: string, code: string) {
     return axios
-      .get<Share>(`${this.model.baseUrl}/shares/${token}`, {
-        headers: {
-          Authorization: `Bearer ${this.model.accessToken}`,
-        },
-      })
+      .get<GetPhotoShareResponse>(`${this.model.baseUrl}/shares/${id}?code=${code}`)
       .then((response) => response.data)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
@@ -30,11 +27,8 @@ export default class SharesSubmodule {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
-      .then(() => undefined)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
   }
-
-  // TODO: create visit share endpoint and method
 }
