@@ -2,7 +2,7 @@ import axios from 'axios';
 import { extractAxiosErrorMessage } from '../../utils';
 
 import { CreatePhotoShareBody, PhotosSdkModel } from '..';
-import { GetPhotoShareResponse } from '../types';
+import { GetPhotoShareResponse, Share } from '../types';
 
 export default class SharesSubmodule {
   private model: PhotosSdkModel;
@@ -22,7 +22,7 @@ export default class SharesSubmodule {
 
   public createShare(body: CreatePhotoShareBody) {
     return axios
-      .post<CreatePhotoShareBody, void>(`${this.model.baseUrl}/shares`, body, {
+      .post<CreatePhotoShareBody, Share>(`${this.model.baseUrl}/shares`, body, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
