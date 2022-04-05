@@ -22,11 +22,12 @@ export default class SharesSubmodule {
 
   public createShare(body: CreatePhotoShareBody) {
     return axios
-      .post<CreatePhotoShareBody, Share>(`${this.model.baseUrl}/shares`, body, {
+      .post<Share>(`${this.model.baseUrl}/shares`, body, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
+      .then((response) => response.data)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
