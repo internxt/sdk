@@ -5,7 +5,7 @@ import {
   SharedDirectoryFolders, GetSharedDirectoryFoldersPayload, GetSharedDirectoryFilesPayload
 } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
-import { testBasicHeaders, testHeadersWithToken, testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { basicHeaders, headersWithTokenAndMnemonic } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -248,7 +248,7 @@ describe('# share service tests', () => {
       mnemonic: mnemonic,
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+    const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
     return { client, headers };
   }
 
@@ -269,7 +269,7 @@ describe('# share service tests', () => {
       mnemonic: '',
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = testBasicHeaders(clientName, clientVersion);
+    const headers = basicHeaders(clientName, clientVersion);
     return { client, headers };
   }
 

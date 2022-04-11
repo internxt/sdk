@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { testHeadersWithToken } from '../../shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { Payments } from '../../../src/drive';
 import { CreatePaymentSessionPayload, StripeSessionMode } from '../../../src/drive/payments/types';
 import { HttpClient } from '../../../src/shared/http/client';
@@ -102,6 +102,6 @@ function clientAndHeadersWithToken(
     mnemonic: '',
   };
   const client = Payments.client(apiUrl, appDetails, apiSecurity);
-  const headers = testHeadersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }

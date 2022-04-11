@@ -71,6 +71,11 @@ export interface Photo {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface PhotoWithDownloadLink extends Photo {
+  previewLink: string;
+  previewIndex: string;
+}
 export interface PhotoJSON extends Omit<Photo, 'statusChangedAt' | 'takenAt' | 'createdAt' | 'updatedAt'> {
   statusChangedAt: string;
   takenAt: string;
@@ -83,8 +88,8 @@ export type ShareId = string;
 export interface Share {
   id: ShareId;
   bucket: string;
-  encryptionKey: string;
-  photoId: string;
+  encryptedMnemonic: string;
+  photoIds: PhotoId[];
   token: string;
   views: number;
   createdAt: Date;
@@ -94,9 +99,9 @@ export interface ShareJSON extends Omit<Share, 'createdAt' | 'updatedAt'> {
   createdAt: string;
   updatedAt: string;
 }
-export interface CreatePhotoShareBody {
-  encryptionKey: string;
-  views: number;
-  photoId: string;
-  bucket: string;
-}
+
+export type CreatePhotoShareBody = Pick<Share, 'encryptedMnemonic' | 'views' | 'photoIds' | 'bucket' | 'token'>;
+
+export type GetPhotoShareResponse = Share & {
+  photos: (Pick<Photo, 'fileId' | 'name' | 'size' | 'type'> & { decryptionKey: string })[];
+};
