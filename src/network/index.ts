@@ -1,3 +1,4 @@
+import { validate as uuidValidate } from 'uuid';
 import {
   BridgeUrl,
   StartUploadResponse,
@@ -50,8 +51,15 @@ export class Network {
   }
 
   public finishUpload(idBucket: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
-    if (!isHexString(payload.index) || payload.index.length !== 64) {
+    const { index, shards } = payload;
+    if (!isHexString(index) || index.length !== 64) {
       throw new Error('Invalid index');
+    }
+
+    for (const shard of shards) {
+      if (!uuidValidate(shard.uuid)) {
+        throw new Error('Invalid UUID');
+      }
     }
 
     return Network.finishUpload(idBucket, payload, {
