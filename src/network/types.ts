@@ -1,14 +1,7 @@
+import { AppDetails } from 'src/shared';
+import { HttpClient } from '../shared/http/client';
+import { BasicAuth } from '../auth/types';
 export type BridgeUrl = string;
-
-export interface UploadRequest {
-  index: string;
-  size: number;
-}
-export interface UploadResponse {
-  index: string;
-  uuid: string;
-  url: string;
-}
 
 export interface Shard {
   uuid: string;
@@ -16,7 +9,7 @@ export interface Shard {
 }
 
 export interface StartUploadResponse {
-  uploads: UploadResponse[];
+  uploads: { index: string; uuid: string; url: string }[];
 }
 
 export interface FinishUploadResponse {
@@ -42,3 +35,23 @@ export interface GetDownloadLinksResponse {
   created: Date;
   shards: ShardResponse[];
 }
+
+export interface NetworkRequestConfig {
+  client: HttpClient;
+  appDetails: AppDetails;
+  auth: BasicAuth;
+}
+
+type UploadPayload = {
+  index: string;
+  size: number;
+};
+
+export type StartUploadPayload = {
+  uploads: UploadPayload[];
+};
+
+export type FinishUploadPayload = {
+  index: string;
+  shards: Shard[];
+};

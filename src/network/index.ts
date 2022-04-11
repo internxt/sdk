@@ -1,9 +1,16 @@
-import { UploadRequest, UploadResponse, Shard, BridgeUrl, StartUploadResponse, FinishUploadResponse } from './types';
+import {
+  BridgeUrl,
+  StartUploadResponse,
+  FinishUploadResponse,
+  GetDownloadLinksResponse,
+  NetworkRequestConfig,
+  FinishUploadPayload,
+} from './types';
 import { ApiUrl, AppDetails } from '../shared';
 import { HttpClient } from '../shared/http/client';
 import { headersWithBasicAuth } from '../shared/headers/index';
 import { BasicAuth } from '../auth/types';
-import { GetDownloadLinksResponse } from './types';
+import { StartUploadPayload } from './types';
 
 export * from './types';
 
@@ -25,25 +32,28 @@ export class Network {
     };
   }
 
-  public startUpload(idBucket: string, uploads: UploadRequest[]): Promise<StartUploadResponse> {
-    return Network.startUpload(
-      { idBucket, uploads },
-      { client: this.client, appDetails: this.appDetails, auth: this.auth },
-    );
+  public startUpload(idBucket: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+    return Network.startUpload(idBucket, payload, {
+      client: this.client,
+      appDetails: this.appDetails,
+      auth: this.auth,
+    });
   }
 
-  public finishUpload(idBucket: string, index: string, shards: Shard[]): Promise<FinishUploadResponse> {
-    return Network.finishUpload(
-      { idBucket, index, shards },
-      { client: this.client, appDetails: this.appDetails, auth: this.auth },
-    );
+  public finishUpload(idBucket: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+    return Network.finishUpload(idBucket, payload, {
+      client: this.client,
+      appDetails: this.appDetails,
+      auth: this.auth,
+    });
   }
 
   public getDownloadLinks(idBucket: string, file: string): Promise<GetDownloadLinksResponse> {
-    return Network.getDownloadLinks(
-      { idBucket, file },
-      { client: this.client, appDetails: this.appDetails, auth: this.auth },
-    );
+    return Network.getDownloadLinks(idBucket, file, {
+      client: this.client,
+      appDetails: this.appDetails,
+      auth: this.auth,
+    });
   }
 
   /**
@@ -52,19 +62,12 @@ export class Network {
    * @param uploads
    */
   private static startUpload(
-    { idBucket, uploads }: { idBucket: string; uploads: UploadRequest[] },
-    { client, appDetails, auth }: { client: HttpClient; appDetails: AppDetails; auth: BasicAuth },
+    idBucket: string,
+    payload: StartUploadPayload,
+    { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<{
-      uploads: UploadResponse[];
-    }>(
-      `/v2/buckets/${idBucket}/files/start`,
-      {
-        uploads,
-      },
-      headers,
-    );
+    return client.post<StartUploadResponse>(`/v2/buckets/${idBucket}/files/start`, payload, headers);
   }
 
   /**
@@ -74,18 +77,12 @@ export class Network {
    * @param shards
    */
   private static finishUpload(
-    { idBucket, index, shards }: { idBucket: string; index: string; shards: Shard[] },
-    { client, appDetails, auth }: { client: HttpClient; appDetails: AppDetails; auth: BasicAuth },
+    idBucket: string,
+    payload: FinishUploadPayload,
+    { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<FinishUploadResponse>(
-      `/v2/buckets/${idBucket}/files/finish`,
-      {
-        index,
-        shards,
-      },
-      headers,
-    );
+    return client.post<FinishUploadResponse>(`/v2/buckets/${idBucket}/files/finish`, payload, headers);
   }
 
   /**
@@ -93,10 +90,7 @@ export class Network {
    * @param idBucket
    * @param file
    */
-  private static getDownloadLinks(
-    { idBucket, file }: { idBucket: string; file: string },
-    { client, appDetails, auth }: { client: HttpClient; appDetails: AppDetails; auth: BasicAuth },
-  ) {
+  private static getDownloadLinks(idBucket: string, file: string, { client, appDetails, auth }: NetworkRequestConfig) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
     return client.get<GetDownloadLinksResponse>(`/v2/buckets/${idBucket}/files/${file}/mirrors`, headers);
   }
