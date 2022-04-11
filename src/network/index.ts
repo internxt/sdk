@@ -77,6 +77,14 @@ export class Network {
     });
   }
 
+  public async deleteFile(idBucket: string, file: string): Promise<void> {
+    await Network.deleteFile(idBucket, file, {
+      client: this.client,
+      appDetails: this.appDetails,
+      auth: this.auth,
+    });
+  }
+
   /**
    * Creates entries for every upload in the request, returns the urls to upload
    * @param idBucket
@@ -114,6 +122,16 @@ export class Network {
   private static getDownloadLinks(idBucket: string, file: string, { client, appDetails, auth }: NetworkRequestConfig) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
     return client.get<GetDownloadLinksResponse>(`/v2/buckets/${idBucket}/files/${file}/mirrors`, headers);
+  }
+
+  /**
+   * Deletes a file
+   * @param idBucket
+   * @param file
+   */
+  private static deleteFile(idBucket: string, file: string, { client, appDetails, auth }: NetworkRequestConfig) {
+    const headers = Network.headersWithBasicAuth(appDetails, auth);
+    return client.delete(`/v2/buckets/${idBucket}/files/${file}`, headers);
   }
 
   /**

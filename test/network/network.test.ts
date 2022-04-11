@@ -196,6 +196,23 @@ describe('network ', () => {
       expect(staticGetDownloadLinks).toHaveBeenCalled();
       expect(callStub.firstCall.args).toEqual([`/v2/buckets/${idBucket}/files/${file}/mirrors`, headers]);
     });
+
+    it('should call static deleteFile with correct parameters', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeadersWithBasicAuth();
+      const idBucket = 'id-bucket';
+      const file = 'a-file';
+      const callStub = sinon.stub(httpClient, 'delete').resolves();
+
+      const staticGetDownloadLinks = jest.spyOn(Network.prototype as any, 'deleteFile');
+
+      // Act
+      await client.deleteFile(idBucket, file);
+
+      // Assert
+      expect(staticGetDownloadLinks).toHaveBeenCalled();
+      expect(callStub.firstCall.args).toEqual([`/v2/buckets/${idBucket}/files/${file}`, headers]);
+    });
   });
 });
 
