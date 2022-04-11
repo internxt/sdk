@@ -17,3 +17,11 @@ export function extractAxiosErrorMessage(err: AxiosError): string {
 
   return errMsg;
 }
+
+export function isHexString(string: string) {
+  if (typeof string !== 'string') {
+    return false;
+  }
+
+  return /^([0-9a-fA-F]{2})+$/.test(string);
+}
