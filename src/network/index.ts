@@ -11,6 +11,7 @@ import { HttpClient } from '../shared/http/client';
 import { headersWithBasicAuth } from '../shared/headers/index';
 import { BasicAuth } from '../auth/types';
 import { StartUploadPayload } from './types';
+import { isHexString } from '../utils';
 
 export * from './types';
 
@@ -33,6 +34,14 @@ export class Network {
   }
 
   public startUpload(idBucket: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+    for (const { index, size } of payload.uploads) {
+      if (!isHexString(index) || index.length !== 64) {
+        throw new Error('Invalid index');
+      }
+      if (size < 0) {
+        throw new Error('Invalid size');
+      }
+    }
     return Network.startUpload(idBucket, payload, {
       client: this.client,
       appDetails: this.appDetails,
@@ -41,6 +50,10 @@ export class Network {
   }
 
   public finishUpload(idBucket: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+    if (!isHexString(payload.index) || payload.index.length !== 64) {
+      throw new Error('Invalid index');
+    }
+
     return Network.finishUpload(idBucket, payload, {
       client: this.client,
       appDetails: this.appDetails,
