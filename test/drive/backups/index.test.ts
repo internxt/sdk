@@ -1,7 +1,7 @@
 import { HttpClient } from '../../../src/shared/http/client';
 import sinon from 'sinon';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { testHeadersWithToken } from '../../shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { Backups } from '../../../src/drive/backups';
 
 const httpClient = HttpClient.create('');
@@ -135,6 +135,6 @@ function clientAndHeadersWithToken(
     mnemonic: '',
   };
   const client = Backups.client(apiUrl, appDetails, apiSecurity);
-  const headers = testHeadersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }
