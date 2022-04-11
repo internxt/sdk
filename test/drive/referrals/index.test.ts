@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { testHeadersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
 import { Referrals } from '../../../src/drive';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -60,6 +60,6 @@ function clientAndHeaders(
     mnemonic: mnemonic,
   };
   const client = Referrals.client(apiUrl, appDetails, apiSecurity);
-  const headers = testHeadersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
   return { client, headers };
 }

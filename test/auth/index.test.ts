@@ -1,7 +1,7 @@
 import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
-import { testBasicHeaders, testHeadersWithToken } from '../shared/headers';
+import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
 
@@ -424,7 +424,7 @@ function clientAndHeaders(
     clientVersion: clientVersion,
   };
   const client = Auth.client(apiUrl, appDetails);
-  const headers = testBasicHeaders(clientName, clientVersion);
+  const headers = basicHeaders(clientName, clientVersion);
   return { client, headers };
 }
 
@@ -446,6 +446,6 @@ function clientAndHeadersWithToken(
     mnemonic: '',
   };
   const client = Auth.client(apiUrl, appDetails, apiSecurity);
-  const headers = testHeadersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }
