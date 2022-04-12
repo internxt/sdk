@@ -69,16 +69,16 @@ export class Network {
     });
   }
 
-  public getDownloadLinks(idBucket: string, file: string): Promise<GetDownloadLinksResponse> {
-    return Network.getDownloadLinks(idBucket, file, {
+  public getDownloadLinks(idBucket: string, fileId: string): Promise<GetDownloadLinksResponse> {
+    return Network.getDownloadLinks(idBucket, fileId, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
     });
   }
 
-  public async deleteFile(idBucket: string, file: string): Promise<void> {
-    await Network.deleteFile(idBucket, file, {
+  public async deleteFile(idBucket: string, fileId: string): Promise<void> {
+    await Network.deleteFile(idBucket, fileId, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
@@ -119,9 +119,13 @@ export class Network {
    * @param idBucket
    * @param file
    */
-  private static getDownloadLinks(idBucket: string, file: string, { client, appDetails, auth }: NetworkRequestConfig) {
+  private static getDownloadLinks(
+    idBucket: string,
+    fileId: string,
+    { client, appDetails, auth }: NetworkRequestConfig,
+  ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.get<GetDownloadLinksResponse>(`/v2/buckets/${idBucket}/files/${file}/mirrors`, headers);
+    return client.get<GetDownloadLinksResponse>(`/v2/buckets/${idBucket}/files/${fileId}/mirrors`, headers);
   }
 
   /**
@@ -129,9 +133,9 @@ export class Network {
    * @param idBucket
    * @param file
    */
-  private static deleteFile(idBucket: string, file: string, { client, appDetails, auth }: NetworkRequestConfig) {
+  private static deleteFile(idBucket: string, fileId: string, { client, appDetails, auth }: NetworkRequestConfig) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.delete(`/v2/buckets/${idBucket}/files/${file}`, headers);
+    return client.delete(`/v2/buckets/${idBucket}/files/${fileId}`, headers);
   }
 
   /**
