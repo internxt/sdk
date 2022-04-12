@@ -9,7 +9,7 @@ export interface Shard {
 }
 
 export interface StartUploadResponse {
-  uploads: { index: string; uuid: string; url: string }[];
+  uploads: { index: number; uuid: string; url: string }[];
 }
 
 export interface FinishUploadResponse {
@@ -43,7 +43,7 @@ export interface NetworkRequestConfig {
 }
 
 type UploadPayload = {
-  index: string;
+  index: number;
   size: number;
 };
 

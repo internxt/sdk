@@ -16,6 +16,38 @@ import { isHexString } from '../utils';
 
 export * from './types';
 
+export class DuplicatedIndexesError extends Error {
+  constructor() {
+    super('Duplicated indexes found');
+
+    Object.setPrototypeOf(this, DuplicatedIndexesError.prototype);
+  }
+}
+
+export class InvalidFileIndexError extends Error {
+  constructor() {
+    super('Invalid file index');
+
+    Object.setPrototypeOf(this, InvalidFileIndexError.prototype);
+  }
+}
+
+export class InvalidUploadIndexError extends Error {
+  constructor() {
+    super('Invalid upload index');
+
+    Object.setPrototypeOf(this, InvalidUploadIndexError.prototype);
+  }
+}
+
+export class InvalidUploadSizeError extends Error {
+  constructor() {
+    super('Invalid size');
+
+    Object.setPrototypeOf(this, InvalidUploadSizeError.prototype);
+  }
+}
+
 export class Network {
   private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
@@ -34,26 +66,33 @@ export class Network {
     };
   }
 
-  public startUpload(idBucket: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+  public startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
     for (const { index, size } of payload.uploads) {
-      if (!isHexString(index) || index.length !== 64) {
-        throw new Error('Invalid index');
+      if (index < 0) {
+        throw new InvalidUploadIndexError();
       }
       if (size < 0) {
-        throw new Error('Invalid size');
+        throw new InvalidUploadSizeError();
       }
     }
-    return Network.startUpload(idBucket, payload, {
+
+    const uploadIndexesWithoutDuplicates = new Set(payload.uploads.map((upload) => upload.index));
+
+    if (uploadIndexesWithoutDuplicates.size < payload.uploads.length) {
+      throw new DuplicatedIndexesError();
+    }
+
+    return Network.startUpload(bucketId, payload, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
     });
   }
 
-  public finishUpload(idBucket: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+  public finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
-      throw new Error('Invalid index');
+      throw new InvalidFileIndexError();
     }
 
     for (const shard of shards) {
@@ -62,23 +101,23 @@ export class Network {
       }
     }
 
-    return Network.finishUpload(idBucket, payload, {
+    return Network.finishUpload(bucketId, payload, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
     });
   }
 
-  public getDownloadLinks(idBucket: string, fileId: string): Promise<GetDownloadLinksResponse> {
-    return Network.getDownloadLinks(idBucket, fileId, {
+  public getDownloadLinks(bucketId: string, fileId: string): Promise<GetDownloadLinksResponse> {
+    return Network.getDownloadLinks(bucketId, fileId, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
     });
   }
 
-  public async deleteFile(idBucket: string, fileId: string): Promise<void> {
-    await Network.deleteFile(idBucket, fileId, {
+  public async deleteFile(bucketId: string, fileId: string): Promise<void> {
+    await Network.deleteFile(bucketId, fileId, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
@@ -87,55 +126,55 @@ export class Network {
 
   /**
    * Creates entries for every upload in the request, returns the urls to upload
-   * @param idBucket
+   * @param bucketId
    * @param uploads
    */
-  private static startUpload(
-    idBucket: string,
+  static startUpload(
+    bucketId: string,
     payload: StartUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<StartUploadResponse>(`/v2/buckets/${idBucket}/files/start`, payload, headers);
+    return client.post<StartUploadResponse>(`/v2/buckets/${bucketId}/files/start`, payload, headers);
   }
 
   /**
    * Finishes the upload of a file
-   * @param idBucket
+   * @param bucketId
    * @param index
    * @param shards
    */
   private static finishUpload(
-    idBucket: string,
+    bucketId: string,
     payload: FinishUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<FinishUploadResponse>(`/v2/buckets/${idBucket}/files/finish`, payload, headers);
+    return client.post<FinishUploadResponse>(`/v2/buckets/${bucketId}/files/finish`, payload, headers);
   }
 
   /**
    * Gets the download links for a file
-   * @param idBucket
+   * @param bucketId
    * @param file
    */
   private static getDownloadLinks(
-    idBucket: string,
+    bucketId: string,
     fileId: string,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.get<GetDownloadLinksResponse>(`/v2/buckets/${idBucket}/files/${fileId}/mirrors`, headers);
+    return client.get<GetDownloadLinksResponse>(`/v2/buckets/${bucketId}/files/${fileId}/mirrors`, headers);
   }
 
   /**
    * Deletes a file
-   * @param idBucket
+   * @param bucketId
    * @param file
    */
-  private static deleteFile(idBucket: string, fileId: string, { client, appDetails, auth }: NetworkRequestConfig) {
+  private static deleteFile(bucketId: string, fileId: string, { client, appDetails, auth }: NetworkRequestConfig) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.delete(`/v2/buckets/${idBucket}/files/${fileId}`, headers);
+    return client.delete(`/v2/buckets/${bucketId}/files/${fileId}`, headers);
   }
 
   /**
