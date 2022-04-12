@@ -44,3 +44,8 @@ export interface TwoFactorAuthQR {
   qr: string
   backupKey: string
 }
+
+export interface BasicAuth {
+  username: string
+  password: string
+}

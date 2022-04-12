@@ -1,4 +1,4 @@
-import { Token } from '../../auth';
+import { BasicAuth, Token } from '../../auth';
 
 export function basicHeaders(clientName: string, clientVersion: string) {
   return {
@@ -23,6 +23,19 @@ export function headersWithTokenAndMnemonic(clientName: string, clientVersion: s
   const headers = headersWithToken(clientName, clientVersion, token);
   const extra = {
     'internxt-mnemonic': mnemonic
+  };
+  return {
+    ...headers,
+    ...extra
+  };
+}
+
+export function headersWithBasicAuth(clientName: string, clientVersion: string, auth: BasicAuth) {
+  const headers = basicHeaders(clientName, clientVersion);
+  const token = `${auth.username}:${auth.password}`;
+  const encodedToken = Buffer.from(token).toString('base64');
+  const extra = {
+    Authorization: 'Basic ' + encodedToken,
   };
   return {
     ...headers,
