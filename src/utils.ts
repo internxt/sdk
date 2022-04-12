@@ -19,9 +19,6 @@ export function extractAxiosErrorMessage(err: AxiosError): string {
 }
 
 export function isHexString(string: string) {
-  if (typeof string !== 'string') {
-    return false;
-  }
-
+  // TODO: replace with proper library
   return /^([0-9a-fA-F]{2})+$/.test(string);
 }

@@ -39,7 +39,6 @@ describe('network ', () => {
         expect(promise).toBeUndefined();
       } catch (err) {
         // Assert
-        expect(err).toBeDefined();
         expect(err).toEqual(new Error('Invalid index'));
       }
 
@@ -54,7 +53,6 @@ describe('network ', () => {
         expect(promise).toBeUndefined();
       } catch (err) {
         // Assert
-        expect(err).toBeDefined();
         expect(err).toEqual(new Error('Invalid size'));
       }
     });
@@ -81,7 +79,6 @@ describe('network ', () => {
       expect(promise).toBeUndefined();
     } catch (err) {
       // Assert
-      expect(err).toBeDefined();
       expect(err).toEqual(new Error('Invalid index'));
     }
 
@@ -102,7 +99,6 @@ describe('network ', () => {
       expect(promise).toBeUndefined();
     } catch (err) {
       // Assert
-      expect(err).toBeDefined();
       expect(err).toEqual(new Error('Invalid UUID'));
     }
   });
