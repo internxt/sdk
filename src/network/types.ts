@@ -13,6 +13,7 @@ export interface StartUploadResponse {
 }
 
 export interface FinishUploadResponse {
+  id: string;
   index: string;
   frame: string;
   bucket: string;
