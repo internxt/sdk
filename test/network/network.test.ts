@@ -1,7 +1,14 @@
-import { HttpClient } from '../../src/shared/http/client';
 import sinon from 'sinon';
+
+import { HttpClient } from '../../src/shared/http/client';
 import { AppDetails } from '../../src/shared';
-import { Network } from '../../src/network/index';
+import {
+  DuplicatedIndexesError,
+  InvalidFileIndexError,
+  InvalidUploadIndexError,
+  InvalidUploadSizeError,
+  Network
+} from '../../src/network/index';
 import { headersWithBasicAuth } from '../../src/shared/headers/index';
 import {
   StartUploadPayload,
@@ -15,6 +22,14 @@ const httpClient = HttpClient.create('');
 const validUUID = 'b541b138-a6f2-4729-8d20-8e6011cb8216';
 const validHex = '2e1884c34f174110ca6e324e7b745754b3d6356b53ef9f594b960fd534050089';
 
+const url = 'http://internxt.com';
+
+const invalidIndex = -1;
+const validIndex = 0;
+
+const invalidSize = -33;
+const validSize = 1;
+
 describe('network ', () => {
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
@@ -24,42 +39,74 @@ describe('network ', () => {
     sinon.restore();
   });
 
-  describe('validate inputs', () => {
-    it('Validates startUpload', async () => {
-      // Arrange
+  describe('startUpload()', () => {
+    it('Should throw if an invalid size is provided', async () => {
       const { client } = clientAndHeadersWithBasicAuth();
       const idBucket = 'id-bucket';
-      const invalidIndexPayload: StartUploadPayload = {
-        uploads: [{ index: 'invalid-hex', size: 40 }],
+
+      try {
+        await client.startUpload(idBucket, {
+          uploads: [{ index: validIndex, size: invalidSize }],
+        });
+        expect(true).toBeFalsy();
+      } catch (err) {
+        expect(err).toBeInstanceOf(InvalidUploadSizeError);
+      }
+    });
+
+    it('Should throw if an invalid index is provided', async () => {
+      const { client } = clientAndHeadersWithBasicAuth();
+      const idBucket = 'id-bucket';
+
+      try {
+        await client.startUpload(idBucket, {
+          uploads: [{ index: invalidIndex, size: validSize }],
+        });
+        expect(true).toBeFalsy();
+      } catch (err) {
+        expect(err).toBeInstanceOf(InvalidUploadIndexError);
+      }
+    });
+
+    it('Should throw if an index is duplicated', async () => {
+      const { client } = clientAndHeadersWithBasicAuth();
+      const idBucket = 'id-bucket';
+
+      try {
+        await client.startUpload(idBucket, {
+          uploads: [{ index: validIndex, size: validSize }, { index: validIndex, size: validSize }],
+        });
+        expect(true).toBeFalsy();
+      } catch (err) {
+        expect(err).toBeInstanceOf(DuplicatedIndexesError);
+      }
+    });
+
+    it('Should work properly if the input is valid', async () => {
+      const { client } = clientAndHeadersWithBasicAuth();
+      const idBucket = 'id-bucket';
+      const uploads = [
+        { index: validIndex, size: validSize },
+        { index: validIndex + 1, size: validSize }
+      ];
+
+      const expected = {
+        uploads: uploads.map(u => ({
+          index: u.index,
+          uuid: validUUID,
+          url
+        })),
       };
 
-      // Act
-      try {
-        const promise = await client.startUpload(idBucket, invalidIndexPayload);
-        expect(promise).toBeUndefined();
-      } catch (err) {
-        // Assert
-        expect(err).toEqual(new Error('Invalid index'));
-      }
+      sinon.stub(Network, 'startUpload').resolves(expected);
 
-      // Arrange
-      const invalidSizePayload: StartUploadPayload = {
-        uploads: [{ index: validHex, size: -33 }],
-      };
+      const received = await client.startUpload(idBucket, { uploads });
 
-      // Act
-      try {
-        const promise = await client.startUpload(idBucket, invalidSizePayload);
-        expect(promise).toBeUndefined();
-      } catch (err) {
-        // Assert
-        expect(err).toEqual(new Error('Invalid size'));
-      }
+      expect(received).toStrictEqual(expected);
     });
   });
 
   it('Validates finishUpload', async () => {
-    // Arrange
     const { client } = clientAndHeadersWithBasicAuth();
 
     const idBucket = 'id-bucket';
@@ -73,13 +120,11 @@ describe('network ', () => {
       ],
     };
 
-    // Act
     try {
       const promise = await client.finishUpload(idBucket, invalidIndexPayload);
       expect(promise).toBeUndefined();
     } catch (err) {
-      // Assert
-      expect(err).toEqual(new Error('Invalid index'));
+      expect(err).toBeInstanceOf(InvalidFileIndexError);
     }
 
     // Arrange
@@ -109,10 +154,10 @@ describe('network ', () => {
       const { client, headers } = clientAndHeadersWithBasicAuth();
       const idBucket = 'id-bucket';
       const validStartUploadPayload: StartUploadPayload = {
-        uploads: [{ index: validHex, size: 40 }],
+        uploads: [{ index: 0, size: 40 }],
       };
       const resolvesTo: StartUploadResponse = {
-        uploads: [{ index: validHex, uuid: validUUID, url: '' }],
+        uploads: [{ index: validIndex, uuid: validUUID, url: '' }],
       };
       const callStub = sinon.stub(httpClient, 'post').resolves(resolvesTo);
       const staticStartUpload = jest.spyOn(Network.prototype as any, 'startUpload');

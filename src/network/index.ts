@@ -16,6 +16,38 @@ import { isHexString } from '../utils';
 
 export * from './types';
 
+export class DuplicatedIndexesError extends Error {
+  constructor() {
+    super('Duplicated indexes found');
+
+    Object.setPrototypeOf(this, DuplicatedIndexesError.prototype);
+  }
+}
+
+export class InvalidFileIndexError extends Error {
+  constructor() {
+    super('Invalid file index');
+
+    Object.setPrototypeOf(this, InvalidFileIndexError.prototype);
+  }
+}
+
+export class InvalidUploadIndexError extends Error {
+  constructor() {
+    super('Invalid upload index');
+
+    Object.setPrototypeOf(this, InvalidUploadIndexError.prototype);
+  }
+}
+
+export class InvalidUploadSizeError extends Error {
+  constructor() {
+    super('Invalid size');
+
+    Object.setPrototypeOf(this, InvalidUploadSizeError.prototype);
+  }
+}
+
 export class Network {
   private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
@@ -37,13 +69,20 @@ export class Network {
   public startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
-        throw new Error('Invalid index');
+        throw new InvalidUploadIndexError();
       }
       if (size < 0) {
-        throw new Error('Invalid size');
+        throw new InvalidUploadSizeError();
       }
     }
-    return Network.startUpload(idBucket, payload, {
+
+    const uploadIndexesWithoutDuplicates = new Set(payload.uploads.map((upload) => upload.index));
+
+    if (uploadIndexesWithoutDuplicates.size < payload.uploads.length) {
+      throw new DuplicatedIndexesError();
+    }
+
+    return Network.startUpload(bucketId, payload, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
@@ -53,7 +92,7 @@ export class Network {
   public finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
-      throw new Error('Invalid index');
+      throw new InvalidFileIndexError();
     }
 
     for (const shard of shards) {
