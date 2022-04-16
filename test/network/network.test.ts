@@ -236,7 +236,7 @@ describe('network ', () => {
       // Assert
       expect(links).toEqual(resolvesTo);
       expect(staticGetDownloadLinks).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([`/v2/buckets/${idBucket}/files/${file}/mirrors`, headers]);
+      expect(callStub.firstCall.args).toEqual([`/buckets/${idBucket}/files/${file}/info`, headers]);
     });
 
     it('should call static deleteFile with correct parameters', async () => {

@@ -53,7 +53,7 @@ export class Network {
   private readonly appDetails: AppDetails;
   private readonly auth: BasicAuth;
 
-  public static client(apiUrl: BridgeUrl, appDetails: AppDetails, opts: { bridgeUser: string; userId: string }) {
+  static client(apiUrl: BridgeUrl, appDetails: AppDetails, opts: { bridgeUser: string; userId: string }) {
     return new Network(apiUrl, appDetails, opts);
   }
 
@@ -66,7 +66,7 @@ export class Network {
     };
   }
 
-  public startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+  startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
         throw new InvalidUploadIndexError();
@@ -89,7 +89,7 @@ export class Network {
     });
   }
 
-  public finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+  finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
       throw new InvalidFileIndexError();
@@ -108,7 +108,7 @@ export class Network {
     });
   }
 
-  public getDownloadLinks(bucketId: string, fileId: string): Promise<GetDownloadLinksResponse> {
+  getDownloadLinks(bucketId: string, fileId: string): Promise<GetDownloadLinksResponse> {
     return Network.getDownloadLinks(bucketId, fileId, {
       client: this.client,
       appDetails: this.appDetails,
@@ -116,7 +116,7 @@ export class Network {
     });
   }
 
-  public async deleteFile(bucketId: string, fileId: string): Promise<void> {
+  async deleteFile(bucketId: string, fileId: string): Promise<void> {
     await Network.deleteFile(bucketId, fileId, {
       client: this.client,
       appDetails: this.appDetails,
@@ -164,7 +164,7 @@ export class Network {
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.get<GetDownloadLinksResponse>(`/v2/buckets/${bucketId}/files/${fileId}/mirrors`, headers);
+    return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info`, headers);
   }
 
   /**
