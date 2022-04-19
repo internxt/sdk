@@ -88,7 +88,6 @@ export type ShareId = string;
 export interface Share {
   id: ShareId;
   bucket: string;
-  encryptedMnemonic: string;
   photoIds: PhotoId[];
   token: string;
   views: number;
@@ -100,7 +99,9 @@ export interface ShareJSON extends Omit<Share, 'createdAt' | 'updatedAt'> {
   updatedAt: string;
 }
 
-export type CreatePhotoShareBody = Pick<Share, 'encryptedMnemonic' | 'views' | 'photoIds' | 'bucket' | 'token'>;
+export type CreatePhotoShareBody = Pick<Share, 'views' | 'photoIds' | 'bucket' | 'token'> & {
+  encryptedMnemonic: string;
+};
 
 export type GetPhotoShareResponse = Share & {
   photos: (Pick<Photo, 'fileId' | 'name' | 'size' | 'type'> & { decryptionKey: string })[];
