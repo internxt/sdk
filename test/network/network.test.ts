@@ -191,7 +191,6 @@ describe('network ', () => {
       const resolvesTo: FinishUploadResponse = {
         id: 'file-id',
         index: validHex,
-        frame: 'frame',
         bucket: idBucket,
         name: 'name',
         mimetype: 'mimetype',
