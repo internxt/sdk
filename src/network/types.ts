@@ -1,4 +1,4 @@
-import { AppDetails } from 'src/shared';
+import { AppDetails } from '../shared';
 import { HttpClient } from '../shared/http/client';
 import { BasicAuth } from '../auth/types';
 
