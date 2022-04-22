@@ -1,4 +1,5 @@
 import { Network } from '.';
+import { UploadInvalidMnemonicError } from './errors';
 import { Crypto, EncryptFileFunction, UploadFileFunction } from './types';
 
 export async function uploadFile(
@@ -10,6 +11,12 @@ export async function uploadFile(
   encryptFile: EncryptFileFunction,
   uploadFile: UploadFileFunction
 ): Promise<string> {
+  const mnemonicIsValid = crypto.validateMnemonic(mnemonic);
+
+  if (!mnemonicIsValid) {
+    throw new UploadInvalidMnemonicError();
+  }
+
   const index = crypto.randomBytes(crypto.algorithm.ivSize);
   const iv = index.slice(0, 16);
   const key = await crypto.generateFileKey(mnemonic, bucketId, index);

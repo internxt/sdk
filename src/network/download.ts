@@ -1,4 +1,5 @@
 import { Network } from '.';
+import { DownloadInvalidMnemonicError } from './errors';
 import {
   Crypto,
   BinaryDataEncoding,
@@ -25,6 +26,12 @@ export async function downloadFile(
   downloadFile: DownloadFileFunction,
   decryptFile: DecryptFileFunction
 ): Promise<void> {
+  const mnemonicIsValid = crypto.validateMnemonic(mnemonic);
+
+  if (!mnemonicIsValid) {
+    throw new DownloadInvalidMnemonicError();
+  }
+
   const { index, shards, version, size } = await network.getDownloadLinks(bucketId, fileId);
 
   if (!version || version === 1) {

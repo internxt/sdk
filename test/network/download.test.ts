@@ -9,12 +9,16 @@ import {
   Network
 } from '../../src/network';
 import { downloadFile, FileVersionOneError } from '../../src/network/download';
+import { DownloadInvalidMnemonicError } from '../../src/network/errors';
 
 const fakeFileId = 'fake-file-id';
 const fakeBucketId = 'fake-bucket-id';
 const fakeHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const fakeMnemonic = 'test test test test test test test test';
 const crypto: Crypto = {
+  validateMnemonic: () => {
+    return true;
+  },
   algorithm: ALGORITHMS.AES256CTR,
   generateFileKey: async (mnemonic) => {
     return Buffer.from(mnemonic);
@@ -60,6 +64,7 @@ describe('network/download', () => {
       ];
 
       const fileSize = shards.reduce((a, s) => a + s.size, 0);
+      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
       const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
       const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
         index,
@@ -85,6 +90,9 @@ describe('network/download', () => {
           downloadFileMock,
           decryptFileMock
         );
+
+        expect(validateMnemonicStub.calledOnce).toBeTruthy();
+        expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
 
         expect(getDownloadLinksStub.calledOnce).toBeTruthy();
         expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId]);
@@ -159,6 +167,32 @@ describe('network/download', () => {
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(FileVersionOneError);
+      }
+    });
+
+    it('Should throw if the mnemonic is invalid', async () => {
+      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(false);
+      const downloadLinksStub = sinon.stub(network, 'getDownloadLinks');
+
+      try {
+        await downloadFile(
+          fakeFileId,
+          fakeBucketId,
+          fakeMnemonic,
+          network,
+          crypto,
+          jest.fn(),
+          jest.fn(),
+          jest.fn()
+        );
+        expect(false).toBeTruthy();
+      } catch (err) {
+        expect(err).toBeInstanceOf(DownloadInvalidMnemonicError);
+
+        expect(validateMnemonicStub.calledOnce).toBeTruthy();
+        expect(validateMnemonicStub.firstCall.args).toStrictEqual([fakeMnemonic]);
+
+        expect(downloadLinksStub.callCount).toEqual(0);
       }
     });
   });

@@ -3,12 +3,16 @@ import { randomBytes } from 'crypto';
 
 import { ALGORITHMS, Network, Crypto } from '../../src/network';
 import { uploadFile } from '../../src/network/upload';
+import { UploadInvalidMnemonicError } from '../../src/network/errors';
 
 const fakeFileId = 'aaaaaa';
 const fakeBucketId = 'fake-bucket-id';
 const fakeHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const fakeMnemonic = 'test test test test test test test test';
 const crypto: Crypto = {
+  validateMnemonic: () => {
+    return false;
+  },
   algorithm: ALGORITHMS.AES256CTR,
   generateFileKey: async (mnemonic) => {
     return Buffer.from(mnemonic);
@@ -45,6 +49,7 @@ describe('network/upload', () => {
 
       const randomBytesStub = sinon.stub(crypto, 'randomBytes').returns(bufferizedIndex);
       const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
+      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
       const startUploadStub = sinon.stub(network, 'startUpload').resolves({
         uploads: [{
           url: fakeUrl,
@@ -74,6 +79,9 @@ describe('network/upload', () => {
           encryptFileMock,
           uploadFileMock
         );
+
+        expect(validateMnemonicStub.calledOnce).toBeTruthy();
+        expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
 
         expect(randomBytesStub.calledOnce).toBeTruthy();
         expect(randomBytesStub.firstCall.args).toStrictEqual([ALGORITHMS.AES256CTR.ivSize]);
@@ -111,6 +119,36 @@ describe('network/upload', () => {
         expect(receivedFileId).toEqual(fileId);
       } catch (err) {
         expect(true).toBeFalsy();
+      }
+    });
+
+    it('Should throw if the mnemonic is invalid', async () => {
+      const bucketId = fakeBucketId;
+      const mnemonic = fakeMnemonic;
+      const fileSize = 1000;
+
+      const validateMnemonic = sinon.stub(crypto, 'validateMnemonic').returns(false);
+      const randomBytes = sinon.stub(crypto, 'randomBytes').returns(Buffer.from(''));
+
+      try {
+        await uploadFile(
+          network,
+          crypto,
+          bucketId,
+          mnemonic,
+          fileSize,
+          jest.fn(),
+          jest.fn()
+        );
+
+        expect(true).toBeFalsy();
+      } catch (err) {
+        expect(err).toBeInstanceOf(UploadInvalidMnemonicError);
+
+        expect(validateMnemonic.calledOnce).toBeTruthy();
+        expect(validateMnemonic.firstCall.args).toStrictEqual([mnemonic]);
+
+        expect(randomBytes.callCount).toEqual(0);
       }
     });
   });
