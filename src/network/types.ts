@@ -95,6 +95,7 @@ export const ALGORITHMS: Record<SymmetricCryptoAlgorithm, Algorithm> = {
 
 export type Crypto = {
   algorithm: Algorithm;
+  validateMnemonic: (mnemonic: string) => boolean;
   randomBytes: (bytesLength: number) => BinaryData;
   generateFileKey: (mnemonic: string, bucketId: string, index: BinaryData | string) => Promise<BinaryData>;
 }
