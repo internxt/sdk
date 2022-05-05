@@ -9,7 +9,7 @@ export interface DriveFolderData {
   icon_id: number | null;
   isFolder: boolean;
   name: string;
-  parentId: number;
+  parentId: number | null;
   parent_id: number | null;
   updatedAt: string;
   userId: number;
@@ -72,13 +72,13 @@ export enum EncryptionVersion {
 }
 
 export interface FileEntry {
-  id: string,
-  type: string,
-  size: number,
-  name: string,
-  bucket: string,
-  folder_id: number,
-  encrypt_version: EncryptionVersion,
+  id: string;
+  type: string;
+  size: number;
+  name: string;
+  bucket: string;
+  folder_id: number;
+  encrypt_version: EncryptionVersion;
 }
 
 export interface CreateFolderPayload {
@@ -97,8 +97,8 @@ export interface CreateFolderResponse {
 }
 
 export interface MoveFolderPayload {
-  folderId: number
-  destinationFolderId: number
+  folderId: number;
+  destinationFolderId: number;
 }
 
 export interface MoveFolderResponse {
@@ -108,41 +108,41 @@ export interface MoveFolderResponse {
 }
 
 export interface UpdateFolderMetadataPayload {
-  folderId: number,
+  folderId: number;
   changes: {
     itemName?: string;
     color?: string;
     icon?: string;
-  }
+  };
 }
 
 // Files
 
 export interface UpdateFilePayload {
-  fileId: string,
-  bucketId: string,
-  destinationPath: string,
+  fileId: string;
+  bucketId: string;
+  destinationPath: string;
   metadata: {
     itemName?: string;
-  },
+  };
 }
 
 export interface DeleteFilePayload {
-  fileId: number,
-  folderId: number,
+  fileId: number;
+  folderId: number;
 }
 
 export interface MoveFilePayload {
-  fileId: string
-  destination: number
-  destinationPath: string
-  bucketId: string
+  fileId: string;
+  destination: number;
+  destinationPath: string;
+  bucketId: string;
 }
 
 export interface MoveFileResponse {
-  item: DriveFileData
-  destination: number
-  moved: boolean
+  item: DriveFileData;
+  destination: number;
+  moved: boolean;
 }
 
 export interface UsageResponse {
