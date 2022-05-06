@@ -3,11 +3,13 @@ import { Storage, StorageTypes } from '../../../src/drive';
 import { randomFolderContentResponse } from './mothers/folderContentResponse.mother';
 import {
   CreateFolderPayload,
-  CreateFolderResponse, DriveFolderData,
+  CreateFolderResponse,
+  DriveFolderData,
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
-  DeleteFilePayload, EncryptionVersion,
+  DeleteFilePayload,
+  EncryptionVersion,
 } from '../../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
@@ -19,7 +21,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('# storage service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -29,9 +30,7 @@ describe('# storage service tests', () => {
   });
 
   describe('-> folders', () => {
-
     describe('get folder content', () => {
-
       it('Should return the expected elements', async () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
@@ -39,8 +38,8 @@ describe('# storage service tests', () => {
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
-            cancel: () => null
-          }
+            cancel: () => null,
+          },
         });
 
         // Act
@@ -63,16 +62,14 @@ describe('# storage service tests', () => {
         // Assert
         await expect(promise).rejects.toThrowError('My cancel message');
       });
-
     });
 
     describe('create folder entry', () => {
-
       it('Should call with correct params & return content', async () => {
         // Arrange
         const createFolderPayload: CreateFolderPayload = {
           folderName: 'ma-fol',
-          parentFolderId: 34
+          parentFolderId: 34,
         };
         const createFolderResponse: CreateFolderResponse = {
           bucket: 'bucket',
@@ -81,13 +78,13 @@ describe('# storage service tests', () => {
           name: 'zero',
           parentId: 0,
           updatedAt: '',
-          userId: 1
+          userId: 1,
         };
         const callStub = sinon.stub(httpClient, 'postCancellable').returns({
           promise: Promise.resolve(createFolderResponse),
           requestCanceler: {
-            cancel: () => null
-          }
+            cancel: () => null,
+          },
         });
         const { client, headers } = clientAndHeaders();
 
@@ -102,7 +99,7 @@ describe('# storage service tests', () => {
             parentFolderId: 34,
             folderName: 'ma-fol',
           },
-          headers
+          headers,
         ]);
         expect(body).toEqual(createFolderResponse);
       });
@@ -111,7 +108,7 @@ describe('# storage service tests', () => {
         // Arrange
         const createFolderPayload: CreateFolderPayload = {
           folderName: 'ma-fol',
-          parentFolderId: 34
+          parentFolderId: 34,
         };
         const { client } = clientAndHeaders();
 
@@ -122,11 +119,9 @@ describe('# storage service tests', () => {
         // Assert
         await expect(promise).rejects.toThrowError('My cancel message');
       });
-
     });
 
     describe('move folder', () => {
-
       it('Should call with right params & return correct response', async () => {
         // Arrange
         const payload: MoveFolderPayload = randomMoveFolderPayload();
@@ -141,7 +136,6 @@ describe('# storage service tests', () => {
             icon: '',
             iconId: 1,
             icon_id: 1,
-            isFolder: true,
             name: 'name',
             parentId: 1,
             parent_id: 1,
@@ -149,7 +143,7 @@ describe('# storage service tests', () => {
             userId: 1,
             user_id: 1,
           },
-          moved: false
+          moved: false,
         };
         const callStub = sinon.stub(httpClient, 'post').resolves(moveFolderResponse);
         const { client, headers } = clientAndHeaders();
@@ -164,15 +158,13 @@ describe('# storage service tests', () => {
             folderId: payload.folderId,
             destination: payload.destinationFolderId,
           },
-          headers
+          headers,
         ]);
         expect(body).toEqual(moveFolderResponse);
       });
-
     });
 
     describe('update folder metadata', () => {
-
       it('Should call with right params & return correct response', async () => {
         // Arrange
         const payload = randomUpdateFolderMetadataPayload();
@@ -190,20 +182,18 @@ describe('# storage service tests', () => {
               itemName: payload.changes.itemName,
               color: payload.changes.color,
               icon: payload.changes.icon,
-            }
+            },
           },
-          headers
+          headers,
         ]);
       });
-
     });
 
     describe('delete folder', () => {
-
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'delete').resolves({
-          valid: true
+          valid: true,
         });
         const { client, headers } = clientAndHeaders();
 
@@ -211,23 +201,18 @@ describe('# storage service tests', () => {
         const body = await client.deleteFolder(2);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/storage/folder/2',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/storage/folder/2', headers]);
         expect(body).toEqual({
-          valid: true
+          valid: true,
         });
       });
-
     });
 
     describe('folder size', () => {
-
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'get').resolves({
-          size: 10
+          size: 10,
         });
         const { client, headers } = clientAndHeaders();
 
@@ -235,21 +220,14 @@ describe('# storage service tests', () => {
         const body = await client.getFolderSize(2);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/storage/folder/size/2',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/storage/folder/size/2', headers]);
         expect(body).toEqual(10);
       });
-
     });
-
   });
 
   describe('-> files', () => {
-
     describe('create file entry', () => {
-
       it('Should have all the correct params on call', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'post').resolves({});
@@ -279,16 +257,14 @@ describe('# storage service tests', () => {
               folder_id: fileEntry.folder_id,
               name: fileEntry.name,
               encrypt_version: fileEntry.encrypt_version,
-            }
+            },
           },
-          headers
+          headers,
         ]);
       });
-
     });
 
     describe('update file metadata', () => {
-
       it('Should call with right params & return control', async () => {
         // Arrange
         const payload: UpdateFilePayload = {
@@ -296,11 +272,11 @@ describe('# storage service tests', () => {
           destinationPath: 'x',
           fileId: '6',
           metadata: {
-            itemName: 'new name'
-          }
+            itemName: 'new name',
+          },
         };
         const callStub = sinon.stub(httpClient, 'post').resolves({
-          valid: true
+          valid: true,
         });
         const { client, headers } = clientAndHeaders();
 
@@ -312,55 +288,48 @@ describe('# storage service tests', () => {
           '/storage/file/6/meta',
           {
             metadata: {
-              itemName: 'new name'
+              itemName: 'new name',
             },
             bucketId: 'bucket',
             relativePath: 'x',
           },
-          headers
+          headers,
         ]);
         expect(body).toEqual({
-          valid: true
+          valid: true,
         });
       });
-
     });
 
     describe('delete file', () => {
-
       it('Should call with right arguments and return control', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'delete').resolves({
-          valid: true
+          valid: true,
         });
         const { client, headers } = clientAndHeaders();
         const payload: DeleteFilePayload = {
           fileId: 5,
-          folderId: 2
+          folderId: 2,
         };
 
         // Act
         const body = await client.deleteFile(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/storage/folder/2/file/5',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/storage/folder/2/file/5', headers]);
         expect(body).toEqual({
-          valid: true
+          valid: true,
         });
       });
-
     });
 
     describe('move file', () => {
-
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
         const callStub = sinon.stub(httpClient, 'post').resolves({
-          content: 'test'
+          content: 'test',
         });
         const { client, headers } = clientAndHeaders();
 
@@ -369,7 +338,7 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(body).toEqual({
-          content: 'test'
+          content: 'test',
         });
         expect(callStub.firstCall.args).toEqual([
           '/storage/move/file',
@@ -379,18 +348,16 @@ describe('# storage service tests', () => {
             relativePath: payload.destinationPath,
             bucketId: payload.bucketId,
           },
-          headers
+          headers,
         ]);
       });
-
     });
 
     describe('get recent files', () => {
-
       it('Should be called with right arguments & return content', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'get').resolves({
-          files: []
+          files: [],
         });
         const { client, headers } = clientAndHeaders();
 
@@ -398,71 +365,53 @@ describe('# storage service tests', () => {
         const body = await client.getRecentFiles(5);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/storage/recents?limit=5',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/storage/recents?limit=5', headers]);
         expect(body).toEqual({
-          files: []
+          files: [],
         });
       });
-
     });
-
   });
 
   describe('-> quotas', () => {
-
     describe('space usage', () => {
-
       it('should call with right params & return response', async () => {
         // Arrange
         const { client, headers } = clientAndHeaders();
         const callStub = sinon.stub(httpClient, 'get').resolves({
-          total: 10
+          total: 10,
         });
 
         // Act
         const body = await client.spaceUsage();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/usage',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/usage', headers]);
         expect(body).toEqual({
-          total: 10
+          total: 10,
         });
       });
-
     });
 
     describe('space limit', () => {
-
       it('should call with right params & return response', async () => {
         // Arrange
         const { client, headers } = clientAndHeaders();
         const callStub = sinon.stub(httpClient, 'get').resolves({
-          total: 10
+          total: 10,
         });
 
         // Act
         const body = await client.spaceLimit();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/limit',
-          headers
-        ]);
+        expect(callStub.firstCall.args).toEqual(['/limit', headers]);
         expect(body).toEqual({
-          total: 10
+          total: 10,
         });
       });
-
     });
-
   });
-
 });
 
 function clientAndHeaders(
@@ -470,10 +419,10 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
-  mnemonic = 'nemo'
+  mnemonic = 'nemo',
 ): {
-  client: Storage,
-  headers: object
+  client: Storage;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
