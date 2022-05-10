@@ -40,83 +40,166 @@ afterEach(() => {
 
 describe('network/download', () => {
   describe('downloadFile()', () => {
-    it('Should work properly if all is fine', async () => {
-      const fileId = fakeFileId;
-      const bucketId = fakeBucketId;
-      const mnemonic = fakeMnemonic;
-      const index = 'aabdfb3018eb9e93bd9a31936aad979bed83abcc60fd79c15c15f44321024f46';
-      const bufferizedIndex = Buffer.from(index, 'hex');
-      const key = Buffer.from('');
+    describe('Should work properly if all is fine', () => {
+      it('Should work when the mnemonic is provided', async () => {
+        const fileId = fakeFileId;
+        const bucketId = fakeBucketId;
+        const mnemonic = fakeMnemonic;
+        const index = 'aabdfb3018eb9e93bd9a31936aad979bed83abcc60fd79c15c15f44321024f46';
+        const bufferizedIndex = Buffer.from(index, 'hex');
+        const key = Buffer.from('');
 
-      const shards: DownloadableShard[] = [
-        {
-          index: 0,
-          hash: fakeHash,
-          size: 1,
-          url: 'https://fake.com'
-        },
-        {
-          index: 1,
-          hash: fakeHash,
-          size: 1,
-          url: 'https://fake.com'
+        const shards: DownloadableShard[] = [
+          {
+            index: 0,
+            hash: fakeHash,
+            size: 1,
+            url: 'https://fake.com'
+          },
+          {
+            index: 1,
+            hash: fakeHash,
+            size: 1,
+            url: 'https://fake.com'
+          }
+        ];
+
+        const fileSize = shards.reduce((a, s) => a + s.size, 0);
+        const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
+        const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
+        const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
+          index,
+          shards,
+          version: 2,
+          bucket: bucketId,
+          created: new Date(),
+          size: fileSize
+        });
+
+        const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
+        const downloadFileMock = jest.fn();
+        const decryptFileMock = jest.fn();
+
+        try {
+          await downloadFile(
+            fileId,
+            bucketId,
+            mnemonic,
+            network,
+            crypto,
+            toBinaryDataMock,
+            downloadFileMock,
+            decryptFileMock
+          );
+
+          expect(validateMnemonicStub.calledOnce).toBeTruthy();
+          expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
+
+          expect(getDownloadLinksStub.calledOnce).toBeTruthy();
+          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, undefined]);
+
+          expect(toBinaryDataMock).toBeCalledTimes(2);
+          expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
+          expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
+
+          expect(generateFileKeyStub.calledOnce).toBeTruthy();
+          expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+
+          expect(downloadFileMock).toBeCalledTimes(1);
+          expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
+
+          expect(decryptFileMock).toBeCalledTimes(1);
+          expect(decryptFileMock).toHaveBeenCalledWith(
+            crypto.algorithm.type,
+            key,
+            bufferizedIndex.slice(0, 16),
+            fileSize
+          );
+        } catch (err) {
+          console.log(err);
+          expect(true).toBeFalsy();
         }
-      ];
-
-      const fileSize = shards.reduce((a, s) => a + s.size, 0);
-      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
-      const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
-      const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
-        index,
-        shards,
-        version: 2,
-        bucket: bucketId,
-        created: new Date(),
-        size: fileSize
       });
 
-      const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
-      const downloadFileMock = jest.fn();
-      const decryptFileMock = jest.fn();
+      it('Should work if the token is provided', async () => {
+        const fileId = fakeFileId;
+        const bucketId = fakeBucketId;
+        const mnemonic = fakeMnemonic;
+        const token = 'a-token';
+        const index = 'aabdfb3018eb9e93bd9a31936aad979bed83abcc60fd79c15c15f44321024f46';
+        const bufferizedIndex = Buffer.from(index, 'hex');
+        const key = Buffer.from('');
 
-      try {
-        await downloadFile(
-          fileId,
-          bucketId,
-          mnemonic,
-          network,
-          crypto,
-          toBinaryDataMock,
-          downloadFileMock,
-          decryptFileMock
-        );
+        const shards: DownloadableShard[] = [
+          {
+            index: 0,
+            hash: fakeHash,
+            size: 1,
+            url: 'https://fake.com'
+          },
+          {
+            index: 1,
+            hash: fakeHash,
+            size: 1,
+            url: 'https://fake.com'
+          }
+        ];
 
-        expect(validateMnemonicStub.calledOnce).toBeTruthy();
-        expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
+        const fileSize = shards.reduce((a, s) => a + s.size, 0);
+        const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
+        const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
+        const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
+          index,
+          shards,
+          version: 2,
+          bucket: bucketId,
+          created: new Date(),
+          size: fileSize
+        });
 
-        expect(getDownloadLinksStub.calledOnce).toBeTruthy();
-        expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId]);
+        const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
+        const downloadFileMock = jest.fn();
+        const decryptFileMock = jest.fn();
 
-        expect(toBinaryDataMock).toBeCalledTimes(2);
-        expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
-        expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
+        try {
+          await downloadFile(
+            fileId,
+            bucketId,
+            mnemonic,
+            network,
+            crypto,
+            toBinaryDataMock,
+            downloadFileMock,
+            decryptFileMock,
+            { token }
+          );
 
-        expect(generateFileKeyStub.calledOnce).toBeTruthy();
-        expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+          expect(validateMnemonicStub.callCount).toBe(0);
 
-        expect(downloadFileMock).toBeCalledTimes(1);
-        expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
+          expect(getDownloadLinksStub.calledOnce).toBeTruthy();
+          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, token]);
 
-        expect(decryptFileMock).toBeCalledTimes(1);
-        expect(decryptFileMock).toHaveBeenCalledWith(
-          crypto.algorithm.type,
-          key,
-          bufferizedIndex.slice(0, 16),
-          fileSize
-        );
-      } catch (err) {
-        expect(true).toBeFalsy();
-      }
+          expect(toBinaryDataMock).toBeCalledTimes(2);
+          expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
+          expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
+
+          expect(generateFileKeyStub.calledOnce).toBeTruthy();
+          expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+
+          expect(downloadFileMock).toBeCalledTimes(1);
+          expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
+
+          expect(decryptFileMock).toBeCalledTimes(1);
+          expect(decryptFileMock).toHaveBeenCalledWith(
+            crypto.algorithm.type,
+            key,
+            bufferizedIndex.slice(0, 16),
+            fileSize
+          );
+        } catch (err) {
+          expect(true).toBeFalsy();
+        }
+      });
     });
 
     it('Should throw if file version is missing', async () => {

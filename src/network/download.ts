@@ -24,15 +24,18 @@ export async function downloadFile(
   crypto: Crypto,
   toBinaryData: ToBinaryDataFunction,
   downloadFile: DownloadFileFunction,
-  decryptFile: DecryptFileFunction
+  decryptFile: DecryptFileFunction,
+  opts?: { token: string }
 ): Promise<void> {
-  const mnemonicIsValid = crypto.validateMnemonic(mnemonic);
+  if (!opts?.token) {
+    const mnemonicIsValid = crypto.validateMnemonic(mnemonic);
 
-  if (!mnemonicIsValid) {
-    throw new DownloadInvalidMnemonicError();
+    if (!mnemonicIsValid) {
+      throw new DownloadInvalidMnemonicError();
+    }
   }
 
-  const { index, shards, version, size } = await network.getDownloadLinks(bucketId, fileId);
+  const { index, shards, version, size } = await network.getDownloadLinks(bucketId, fileId, opts?.token);
 
   if (!version || version === 1) {
     throw new FileVersionOneError();
