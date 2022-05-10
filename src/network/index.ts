@@ -9,7 +9,7 @@ import {
 } from './types';
 import { ApiUrl, AppDetails } from '../shared';
 import { HttpClient } from '../shared/http/client';
-import { headersWithBasicAuth } from '../shared/headers/index';
+import { headersWithAuthToken, headersWithBasicAuth } from '../shared/headers/index';
 import { BasicAuth } from '../auth/types';
 import { StartUploadPayload } from './types';
 import { isHexString } from '../utils';
@@ -108,12 +108,12 @@ export class Network {
     });
   }
 
-  getDownloadLinks(bucketId: string, fileId: string): Promise<GetDownloadLinksResponse> {
+  getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
     return Network.getDownloadLinks(bucketId, fileId, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
-    });
+    }, token);
   }
 
   async deleteFile(bucketId: string, fileId: string): Promise<void> {
@@ -162,8 +162,12 @@ export class Network {
     bucketId: string,
     fileId: string,
     { client, appDetails, auth }: NetworkRequestConfig,
+    token?: string
   ) {
-    const headers = Network.headersWithBasicAuth(appDetails, auth);
+    const headers = token ?
+      Network.headersWithAuthToken(appDetails, token) :
+      Network.headersWithBasicAuth(appDetails, auth);
+
     return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info`, headers);
   }
 
@@ -184,5 +188,9 @@ export class Network {
    */
   private static headersWithBasicAuth(appDetails: AppDetails, auth: BasicAuth) {
     return headersWithBasicAuth(appDetails.clientName, appDetails.clientVersion, auth);
+  }
+
+  private static headersWithAuthToken(appDetails: AppDetails, token: string) {
+    return headersWithAuthToken(appDetails.clientName, appDetails.clientVersion, token);
   }
 }

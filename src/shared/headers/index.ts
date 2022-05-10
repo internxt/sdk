@@ -42,3 +42,12 @@ export function headersWithBasicAuth(clientName: string, clientVersion: string, 
     ...extra
   };
 }
+
+export function headersWithAuthToken(clientName: string, clientVersion: string, token: string) {
+  const headers = basicHeaders(clientName, clientVersion);
+
+  return {
+    ...headers,
+    'x-token': token
+  };
+}
