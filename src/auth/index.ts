@@ -20,6 +20,7 @@ export class Auth {
   private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
   private readonly apiSecurity?: ApiSecurity;
+  private readonly apiUrl: string;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
     return new Auth(apiUrl, appDetails, apiSecurity);
@@ -29,6 +30,7 @@ export class Auth {
     this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
+    this.apiUrl = apiUrl;
   }
 
   /**
@@ -208,6 +210,27 @@ export class Auth {
    */
   public confirmDeactivation(token: string): Promise<void> {
     return this.client.get(`/confirmDeactivation/${token}`, this.basicHeaders());
+  }
+
+  /**
+   * Checks if the password is correct for this email
+   * @param email
+   * @param hashedPassword
+   * @returns
+   */
+
+  public areCredentialsCorrect(email: string, hashedPassword: string): Promise<boolean> {
+    // Uses fetch instead of httpClient since a 401 response
+    // would log out the user
+    return fetch(`${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`).then(
+      (res) => {
+        if (res.ok) {
+          return true;
+        } else if (res.status === 401) {
+          return false;
+        } else throw new Error(`Request failed with error ${res.status}`);
+      },
+    );
   }
 
   private basicHeaders() {
