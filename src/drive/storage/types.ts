@@ -144,10 +144,11 @@ export interface MoveFileResponse {
   moved: boolean;
 }
 
-export interface UsageResponse {
+export type UsageResponse = {
   _id: string;
-  total: number;
-}
+} & {
+  [k in 'drive' | 'backups' | 'total']: number;
+};
 
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
