@@ -168,7 +168,10 @@ export class Network {
       Network.headersWithAuthToken(appDetails, token) :
       Network.headersWithBasicAuth(appDetails, auth);
 
-    return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info`, headers);
+    return client.get<GetDownloadLinksResponse>(
+      `/buckets/${bucketId}/files/${fileId}/info`,
+      { ...headers, 'x-api-version': '2' }
+    );
   }
 
   /**
