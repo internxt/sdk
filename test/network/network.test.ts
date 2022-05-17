@@ -235,7 +235,10 @@ describe('network ', () => {
       // Assert
       expect(links).toEqual(resolvesTo);
       expect(staticGetDownloadLinks).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([`/buckets/${idBucket}/files/${file}/info`, headers]);
+      expect(callStub.firstCall.args).toEqual([
+        `/buckets/${idBucket}/files/${file}/info`,
+        { ...headers, 'x-api-version': '2' }
+      ]);
     });
 
     it('should call static deleteFile with correct parameters', async () => {
