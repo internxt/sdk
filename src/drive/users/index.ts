@@ -1,9 +1,6 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import {
-  ChangePasswordPayload,
-  InitializeUserResponse,
-} from './types';
+import { ChangePasswordPayload, InitializeUserResponse, UpdateProfilePayload } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
 
@@ -29,14 +26,13 @@ export class Users {
    * @param email
    */
   public sendInvitation(email: string): Promise<void> {
-    return this.client
-      .post(
-        '/user/invite',
-        {
-          email: email
-        },
-        this.headers()
-      );
+    return this.client.post(
+      '/user/invite',
+      {
+        email: email,
+      },
+      this.headers(),
+    );
   }
 
   /**
@@ -47,16 +43,16 @@ export class Users {
   public initialize(email: string, mnemonic: string): Promise<InitializeUserResponse> {
     return this.client
       .post<{
-        user: InitializeUserResponse
+        user: InitializeUserResponse;
       }>(
         '/initialize',
         {
           email: email,
-          mnemonic: mnemonic
+          mnemonic: mnemonic,
         },
-        this.headers()
+        this.headers(),
       )
-      .then(data => {
+      .then((data) => {
         return data.user;
       });
   }
@@ -65,14 +61,10 @@ export class Users {
    * Returns fresh data of the user
    */
   public refreshUser(): Promise<{
-    user: UserSettings
-    token: string
+    user: UserSettings;
+    token: string;
   }> {
-    return this.client
-      .get(
-        '/user/refresh',
-        this.headers()
-      );
+    return this.client.get('/user/refresh', this.headers());
   }
 
   /**
@@ -80,18 +72,25 @@ export class Users {
    * @param payload
    */
   public changePassword(payload: ChangePasswordPayload) {
-    return this.client
-      .patch(
-        '/user/password',
-        {
-          currentPassword: payload.currentEncryptedPassword,
-          newPassword: payload.newEncryptedPassword,
-          newSalt: payload.newEncryptedSalt,
-          mnemonic: payload.encryptedMnemonic,
-          privateKey: payload.encryptedPrivateKey,
-        },
-        this.headers()
-      );
+    return this.client.patch(
+      '/user/password',
+      {
+        currentPassword: payload.currentEncryptedPassword,
+        newPassword: payload.newEncryptedPassword,
+        newSalt: payload.newEncryptedSalt,
+        mnemonic: payload.encryptedMnemonic,
+        privateKey: payload.encryptedPrivateKey,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Updates a user profile
+   * @param payload
+   */
+  public updateProfile(payload: UpdateProfilePayload) {
+    return this.client.patch<void>('/user/profile', payload, this.headers());
   }
 
   private headers() {
@@ -99,7 +98,7 @@ export class Users {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic
+      this.apiSecurity.mnemonic,
     );
   }
 }
