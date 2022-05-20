@@ -1,6 +1,6 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { ChangePasswordPayload, InitializeUserResponse, UpdateProfilePayload } from './types';
+import { ChangePasswordPayload, FriendInvite, InitializeUserResponse, UpdateProfilePayload } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
 
@@ -100,5 +100,12 @@ export class Users {
       this.apiSecurity.token,
       this.apiSecurity.mnemonic,
     );
+  }
+
+  /**
+   * Gets all friend invites created by this user
+   */
+  public getFriendInvites(): Promise<FriendInvite[]> {
+    return this.client.get('/user/invite', this.headers());
   }
 }
