@@ -1,4 +1,4 @@
-import {AppSumoDetails} from './appsumo';
+import { AppSumoDetails } from './appsumo';
 
 export type UUID = string;
 
@@ -24,4 +24,5 @@ export interface UserSettings {
   registerCompleted: boolean;
   hasReferralsProgram: boolean;
   createdAt: Date;
+  avatar: string | null;
 }
