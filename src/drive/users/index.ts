@@ -93,6 +93,24 @@ export class Users {
     return this.client.patch<void>('/user/profile', payload, this.headers());
   }
 
+  /**
+   * Updates a user avatar
+   * @param payload
+   */
+  public updateAvatar(payload: { avatar: Blob }) {
+    const formData = new FormData();
+    formData.set('avatar', payload.avatar);
+
+    return this.client.put<{ avatar: string }>('/user/avatar', formData, this.headers());
+  }
+
+  /**
+   * Delete current user avatar
+   */
+  public deleteAvatar() {
+    return this.client.delete<void>('/user/avatar', this.headers());
+  }
+
   private headers() {
     return headersWithTokenAndMnemonic(
       this.appDetails.clientName,
