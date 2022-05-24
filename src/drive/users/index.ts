@@ -124,6 +124,13 @@ export class Users {
     return this.client.post<void>('/user/sendVerificationEmail', {}, this.headers());
   }
 
+  /**
+   * Verifies user email
+   */
+  public verifyEmail(payload: { verificationToken: string }) {
+    return this.client.post<void>('/user/verifyEmail', payload, this.headers());
+  }
+
   private headers() {
     return headersWithTokenAndMnemonic(
       this.appDetails.clientName,
