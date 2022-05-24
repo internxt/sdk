@@ -110,6 +110,26 @@ export class Users {
   public deleteAvatar() {
     return this.client.delete<void>('/user/avatar', this.headers());
   }
+  /**
+   * Gets all friend invites created by this user
+   */
+  public getFriendInvites(): Promise<FriendInvite[]> {
+    return this.client.get('/user/invite', this.headers());
+  }
+
+  /**
+   * Sends verification email
+   */
+  public sendVerificationEmail() {
+    return this.client.post<void>('/user/sendVerificationEmail', {}, this.headers());
+  }
+
+  /**
+   * Verifies user email
+   */
+  public verifyEmail(payload: { verificationToken: string }) {
+    return this.client.post<void>('/user/verifyEmail', payload, this.headers());
+  }
 
   private headers() {
     return headersWithTokenAndMnemonic(
@@ -118,12 +138,5 @@ export class Users {
       this.apiSecurity.token,
       this.apiSecurity.mnemonic,
     );
-  }
-
-  /**
-   * Gets all friend invites created by this user
-   */
-  public getFriendInvites(): Promise<FriendInvite[]> {
-    return this.client.get('/user/invite', this.headers());
   }
 }
