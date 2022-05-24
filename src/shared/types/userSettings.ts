@@ -25,4 +25,5 @@ export interface UserSettings {
   hasReferralsProgram: boolean;
   createdAt: Date;
   avatar: string | null;
+  emailVerified: boolean;
 }
