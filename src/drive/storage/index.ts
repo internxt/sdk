@@ -14,6 +14,7 @@ import {
   UpdateFolderMetadataPayload,
   FetchLimitResponse,
   UsageResponse,
+  AddItemsToTrashPayload
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
@@ -91,13 +92,15 @@ export class Storage {
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
-  public getFolderContent(folderId: number): [
+  public getFolderContent(folderId: number, trash: (boolean | null) = null): [
     Promise<FetchFolderContentResponse>,
     RequestCanceler
   ] {
+    const query = trash !== null ? '/?trash='+trash : '';
+    
     const { promise, requestCanceler } = this.client
       .getCancellable<FetchFolderContentResponse>(
-        `/storage/v2/folder/${folderId}`,
+        `/storage/v2/folder/${folderId}${query}` ,
         this.headers()
       );
 
@@ -212,6 +215,36 @@ export class Storage {
       .get(
         `/storage/recents?limit=${limit}`,
         this.headers()
+      );
+  }
+
+  /**
+   * Returns a list of items in trash
+   */
+   public getTrash(): [
+    Promise<FetchFolderContentResponse>,
+    RequestCanceler
+  ] {
+    const { promise, requestCanceler } = this.client
+      .getCancellable<FetchFolderContentResponse>(
+        `/storage/trash`,
+        this.headers()
+      );
+    return [ promise, requestCanceler];
+  }
+
+  /**
+   * Add Items to Trash
+   * @param payload
+   */
+   public addItemsToTrash(payload: AddItemsToTrashPayload) {
+    return this.client
+      .post(
+        '/storage/trash/add',
+        {
+          items: payload.items,
+        },
+        this.headers(),
       );
   }
 
