@@ -92,12 +92,12 @@ export class Storage {
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
-  public getFolderContent(folderId: number, trash: (boolean | null) = null): [
+  public getFolderContent(folderId: number, trash?: boolean): [
     Promise<FetchFolderContentResponse>,
     RequestCanceler
   ] {
     const query = trash !== null ? '/?trash='+trash : '';
-    
+
     const { promise, requestCanceler } = this.client
       .getCancellable<FetchFolderContentResponse>(
         `/storage/v2/folder/${folderId}${query}` ,
