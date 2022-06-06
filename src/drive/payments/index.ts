@@ -1,6 +1,6 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, ProductData } from './types';
+import { CreatePaymentSessionPayload, PaymentMethod, ProductData } from './types';
 import { HttpClient } from '../../shared/http/client';
 
 export class Payments {
@@ -48,6 +48,10 @@ export class Payments {
 
   public getSetupIntent(): Promise<{ clientSecret: string }> {
     return this.client.get('/setup-intent', this.headers());
+  }
+
+  public getDefaultPaymentMethod(): Promise<PaymentMethod> {
+    return this.client.get('/default-payment-method', this.headers());
   }
 
   /**
