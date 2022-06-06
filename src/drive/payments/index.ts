@@ -1,8 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, ProductData } from './types';
+import { CreatePaymentSessionPayload, PaymentMethod, ProductData } from './types';
 import { HttpClient } from '../../shared/http/client';
-
 
 export class Payments {
   private readonly client: HttpClient;
@@ -23,11 +22,7 @@ export class Payments {
    * Fetches the existing products and its details
    */
   public getProducts(): Promise<ProductData[]> {
-    return this.client
-      .get(
-        '/v3/stripe/products',
-        this.headers()
-      );
+    return this.client.get('/v3/stripe/products', this.headers());
   }
 
   /**
@@ -35,21 +30,28 @@ export class Payments {
    * @param payload
    */
   public createSession(payload: CreatePaymentSessionPayload): Promise<{
-    id: string
+    id: string;
   }> {
-    return this.client
-      .post(
-        '/v2/stripe/session',
-        {
-          test: payload.test,
-          lifetime_tier: payload.lifetime_tier,
-          mode: payload.mode,
-          priceId: payload.priceId,
-          successUrl: payload.successUrl,
-          canceledUrl: payload.canceledUrl,
-        },
-        this.headers()
-      );
+    return this.client.post(
+      '/v2/stripe/session',
+      {
+        test: payload.test,
+        lifetime_tier: payload.lifetime_tier,
+        mode: payload.mode,
+        priceId: payload.priceId,
+        successUrl: payload.successUrl,
+        canceledUrl: payload.canceledUrl,
+      },
+      this.headers(),
+    );
+  }
+
+  public getSetupIntent(): Promise<{ clientSecret: string }> {
+    return this.client.get('/setup-intent', this.headers());
+  }
+
+  public getDefaultPaymentMethod(): Promise<PaymentMethod> {
+    return this.client.get('/default-payment-method', this.headers());
   }
 
   /**
@@ -57,10 +59,6 @@ export class Payments {
    * @private
    */
   private headers() {
-    return headersWithToken(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 }

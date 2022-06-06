@@ -1,37 +1,37 @@
 export interface ProductData {
-  id: string
-  name: string
-  metadata: ProductMetadata
-  price: ProductPriceData
-  renewalPeriod: RenewalPeriod
+  id: string;
+  name: string;
+  metadata: ProductMetadata;
+  price: ProductPriceData;
+  renewalPeriod: RenewalPeriod;
 }
 
 export interface ProductMetadata {
-  is_drive: boolean
-  is_teams: boolean
-  show: boolean
-  lifetime_tier: LifetimeTier
-  member_tier: keyof typeof StripeMemberTiers
-  simple_name: keyof typeof RenewalPeriod
-  size_bytes: string
+  is_drive: boolean;
+  is_teams: boolean;
+  show: boolean;
+  lifetime_tier: LifetimeTier;
+  member_tier: keyof typeof StripeMemberTiers;
+  simple_name: keyof typeof RenewalPeriod;
+  size_bytes: string;
 }
 
 export interface ProductPriceData {
-  id: string
-  name: string | null
-  amount: number
-  monthlyAmount: number
-  type: ProductPriceType
-  currency: string
-  recurring: ProductPriceRecurringData | null
+  id: string;
+  name: string | null;
+  amount: number;
+  monthlyAmount: number;
+  type: ProductPriceType;
+  currency: string;
+  recurring: ProductPriceRecurringData | null;
 }
 
 export interface ProductPriceRecurringData {
-  aggregate_usage: string | null
-  interval: string
-  interval_count: number
-  trial_period_days: number
-  usage_type: string
+  aggregate_usage: string | null;
+  interval: string;
+  interval_count: number;
+  trial_period_days: number;
+  usage_type: string;
 }
 
 export enum RenewalPeriod {
@@ -70,4 +70,15 @@ export interface CreatePaymentSessionPayload {
   priceId: string;
   successUrl?: string;
   canceledUrl?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  card: {
+    brand: 'amex' | 'diners' | 'discover' | 'jcb' | 'mastercard' | 'unionpay' | 'visa' | 'unknown';
+    exp_month: number;
+    exp_year: number;
+    last4: string;
+  };
+  created: number;
 }
