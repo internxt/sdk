@@ -1,6 +1,6 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, PaymentMethod, ProductData } from './types';
+import { CreatePaymentSessionPayload, Invoice, PaymentMethod, ProductData } from './types';
 import { HttpClient } from '../../shared/http/client';
 
 export class Payments {
@@ -52,6 +52,14 @@ export class Payments {
 
   public getDefaultPaymentMethod(): Promise<PaymentMethod> {
     return this.client.get('/default-payment-method', this.headers());
+  }
+
+  public getInvoices({ startingAfter, limit }: { startingAfter?: string; limit?: number }): Promise<Invoice[]> {
+    const query = new URLSearchParams();
+    if (startingAfter !== undefined) query.set('starting_after', startingAfter);
+    if (limit !== undefined) query.set('limit', limit.toString());
+
+    return this.client.get(`/invoices?${query.toString()}`, this.headers());
   }
 
   /**

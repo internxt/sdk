@@ -82,3 +82,10 @@ export interface PaymentMethod {
   };
   created: number;
 }
+
+export interface Invoice {
+  id: string;
+  created: number;
+  bytesInPlan: number;
+  pdf: string;
+}
