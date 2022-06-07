@@ -89,3 +89,14 @@ export interface Invoice {
   bytesInPlan: number;
   pdf: string;
 }
+
+export type UserSubscription =
+  | { type: 'free' | 'lifetime' }
+  | {
+      type: 'subscription';
+      amount: number;
+      currency: string;
+      amountAfterCoupon?: number;
+      interval: 'year' | 'month';
+      nextPayment: number;
+    };

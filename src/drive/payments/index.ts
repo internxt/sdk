@@ -1,7 +1,8 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, Invoice, PaymentMethod, ProductData } from './types';
+import { CreatePaymentSessionPayload, Invoice, PaymentMethod, ProductData, UserSubscription } from './types';
 import { HttpClient } from '../../shared/http/client';
+import AppError from '../../shared/types/errors';
 
 export class Payments {
   private readonly client: HttpClient;
@@ -60,6 +61,15 @@ export class Payments {
     if (limit !== undefined) query.set('limit', limit.toString());
 
     return this.client.get(`/invoices?${query.toString()}`, this.headers());
+  }
+
+  public getUserSubscription(): Promise<UserSubscription> {
+    return this.client.get<UserSubscription>('/subscriptions', this.headers()).catch((err) => {
+      const error = err as AppError;
+
+      if (error.status === 404) return { type: 'free' };
+      else throw err;
+    });
   }
 
   /**
