@@ -87,6 +87,10 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
   }
 
+  public cancelSubscription(): Promise<void> {
+    return this.client.delete('/subscriptions', this.headers());
+  }
+
   /**
    * Returns the needed headers for the module requests
    * @private
