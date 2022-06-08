@@ -1,6 +1,13 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, Invoice, PaymentMethod, ProductData, UserSubscription } from './types';
+import {
+  CreatePaymentSessionPayload,
+  DisplayPrice,
+  Invoice,
+  PaymentMethod,
+  ProductData,
+  UserSubscription,
+} from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
 
@@ -70,6 +77,10 @@ export class Payments {
       if (error.status === 404) return { type: 'free' };
       else throw err;
     });
+  }
+
+  public getPrices(): Promise<DisplayPrice[]> {
+    return this.client.get<DisplayPrice[]>('/prices', this.headers());
   }
 
   /**

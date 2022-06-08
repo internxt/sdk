@@ -100,3 +100,10 @@ export type UserSubscription =
       interval: 'year' | 'month';
       nextPayment: number;
     };
+
+export interface DisplayPrice {
+  id: string;
+  bytes: number;
+  interval: 'year' | 'month';
+  amount: number;
+}
