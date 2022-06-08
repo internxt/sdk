@@ -1,6 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import {
+  CreateCheckoutSessionPayload,
   CreatePaymentSessionPayload,
   DisplayPrice,
   Invoice,
@@ -89,6 +90,10 @@ export class Payments {
 
   public cancelSubscription(): Promise<void> {
     return this.client.delete('/subscriptions', this.headers());
+  }
+
+  public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
+    return this.client.post('/checkout-session', { ...payload }, this.headers());
   }
 
   /**

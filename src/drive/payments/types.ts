@@ -108,3 +108,9 @@ export interface DisplayPrice {
   interval: 'year' | 'month';
   amount: number;
 }
+
+export interface CreateCheckoutSessionPayload {
+  price_id: string;
+  success_url: string;
+  cancel_url: string;
+}
