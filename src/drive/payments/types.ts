@@ -82,3 +82,35 @@ export interface PaymentMethod {
   };
   created: number;
 }
+
+export interface Invoice {
+  id: string;
+  created: number;
+  bytesInPlan: number;
+  pdf: string;
+}
+
+export type UserSubscription =
+  | { type: 'free' | 'lifetime' }
+  | {
+      type: 'subscription';
+      amount: number;
+      currency: string;
+      amountAfterCoupon?: number;
+      interval: 'year' | 'month';
+      nextPayment: number;
+      priceId: string;
+    };
+
+export interface DisplayPrice {
+  id: string;
+  bytes: number;
+  interval: 'year' | 'month';
+  amount: number;
+}
+
+export interface CreateCheckoutSessionPayload {
+  price_id: string;
+  success_url: string;
+  cancel_url: string;
+}

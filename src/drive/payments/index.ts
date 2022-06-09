@@ -1,7 +1,16 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { CreatePaymentSessionPayload, PaymentMethod, ProductData } from './types';
+import {
+  CreateCheckoutSessionPayload,
+  CreatePaymentSessionPayload,
+  DisplayPrice,
+  Invoice,
+  PaymentMethod,
+  ProductData,
+  UserSubscription,
+} from './types';
 import { HttpClient } from '../../shared/http/client';
+import AppError from '../../shared/types/errors';
 
 export class Payments {
   private readonly client: HttpClient;
@@ -52,6 +61,39 @@ export class Payments {
 
   public getDefaultPaymentMethod(): Promise<PaymentMethod> {
     return this.client.get('/default-payment-method', this.headers());
+  }
+
+  public getInvoices({ startingAfter, limit }: { startingAfter?: string; limit?: number }): Promise<Invoice[]> {
+    const query = new URLSearchParams();
+    if (startingAfter !== undefined) query.set('starting_after', startingAfter);
+    if (limit !== undefined) query.set('limit', limit.toString());
+
+    return this.client.get(`/invoices?${query.toString()}`, this.headers());
+  }
+
+  public getUserSubscription(): Promise<UserSubscription> {
+    return this.client.get<UserSubscription>('/subscriptions', this.headers()).catch((err) => {
+      const error = err as AppError;
+
+      if (error.status === 404) return { type: 'free' };
+      else throw err;
+    });
+  }
+
+  public getPrices(): Promise<DisplayPrice[]> {
+    return this.client.get<DisplayPrice[]>('/prices', this.headers());
+  }
+
+  public updateSubscriptionPrice(priceId: string): Promise<void> {
+    return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
+  }
+
+  public cancelSubscription(): Promise<void> {
+    return this.client.delete('/subscriptions', this.headers());
+  }
+
+  public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
+    return this.client.post('/checkout-session', { ...payload }, this.headers());
   }
 
   /**
