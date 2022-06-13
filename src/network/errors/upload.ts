@@ -7,3 +7,19 @@ export class UploadInvalidMnemonicError extends CodeError {
     Object.setPrototypeOf(this, UploadInvalidMnemonicError.prototype);
   }
 }
+
+export class UrlNotReceivedFromNetworkError extends CodeError {
+  constructor() {
+    super(ErrorCode.Upload.InvalidMnemonic, 'Url not received from network');
+
+    Object.setPrototypeOf(this, UrlNotReceivedFromNetworkError.prototype);
+  }
+}
+
+export class UrlsNotReceivedFromNetworkError extends CodeError {
+  constructor() {
+    super(ErrorCode.Upload.InvalidMnemonic, 'Urls not received from network');
+
+    Object.setPrototypeOf(this, UrlsNotReceivedFromNetworkError.prototype);
+  }
+}
