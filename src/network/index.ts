@@ -124,7 +124,7 @@ export class Network {
     });
   }
 
-  finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+  finishMultipartUpload(bucketId: string, payload: FinishMultipartUploadPayload): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
       throw new InvalidFileIndexError();
@@ -133,6 +133,13 @@ export class Network {
     for (const shard of shards) {
       if (!uuidValidate(shard.uuid)) {
         throw new Error('Invalid UUID');
+      }
+
+      if (!shard.UploadId) {
+        throw new Error('Missing UploadId');
+      }
+      if (!shard.parts) {
+        throw new Error('Missing parts');
       }
     }
 
@@ -144,11 +151,16 @@ export class Network {
   }
 
   getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
-    return Network.getDownloadLinks(bucketId, fileId, {
+    return Network.getDownloadLinks(
+      bucketId,
+      fileId,
+      {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
-    }, token);
+      },
+      token,
+    );
   }
 
   async deleteFile(bucketId: string, fileId: string): Promise<void> {
