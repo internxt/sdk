@@ -93,7 +93,31 @@ export class Network {
       throw new DuplicatedIndexesError();
     }
 
-    return Network.startUpload(bucketId, payload, {
+    return Network.startUpload(
+      bucketId,
+      payload,
+      {
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
+      },
+      parts,
+    );
+  }
+
+  finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+    const { index, shards } = payload;
+    if (!isHexString(index) || index.length !== 64) {
+      throw new InvalidFileIndexError();
+    }
+
+    for (const shard of shards) {
+      if (!uuidValidate(shard.uuid)) {
+        throw new Error('Invalid UUID');
+      }
+    }
+
+    return Network.finishUpload(bucketId, payload, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
