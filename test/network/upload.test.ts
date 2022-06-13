@@ -54,7 +54,8 @@ describe('network/upload', () => {
         uploads: [{
           url: fakeUrl,
           uuid: fakeUuid,
-          index: 0
+          index: 0,
+          urls: null,
         }]
       });
       const finishUploadStub = sinon.stub(network, 'finishUpload').resolves({
