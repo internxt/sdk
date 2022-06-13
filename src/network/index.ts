@@ -6,6 +6,7 @@ import {
   GetDownloadLinksResponse,
   NetworkRequestConfig,
   FinishUploadPayload,
+  FinishMultipartUploadPayload,
 } from './types';
 import { ApiUrl, AppDetails } from '../shared';
 import { HttpClient } from '../shared/http/client';
@@ -45,6 +46,22 @@ export class InvalidUploadSizeError extends Error {
     super('Invalid size');
 
     Object.setPrototypeOf(this, InvalidUploadSizeError.prototype);
+  }
+}
+
+export class FileTooSmallForMultipartError extends Error {
+  constructor() {
+    super('File is too small for multipart upload');
+
+    Object.setPrototypeOf(this, FileTooSmallForMultipartError.prototype);
+  }
+}
+
+export class InvalidMultipartValueError extends Error {
+  constructor() {
+    super('Invalid multipart value');
+
+    Object.setPrototypeOf(this, InvalidMultipartValueError.prototype);
   }
 }
 
