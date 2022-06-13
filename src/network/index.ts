@@ -180,9 +180,14 @@ export class Network {
     bucketId: string,
     payload: StartUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
+    parts = 1,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<StartUploadResponse>(`/v2/buckets/${bucketId}/files/start`, payload, headers);
+    return client.post<StartUploadResponse>(
+      `/v2/buckets/${bucketId}/files/start?multiparts=${parts}`,
+      payload,
+      headers,
+    );
   }
 
   /**
