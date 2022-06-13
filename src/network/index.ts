@@ -66,7 +66,8 @@ export class Network {
     };
   }
 
-  startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+  startUpload(bucketId: string, payload: StartUploadPayload, parts = 1): Promise<StartUploadResponse> {
+    let totalSize = 0;
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
         throw new InvalidUploadIndexError();
@@ -74,6 +75,16 @@ export class Network {
       if (size < 0) {
         throw new InvalidUploadSizeError();
       }
+      totalSize += size;
+    }
+
+    const MB500 = 500 * 1024 * 1024;
+    if (totalSize < MB500 && parts > 1) {
+      throw new FileTooSmallForMultipartError();
+    }
+
+    if (!Number.isInteger(parts) || parts < 1) {
+      throw new InvalidMultipartValueError();
     }
 
     const uploadIndexesWithoutDuplicates = new Set(payload.uploads.map((upload) => upload.index));
