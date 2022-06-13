@@ -198,7 +198,7 @@ export class Network {
    */
   private static finishUpload(
     bucketId: string,
-    payload: FinishUploadPayload,
+    payload: FinishUploadPayload | FinishMultipartUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
