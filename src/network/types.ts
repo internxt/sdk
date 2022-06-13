@@ -10,8 +10,16 @@ export interface Shard {
   hash: Hash;
 }
 
+export interface ShardForMultipart extends Shard {
+  UploadId: string;
+  parts: {
+    PartNumber: number;
+    ETag: string;
+  };
+}
+
 export interface StartUploadResponse {
-  uploads: { index: number; uuid: Shard['uuid']; url: string }[];
+  uploads: { index: number; uuid: Shard['uuid']; url: string | null; urls: string[] | null; UploadId?: string }[];
 }
 export type FinishUploadResponse = BucketEntry;
 export interface BucketEntry {
@@ -59,11 +67,16 @@ export type FinishUploadPayload = {
   shards: Shard[];
 };
 
+export type FinishMultipartUploadPayload = {
+  index: string;
+  shards: ShardForMultipart[];
+};
+
 export type UploadFileFunction = (url: string) => Promise<Hash>;
-export type DownloadFileFunction = (
-  downloadables: DownloadableShard[],
-  fileSize: number
-) => Promise<void>;
+export type UploadFileMultipartFunction = (
+  urls: string[],
+) => Promise<{ hash: Hash; parts: { PartNumber: number; ETag: string } }>;
+export type DownloadFileFunction = (downloadables: DownloadableShard[], fileSize: number) => Promise<void>;
 
 export type BinaryData = {
   slice: (from: number, to: number) => BinaryData;
