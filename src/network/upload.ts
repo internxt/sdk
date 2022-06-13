@@ -1,6 +1,6 @@
 import { Network } from '.';
-import { UploadInvalidMnemonicError } from './errors';
-import { Crypto, EncryptFileFunction, UploadFileFunction } from './types';
+import { UploadInvalidMnemonicError, UrlNotReceivedFromNetworkError, UrlsNotReceivedFromNetworkError } from './errors';
+import { Crypto, EncryptFileFunction, UploadFileFunction, UploadFileMultipartFunction } from './types';
 
 export async function uploadFile(
   network: Network,
@@ -29,6 +29,10 @@ export async function uploadFile(
   });
 
   const [{ url, uuid }] = uploads;
+
+  if (!url) {
+    throw new UrlNotReceivedFromNetworkError();
+  }
 
   await encryptFile(crypto.algorithm.type, key, iv);
   const hash = await uploadFile(url);
