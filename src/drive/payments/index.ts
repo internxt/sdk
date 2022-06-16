@@ -84,7 +84,7 @@ export class Payments {
     return this.client.get<DisplayPrice[]>('/prices', this.headers());
   }
 
-  public updateSubscriptionPrice(priceId: string): Promise<void> {
+  public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
     return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
   }
 
