@@ -66,6 +66,10 @@ export class Network {
     };
   }
 
+  get credentials(): BasicAuth {
+    return this.auth;
+  }
+
   startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
