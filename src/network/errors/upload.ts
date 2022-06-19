@@ -23,3 +23,10 @@ export class UrlsNotReceivedFromNetworkError extends CodeError {
     Object.setPrototypeOf(this, UrlsNotReceivedFromNetworkError.prototype);
   }
 }
+export class UploadIdNotReceivedFromNetworkError extends CodeError {
+  constructor() {
+    super(ErrorCode.Upload.InvalidMnemonic, 'UploadId not receievd from network');
+
+    Object.setPrototypeOf(this, UploadIdNotReceivedFromNetworkError.prototype);
+  }
+}

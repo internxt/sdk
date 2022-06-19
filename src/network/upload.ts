@@ -1,5 +1,10 @@
 import { Network } from '.';
-import { UploadInvalidMnemonicError, UrlNotReceivedFromNetworkError, UrlsNotReceivedFromNetworkError } from './errors';
+import { 
+  UploadIdNotReceivedFromNetworkError, 
+  UploadInvalidMnemonicError, 
+  UrlNotReceivedFromNetworkError, 
+  UrlsNotReceivedFromNetworkError 
+} from './errors';
 import { Crypto, EncryptFileFunction, UploadFileFunction, UploadFileMultipartFunction } from './types';
 
 export async function uploadFile(
@@ -84,6 +89,9 @@ export async function uploadMultipartFile(
 
   if (!urls) {
     throw new UrlsNotReceivedFromNetworkError();
+  }
+  if (!UploadId) {
+    throw new UploadIdNotReceivedFromNetworkError();
   }
 
   await encryptFile(crypto.algorithm.type, key, iv);
