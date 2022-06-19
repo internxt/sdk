@@ -15,7 +15,7 @@ export interface ShardForMultipart extends Shard {
   parts: {
     PartNumber: number;
     ETag: string;
-  };
+  }[];
 }
 
 export interface StartUploadResponse {
@@ -75,7 +75,7 @@ export type FinishMultipartUploadPayload = {
 export type UploadFileFunction = (url: string) => Promise<Hash>;
 export type UploadFileMultipartFunction = (
   urls: string[],
-) => Promise<{ hash: Hash; parts: { PartNumber: number; ETag: string } }>;
+) => Promise<{ hash: Hash; parts: { PartNumber: number; ETag: string }[] }>;
 export type DownloadFileFunction = (downloadables: DownloadableShard[], fileSize: number) => Promise<void>;
 
 export type BinaryData = {
