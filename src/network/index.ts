@@ -83,8 +83,13 @@ export class Network {
     };
   }
 
+  get credentials(): BasicAuth {
+    return this.auth;
+  }
+
   startUpload(bucketId: string, payload: StartUploadPayload, parts = 1): Promise<StartUploadResponse> {
     let totalSize = 0;
+
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
         throw new InvalidUploadIndexError();
@@ -172,9 +177,9 @@ export class Network {
       bucketId,
       fileId,
       {
-      client: this.client,
-      appDetails: this.appDetails,
-      auth: this.auth,
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
       },
       token,
     );
