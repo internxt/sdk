@@ -94,7 +94,8 @@ describe('network ', () => {
         uploads: uploads.map(u => ({
           index: u.index,
           uuid: validUUID,
-          url
+          url,
+          urls: null,
         })),
       };
 
@@ -157,7 +158,7 @@ describe('network ', () => {
         uploads: [{ index: 0, size: 40 }],
       };
       const resolvesTo: StartUploadResponse = {
-        uploads: [{ index: validIndex, uuid: validUUID, url: '' }],
+        uploads: [{ index: validIndex, uuid: validUUID, url: '', urls: null }],
       };
       const callStub = sinon.stub(httpClient, 'post').resolves(resolvesTo);
       const staticStartUpload = jest.spyOn(Network.prototype as any, 'startUpload');
@@ -169,7 +170,7 @@ describe('network ', () => {
       expect(response).toEqual(resolvesTo);
       expect(staticStartUpload).toHaveBeenCalled();
       expect(callStub.firstCall.args).toEqual([
-        `/v2/buckets/${idBucket}/files/start`,
+        `/v2/buckets/${idBucket}/files/start?multiparts=1`,
         validStartUploadPayload,
         headers,
       ]);

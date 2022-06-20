@@ -6,6 +6,7 @@ import {
   GetDownloadLinksResponse,
   NetworkRequestConfig,
   FinishUploadPayload,
+  FinishMultipartUploadPayload,
 } from './types';
 import { ApiUrl, AppDetails } from '../shared';
 import { HttpClient } from '../shared/http/client';
@@ -48,6 +49,22 @@ export class InvalidUploadSizeError extends Error {
   }
 }
 
+export class FileTooSmallForMultipartError extends Error {
+  constructor() {
+    super('File is too small for multipart upload');
+
+    Object.setPrototypeOf(this, FileTooSmallForMultipartError.prototype);
+  }
+}
+
+export class InvalidMultipartValueError extends Error {
+  constructor() {
+    super('Invalid multipart value');
+
+    Object.setPrototypeOf(this, InvalidMultipartValueError.prototype);
+  }
+}
+
 export class Network {
   private readonly client: HttpClient;
   private readonly appDetails: AppDetails;
@@ -70,7 +87,9 @@ export class Network {
     return this.auth;
   }
 
-  startUpload(bucketId: string, payload: StartUploadPayload): Promise<StartUploadResponse> {
+  startUpload(bucketId: string, payload: StartUploadPayload, parts = 1): Promise<StartUploadResponse> {
+    let totalSize = 0;
+
     for (const { index, size } of payload.uploads) {
       if (index < 0) {
         throw new InvalidUploadIndexError();
@@ -78,6 +97,16 @@ export class Network {
       if (size < 0) {
         throw new InvalidUploadSizeError();
       }
+      totalSize += size;
+    }
+
+    const MB500 = 500 * 1024 * 1024;
+    if (totalSize < MB500 && parts > 1) {
+      throw new FileTooSmallForMultipartError();
+    }
+
+    if (!Number.isInteger(parts) || parts < 1) {
+      throw new InvalidMultipartValueError();
     }
 
     const uploadIndexesWithoutDuplicates = new Set(payload.uploads.map((upload) => upload.index));
@@ -86,11 +115,16 @@ export class Network {
       throw new DuplicatedIndexesError();
     }
 
-    return Network.startUpload(bucketId, payload, {
-      client: this.client,
-      appDetails: this.appDetails,
-      auth: this.auth,
-    });
+    return Network.startUpload(
+      bucketId,
+      payload,
+      {
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
+      },
+      parts,
+    );
   }
 
   finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
@@ -112,12 +146,43 @@ export class Network {
     });
   }
 
-  getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
-    return Network.getDownloadLinks(bucketId, fileId, {
+  finishMultipartUpload(bucketId: string, payload: FinishMultipartUploadPayload): Promise<FinishUploadResponse> {
+    const { index, shards } = payload;
+    if (!isHexString(index) || index.length !== 64) {
+      throw new InvalidFileIndexError();
+    }
+
+    for (const shard of shards) {
+      if (!uuidValidate(shard.uuid)) {
+        throw new Error('Invalid UUID');
+      }
+
+      if (!shard.UploadId) {
+        throw new Error('Missing UploadId');
+      }
+      if (!shard.parts) {
+        throw new Error('Missing parts');
+      }
+    }
+
+    return Network.finishUpload(bucketId, payload, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
-    }, token);
+    });
+  }
+
+  getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
+    return Network.getDownloadLinks(
+      bucketId,
+      fileId,
+      {
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
+      },
+      token,
+    );
   }
 
   async deleteFile(bucketId: string, fileId: string): Promise<void> {
@@ -137,9 +202,14 @@ export class Network {
     bucketId: string,
     payload: StartUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
+    parts = 1,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<StartUploadResponse>(`/v2/buckets/${bucketId}/files/start`, payload, headers);
+    return client.post<StartUploadResponse>(
+      `/v2/buckets/${bucketId}/files/start?multiparts=${parts}`,
+      payload,
+      headers,
+    );
   }
 
   /**
@@ -150,7 +220,7 @@ export class Network {
    */
   private static finishUpload(
     bucketId: string,
-    payload: FinishUploadPayload,
+    payload: FinishUploadPayload | FinishMultipartUploadPayload,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
