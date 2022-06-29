@@ -2,8 +2,8 @@ export interface CreateSendLinkPayload {
     sender?: string;
     receivers?: string[];
     code: string;
-    title: string;
-    subject: string;
+    title?: string;
+    subject?: string;
     items: Array<{
         name: string;
         type: string;
