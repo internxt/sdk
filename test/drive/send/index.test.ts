@@ -20,10 +20,6 @@ describe('Send Links', () => {
     title: 'File Test',
     subject: 'Esto es una prueba de archivo',
     code: 'code',
-    sender: 'test@internxt.com',
-    receivers: [
-        'test@internxt.com',
-    ],
     views: 0,
     userId: null,
     items: [

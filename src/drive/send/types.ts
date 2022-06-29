@@ -1,6 +1,6 @@
 export interface CreateSendLinkPayload {
-    sender: string;
-    receivers: string[];
+    sender?: string;
+    receivers?: string[];
     code: string;
     title: string;
     subject: string;
@@ -18,8 +18,6 @@ export interface SendLink {
     title: string;
     subject: string;
     code: string;
-    sender: string;
-    receivers: string[];
     views: number;
     userId: string | null;
     items: Array<{
