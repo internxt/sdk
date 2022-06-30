@@ -100,8 +100,8 @@ export class Network {
       totalSize += size;
     }
 
-    const MB500 = 500 * 1024 * 1024;
-    if (totalSize < MB500 && parts > 1) {
+    const MB100 = 100 * 1024 * 1024;
+    if (totalSize < MB100 && parts > 1) {
       throw new FileTooSmallForMultipartError();
     }
 
@@ -236,16 +236,16 @@ export class Network {
     bucketId: string,
     fileId: string,
     { client, appDetails, auth }: NetworkRequestConfig,
-    token?: string
+    token?: string,
   ) {
-    const headers = token ?
-      Network.headersWithAuthToken(appDetails, token) :
-      Network.headersWithBasicAuth(appDetails, auth);
+    const headers = token
+      ? Network.headersWithAuthToken(appDetails, token)
+      : Network.headersWithBasicAuth(appDetails, auth);
 
-    return client.get<GetDownloadLinksResponse>(
-      `/buckets/${bucketId}/files/${fileId}/info`,
-      { ...headers, 'x-api-version': '2' }
-    );
+    return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info`, {
+      ...headers,
+      'x-api-version': '2',
+    });
   }
 
   /**
