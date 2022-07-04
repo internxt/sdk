@@ -106,3 +106,12 @@ export type CreatePhotoShareBody = Pick<Share, 'views' | 'photoIds' | 'bucket' |
 export type GetPhotoShareResponse = Share & {
   photos: (Pick<Photo, 'fileId' | 'name' | 'size' | 'type'> & { decryptionKey: string })[];
 };
+
+export type PhotoExistsPayload = {
+  hash: string;
+  name: string;
+  takenAt: string;
+};
+
+export type PhotoExistsDataJSON = (PhotoExistsPayload | PhotoJSON) & { exists: boolean };
+export type PhotoExistsData = ((Omit<PhotoExistsPayload, 'takenAt'> & { takenAt: Date }) | Photo) & { exists: boolean };
