@@ -96,7 +96,7 @@ export default class PhotosSubmodule {
 
   public photosExists(photosExistPayload: PhotoExistsPayload[]): Promise<PhotoExistsData[]> {
     return axios
-      .post<PhotoExistsDataJSON[]>(
+      .post<{ photos: PhotoExistsDataJSON[] }>(
         `${this.model.baseUrl}/photos/exists`,
         { photos: photosExistPayload },
         {
@@ -106,7 +106,7 @@ export default class PhotosSubmodule {
         },
       )
       .then((res) => {
-        return res.data.map((result) => {
+        return res.data.photos.map((result) => {
           if ('id' in result) {
             return {
               ...this.parse(result),
