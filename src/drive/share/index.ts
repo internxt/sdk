@@ -1,10 +1,13 @@
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
-  GenerateShareFileLinkPayload,
-  GenerateShareFolderLinkPayload, SharedDirectoryFiles, SharedDirectoryFolders,
-  GetSharedDirectoryFoldersPayload, SharedFolderInfo,
+  GenerateShareLinkPayload,
+  UpdateShareLinkPayload, SharedDirectoryFolders,
+  GetSharedDirectoryPayload,
   SharedFileInfo,
-  IShare, GetSharedDirectoryFilesPayload
+  IShare,
+  GetShareLinkFolderSizePayload,
+  ShareLink,
+  ShareLinks
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -27,52 +30,50 @@ export class Share {
   }
 
   /**
-   * Creates a new link to share a file
-   * @param payload
-   */
-  public createShareFileLink(payload: GenerateShareFileLinkPayload): Promise<{
-    token: string
-  }> {
-    return this.client
-      .post(
-        `/storage/share/file/${payload.fileId}`,
-        {
-          views: payload.views,
-          encryptionKey: payload.encryptionKey,
-          fileToken: payload.fileToken,
-          bucket: payload.bucket,
-        },
-        this.headers()
-      );
-  }
-
-  /**
-   * Creates a new link to share a folder
-   * @param payload
-   */
-  public createShareFolderLink(payload: GenerateShareFolderLinkPayload): Promise<{
-    token: string
-  }> {
-    return this.client
-      .post(
-        `/storage/share/folder/${payload.folderId}`,
-        {
-          views: payload.views,
-          bucketToken: payload.bucketToken,
-          bucket: payload.bucket,
-          mnemonic: payload.encryptedMnemonic
-        },
-        this.headers()
-      );
-  }
-
-  /**
    * Fetches the list of shared items
    */
-  public getShareList(): Promise<IShare> {
+  public getShareLinks(page = 1, perPage = 50): Promise<Array<Partial<ShareLink>> | []> {
     return this.client
       .get(
-        '/share/list',
+        `/share/list?page=${page}&perPage=${perPage}`,
+        this.headers()
+      );
+  }
+
+  /**
+   * Creates a new link to share a file or folder
+   * @param payload
+   */
+  public createShareLink(payload: GenerateShareLinkPayload): Promise<{
+    created: boolean,
+    token: string
+  }> {
+    return this.client
+      .post(
+        `/storage/share/${payload.type}/${payload.itemId}`,
+        {
+          timesValid: payload.timesValid,
+          encryptionKey: payload.encryptionKey,
+          mnemonic: payload.mnemonic,
+          itemToken: payload.itemToken,
+          bucket: payload.bucket,
+        },
+        this.headers()
+      );
+  }
+
+  /**
+   * Update share link
+   * @param payload
+   */
+   public updateShareLink(payload: UpdateShareLinkPayload): Promise<ShareLink> {
+    return this.client
+      .put(
+        `/storage/share/${payload.itemId}`,
+        {
+          timesValid: payload.timesValid,
+          active: payload.active,
+        },
         this.headers()
       );
   }
@@ -81,7 +82,7 @@ export class Share {
    * Fetches data of a shared file
    * @param token
    */
-  public getSharedFileByToken(token: string): Promise<SharedFileInfo> {
+  public getShareLink(token: string): Promise<ShareLink> {
     return this.client
       .get(
         `/storage/share/${token}`,
@@ -90,37 +91,25 @@ export class Share {
   }
 
   /**
-   * Fetches data of a shared folder
-   * @param token
+   * Fetches paginated folders or files of a specific share link
+   * @param payload
    */
-  public getSharedFolderByToken(token: string): Promise<SharedFolderInfo> {
+  public getShareLinkDirectory(payload: GetSharedDirectoryPayload): Promise<any> {
     return this.client
       .get(
-        `/storage/shared-folder/${token}`,
+        `/storage/share/down/${payload.type}?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
         this.basicHeaders()
       );
   }
 
   /**
-   * Fetches paginated folders of a specific shared folder
+   * Get size of folder in share links
    * @param payload
    */
-  public getSharedDirectoryFolders(payload: GetSharedDirectoryFoldersPayload): Promise<SharedDirectoryFolders> {
+   public getShareLinkFolderSize(payload: GetShareLinkFolderSizePayload): Promise<any> {
     return this.client
       .get(
-        `/storage/share/down/folders?token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
-        this.basicHeaders()
-      );
-  }
-
-  /**
-   * Fetches paginated files of a specific shared folder
-   * @param payload
-   */
-  public getSharedDirectoryFiles(payload: GetSharedDirectoryFilesPayload): Promise<SharedDirectoryFiles> {
-    return this.client
-      .get(
-        `/storage/share/down/files?code=${payload.code}&token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
+        `/storage/share/${payload.itemId}/folder/${payload.folderId}/size`,
         this.basicHeaders()
       );
   }

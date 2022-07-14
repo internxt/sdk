@@ -1,30 +1,48 @@
-export interface GenerateShareFileLinkPayload {
-  fileId: string
-  views: number
+export interface GenerateShareLinkPayload {
+  itemId: string
+  type: string
   encryptionKey: string
-  fileToken: string
+  mnemonic: string
+  itemToken: string
   bucket: string
+  timesValid: number
 }
 
-export interface GenerateShareFolderLinkPayload {
-  folderId: number
-  views: number
-  bucketToken: string
-  bucket: string,
-  encryptedMnemonic: string
+export interface UpdateShareLinkPayload {
+  itemId: string
+  timesValid: number
+  active: boolean
 }
 
-export interface GetSharedDirectoryFoldersPayload {
+export interface GetSharedDirectoryPayload {
+  type: string
   token: string
-  directoryId: number | null
-  offset: number
-  limit: number
+  folderId: number | null
+  page: number
+  perPage: number
+  code?: string
 }
 
-export interface GetSharedDirectoryFilesPayload extends GetSharedDirectoryFoldersPayload {
-  code: string
+export interface GetShareLinkFolderSizePayload {
+  itemId: string
+  folderId: string
 }
-
+export interface ShareLink {
+  id: string,
+  token: string,
+  mnemonic: string,
+  user: object | null,
+  item: object | null,
+  encryptionKey: string,
+  bucket: string,
+  itemToken: string,
+  isFolder: boolean,
+  views: number,
+  timesValid: number,
+  active: boolean,
+  createdAt: string,
+  updatedAt: string,
+}
 export interface SharedFileInfo {
   user: string;
   token: string;
@@ -41,14 +59,6 @@ export interface SharedFileInfo {
     type: string;
     size: number;
   };
-}
-
-export interface SharedFolderInfo {
-  folderId: number
-  name: string
-  size: number
-  bucket: string
-  bucketToken: string
 }
 
 export interface SharedDirectoryFolders {
@@ -72,17 +82,6 @@ export interface SharedDirectoryFile {
   type: string
   size: number
   encryptionKey: string
-}
-
-export interface IShare {
-  token: string
-  file: string
-  encryptionKey: string
-  bucket: string
-  fileToken: string
-  isFolder: boolean
-  views: number
-  fileInfo: IFile
 }
 
 export interface IFile {
