@@ -1,101 +1,46 @@
-export interface GenerateShareFileLinkPayload {
-  fileId: string
-  views: number
-  encryptionKey: string
-  fileToken: string
+export interface GenerateShareLinkPayload {
+  itemId: string
+  type: string
+  encryptionKey?: string
+  mnemonic: string
+  itemToken: string
   bucket: string
+  timesValid: number
+  code?: string
 }
 
-export interface GenerateShareFolderLinkPayload {
-  folderId: number
-  views: number
-  bucketToken: string
+export interface UpdateShareLinkPayload {
+  itemId: string
+  timesValid: number
+  active: boolean
+}
+
+export interface GetSharedDirectoryPayload {
+  type: string
+  token: string
+  folderId: number | null
+  page: number
+  perPage: number
+  code?: string
+}
+
+export interface GetShareLinkFolderSizePayload {
+  itemId: string
+  folderId: string
+}
+export interface ShareLink {
+  id: string,
+  token: string,
+  mnemonic: string,
+  user: any,
+  item: any,
+  encryptionKey: string,
   bucket: string,
-  encryptedMnemonic: string
-}
-
-export interface GetSharedDirectoryFoldersPayload {
-  token: string
-  directoryId: number | null
-  offset: number
-  limit: number
-}
-
-export interface GetSharedDirectoryFilesPayload extends GetSharedDirectoryFoldersPayload {
-  code: string
-}
-
-export interface SharedFileInfo {
-  user: string;
-  token: string;
-  file: string;
-  encryptionKey: string;
-  mnemonic: string;
-  isFolder: boolean;
-  views: number;
-  bucket: string;
-  fileToken: string;
-  fileMeta: {
-    folderId: string;
-    name: string;
-    type: string;
-    size: number;
-  };
-}
-
-export interface SharedFolderInfo {
-  folderId: number
-  name: string
-  size: number
-  bucket: string
-  bucketToken: string
-}
-
-export interface SharedDirectoryFolders {
-  folders: SharedDirectoryFolder[],
-  last: boolean
-}
-
-export interface SharedDirectoryFolder {
-  id: number
-  name: string
-}
-
-export interface SharedDirectoryFiles {
-  files: SharedDirectoryFile[],
-  last: boolean
-}
-
-export interface SharedDirectoryFile {
-  id: string
-  name: string
-  type: string
-  size: number
-  encryptionKey: string
-}
-
-export interface IShare {
-  token: string
-  file: string
-  encryptionKey: string
-  bucket: string
-  fileToken: string
-  isFolder: boolean
-  views: number
-  fileInfo: IFile
-}
-
-export interface IFile {
-  bucket: string
-  createdAt: Date
-  folderId: number
-  fileId: string
-  id: number
-  name: string
-  type: string
-  updatedAt: Date
-  size: number
-  progress: number
-  uri?: string
-  isUploaded?: boolean
+  itemToken: string,
+  isFolder: boolean,
+  views: number,
+  timesValid: number,
+  active: boolean,
+  createdAt: string,
+  updatedAt: string,
 }
