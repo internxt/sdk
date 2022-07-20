@@ -1,13 +1,10 @@
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   GenerateShareLinkPayload,
-  UpdateShareLinkPayload, SharedDirectoryFolders,
+  UpdateShareLinkPayload,
   GetSharedDirectoryPayload,
-  SharedFileInfo,
-  IShare,
   GetShareLinkFolderSizePayload,
   ShareLink,
-  ShareLinks
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -35,7 +32,7 @@ export class Share {
   public getShareLinks(page = 1, perPage = 50): Promise<Array<Partial<ShareLink>> | []> {
     return this.client
       .get(
-        `/share/list?page=${page}&perPage=${perPage}`,
+        `/storage/share/list?page=${page}&perPage=${perPage}`,
         this.headers()
       );
   }
@@ -48,6 +45,10 @@ export class Share {
     created: boolean,
     token: string
   }> {
+    const types = ['file', 'folder'];
+    if(!types.includes(payload.type)) {
+      throw new Error('Invalid type');
+    }
     return this.client
       .post(
         `/storage/share/${payload.type}/${payload.itemId}`,
@@ -95,12 +96,17 @@ export class Share {
    * @param payload
    */
   public getShareLinkDirectory(payload: GetSharedDirectoryPayload): Promise<any> {
+    const types = ['file', 'folder'];
+    if(!types.includes(payload.type)) {
+      throw new Error('Invalid type');
+    }
     return this.client
       .get(
-        `/storage/share/down/${payload.type}?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
+        `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}${payload.code ?  '&code=' + payload.code : ''}`,
         this.basicHeaders()
       );
   }
+  
 
   /**
    * Get size of folder in share links
