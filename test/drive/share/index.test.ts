@@ -18,9 +18,32 @@ describe('# share service tests', () => {
     sinon.restore();
   });
 
-  describe('generate share file link', () => {
+  describe('generate share link', () => {
 
-    it('Should be called with right arguments & return content', async () => {
+
+    it('Should be called with fail argments & throws Error', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        token: 'token'
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const payload: GenerateShareLinkPayload = {
+        itemId: '1',
+        type: 'files',
+        timesValid: 0,
+        encryptionKey: '',
+        itemToken: '',
+        bucket: '',
+        mnemonic: ''
+      };
+
+      // Assert
+      expect(() => {
+        client.createShareLink(payload);
+      }).toThrowError('Invalid type');
+    });
+
+    it('Should be called with right arguments & return content of file', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
         token: 'token'
@@ -56,11 +79,7 @@ describe('# share service tests', () => {
       });
     });
 
-  });
-
-  describe('generate share folder link', () => {
-
-    it('Should be called with right arguments & return content', async () => {
+    it('Should be called with right arguments & return content of folders', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
         token: 'token',
@@ -96,6 +115,7 @@ describe('# share service tests', () => {
     });
 
   });
+
 
   describe('get share token info', () => {
 
@@ -136,6 +156,26 @@ describe('# share service tests', () => {
       // Assert
       expect(callStub.firstCall.args).toEqual([
         '/storage/share/list?page=1&perPage=50',
+        headers
+      ]);
+      expect(body).toEqual({
+        list: 'some'
+      });
+    });
+
+    it('Should be called with right pagination & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        list: 'some'
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+
+      // Act
+      const body = await client.getShareLinks(2, 100);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/storage/share/list?page=2&perPage=100',
         headers
       ]);
       expect(body).toEqual({
