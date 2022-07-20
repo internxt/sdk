@@ -102,6 +102,7 @@ export class Share {
     }
     return this.client
       .get(
+        // eslint-disable-next-line max-len
         `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}${payload.code ?  '&code=' + payload.code : ''}`,
         this.basicHeaders()
       );
