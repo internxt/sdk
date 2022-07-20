@@ -62,6 +62,27 @@ describe('# storage service tests', () => {
         // Assert
         await expect(promise).rejects.toThrowError('My cancel message');
       });
+
+      it('Should return the expected elements with trash', async () => {
+        // Arrange
+        const response = randomFolderContentResponse(2, 2);
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+
+        // Act
+        const [promise, requestCanceler] = client.getFolderContent(1, true);
+        const body = await promise;
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual(['/storage/v2/folder/1/?trash=true', headers])
+        expect(body.files).toHaveLength(2);
+        expect(body.children).toHaveLength(2);
+      });
     });
 
     describe('create folder entry', () => {
@@ -408,6 +429,60 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual(['/limit', headers]);
         expect(body).toEqual({
           total: 10,
+        });
+      });
+    });
+
+    describe('Trash', () => {
+      describe('get Trash', () => {
+        it('Should return the expected elements', async () => {
+          // Arrange
+          const response = randomFolderContentResponse(2, 2);
+          const { client } = clientAndHeaders();
+          sinon.stub(httpClient, 'getCancellable').returns({
+            promise: Promise.resolve(response),
+            requestCanceler: {
+              cancel: () => null,
+            },
+          });
+  
+          // Act
+          const [promise, requestCanceler] = client.getTrash();
+          const body = await promise;
+  
+          // Assert
+          expect(body.files).toHaveLength(2);
+          expect(body.children).toHaveLength(2);
+        });
+
+        it('Should cancel the request', async () => {
+          // Arrange
+          const { client } = clientAndHeaders();
+  
+          // Act
+          const [promise, requestCanceler] = client.getTrash();
+          requestCanceler.cancel('My cancel message');
+  
+          // Assert
+          await expect(promise).rejects.toThrowError('My cancel message');
+        });
+      });
+
+      describe('Add Items into trash', () => {
+        it('should call with right params & return 200', async () => {
+          const { client, headers } = clientAndHeaders();
+          const callStub = sinon.stub(httpClient, 'post').resolves(true);
+          const itemsToTrash = [
+            { id: 'id1', type: 'file'},
+            { id: 'id2', type: 'folder'}
+          ]
+
+          // Act
+          const body = await client.addItemsToTrash({ items: itemsToTrash});
+
+          // Assert
+          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', {items: itemsToTrash}, headers]);
+          expect(body).toEqual(true);
         });
       });
     });
