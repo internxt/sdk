@@ -222,7 +222,10 @@ export class Auth {
   public areCredentialsCorrect(email: string, hashedPassword: string): Promise<boolean> {
     // Uses fetch instead of httpClient since a 401 response
     // would log out the user
-    return fetch(`${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`).then(
+    return fetch(
+      `${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`,
+      { headers: this.headersWithToken(this.apiSecurity?.token as string) }
+    ).then(
       (res) => {
         if (res.ok) {
           return true;
