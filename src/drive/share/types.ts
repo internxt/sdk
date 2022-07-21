@@ -44,3 +44,26 @@ export interface ShareLink {
   createdAt: string,
   updatedAt: string,
 }
+
+export interface SharedDirectoryFolders {
+  folders: SharedDirectoryFolder[],
+  last: boolean
+}
+
+export interface SharedDirectoryFolder {
+  id: number
+  name: string
+}
+
+export interface SharedDirectoryFiles {
+  files: SharedDirectoryFile[],
+  last: boolean
+}
+
+export interface SharedDirectoryFile {
+  id: string
+  name: string
+  type: string
+  size: number
+  encryptionKey: string
+}
