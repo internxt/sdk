@@ -115,8 +115,7 @@ describe('# share service tests', () => {
     });
 
   });
-
-
+  
   describe('get share token info', () => {
 
     it('Should be called with right arguments & return content', async () => {
@@ -137,6 +136,32 @@ describe('# share service tests', () => {
       ]);
       expect(body).toEqual({
         info: 'some'
+      });
+    });
+  });
+
+  describe('delete share by id', () => {
+
+    it('Should be called with right arguments & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'delete').resolves({
+        deleted: true,
+        shareId: '1'
+      });
+      const { client, headers } = clientAndHeaders();
+      const shareId = '1';
+
+      // Act
+      const body = await client.deleteShareLink(shareId);
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject([
+        '/storage/share/1',
+        headers
+      ]);
+      expect(body).toEqual({
+        deleted: true,
+        shareId: '1'
       });
     });
   });

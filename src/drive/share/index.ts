@@ -80,6 +80,18 @@ export class Share {
   }
 
   /**
+   * Delete share link by id
+   * @param payload
+   */
+   public deleteShareLink(shareId: string): Promise<{deleted: boolean, shareId: string}> {
+    return this.client
+      .delete(
+        `/storage/share/${shareId}`,
+        this.headers()
+      );
+  }
+
+  /**
    * Fetches data of a shared file
    * @param token
    */
