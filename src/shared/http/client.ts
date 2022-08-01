@@ -172,7 +172,7 @@ export class HttpClient {
       } else {
         // TODO : remove when endpoints of updateMetadata(file/folder) are updated
         // after all clients use th SDK
-        errorMessage = String(response.data);
+        errorMessage = JSON.stringify(response.data);
       }
       errorStatus = response.status;
     } else if (error.request) {
