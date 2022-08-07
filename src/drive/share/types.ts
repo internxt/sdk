@@ -39,7 +39,7 @@ export interface ShareLink {
   itemToken: string;
   isFolder: boolean;
   views: number;
-  timesValid: number | null;
+  timesValid: number;
   active: boolean;
   createdAt: string;
   updatedAt: string;
