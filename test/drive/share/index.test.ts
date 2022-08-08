@@ -1,6 +1,5 @@
 import sinon from 'sinon';
-import { GenerateShareLinkPayload, GetSharedDirectoryPayload
-} from '../../../src/drive/share/types';
+import { GenerateShareLinkPayload, GetSharedDirectoryPayload } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
@@ -9,7 +8,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('# share service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -19,12 +17,10 @@ describe('# share service tests', () => {
   });
 
   describe('generate share link', () => {
-
-
     it('Should be called with fail argments & throws Error', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
-        token: 'token'
+        token: 'token',
       });
       const { client, headers } = clientAndHeadersWithToken();
       const payload: GenerateShareLinkPayload = {
@@ -34,7 +30,7 @@ describe('# share service tests', () => {
         encryptionKey: '',
         itemToken: '',
         bucket: '',
-        mnemonic: ''
+        mnemonic: '',
       };
 
       // Assert
@@ -46,7 +42,7 @@ describe('# share service tests', () => {
     it('Should be called with right arguments & return content of file', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
-        token: 'token'
+        token: 'token',
       });
       const { client, headers } = clientAndHeadersWithToken();
       const payload: GenerateShareLinkPayload = {
@@ -56,7 +52,7 @@ describe('# share service tests', () => {
         encryptionKey: '',
         itemToken: '',
         bucket: '',
-        mnemonic: ''
+        mnemonic: '',
       };
 
       // Act
@@ -72,10 +68,10 @@ describe('# share service tests', () => {
           itemToken: payload.itemToken,
           bucket: payload.bucket,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        token: 'token'
+        token: 'token',
       });
     });
 
@@ -91,7 +87,7 @@ describe('# share service tests', () => {
         bucket: '',
         mnemonic: 'lola',
         itemId: '1',
-        type: 'folder'
+        type: 'folder',
       };
 
       // Act
@@ -107,21 +103,19 @@ describe('# share service tests', () => {
           itemToken: payload.itemToken,
           bucket: payload.bucket,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        token: 'token'
+        token: 'token',
       });
     });
-
   });
-  
-  describe('get share token info', () => {
 
+  describe('get share token info', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const token = 'ma-token';
@@ -130,23 +124,19 @@ describe('# share service tests', () => {
       const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/ma-token',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
   });
 
   describe('delete share by id', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'delete').resolves({
         deleted: true,
-        shareId: '1'
+        shareId: '1',
       });
       const { client, headers } = clientAndHeaders();
       const shareId = '1';
@@ -155,23 +145,19 @@ describe('# share service tests', () => {
       const body = await client.deleteShareLink(shareId);
 
       // Assert
-      expect(callStub.firstCall.args).toMatchObject([
-        '/storage/share/1',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toMatchObject(['/storage/share/1', headers]);
       expect(body).toEqual({
         deleted: true,
-        shareId: '1'
+        shareId: '1',
       });
     });
   });
 
   describe('get shares list', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        list: 'some'
+        list: 'some',
       });
       const { client, headers } = clientAndHeadersWithToken();
 
@@ -179,19 +165,16 @@ describe('# share service tests', () => {
       const body = await client.getShareLinks();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/list?page=1&perPage=50',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=0&perPage=50', headers]);
       expect(body).toEqual({
-        list: 'some'
+        list: 'some',
       });
     });
 
     it('Should be called with right pagination & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        list: 'some'
+        list: 'some',
       });
       const { client, headers } = clientAndHeadersWithToken();
 
@@ -199,23 +182,18 @@ describe('# share service tests', () => {
       const body = await client.getShareLinks(2, 100);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/list?page=2&perPage=100',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=2&perPage=100', headers]);
       expect(body).toEqual({
-        list: 'some'
+        list: 'some',
       });
     });
-
   });
 
   describe('get shared folder info', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const token = 'ma-token';
@@ -224,23 +202,18 @@ describe('# share service tests', () => {
       const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/ma-token',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   describe('get shared-directory folders', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const payload: GetSharedDirectoryPayload = {
@@ -248,7 +221,7 @@ describe('# share service tests', () => {
         folderId: 1,
         page: 1,
         perPage: 10,
-        type: 'folder'
+        type: 'folder',
       };
 
       // Act
@@ -257,21 +230,19 @@ describe('# share service tests', () => {
       // Assert
       expect(callStub.firstCall.args).toEqual([
         `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}`,
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   describe('get shared-directory files', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const payload: GetSharedDirectoryPayload = {
@@ -280,7 +251,7 @@ describe('# share service tests', () => {
         folderId: 1,
         page: 0,
         perPage: 10,
-        code: 'code'
+        code: 'code',
       };
 
       // Act
@@ -289,13 +260,12 @@ describe('# share service tests', () => {
       // Assert
       expect(callStub.firstCall.args).toEqual([
         `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   function clientAndHeadersWithToken(
@@ -303,10 +273,10 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
     token = 'my-token',
-    mnemonic = 'nemo'
+    mnemonic = 'nemo',
   ): {
-    client: Share,
-    headers: object
+    client: Share;
+    headers: object;
   } {
     const appDetails: AppDetails = {
       clientName: clientName,
@@ -326,8 +296,8 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
   ): {
-    client: Share,
-    headers: object
+    client: Share;
+    headers: object;
   } {
     const appDetails: AppDetails = {
       clientName: clientName,
@@ -341,5 +311,4 @@ describe('# share service tests', () => {
     const headers = basicHeaders(clientName, clientVersion);
     return { client, headers };
   }
-
 });

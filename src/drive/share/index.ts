@@ -5,6 +5,7 @@ import {
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
   ShareLink,
+  ListShareLinksResponse,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -29,12 +30,14 @@ export class Share {
   /**
    * Fetches the list of shared items
    */
-  public getShareLinks(page = 1, perPage = 50): Promise<Array<Partial<ShareLink>> | []> {
-    return this.client
-      .get(
-        `/storage/share/list?page=${page}&perPage=${perPage}`,
-        this.headers()
-      );
+  public getShareLinks(
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListShareLinksResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(`/storage/share/list?page=${page}&perPage=${perPage}${orderByQueryParam}`, this.headers());
   }
 
   /**
@@ -42,53 +45,47 @@ export class Share {
    * @param payload
    */
   public createShareLink(payload: GenerateShareLinkPayload): Promise<{
-    created: boolean,
-    token: string
+    created: boolean;
+    token: string;
   }> {
     const types = ['file', 'folder'];
-    if(!types.includes(payload.type)) {
+    if (!types.includes(payload.type)) {
       throw new Error('Invalid type');
     }
-    return this.client
-      .post(
-        `/storage/share/${payload.type}/${payload.itemId}`,
-        {
-          timesValid: payload.timesValid,
-          encryptionKey: payload.encryptionKey,
-          mnemonic: payload.mnemonic,
-          itemToken: payload.itemToken,
-          bucket: payload.bucket,
-        },
-        this.headers()
-      );
+    return this.client.post(
+      `/storage/share/${payload.type}/${payload.itemId}`,
+      {
+        timesValid: payload.timesValid,
+        encryptionKey: payload.encryptionKey,
+        mnemonic: payload.mnemonic,
+        itemToken: payload.itemToken,
+        bucket: payload.bucket,
+      },
+      this.headers(),
+    );
   }
 
   /**
    * Update share link
    * @param payload
    */
-   public updateShareLink(payload: UpdateShareLinkPayload): Promise<ShareLink> {
-    return this.client
-      .put(
-        `/storage/share/${payload.itemId}`,
-        {
-          timesValid: payload.timesValid,
-          active: payload.active,
-        },
-        this.headers()
-      );
+  public updateShareLink(payload: UpdateShareLinkPayload): Promise<ShareLink> {
+    return this.client.put(
+      `/storage/share/${payload.itemId}`,
+      {
+        timesValid: payload.timesValid,
+        active: payload.active,
+      },
+      this.headers(),
+    );
   }
 
   /**
    * Delete share link by id
    * @param payload
    */
-   public deleteShareLink(shareId: string): Promise<{deleted: boolean, shareId: string}> {
-    return this.client
-      .delete(
-        `/storage/share/${shareId}`,
-        this.headers()
-      );
+  public deleteShareLink(shareId: string): Promise<{ deleted: boolean; shareId: string }> {
+    return this.client.delete(`/storage/share/${shareId}`, this.headers());
   }
 
   /**
@@ -96,11 +93,7 @@ export class Share {
    * @param token
    */
   public getShareLink(token: string): Promise<ShareLink> {
-    return this.client
-      .get(
-        `/storage/share/${token}`,
-        this.basicHeaders()
-      );
+    return this.client.get(`/storage/share/${token}`, this.basicHeaders());
   }
 
   /**
@@ -109,28 +102,24 @@ export class Share {
    */
   public getShareLinkDirectory(payload: GetSharedDirectoryPayload): Promise<any> {
     const types = ['file', 'folder'];
-    if(!types.includes(payload.type)) {
+    if (!types.includes(payload.type)) {
       throw new Error('Invalid type');
     }
-    return this.client
-      .get(
-        // eslint-disable-next-line max-len
-        `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}${payload.code ?  '&code=' + payload.code : ''}`,
-        this.basicHeaders()
-      );
+    return this.client.get(
+      // eslint-disable-next-line max-len
+      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${
+        payload.page
+      }&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
+      this.basicHeaders(),
+    );
   }
-  
 
   /**
    * Get size of folder in share links
    * @param payload
    */
-   public getShareLinkFolderSize(payload: GetShareLinkFolderSizePayload): Promise<any> {
-    return this.client
-      .get(
-        `/storage/share/${payload.itemId}/folder/${payload.folderId}/size`,
-        this.basicHeaders()
-      );
+  public getShareLinkFolderSize(payload: GetShareLinkFolderSizePayload): Promise<any> {
+    return this.client.get(`/storage/share/${payload.itemId}/folder/${payload.folderId}/size`, this.basicHeaders());
   }
 
   /**
@@ -142,7 +131,7 @@ export class Share {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic
+      this.apiSecurity.mnemonic,
     );
   }
 
@@ -151,9 +140,6 @@ export class Share {
    * @private
    */
   private basicHeaders() {
-    return basicHeaders(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-    );
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }
 }
