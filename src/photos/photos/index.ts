@@ -3,7 +3,7 @@ import queryString from 'query-string';
 
 import { extractAxiosErrorMessage } from '../../utils';
 import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel, PhotoStatus } from '..';
-import { PhotoWithDownloadLink } from '../types';
+import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON } from '../types';
 
 export default class PhotosSubmodule {
   private model: PhotosSdkModel;
@@ -89,6 +89,37 @@ export default class PhotosSubmodule {
         },
       })
       .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public photosExists(photosExistPayload: PhotoExistsPayload[]): Promise<PhotoExistsData[]> {
+    return axios
+      .post<{ photos: PhotoExistsDataJSON[] }>(
+        `${this.model.baseUrl}/photos/exists`,
+        { photos: photosExistPayload },
+        {
+          headers: {
+            Authorization: `Bearer ${this.model.accessToken}`,
+          },
+        },
+      )
+      .then((res) => {
+        return res.data.photos.map((result) => {
+          if ('id' in result) {
+            return {
+              ...this.parse(result),
+              exists: true,
+            };
+          } else {
+            return {
+              ...result,
+              takenAt: new Date(result.takenAt),
+            };
+          }
+        });
+      })
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });

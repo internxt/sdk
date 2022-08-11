@@ -1,9 +1,5 @@
 import sinon from 'sinon';
-import {
-  GenerateShareFileLinkPayload,
-  GenerateShareFolderLinkPayload,
-  SharedDirectoryFolders, GetSharedDirectoryFoldersPayload, GetSharedDirectoryFilesPayload
-} from '../../../src/drive/share/types';
+import { GenerateShareLinkPayload, GetSharedDirectoryPayload } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
@@ -12,7 +8,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('# share service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -21,212 +16,256 @@ describe('# share service tests', () => {
     sinon.restore();
   });
 
-  describe('generate share file link', () => {
-
-    it('Should be called with right arguments & return content', async () => {
-      // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
-        token: 'token'
-      });
-      const { client, headers } = clientAndHeadersWithToken();
-      const payload: GenerateShareFileLinkPayload = {
-        fileId: '1',
-        views: 0,
-        encryptionKey: '',
-        fileToken: '',
-        bucket: ''
-      };
-
-      // Act
-      const body = await client.createShareFileLink(payload);
-
-      // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/file/1',
-        {
-          views: payload.views,
-          encryptionKey: payload.encryptionKey,
-          fileToken: payload.fileToken,
-          bucket: payload.bucket,
-        },
-        headers
-      ]);
-      expect(body).toEqual({
-        token: 'token'
-      });
-    });
-
-  });
-
-  describe('generate share folder link', () => {
-
-    it('Should be called with right arguments & return content', async () => {
+  describe('generate share link', () => {
+    it('Should be called with fail argments & throws Error', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
         token: 'token',
       });
       const { client, headers } = clientAndHeadersWithToken();
-      const payload: GenerateShareFolderLinkPayload = {
-        folderId: 1,
-        views: 0,
-        bucketToken: '',
+      const payload: GenerateShareLinkPayload = {
+        itemId: '1',
+        type: 'files',
+        timesValid: 0,
+        encryptionKey: '',
+        itemToken: '',
         bucket: '',
-        encryptedMnemonic: 'lola'
+        mnemonic: '',
+      };
+
+      // Assert
+      expect(() => {
+        client.createShareLink(payload);
+      }).toThrowError('Invalid type');
+    });
+
+    it('Should be called with right arguments & return content of file', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        token: 'token',
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const payload: GenerateShareLinkPayload = {
+        itemId: '1',
+        type: 'file',
+        timesValid: 0,
+        encryptionKey: '',
+        itemToken: '',
+        bucket: '',
+        mnemonic: '',
       };
 
       // Act
-      const body = await client.createShareFolderLink(payload);
+      const body = await client.createShareLink(payload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        '/storage/share/file/1',
+        {
+          timesValid: payload.timesValid,
+          encryptionKey: payload.encryptionKey,
+          mnemonic: payload.mnemonic,
+          itemToken: payload.itemToken,
+          bucket: payload.bucket,
+        },
+        headers,
+      ]);
+      expect(body).toEqual({
+        token: 'token',
+      });
+    });
+
+    it('Should be called with right arguments & return content of folders', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        token: 'token',
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const payload: GenerateShareLinkPayload = {
+        timesValid: 0,
+        itemToken: '',
+        bucket: '',
+        mnemonic: 'lola',
+        itemId: '1',
+        type: 'folder',
+      };
+
+      // Act
+      const body = await client.createShareLink(payload);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
         '/storage/share/folder/1',
         {
-          views: payload.views,
-          bucketToken: payload.bucketToken,
+          timesValid: payload.timesValid,
+          encryptionKey: payload.encryptionKey,
+          mnemonic: payload.mnemonic,
+          itemToken: payload.itemToken,
           bucket: payload.bucket,
-          mnemonic: payload.encryptedMnemonic,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        token: 'token'
+        token: 'token',
       });
     });
-
   });
 
   describe('get share token info', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const token = 'ma-token';
 
       // Act
-      const body = await client.getSharedFileByToken(token);
+      const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/share/ma-token',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
+      });
+    });
+  });
+
+  describe('delete share by id', () => {
+    it('Should be called with right arguments & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'delete').resolves({
+        deleted: true,
+        shareId: '1',
+      });
+      const { client, headers } = clientAndHeaders();
+      const shareId = '1';
+
+      // Act
+      const body = await client.deleteShareLink(shareId);
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject(['/storage/share/1', headers]);
+      expect(body).toEqual({
+        deleted: true,
+        shareId: '1',
       });
     });
   });
 
   describe('get shares list', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        list: 'some'
+        list: 'some',
       });
       const { client, headers } = clientAndHeadersWithToken();
 
       // Act
-      const body = await client.getShareList();
+      const body = await client.getShareLinks();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/share/list',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=0&perPage=50', headers]);
       expect(body).toEqual({
-        list: 'some'
+        list: 'some',
       });
     });
 
+    it('Should be called with right pagination & return content', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        list: 'some',
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+
+      // Act
+      const body = await client.getShareLinks(2, 100);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=2&perPage=100', headers]);
+      expect(body).toEqual({
+        list: 'some',
+      });
+    });
   });
 
   describe('get shared folder info', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
       const token = 'ma-token';
 
       // Act
-      const body = await client.getSharedFolderByToken(token);
+      const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/storage/shared-folder/ma-token',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   describe('get shared-directory folders', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
-      const payload: GetSharedDirectoryFoldersPayload = {
+      const payload: GetSharedDirectoryPayload = {
         token: 'tokk',
-        directoryId: 1,
-        offset: 0,
-        limit: 10
+        folderId: 1,
+        page: 1,
+        perPage: 10,
+        type: 'folder',
       };
 
       // Act
-      const body = await client.getSharedDirectoryFolders(payload);
+      const body = await client.getShareLinkDirectory(payload);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/folders?token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
-        headers
+        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}`,
+        headers,
       ]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   describe('get shared-directory files', () => {
-
     it('Should be called with right arguments & return content', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        info: 'some'
+        info: 'some',
       });
       const { client, headers } = clientAndHeaders();
-      const payload: GetSharedDirectoryFilesPayload = {
+      const payload: GetSharedDirectoryPayload = {
         token: 'tokk',
-        directoryId: 1,
-        offset: 0,
-        limit: 10,
-        code: 'code'
+        type: 'file',
+        folderId: 1,
+        page: 0,
+        perPage: 10,
+        code: 'code',
       };
 
       // Act
-      const body = await client.getSharedDirectoryFiles(payload);
+      const body = await client.getShareLinkDirectory(payload);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/files?code=${payload.code}&token=${payload.token}&directoryId=${payload.directoryId}&offset=${payload.offset}&limit=${payload.limit}`,
-        headers
+        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
+        headers,
       ]);
       expect(body).toEqual({
-        info: 'some'
+        info: 'some',
       });
     });
-
   });
 
   function clientAndHeadersWithToken(
@@ -234,10 +273,10 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
     token = 'my-token',
-    mnemonic = 'nemo'
+    mnemonic = 'nemo',
   ): {
-    client: Share,
-    headers: object
+    client: Share;
+    headers: object;
   } {
     const appDetails: AppDetails = {
       clientName: clientName,
@@ -257,8 +296,8 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
   ): {
-    client: Share,
-    headers: object
+    client: Share;
+    headers: object;
   } {
     const appDetails: AppDetails = {
       clientName: clientName,
@@ -272,5 +311,4 @@ describe('# share service tests', () => {
     const headers = basicHeaders(clientName, clientVersion);
     return { client, headers };
   }
-
 });
