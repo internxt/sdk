@@ -1,11 +1,11 @@
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   GenerateShareLinkPayload,
-  UpdateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
-  ShareLink,
   ListShareLinksResponse,
+  ShareLink,
+  UpdateShareLinkPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -47,6 +47,7 @@ export class Share {
   public createShareLink(payload: GenerateShareLinkPayload): Promise<{
     created: boolean;
     token: string;
+    code: string;
   }> {
     const types = ['file', 'folder'];
     if (!types.includes(payload.type)) {
@@ -60,6 +61,7 @@ export class Share {
         mnemonic: payload.mnemonic,
         itemToken: payload.itemToken,
         bucket: payload.bucket,
+        code: payload.code,
       },
       this.headers(),
     );
