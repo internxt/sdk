@@ -1,11 +1,11 @@
 import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   GenerateShareLinkPayload,
-  UpdateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
-  ShareLink,
   ListShareLinksResponse,
+  ShareLink,
+  UpdateShareLinkPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -47,6 +47,7 @@ export class Share {
   public createShareLink(payload: GenerateShareLinkPayload): Promise<{
     created: boolean;
     token: string;
+    code: string;
   }> {
     const types = ['file', 'folder'];
     if (!types.includes(payload.type)) {
@@ -56,10 +57,10 @@ export class Share {
       `/storage/share/${payload.type}/${payload.itemId}`,
       {
         timesValid: payload.timesValid,
-        encryptionKey: payload.encryptionKey,
-        mnemonic: payload.mnemonic,
+        encryptedMnemonic: payload.encryptedMnemonic,
         itemToken: payload.itemToken,
         bucket: payload.bucket,
+        encryptedCode: payload.encryptedCode,
       },
       this.headers(),
     );
@@ -107,8 +108,7 @@ export class Share {
     }
     return this.client.get(
       // eslint-disable-next-line max-len
-      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${
-        payload.page
+      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page
       }&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
       this.basicHeaders(),
     );

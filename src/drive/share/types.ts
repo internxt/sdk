@@ -1,12 +1,11 @@
 export interface GenerateShareLinkPayload {
   itemId: string;
   type: string;
-  encryptionKey?: string;
-  mnemonic: string;
+  encryptedMnemonic: string;
   itemToken: string;
   bucket: string;
   timesValid: number;
-  code?: string;
+  encryptedCode: string;
 }
 
 export interface UpdateShareLinkPayload {
