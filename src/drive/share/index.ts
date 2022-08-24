@@ -57,11 +57,10 @@ export class Share {
       `/storage/share/${payload.type}/${payload.itemId}`,
       {
         timesValid: payload.timesValid,
-        encryptionKey: payload.encryptionKey,
-        mnemonic: payload.mnemonic,
+        encryptedMnemonic: payload.encryptedMnemonic,
         itemToken: payload.itemToken,
         bucket: payload.bucket,
-        code: payload.code,
+        encryptedCode: payload.encryptedCode,
       },
       this.headers(),
     );
@@ -109,8 +108,7 @@ export class Share {
     }
     return this.client.get(
       // eslint-disable-next-line max-len
-      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${
-        payload.page
+      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page
       }&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
       this.basicHeaders(),
     );

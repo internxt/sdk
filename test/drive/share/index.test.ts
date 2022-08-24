@@ -27,10 +27,10 @@ describe('# share service tests', () => {
         itemId: '1',
         type: 'files',
         timesValid: 0,
-        encryptionKey: '',
+        encryptedMnemonic: '',
+        encryptedCode: '',
         itemToken: '',
-        bucket: '',
-        mnemonic: '',
+        bucket: ''
       };
 
       // Assert
@@ -49,10 +49,10 @@ describe('# share service tests', () => {
         itemId: '1',
         type: 'file',
         timesValid: 0,
-        encryptionKey: '',
         itemToken: '',
         bucket: '',
-        mnemonic: '',
+        encryptedCode: '',
+        encryptedMnemonic: ''
       };
 
       // Act
@@ -63,10 +63,10 @@ describe('# share service tests', () => {
         '/storage/share/file/1',
         {
           timesValid: payload.timesValid,
-          encryptionKey: payload.encryptionKey,
-          mnemonic: payload.mnemonic,
+          encryptedMnemonic: payload.encryptedMnemonic,
           itemToken: payload.itemToken,
           bucket: payload.bucket,
+          encryptedCode: payload.encryptedCode
         },
         headers,
       ]);
@@ -85,9 +85,10 @@ describe('# share service tests', () => {
         timesValid: 0,
         itemToken: '',
         bucket: '',
-        mnemonic: 'lola',
+        encryptedMnemonic: 'lola',
         itemId: '1',
         type: 'folder',
+        encryptedCode: ''
       };
 
       // Act
@@ -98,10 +99,10 @@ describe('# share service tests', () => {
         '/storage/share/folder/1',
         {
           timesValid: payload.timesValid,
-          encryptionKey: payload.encryptionKey,
-          mnemonic: payload.mnemonic,
+          encryptedMnemonic: payload.encryptedMnemonic,
           itemToken: payload.itemToken,
           bucket: payload.bucket,
+          encryptedCode: payload.encryptedCode
         },
         headers,
       ]);
