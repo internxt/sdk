@@ -485,6 +485,20 @@ describe('# storage service tests', () => {
           expect(body).toEqual(true);
         });
       });
+
+      describe('Clear trash', () => {
+        it('should return an empty body', async () => {
+          // Arrange
+          const { client } = clientAndHeaders();
+          sinon.stub(httpClient, 'delete').resolves();
+
+          // Act
+          const body = await client.clearTrash();
+
+          // Assert
+          expect(body).toBe(undefined);
+        });
+      });
     });
   });
 });

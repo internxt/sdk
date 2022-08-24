@@ -216,6 +216,13 @@ export class Storage {
   }
 
   /**
+   * Removes all items from the trash
+   */
+  public clearTrash(): Promise<void> {
+    return this.client.delete('/storage/trash/all', this.headers());
+  }
+
+  /**
    * Returns the current space usage of the user
    */
   public spaceUsage(): Promise<UsageResponse> {
