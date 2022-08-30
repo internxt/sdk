@@ -126,11 +126,6 @@ export interface UpdateFilePayload {
   };
 }
 
-export interface DeleteFilePayload {
-  fileId: number;
-  folderId: number;
-}
-
 export interface MoveFilePayload {
   fileId: string;
   destination: number;
@@ -152,8 +147,4 @@ export type UsageResponse = {
 
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
-}
-
-export interface AddItemsToTrashPayload {
-  items: Array<{id: string, type: string}>;
 }
