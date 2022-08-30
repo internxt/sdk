@@ -10,6 +10,7 @@ import {
   UpdateFilePayload,
   DeleteFilePayload,
   EncryptionVersion,
+  DeleteItemsPermanentlyPayload,
 } from '../../../src/drive/storage/types';
 import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
@@ -79,7 +80,7 @@ describe('# storage service tests', () => {
         const body = await promise;
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/v2/folder/1/?trash=true', headers])
+        expect(callStub.firstCall.args).toEqual(['/storage/v2/folder/1/?trash=true', headers]);
         expect(body.files).toHaveLength(2);
         expect(body.children).toHaveLength(2);
       });
@@ -445,11 +446,11 @@ describe('# storage service tests', () => {
               cancel: () => null,
             },
           });
-  
+
           // Act
           const [promise, requestCanceler] = client.getTrash();
           const body = await promise;
-  
+
           // Assert
           expect(body.files).toHaveLength(2);
           expect(body.children).toHaveLength(2);
@@ -458,11 +459,11 @@ describe('# storage service tests', () => {
         it('Should cancel the request', async () => {
           // Arrange
           const { client } = clientAndHeaders();
-  
+
           // Act
           const [promise, requestCanceler] = client.getTrash();
           requestCanceler.cancel('My cancel message');
-  
+
           // Assert
           await expect(promise).rejects.toThrowError('My cancel message');
         });
@@ -473,16 +474,35 @@ describe('# storage service tests', () => {
           const { client, headers } = clientAndHeaders();
           const callStub = sinon.stub(httpClient, 'post').resolves(true);
           const itemsToTrash = [
-            { id: 'id1', type: 'file'},
-            { id: 'id2', type: 'folder'}
-          ]
+            { id: 'id1', type: 'file' },
+            { id: 'id2', type: 'folder' },
+          ];
 
           // Act
-          const body = await client.addItemsToTrash({ items: itemsToTrash});
+          const body = await client.addItemsToTrash({ items: itemsToTrash });
 
           // Assert
-          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', {items: itemsToTrash}, headers]);
+          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', { items: itemsToTrash }, headers]);
           expect(body).toEqual(true);
+        });
+      });
+
+      describe('Delete trashed items', () => {
+        it('should call with right params', async () => {
+          const { client, headers } = clientAndHeaders();
+          const callStub = sinon.stub(httpClient, 'delete').resolves();
+          const payload: DeleteItemsPermanentlyPayload = {
+            items: [
+              { id: 36225, type: 'folder' },
+              { id: 36225, type: 'folder' },
+              { id: '36225', type: 'file' },
+            ],
+          };
+
+          const body = await client.deleteItemsPermanently(payload);
+
+          expect(callStub.firstCall.args).toEqual(['/storage/trash', headers, payload]);
+          expect(body).toBe(undefined);
         });
       });
     });
