@@ -2,7 +2,7 @@ import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { AddItemsToTrashPayload, DeleteFilePayload } from './types';
 import { FetchFolderContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { HttpClient, RequestCanceler } from '../../shared/http/client';
+import { HttpClient } from '../../shared/http/client';
 
 export * as TrashTypes from './types';
 
@@ -25,7 +25,7 @@ export class Trash {
    * Removes a specific folder from the centralized persistence
    * @param folderId
    */
-  public deleteFolder(folderId: number): Promise<unknown> {
+  public async deleteFolder(folderId: number): Promise<unknown> {
     return this.client.delete(`/storage/folder/${folderId}`, this.headers());
   }
 
@@ -33,19 +33,15 @@ export class Trash {
    * Deletes a specific file entry
    * @param payload
    */
-  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
+  public async deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
   /**
    * Returns a list of items in trash
    */
-  public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
-      '/storage/trash',
-      this.headers(),
-    );
-    return [promise, requestCanceler];
+  public getTrash(): Promise<FetchFolderContentResponse> {
+    return this.client.get('/storage/trash', this.headers());
   }
 
   /**

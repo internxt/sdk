@@ -69,32 +69,13 @@ describe('# trash service tests', () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'getCancellable').returns({
-          promise: Promise.resolve(response),
-          requestCanceler: {
-            cancel: () => null,
-          },
-        });
+        sinon.stub(httpClient, 'get').resolves(response);
 
         // Act
-        const [promise, requestCanceler] = client.getTrash();
-        const body = await promise;
-
+        const body = await client.getTrash();
         // Assert
         expect(body.files).toHaveLength(2);
         expect(body.children).toHaveLength(2);
-      });
-
-      it('Should cancel the request', async () => {
-        // Arrange
-        const { client } = clientAndHeaders();
-
-        // Act
-        const [promise, requestCanceler] = client.getTrash();
-        requestCanceler.cancel('My cancel message');
-
-        // Assert
-        await expect(promise).rejects.toThrowError('My cancel message');
       });
     });
 
