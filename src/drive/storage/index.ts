@@ -13,6 +13,8 @@ import {
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
   UsageResponse,
+  AddItemsToTrashPayload,
+  DeleteItemsPermanentlyPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
@@ -192,6 +194,16 @@ export class Storage {
       );
   }
 
+
+  /**
+   * Deletes trashed items permanently
+   * @param payload
+   */
+  public deleteItemsPermanently(payload: DeleteItemsPermanentlyPayload) {
+    return this.client.delete('/storage/trash', this.headers(), {
+      items: payload.items,
+    });
+  }
 
   /**
    * Returns the current space usage of the user
