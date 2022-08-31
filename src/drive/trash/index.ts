@@ -1,5 +1,5 @@
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
-import { AddItemsToTrashPayload, DeleteFilePayload } from './types';
+import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
 import { FetchFolderContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -50,11 +50,11 @@ export class Trash {
    */
   public addItemsToTrash(payload: AddItemsToTrashPayload) {
     return this.client.post(
-      '/storage/trash/add',
-      {
-        items: payload.items,
-      },
-      this.headers(),
+        '/storage/trash/add',
+        {
+          items: payload.items,
+        },
+        this.headers(),
     );
   }
 
@@ -66,15 +66,25 @@ export class Trash {
   }
 
   /**
+   * Deletes trashed items permanently
+   * @param payload
+   */
+  public deleteItemsPermanently(payload: DeleteItemsPermanentlyPayload) {
+    return this.client.delete('/storage/trash', this.headers(), {
+      items: payload.items,
+    });
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
   private headers() {
     return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
+        this.appDetails.clientName,
+        this.appDetails.clientVersion,
+        this.apiSecurity.token,
+        this.apiSecurity.mnemonic,
     );
   }
 }

@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { Trash } from '../../../src/drive';
 import { randomFolderContentResponse } from '../storage/mothers/folderContentResponse.mother';
-import { DeleteFilePayload } from '../../../src/drive/trash/types';
+import { DeleteFilePayload, DeleteItemsPermanentlyPayload } from '../../../src/drive/trash/types';
 import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
@@ -107,6 +107,25 @@ describe('# trash service tests', () => {
         const body = await client.clearTrash();
 
         // Assert
+        expect(body).toBe(undefined);
+      });
+    });
+
+    describe('Delete trashed items', () => {
+      it('should call with right params', async () => {
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(httpClient, 'delete').resolves();
+        const payload: DeleteItemsPermanentlyPayload = {
+          items: [
+            { id: 36225, type: 'folder' },
+            { id: 36225, type: 'folder' },
+            { id: '36225', type: 'file' },
+          ],
+        };
+
+        const body = await client.deleteItemsPermanently(payload);
+
+        expect(callStub.firstCall.args).toEqual(['/storage/trash', headers, payload]);
         expect(body).toBe(undefined);
       });
     });

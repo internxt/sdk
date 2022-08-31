@@ -38,19 +38,15 @@ export class Storage {
    * Creates a new folder
    * @param payload
    */
-  public createFolder(payload: CreateFolderPayload): [
-    Promise<CreateFolderResponse>,
-    RequestCanceler
-  ] {
-    const { promise, requestCanceler } = this.client
-      .postCancellable<CreateFolderResponse>(
-        '/storage/folder',
-        {
-          parentFolderId: payload.parentFolderId,
-          folderName: payload.folderName,
-        },
-        this.headers(),
-      );
+  public createFolder(payload: CreateFolderPayload): [Promise<CreateFolderResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.postCancellable<CreateFolderResponse>(
+      '/storage/folder',
+      {
+        parentFolderId: payload.parentFolderId,
+        folderName: payload.folderName,
+      },
+      this.headers(),
+    );
 
     return [promise, requestCanceler];
   }
@@ -60,15 +56,14 @@ export class Storage {
    * @param payload
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
-    return this.client
-      .post(
-        '/storage/move/folder',
-        {
-          folderId: payload.folderId,
-          destination: payload.destinationFolderId,
-        },
-        this.headers(),
-      );
+    return this.client.post(
+      '/storage/move/folder',
+      {
+        folderId: payload.folderId,
+        destination: payload.destinationFolderId,
+      },
+      this.headers(),
+    );
   }
 
   /**
@@ -76,31 +71,26 @@ export class Storage {
    * @param payload
    */
   public async updateFolder(payload: UpdateFolderMetadataPayload): Promise<void> {
-    await this.client
-      .post(
-        `/storage/folder/${payload.folderId}/meta`,
-        {
-          metadata: payload.changes,
-        },
-        this.headers(),
-      );
+    await this.client.post(
+      `/storage/folder/${payload.folderId}/meta`,
+      {
+        metadata: payload.changes,
+      },
+      this.headers(),
+    );
   }
 
   /**
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
-  public getFolderContent(folderId: number, trash?: boolean): [
-    Promise<FetchFolderContentResponse>,
-    RequestCanceler
-  ] {
-    const query = trash !== null ? '/?trash='+trash : '';
+  public getFolderContent(folderId: number, trash?: boolean): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const query = trash !== null ? '/?trash=' + trash : '';
 
-    const { promise, requestCanceler } = this.client
-      .getCancellable<FetchFolderContentResponse>(
-        `/storage/v2/folder/${folderId}${query}` ,
-        this.headers()
-      );
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `/storage/v2/folder/${folderId}${query}`,
+      this.headers(),
+    );
 
     return [promise, requestCanceler];
   }
@@ -112,12 +102,9 @@ export class Storage {
   public getFolderSize(folderId: number): Promise<number> {
     return this.client
       .get<{
-        size: number
-      }>(
-        `/storage/folder/size/${folderId}`,
-        this.headers()
-      )
-      .then(response => {
+        size: number;
+      }>(`/storage/folder/size/${folderId}`, this.headers())
+      .then((response) => {
         return response.size;
       });
   }
@@ -127,22 +114,21 @@ export class Storage {
    * @param fileEntry
    */
   public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
-    return this.client
-      .post(
-        '/storage/file',
-        {
-          file: {
-            fileId: fileEntry.id,
-            type: fileEntry.type,
-            bucket: fileEntry.bucket,
-            size: fileEntry.size,
-            folder_id: fileEntry.folder_id,
-            name: fileEntry.name,
-            encrypt_version: fileEntry.encrypt_version,
-          },
+    return this.client.post(
+      '/storage/file',
+      {
+        file: {
+          fileId: fileEntry.id,
+          type: fileEntry.type,
+          bucket: fileEntry.bucket,
+          size: fileEntry.size,
+          folder_id: fileEntry.folder_id,
+          name: fileEntry.name,
+          encrypt_version: fileEntry.encrypt_version,
         },
-        this.headers(),
-      );
+      },
+      this.headers(),
+    );
   }
 
   /**
@@ -150,16 +136,15 @@ export class Storage {
    * @param payload
    */
   public updateFile(payload: UpdateFilePayload): Promise<void> {
-    return this.client
-      .post(
-        `/storage/file/${payload.fileId}/meta`,
-        {
-          metadata: payload.metadata,
-          bucketId: payload.bucketId,
-          relativePath: payload.destinationPath,
-        },
-        this.headers(),
-      );
+    return this.client.post(
+      `/storage/file/${payload.fileId}/meta`,
+      {
+        metadata: payload.metadata,
+        bucketId: payload.bucketId,
+        relativePath: payload.destinationPath,
+      },
+      this.headers(),
+    );
   }
 
   /**
@@ -167,17 +152,16 @@ export class Storage {
    * @param payload
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
-    return this.client
-      .post(
-        '/storage/move/file',
-        {
-          fileId: payload.fileId,
-          destination: payload.destination,
-          relativePath: payload.destinationPath,
-          bucketId: payload.bucketId,
-        },
-        this.headers(),
-      );
+    return this.client.post(
+      '/storage/move/file',
+      {
+        fileId: payload.fileId,
+        destination: payload.destination,
+        relativePath: payload.destinationPath,
+        bucketId: payload.bucketId,
+      },
+      this.headers(),
+    );
   }
 
   /**
@@ -185,34 +169,21 @@ export class Storage {
    * @param limit
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
-    return this.client
-      .get(
-        `/storage/recents?limit=${limit}`,
-        this.headers()
-      );
+    return this.client.get(`/storage/recents?limit=${limit}`, this.headers());
   }
-
 
   /**
    * Returns the current space usage of the user
    */
   public spaceUsage(): Promise<UsageResponse> {
-    return this.client
-      .get(
-        '/usage',
-        this.headers()
-      );
+    return this.client.get('/usage', this.headers());
   }
 
   /**
    * Returns the current space limit for the user
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
-    return this.client
-      .get(
-        '/limit',
-        this.headers()
-      );
+    return this.client.get('/limit', this.headers());
   }
 
   /**
