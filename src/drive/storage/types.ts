@@ -148,11 +148,3 @@ export type UsageResponse = {
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
 }
-
-export interface AddItemsToTrashPayload {
-  items: Array<{ id: string; type: string }>;
-}
-
-export interface DeleteItemsPermanentlyPayload {
-  items: Array<{ id: number; type: 'folder' } | { id: string; type: 'file' }>;
-}
