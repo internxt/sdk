@@ -9,6 +9,7 @@ export enum ReferralKey {
   SubscribeToNewsletter = 'subscribe-to-newsletter',
   InstallDesktopApp = 'install-desktop-app',
   InviteFriends = 'invite-friends',
+  CompleteSurvey = 'complete-survey',
 }
 
 export interface UserReferral {
