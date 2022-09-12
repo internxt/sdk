@@ -42,6 +42,7 @@ export interface ShareLink {
   active: boolean;
   createdAt: string;
   updatedAt: string;
+  fileSize: number;
 }
 
 export interface SharedDirectoryFolders {
@@ -69,7 +70,7 @@ export interface SharedDirectoryFile {
 
 export type ListShareLinksItem = Pick<
   ShareLink,
-  'id' | 'token' | 'views' | 'timesValid' | 'active' | 'isFolder' | 'createdAt' | 'updatedAt'
+  'id' | 'token' | 'views' | 'timesValid' | 'active' | 'isFolder' | 'createdAt' | 'updatedAt' | 'fileSize'
 > & {
   item: unknown;
 };
