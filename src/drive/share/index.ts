@@ -90,6 +90,14 @@ export class Share {
   }
 
   /**
+   * Increment share view by id
+   * @param shareId
+   */
+   public incrementShareViewById(shareId: string): Promise<{ incremented: boolean; shareId: string }> {
+    return this.client.put(`/storage/share/${shareId}/view`, {}, this.headers());
+  }
+
+  /**
    * Fetches data of a shared file
    * @param token
    */
