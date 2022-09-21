@@ -1,101 +1,80 @@
-export interface GenerateShareFileLinkPayload {
-  fileId: string
-  views: number
-  encryptionKey: string
-  fileToken: string
-  bucket: string
+export interface GenerateShareLinkPayload {
+  itemId: string;
+  type: string;
+  encryptedMnemonic: string;
+  itemToken: string;
+  bucket: string;
+  timesValid: number;
+  encryptedCode: string;
 }
 
-export interface GenerateShareFolderLinkPayload {
-  folderId: number
-  views: number
-  bucketToken: string
-  bucket: string,
-  encryptedMnemonic: string
+export interface UpdateShareLinkPayload {
+  itemId: string;
+  timesValid: number;
+  active: boolean;
 }
 
-export interface GetSharedDirectoryFoldersPayload {
-  token: string
-  directoryId: number | null
-  offset: number
-  limit: number
-}
-
-export interface GetSharedDirectoryFilesPayload extends GetSharedDirectoryFoldersPayload {
-  code: string
-}
-
-export interface SharedFileInfo {
-  user: string;
+export interface GetSharedDirectoryPayload {
+  type: string;
   token: string;
-  file: string;
-  encryptionKey: string;
+  folderId: number | null;
+  page: number;
+  perPage: number;
+  code?: string;
+}
+
+export interface GetShareLinkFolderSizePayload {
+  itemId: string;
+  folderId: string;
+}
+export interface ShareLink {
+  id: string;
+  token: string;
   mnemonic: string;
+  user: any;
+  item: any;
+  encryptionKey: string;
+  bucket: string;
+  itemToken: string;
   isFolder: boolean;
   views: number;
-  bucket: string;
-  fileToken: string;
-  fileMeta: {
-    folderId: string;
-    name: string;
-    type: string;
-    size: number;
-  };
-}
-
-export interface SharedFolderInfo {
-  folderId: number
-  name: string
-  size: number
-  bucket: string
-  bucketToken: string
+  timesValid: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fileSize: number;
 }
 
 export interface SharedDirectoryFolders {
-  folders: SharedDirectoryFolder[],
-  last: boolean
+  folders: SharedDirectoryFolder[];
+  last: boolean;
 }
 
 export interface SharedDirectoryFolder {
-  id: number
-  name: string
+  id: number;
+  name: string;
 }
 
 export interface SharedDirectoryFiles {
-  files: SharedDirectoryFile[],
-  last: boolean
+  files: SharedDirectoryFile[];
+  last: boolean;
 }
 
 export interface SharedDirectoryFile {
-  id: string
-  name: string
-  type: string
-  size: number
-  encryptionKey: string
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  encryptionKey: string;
 }
 
-export interface IShare {
-  token: string
-  file: string
-  encryptionKey: string
-  bucket: string
-  fileToken: string
-  isFolder: boolean
-  views: number
-  fileInfo: IFile
-}
-
-export interface IFile {
-  bucket: string
-  createdAt: Date
-  folderId: number
-  fileId: string
-  id: number
-  name: string
-  type: string
-  updatedAt: Date
-  size: number
-  progress: number
-  uri?: string
-  isUploaded?: boolean
-}
+export type ListShareLinksItem = Pick<
+  ShareLink,
+  'id' | 'token' | 'views' | 'timesValid' | 'active' | 'isFolder' | 'createdAt' | 'updatedAt' | 'fileSize'
+> & {
+  item: unknown;
+};
+export type ListShareLinksResponse = {
+  items: ListShareLinksItem[];
+  pagination: { page: number; perPage: number; countAll: number; orderBy?: string };
+};
