@@ -9,7 +9,7 @@ export enum ReferralKey {
   SubscribeToNewsletter = 'subscribe-to-newsletter',
   InstallDesktopApp = 'install-desktop-app',
   InviteFriends = 'invite-friends',
-  Invite2Firends = 'invite-2-friends',
+  Invite2Friends = 'invite-2-friends',
   CompleteSurvey = 'complete-survey',
 }
 
