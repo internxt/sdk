@@ -81,6 +81,19 @@ export default class PhotosSubmodule {
       });
   }
 
+  public findOrCreatePhoto(data: CreatePhotoData): Promise<Photo> {
+    return axios
+      .post<PhotoJSON>(`${this.model.baseUrl}/photos/photo/exists`, data, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((res) => this.parse(res.data))
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public deletePhotoById(photoId: PhotoId): Promise<void> {
     return axios
       .delete(`${this.model.baseUrl}/photos/${photoId}`, {
