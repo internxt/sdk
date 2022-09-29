@@ -41,7 +41,7 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(postCall.firstCall.args).toEqual([
-        '/register',
+        '/users',
         {
           name: registerDetails.name,
           lastname: registerDetails.lastname,
