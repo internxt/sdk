@@ -43,7 +43,7 @@ export class Auth {
     uuid: UUID;
   }> {
     return this.client.post(
-      '/register',
+      '/users',
       {
         name: registerDetails.name,
         captcha: registerDetails.captcha,

@@ -3,7 +3,7 @@ import queryString from 'query-string';
 
 import { extractAxiosErrorMessage } from '../../utils';
 import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel, PhotoStatus } from '..';
-import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON } from '../types';
+import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON, PhotosUsage } from '../types';
 
 export default class PhotosSubmodule {
   private model: PhotosSdkModel;
@@ -81,6 +81,19 @@ export default class PhotosSubmodule {
       });
   }
 
+  public findOrCreatePhoto(data: CreatePhotoData): Promise<Photo> {
+    return axios
+      .post<PhotoJSON>(`${this.model.baseUrl}/photos/photo/exists`, data, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((res) => this.parse(res.data))
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public deletePhotoById(photoId: PhotoId): Promise<void> {
     return axios
       .delete(`${this.model.baseUrl}/photos/${photoId}`, {
@@ -89,6 +102,21 @@ export default class PhotosSubmodule {
         },
       })
       .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public getUsage(): Promise<PhotosUsage> {
+    return axios
+      .get(`${this.model.baseUrl}/photos/usage`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((result) => {
+        return result.data as PhotosUsage;
+      })
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
