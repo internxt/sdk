@@ -3,7 +3,7 @@ import queryString from 'query-string';
 
 import { extractAxiosErrorMessage } from '../../utils';
 import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel, PhotoStatus } from '..';
-import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON } from '../types';
+import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON, PhotosUsage } from '../types';
 
 export default class PhotosSubmodule {
   private model: PhotosSdkModel;
@@ -102,6 +102,21 @@ export default class PhotosSubmodule {
         },
       })
       .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public getUsage(): Promise<PhotosUsage> {
+    return axios
+      .get(`${this.model.baseUrl}/photos/usage`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((result) => {
+        return result.data as PhotosUsage;
+      })
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
