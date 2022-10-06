@@ -15,6 +15,8 @@ import {
   FetchLimitResponse,
   UsageResponse,
   AddItemsToTrashPayload,
+  ThumbnailEntry,
+  Thumbnail,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
@@ -135,6 +137,27 @@ export class Storage {
           folder_id: fileEntry.folder_id,
           name: fileEntry.name,
           encrypt_version: fileEntry.encrypt_version,
+        },
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Creates a new thumbnail entry
+   * @param thumbnailEntry
+   */
+   public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
+    return this.client.post(
+      '/storage/thumbnail',
+      {
+        thumbnail: {
+          file_id: thumbnailEntry.file_id,
+          type: thumbnailEntry.type,
+          size: thumbnailEntry.size,
+          bucket_id: thumbnailEntry.bucket_id,
+          bucket_file: thumbnailEntry.bucket_file,
+          encrypt_version: thumbnailEntry.encrypt_version,
         },
       },
       this.headers(),
