@@ -52,6 +52,7 @@ export enum PhotoStatus {
 }
 export type FileId = string;
 export type PhotoId = string;
+export type PhotoPreviewType = 'PNG' | 'JPEG';
 export interface Photo {
   id: PhotoId;
   name: string;
@@ -61,7 +62,7 @@ export interface Photo {
   height: number;
   fileId: FileId;
   previewId: FileId;
-  previews?: { width: number; height: number; size: number; fileId: FileId }[];
+  previews?: { width: number; height: number; size: number; fileId: FileId; type: PhotoPreviewType }[];
   deviceId: DeviceId;
   userId: string;
   status: PhotoStatus;
@@ -82,7 +83,9 @@ export interface PhotoJSON extends Omit<Photo, 'statusChangedAt' | 'takenAt' | '
   createdAt: string;
   updatedAt: string;
 }
-export type CreatePhotoData = Omit<Photo, 'id' | 'status' | 'statusChangedAt' | 'createdAt' | 'updatedAt'>;
+export type CreatePhotoData = Omit<Photo, 'id' | 'status' | 'statusChangedAt' | 'createdAt' | 'updatedAt'> & {
+  networkBucketId: string;
+};
 
 export type ShareId = string;
 export interface Share {
