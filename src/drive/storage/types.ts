@@ -30,6 +30,21 @@ export interface DriveFileData {
   size: number;
   type: string;
   updatedAt: string;
+  thumbnails: Array<Thumbnail>;
+  currentThumbnail: Thumbnail | null;
+}
+
+export interface Thumbnail {
+  id: number;
+  file_id: number;
+  max_width: number;
+  max_height: number;
+  type: string;
+  size: number;
+  bucket_id: string;
+  bucket_file: string;
+  encrypt_version: string;
+  urlObject?: string;
 }
 
 export interface FolderChild {
@@ -77,6 +92,17 @@ export interface FileEntry {
   name: string;
   bucket: string;
   folder_id: number;
+  encrypt_version: EncryptionVersion;
+}
+
+export interface ThumbnailEntry {
+  file_id: number;
+  max_width: number;
+  max_height: number;
+  type: string;
+  size: number;
+  bucket_id: string;
+  bucket_file: string;
   encrypt_version: EncryptionVersion;
 }
 
