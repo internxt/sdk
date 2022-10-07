@@ -31,7 +31,7 @@ export interface DriveFileData {
   type: string;
   updatedAt: string;
   thumbnails: Array<Thumbnail>;
-  currentThumbnail: string;
+  currentThumbnail: Thumbnail | null;
 }
 
 export interface Thumbnail {
@@ -44,7 +44,9 @@ export interface Thumbnail {
   bucket_id: string;
   bucket_file: string;
   encrypt_version: string;
+  urlObject?: string;
 }
+
 export interface FolderChild {
   bucket: string;
   color: string;

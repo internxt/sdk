@@ -53,7 +53,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     type: '',
     updatedAt: '',
     thumbnails: [],
-    currentThumbnail: ''
+    currentThumbnail: null
   };
 
   const response = emptyFolderContentResponse();
