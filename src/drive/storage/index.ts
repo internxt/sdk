@@ -147,18 +147,11 @@ export class Storage {
    * Creates a new thumbnail entry
    * @param thumbnailEntry
    */
-   public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
+  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
     return this.client.post(
       '/storage/thumbnail',
       {
-        thumbnail: {
-          file_id: thumbnailEntry.file_id,
-          type: thumbnailEntry.type,
-          size: thumbnailEntry.size,
-          bucket_id: thumbnailEntry.bucket_id,
-          bucket_file: thumbnailEntry.bucket_file,
-          encrypt_version: thumbnailEntry.encrypt_version,
-        },
+        thumbnail: thumbnailEntry,
       },
       this.headers(),
     );

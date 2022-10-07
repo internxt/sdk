@@ -37,6 +37,8 @@ export interface DriveFileData {
 export interface Thumbnail {
   id: number;
   file_id: number;
+  max_width: number;
+  max_height: number;
   type: string;
   size: number;
   bucket_id: string;
@@ -93,6 +95,8 @@ export interface FileEntry {
 
 export interface ThumbnailEntry {
   file_id: number;
+  max_width: number;
+  max_height: number;
   type: string;
   size: number;
   bucket_id: string;
