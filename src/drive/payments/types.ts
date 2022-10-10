@@ -67,8 +67,7 @@ export interface CreatePaymentSessionPayload {
   test?: boolean;
   lifetime_tier?: LifetimeTier;
   mode: StripeSessionMode;
-  priceId: string;
-  coupon_code?: string; 
+  priceId: string; 
   successUrl?: string;
   canceledUrl?: string;
 }
