@@ -69,7 +69,7 @@ export class Storage {
       this.headers(),
     );
   }
-
+  //TODO: REMEMBER TO CHECK PLAIN_NAME WHEN CHANGE FOLDER OF FILE NAME
   /**
    * Updates the metadata of a folder
    * @param payload
@@ -136,6 +136,7 @@ export class Storage {
           size: fileEntry.size,
           folder_id: fileEntry.folder_id,
           name: fileEntry.name,
+          plain_name: fileEntry.plain_name,
           encrypt_version: fileEntry.encrypt_version,
         },
       },
