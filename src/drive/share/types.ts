@@ -6,12 +6,12 @@ export interface GenerateShareLinkPayload {
   bucket: string;
   timesValid: number;
   encryptedCode: string;
+  password?: string;
 }
 
 export interface UpdateShareLinkPayload {
   itemId: string;
-  timesValid: number;
-  active: boolean;
+  plainPassword: string | null;
 }
 
 export interface GetSharedDirectoryPayload {
@@ -21,6 +21,7 @@ export interface GetSharedDirectoryPayload {
   page: number;
   perPage: number;
   code?: string;
+  password?: string;
 }
 
 export interface GetShareLinkFolderSizePayload {
