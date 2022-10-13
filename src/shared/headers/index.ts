@@ -4,29 +4,56 @@ export function basicHeaders(clientName: string, clientVersion: string) {
   return {
     'content-type': 'application/json; charset=utf-8',
     'internxt-version': clientVersion,
-    'internxt-client': clientName
+    'internxt-client': clientName,
+  };
+}
+
+export function basicHeadersWithPassword(clientName: string, clientVersion: string, password: string) {
+  return {
+    'content-type': 'application/json; charset=utf-8',
+    'internxt-version': clientVersion,
+    'internxt-client': clientName,
+    'x-share-password': password,
   };
 }
 
 export function headersWithToken(clientName: string, clientVersion: string, token: Token) {
   const headers = basicHeaders(clientName, clientVersion);
   const extra = {
-    Authorization: 'Bearer ' + token
+    Authorization: 'Bearer ' + token,
   };
   return {
     ...headers,
-    ...extra
+    ...extra,
   };
 }
 
 export function headersWithTokenAndMnemonic(clientName: string, clientVersion: string, token: Token, mnemonic: string) {
   const headers = headersWithToken(clientName, clientVersion, token);
   const extra = {
-    'internxt-mnemonic': mnemonic
+    'internxt-mnemonic': mnemonic,
   };
   return {
     ...headers,
-    ...extra
+    ...extra,
+  };
+}
+
+export function headersWithTokenAndMnemonicAndPassword(
+  clientName: string,
+  clientVersion: string,
+  token: Token,
+  mnemonic: string,
+  password: string,
+) {
+  const headers = headersWithToken(clientName, clientVersion, token);
+  const extra = {
+    'internxt-mnemonic': mnemonic,
+    'x-share-password': password,
+  };
+  return {
+    ...headers,
+    ...extra,
   };
 }
 
@@ -39,7 +66,7 @@ export function headersWithBasicAuth(clientName: string, clientVersion: string, 
   };
   return {
     ...headers,
-    ...extra
+    ...extra,
   };
 }
 
@@ -48,6 +75,6 @@ export function headersWithAuthToken(clientName: string, clientVersion: string, 
 
   return {
     ...headers,
-    'x-token': token
+    'x-token': token,
   };
 }
