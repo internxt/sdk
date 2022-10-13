@@ -134,13 +134,17 @@ export class Share {
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithTokenAndMnemonic(
+  private headers(password?: string) {
+    const args: [string, string, string, string] = [
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
       this.apiSecurity.mnemonic,
-    );
+    ];
+    if (password) {
+      return headersWithTokenAndMnemonicAndPassword(...args, password);
+    }
+    return headersWithTokenAndMnemonic(...args);
   }
 
   /**
@@ -149,5 +153,13 @@ export class Share {
    */
   private basicHeaders() {
     return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+  }
+
+  /**
+   * Used to send the password in shares
+   * @private
+   */
+  private basicHeadersWithPassword(password: string) {
+    return basicHeadersWithPassword(this.appDetails.clientName, this.appDetails.clientVersion, password);
   }
 }
