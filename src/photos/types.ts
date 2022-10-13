@@ -53,6 +53,10 @@ export enum PhotoStatus {
 export type FileId = string;
 export type PhotoId = string;
 export type PhotoPreviewType = 'PNG' | 'JPEG';
+export enum PhotosItemType {
+  PHOTO = 'PHOTO',
+  VIDEO = 'VIDEO',
+}
 export interface Photo {
   id: PhotoId;
   name: string;
@@ -71,6 +75,8 @@ export interface Photo {
   takenAt: Date;
   createdAt: Date;
   updatedAt: Date;
+  duration?: number;
+  itemType: PhotosItemType;
 }
 
 export interface PhotoWithDownloadLink extends Photo {
