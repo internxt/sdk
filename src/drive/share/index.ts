@@ -1,4 +1,9 @@
-import { basicHeaders, headersWithTokenAndMnemonic } from '../../shared/headers';
+import {
+  basicHeaders,
+  basicHeadersWithPassword,
+  headersWithTokenAndMnemonic,
+  headersWithTokenAndMnemonicAndPassword,
+} from '../../shared/headers';
 import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
@@ -53,6 +58,7 @@ export class Share {
     if (!types.includes(payload.type)) {
       throw new Error('Invalid type');
     }
+
     return this.client.post(
       `/storage/share/${payload.type}/${payload.itemId}`,
       {
@@ -62,7 +68,7 @@ export class Share {
         bucket: payload.bucket,
         encryptedCode: payload.encryptedCode,
       },
-      this.headers(),
+      this.headers(payload.password),
     );
   }
 
@@ -74,8 +80,7 @@ export class Share {
     return this.client.put(
       `/storage/share/${payload.itemId}`,
       {
-        timesValid: payload.timesValid,
-        active: payload.active,
+        plainPassword: payload.plainPassword,
       },
       this.headers(),
     );
@@ -93,7 +98,7 @@ export class Share {
    * Increment share view by token
    * @param token
    */
-   public incrementShareViewByToken(token: string): Promise<{ incremented: boolean; token: string }> {
+  public incrementShareViewByToken(token: string): Promise<{ incremented: boolean; token: string }> {
     return this.client.put(`/storage/share/${token}/view`, {}, this.headers());
   }
 
@@ -101,8 +106,9 @@ export class Share {
    * Fetches data of a shared file
    * @param token
    */
-  public getShareLink(token: string): Promise<ShareLink> {
-    return this.client.get(`/storage/share/${token}`, this.basicHeaders());
+  public getShareLink(token: string, password?: string): Promise<ShareLink> {
+    const headers = password ? this.basicHeadersWithPassword(password) : this.basicHeaders();
+    return this.client.get(`/storage/share/${token}`, headers);
   }
 
   /**
@@ -114,11 +120,16 @@ export class Share {
     if (!types.includes(payload.type)) {
       throw new Error('Invalid type');
     }
+    let headers = this.basicHeaders();
+    if (payload.password) {
+      headers = this.basicHeadersWithPassword(payload.password);
+    }
     return this.client.get(
       // eslint-disable-next-line max-len
-      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page
+      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${
+        payload.page
       }&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
-      this.basicHeaders(),
+      headers,
     );
   }
 
@@ -134,13 +145,17 @@ export class Share {
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithTokenAndMnemonic(
+  private headers(password?: string) {
+    const args: [string, string, string, string] = [
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
       this.apiSecurity.mnemonic,
-    );
+    ];
+    if (password) {
+      return headersWithTokenAndMnemonicAndPassword(...args, password);
+    }
+    return headersWithTokenAndMnemonic(...args);
   }
 
   /**
@@ -149,5 +164,13 @@ export class Share {
    */
   private basicHeaders() {
     return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+  }
+
+  /**
+   * Used to send the password in shares
+   * @private
+   */
+  private basicHeadersWithPassword(password: string) {
+    return basicHeadersWithPassword(this.appDetails.clientName, this.appDetails.clientVersion, password);
   }
 }
