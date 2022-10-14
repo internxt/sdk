@@ -69,7 +69,7 @@ export class Storage {
       this.headers(),
     );
   }
-  //TODO: REMEMBER TO CHECK PLAIN_NAME WHEN CHANGE FOLDER OF FILE NAME
+
   /**
    * Updates the metadata of a folder
    * @param payload
