@@ -44,6 +44,8 @@ export interface ShareLink {
   createdAt: string;
   updatedAt: string;
   fileSize: number;
+  hashed_password: string | null;
+  code: string;
 }
 
 export interface SharedDirectoryFolders {
