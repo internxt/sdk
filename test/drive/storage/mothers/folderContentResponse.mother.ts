@@ -11,11 +11,12 @@ export function emptyFolderContentResponse() {
     icon: '',
     id: 0,
     name: '',
+    plain_name: '',
     parentId: 0,
     parent_id: 0,
     updatedAt: '',
     userId: 0,
-    user_id: 0
+    user_id: 0,
   };
   return response;
 }
@@ -31,11 +32,12 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     icon_id: null,
     id: 0,
     name: '',
+    plain_name: '',
     parentId: 0,
     parent_id: 0,
     updatedAt: '',
     userId: 0,
-    user_id: 0
+    user_id: 0,
   };
   const file: DriveFileData = {
     bucket: '',
@@ -49,11 +51,12 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     folder_id: 0,
     id: 0,
     name: '',
+    plain_name: '',
     size: 0,
     type: '',
     updatedAt: '',
     thumbnails: [],
-    currentThumbnail: null
+    currentThumbnail: null,
   };
 
   const response = emptyFolderContentResponse();
