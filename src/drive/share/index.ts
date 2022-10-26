@@ -67,7 +67,7 @@ export class Share {
         itemToken: payload.itemToken,
         bucket: payload.bucket,
         encryptedCode: payload.encryptedCode,
-        plainPassword: payload.password,
+        plainPassword: payload.plainPassword,
       },
       this.headers(),
     );

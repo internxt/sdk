@@ -6,7 +6,7 @@ export interface GenerateShareLinkPayload {
   bucket: string;
   timesValid: number;
   encryptedCode: string;
-  password?: string;
+  plainPassword?: string;
 }
 
 export interface UpdateShareLinkPayload {
