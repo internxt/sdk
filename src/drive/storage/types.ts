@@ -8,6 +8,7 @@ export interface DriveFolderData {
   iconId: number | null;
   icon_id: number | null;
   name: string;
+  plain_name: string | null;
   parentId: number | null;
   parent_id: number | null;
   updatedAt: string;
@@ -27,9 +28,25 @@ export interface DriveFileData {
   folder_id: number;
   id: number;
   name: string;
+  plain_name: string | null;
   size: number;
   type: string;
   updatedAt: string;
+  thumbnails: Array<Thumbnail>;
+  currentThumbnail: Thumbnail | null;
+}
+
+export interface Thumbnail {
+  id: number;
+  file_id: number;
+  max_width: number;
+  max_height: number;
+  type: string;
+  size: number;
+  bucket_id: string;
+  bucket_file: string;
+  encrypt_version: string;
+  urlObject?: string;
 }
 
 export interface FolderChild {
@@ -42,6 +59,7 @@ export interface FolderChild {
   icon_id: number | null;
   id: number;
   name: string;
+  plain_name: string | null;
   parentId: number;
   parent_id: number;
   updatedAt: string;
@@ -59,6 +77,7 @@ export interface FetchFolderContentResponse {
   icon: string;
   id: number;
   name: string;
+  plain_name: string | null;
   parentId: number;
   parent_id: number;
   updatedAt: string;
@@ -75,8 +94,20 @@ export interface FileEntry {
   type: string;
   size: number;
   name: string;
+  plain_name: string | null;
   bucket: string;
   folder_id: number;
+  encrypt_version: EncryptionVersion;
+}
+
+export interface ThumbnailEntry {
+  file_id: number;
+  max_width: number;
+  max_height: number;
+  type: string;
+  size: number;
+  bucket_id: string;
+  bucket_file: string;
   encrypt_version: EncryptionVersion;
 }
 
@@ -89,6 +120,7 @@ export interface CreateFolderResponse {
   bucket: string;
   id: number;
   name: string;
+  plain_name: string | null;
   parentId: number;
   createdAt: string;
   updatedAt: string;
@@ -126,6 +158,11 @@ export interface UpdateFilePayload {
   };
 }
 
+export interface DeleteFilePayload {
+  fileId: number;
+  folderId: number;
+}
+
 export interface MoveFilePayload {
   fileId: string;
   destination: number;
@@ -147,4 +184,8 @@ export type UsageResponse = {
 
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
+}
+
+export interface AddItemsToTrashPayload {
+  items: Array<{id: string, type: string}>;
 }

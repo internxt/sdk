@@ -4,6 +4,7 @@ import { randomFolderContentResponse } from './mothers/folderContentResponse.mot
 import {
   CreateFolderPayload,
   CreateFolderResponse,
+  DeleteFilePayload,
   DriveFolderData,
   EncryptionVersion,
   MoveFolderPayload,
@@ -96,6 +97,7 @@ describe('# storage service tests', () => {
           createdAt: '',
           id: 2,
           name: 'zero',
+          plain_name: 'ma-fol',
           parentId: 0,
           updatedAt: '',
           userId: 1,
@@ -209,6 +211,25 @@ describe('# storage service tests', () => {
       });
     });
 
+    describe('delete folder', () => {
+      it('Should call with right arguments & return content', async () => {
+        // Arrange
+        const callStub = sinon.stub(httpClient, 'delete').resolves({
+          valid: true,
+        });
+        const { client, headers } = clientAndHeaders();
+
+        // Act
+        const body = await client.deleteFolder(2);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual(['/storage/folder/2', headers]);
+        expect(body).toEqual({
+          valid: true,
+        });
+      });
+    });
+
     describe('folder size', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
@@ -237,6 +258,7 @@ describe('# storage service tests', () => {
           id: '1',
           type: 'type',
           name: 'xtz',
+          plain_name: 'plain',
           size: 2,
           bucket: '',
           encrypt_version: EncryptionVersion.Aes03,
@@ -257,6 +279,7 @@ describe('# storage service tests', () => {
               size: fileEntry.size,
               folder_id: fileEntry.folder_id,
               name: fileEntry.name,
+              plain_name: fileEntry.plain_name,
               encrypt_version: fileEntry.encrypt_version,
             },
           },
@@ -296,6 +319,29 @@ describe('# storage service tests', () => {
           },
           headers,
         ]);
+        expect(body).toEqual({
+          valid: true,
+        });
+      });
+    });
+
+    describe('delete file', () => {
+      it('Should call with right arguments and return control', async () => {
+        // Arrange
+        const callStub = sinon.stub(httpClient, 'delete').resolves({
+          valid: true,
+        });
+        const { client, headers } = clientAndHeaders();
+        const payload: DeleteFilePayload = {
+          fileId: 5,
+          folderId: 2,
+        };
+
+        // Act
+        const body = await client.deleteFile(payload);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual(['/storage/folder/2/file/5', headers]);
         expect(body).toEqual({
           valid: true,
         });
@@ -386,6 +432,60 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual(['/limit', headers]);
         expect(body).toEqual({
           total: 10,
+        });
+      });
+    });
+
+    describe('Trash', () => {
+      describe('get Trash', () => {
+        it('Should return the expected elements', async () => {
+          // Arrange
+          const response = randomFolderContentResponse(2, 2);
+          const { client } = clientAndHeaders();
+          sinon.stub(httpClient, 'getCancellable').returns({
+            promise: Promise.resolve(response),
+            requestCanceler: {
+              cancel: () => null,
+            },
+          });
+  
+          // Act
+          const [promise, requestCanceler] = client.getTrash();
+          const body = await promise;
+  
+          // Assert
+          expect(body.files).toHaveLength(2);
+          expect(body.children).toHaveLength(2);
+        });
+
+        it('Should cancel the request', async () => {
+          // Arrange
+          const { client } = clientAndHeaders();
+  
+          // Act
+          const [promise, requestCanceler] = client.getTrash();
+          requestCanceler.cancel('My cancel message');
+  
+          // Assert
+          await expect(promise).rejects.toThrowError('My cancel message');
+        });
+      });
+
+      describe('Add Items into trash', () => {
+        it('should call with right params & return 200', async () => {
+          const { client, headers } = clientAndHeaders();
+          const callStub = sinon.stub(httpClient, 'post').resolves(true);
+          const itemsToTrash = [
+            { id: 'id1', type: 'file'},
+            { id: 'id2', type: 'folder'}
+          ]
+
+          // Act
+          const body = await client.addItemsToTrash({ items: itemsToTrash});
+
+          // Assert
+          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', {items: itemsToTrash}, headers]);
+          expect(body).toEqual(true);
         });
       });
     });

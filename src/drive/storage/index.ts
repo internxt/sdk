@@ -2,9 +2,9 @@ import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
+  DeleteFilePayload,
   DriveFileData,
   FetchFolderContentResponse,
-  FetchLimitResponse,
   FileEntry,
   MoveFilePayload,
   MoveFileResponse,
@@ -12,7 +12,11 @@ import {
   MoveFolderResponse,
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
+  FetchLimitResponse,
   UsageResponse,
+  AddItemsToTrashPayload,
+  ThumbnailEntry,
+  Thumbnail,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
@@ -96,6 +100,14 @@ export class Storage {
   }
 
   /**
+   * Removes a specific folder from the centralized persistence
+   * @param folderId
+   */
+   public deleteFolder(folderId: number): Promise<unknown> {
+    return this.client.delete(`/storage/folder/${folderId}`, this.headers());
+  }
+
+  /**
    * Returns the total size of a folder
    * @param folderId
    */
@@ -124,8 +136,23 @@ export class Storage {
           size: fileEntry.size,
           folder_id: fileEntry.folder_id,
           name: fileEntry.name,
+          plain_name: fileEntry.plain_name,
           encrypt_version: fileEntry.encrypt_version,
         },
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Creates a new thumbnail entry
+   * @param thumbnailEntry
+   */
+  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
+    return this.client.post(
+      '/storage/thumbnail',
+      {
+        thumbnail: thumbnailEntry,
       },
       this.headers(),
     );
@@ -145,6 +172,14 @@ export class Storage {
       },
       this.headers(),
     );
+  }
+
+  /**
+   * Deletes a specific file entry
+   * @param payload
+   */
+   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
+    return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
   /**
@@ -170,6 +205,31 @@ export class Storage {
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.client.get(`/storage/recents?limit=${limit}`, this.headers());
+  }
+
+  /**
+   * Returns a list of items in trash
+   */
+   public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      '/storage/trash',
+      this.headers(),
+    );
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Add Items to Trash
+   * @param payload
+   */
+   public addItemsToTrash(payload: AddItemsToTrashPayload) {
+    return this.client.post(
+      '/storage/trash/add',
+      {
+        items: payload.items,
+      },
+      this.headers(),
+    );
   }
 
   /**
