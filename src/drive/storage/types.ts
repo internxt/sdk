@@ -187,5 +187,5 @@ export interface FetchLimitResponse {
 }
 
 export interface AddItemsToTrashPayload {
-  items: Array<{ id: string; type: string }>;
+  items: Array<{id: string, type: string}>;
 }
