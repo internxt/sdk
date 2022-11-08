@@ -3,12 +3,13 @@ export interface DriveFolderData {
   bucket: string | null;
   color: string | null;
   createdAt: string;
+  deleted: boolean;
   encrypt_version: string | null;
   icon: string | null;
   iconId: number | null;
   icon_id: number | null;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   parentId: number | null;
   parent_id: number | null;
   updatedAt: string;
@@ -20,7 +21,7 @@ export interface DriveFileData {
   bucket: string;
   createdAt: string;
   created_at: string;
-  deleted: false;
+  deleted: boolean;
   deletedAt: null;
   encrypt_version: string;
   fileId: string;
@@ -28,7 +29,7 @@ export interface DriveFileData {
   folder_id: number;
   id: number;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   size: number;
   type: string;
   updatedAt: string;
@@ -59,7 +60,7 @@ export interface FolderChild {
   icon_id: number | null;
   id: number;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   parentId: number;
   parent_id: number;
   updatedAt: string;
@@ -77,7 +78,7 @@ export interface FetchFolderContentResponse {
   icon: string;
   id: number;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   parentId: number;
   parent_id: number;
   updatedAt: string;
@@ -94,7 +95,7 @@ export interface FileEntry {
   type: string;
   size: number;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   bucket: string;
   folder_id: number;
   encrypt_version: EncryptionVersion;
@@ -120,7 +121,7 @@ export interface CreateFolderResponse {
   bucket: string;
   id: number;
   name: string;
-  plain_name: string | null;
+  plain_name: string;
   parentId: number;
   createdAt: string;
   updatedAt: string;
