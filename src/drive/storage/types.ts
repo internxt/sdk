@@ -86,6 +86,13 @@ export interface FetchFolderContentResponse {
   user_id: number;
 }
 
+export interface TrashResponse {
+  children: FolderChild[];
+  files: DriveFileData[];
+  totalFiles: number;
+  totalSize: number;
+}
+
 export enum EncryptionVersion {
   Aes03 = '03-aes',
 }

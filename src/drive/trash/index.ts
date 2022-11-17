@@ -1,6 +1,6 @@
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
-import { FetchFolderContentResponse } from '../storage/types';
+import { TrashResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
 
@@ -40,7 +40,7 @@ export class Trash {
   /**
    * Returns a list of items in trash
    */
-  public getTrash(): Promise<FetchFolderContentResponse> {
+  public getTrash(): Promise<TrashResponse> {
     return this.client.get('/storage/trash', this.headers());
   }
 
