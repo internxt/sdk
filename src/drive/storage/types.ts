@@ -84,6 +84,7 @@ export interface FetchFolderContentResponse {
   updatedAt: string;
   userId: number;
   user_id: number;
+  finished: boolean;
 }
 
 export enum EncryptionVersion {

@@ -100,10 +100,37 @@ export class Storage {
   }
 
   /**
+   * Fetches & returns the contents of a specific folder by name
+   * @param folderId
+   * @param trash
+   * @param index
+   * @param limit
+   *
+   */
+  public getFolderContentByName(
+    folderId: number,
+    trash = false,
+    index = 0,
+    limit?: number,
+  ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const trashQuery = trash ? '/?trash=true' : '';
+    const indexQuery = trash ? `&index=${index}` : `/?index=${index}`;
+    const limitQuery = limit ? `&limit=${limit}` : '';
+    const query = `${trashQuery}${indexQuery}${limitQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `/storage/folder/${folderId}/files${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Removes a specific folder from the centralized persistence
    * @param folderId
    */
-   public deleteFolder(folderId: number): Promise<unknown> {
+  public deleteFolder(folderId: number): Promise<unknown> {
     return this.client.delete(`/storage/folder/${folderId}`, this.headers());
   }
 
@@ -178,7 +205,7 @@ export class Storage {
    * Deletes a specific file entry
    * @param payload
    */
-   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
+  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
@@ -210,7 +237,7 @@ export class Storage {
   /**
    * Returns a list of items in trash
    */
-   public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+  public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       '/storage/trash',
       this.headers(),
@@ -222,7 +249,7 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-   public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload) {
     return this.client.post(
       '/storage/trash/add',
       {
