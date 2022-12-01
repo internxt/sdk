@@ -100,7 +100,7 @@ export class Storage {
   }
 
   /**
-   * Fetches & returns the contents of a specific folder by name
+   * Fetches & returns the contents of a specific folder ordered by name
    * @param folderId
    * @param trash
    * @param index
