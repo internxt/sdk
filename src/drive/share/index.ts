@@ -11,6 +11,7 @@ import {
   ListShareLinksResponse,
   ShareLink,
   UpdateShareLinkPayload,
+  ShareItemsIds,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -93,6 +94,16 @@ export class Share {
    */
   public deleteShareLink(shareId: string): Promise<{ deleted: boolean; shareId: string }> {
     return this.client.delete(`/storage/share/${shareId}`, this.headers());
+  }
+
+  /**
+   * Delete share links by id
+   * @param payload
+   */
+  public deleteShareLinks(
+    payload: ShareItemsIds,
+  ): Promise<{ deleted: boolean; items: Array<{ id: number | string }> }> {
+    return this.client.delete('/storage/share/', { items: JSON.stringify(payload.items) }, this.headers());
   }
 
   /**
