@@ -103,7 +103,7 @@ export class Share {
   public deleteShareLinks(
     payload: ShareItemsIds,
   ): Promise<{ deleted: boolean; items: Array<{ id: number | string }> }> {
-    return this.client.delete('/storage/share/', { items: JSON.stringify(payload.items) }, this.headers());
+    return this.client.delete('/storage/share/', this.headers(), { items: payload.items });
   }
 
   /**
