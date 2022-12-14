@@ -3,7 +3,14 @@ import queryString from 'query-string';
 
 import { extractAxiosErrorMessage } from '../../utils';
 import { CreatePhotoData, Photo, PhotoId, PhotoJSON, PhotosSdkModel, PhotoStatus } from '..';
-import { PhotoWithDownloadLink, PhotoExistsPayload, PhotoExistsData, PhotoExistsDataJSON, PhotosUsage } from '../types';
+import {
+  PhotoWithDownloadLink,
+  PhotoExistsPayload,
+  PhotoExistsData,
+  PhotoExistsDataJSON,
+  PhotosUsage,
+  UpdatePhotoPayload,
+} from '../types';
 
 export default class PhotosSubmodule {
   private model: PhotosSdkModel;
@@ -147,6 +154,21 @@ export default class PhotosSubmodule {
             };
           }
         });
+      })
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public updatePhoto(photoId: PhotoId, data: UpdatePhotoPayload): Promise<{ message: string }> {
+    return axios
+      .patch(`${this.model.baseUrl}/photos/${photoId}`, data, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((result) => {
+        return result.data;
       })
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));

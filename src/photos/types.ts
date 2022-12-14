@@ -79,6 +79,10 @@ export interface Photo {
   itemType: PhotosItemType;
 }
 
+export interface UpdatePhotoPayload {
+  previews?: { width: number; height: number; size: number; fileId: FileId; type: PhotoPreviewType }[];
+}
+
 export interface PhotoWithDownloadLink extends Photo {
   previewLink: string;
   previewIndex: string;
