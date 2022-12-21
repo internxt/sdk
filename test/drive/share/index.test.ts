@@ -220,6 +220,7 @@ describe('# share service tests', () => {
       const payload: GetSharedDirectoryPayload = {
         token: 'tokk',
         folderId: 1,
+        parentId: 1,
         page: 1,
         perPage: 10,
         type: 'folder',
@@ -230,7 +231,9 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}`,
+        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${
+          payload.parentId
+        }&page=${payload.page}&perPage=${payload.perPage}`,
         headers,
       ]);
       expect(body).toEqual({
@@ -250,6 +253,7 @@ describe('# share service tests', () => {
         token: 'tokk',
         type: 'file',
         folderId: 1,
+        parentId: 1,
         page: 0,
         perPage: 10,
         code: 'code',
@@ -260,7 +264,9 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
+        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${
+          payload.parentId
+        }&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
         headers,
       ]);
       expect(body).toEqual({
