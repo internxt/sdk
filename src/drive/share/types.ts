@@ -17,7 +17,8 @@ export interface UpdateShareLinkPayload {
 export interface GetSharedDirectoryPayload {
   type: string;
   token: string;
-  folderId: number | null;
+  folderId: number;
+  parentId: number;
   page: number;
   perPage: number;
   code?: string;

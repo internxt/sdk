@@ -126,10 +126,11 @@ export class Share {
       headers = this.basicHeadersWithPassword(payload.password);
     }
     return this.client.get(
-      // eslint-disable-next-line max-len
-      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&page=${
-        payload.page
-      }&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
+      `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&parentId=${
+        payload.parentId
+      }&page=${payload.page}&perPage=${payload.perPage}${
+        payload.code ? '&code=' + payload.code : ''
+      }`,
       headers,
     );
   }
