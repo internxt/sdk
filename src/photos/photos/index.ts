@@ -10,6 +10,7 @@ import {
   PhotoExistsDataJSON,
   PhotosUsage,
   UpdatePhotoPayload,
+  PhotosCount,
 } from '../types';
 
 export default class PhotosSubmodule {
@@ -33,41 +34,36 @@ export default class PhotosSubmodule {
   }
 
   public getPhotos(
-    filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
+    filter: { name?: string; status?: PhotoStatus; updatedAt?: Date },
     skip: number,
     limit: number,
-  ): Promise<{ results: Photo[]; count: number }>;
+  ): Promise<{ results: Photo[]; bucketId: string }>;
   public getPhotos(
-    filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
+    filter: { name?: string; status?: PhotoStatus; updatedAt?: Date },
     skip: number,
     limit: number,
     includeDownloadLinks: true,
-  ): Promise<{ results: PhotoWithDownloadLink[]; count: number; bucketId: string }>;
+  ): Promise<{ results: PhotoWithDownloadLink[]; bucketId: string }>;
   public getPhotos(
-    filter: { name?: string; status?: PhotoStatus; statusChangedAt?: Date },
+    filter: { name?: string; status?: PhotoStatus; updatedAt?: Date },
     skip = 0,
     limit = 1,
-    includeDownloadLinks?: true,
-  ): Promise<{ results: Photo[]; count: number; bucketId?: string }> {
+    includeDownloadLinks?: boolean,
+  ): Promise<{ results: Photo[]; bucketId?: string }> {
     const query = queryString.stringify({ ...filter, skip, limit, includeDownloadLinks });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
     }
 
-    if (limit > 200 || limit < 1) {
-      throw new Error('Invalid limit. Limit should be positive and lower than 201. Provided limit was: ' + limit);
-    }
-
     return axios
-      .get<{ results: PhotoJSON[]; count: number; bucketId?: string }>(`${this.model.baseUrl}/photos/?${query}`, {
+      .get<{ results: PhotoJSON[]; bucketId?: string }>(`${this.model.baseUrl}/photos/?${query}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
       .then((res) => ({
         results: res.data.results.map((photoJson) => this.parse(photoJson)),
-        count: res.data.count,
         bucketId: res.data.bucketId,
       }))
       .catch((err) => {
@@ -170,6 +166,15 @@ export default class PhotosSubmodule {
       .then((result) => {
         return result.data;
       })
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public getCount(): Promise<PhotosCount> {
+    return axios
+      .get<PhotosCount>(`${this.model.baseUrl}/photos/count`)
+      .then((result) => result.data)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
       });
