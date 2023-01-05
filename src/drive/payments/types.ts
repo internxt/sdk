@@ -67,7 +67,7 @@ export interface CreatePaymentSessionPayload {
   test?: boolean;
   lifetime_tier?: LifetimeTier;
   mode: StripeSessionMode;
-  priceId: string; 
+  priceId: string;
   successUrl?: string;
   canceledUrl?: string;
 }
@@ -105,7 +105,7 @@ export type UserSubscription =
 export interface DisplayPrice {
   id: string;
   bytes: number;
-  interval: 'year' | 'month';
+  interval: 'year' | 'month' | 'lifetime';
   amount: number;
 }
 
