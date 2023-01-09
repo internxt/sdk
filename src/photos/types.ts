@@ -129,3 +129,4 @@ export type PhotoExistsPayload = {
 export type PhotoExistsDataJSON = (PhotoExistsPayload | PhotoJSON) & { exists: boolean };
 export type PhotoExistsData = ((Omit<PhotoExistsPayload, 'takenAt'> & { takenAt: Date }) | Photo) & { exists: boolean };
 export type PhotosUsage = { usage: number };
+export type PhotosCount = { existent: number; trashed: number; deleted: number; total: number };
