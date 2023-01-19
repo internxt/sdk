@@ -33,6 +33,27 @@ export default class PhotosSubmodule {
       });
   }
 
+  public getPhotosSorted(filter: { status?: PhotoStatus; updatedAt: Date }, skip: number, limit: number) {
+    const query = queryString.stringify({ ...filter, skip, limit });
+
+    if (skip < 0) {
+      throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
+    }
+
+    return axios
+      .get<{ results: PhotoJSON[] }>(`${this.model.baseUrl}/photos/sorted?${query}`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
+      .then((res) => ({
+        results: res.data.results.map((photoJson) => this.parse(photoJson)),
+      }))
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public getPhotos(
     filter: { name?: string; status?: PhotoStatus; updatedAt?: Date },
     skip: number,
@@ -173,7 +194,11 @@ export default class PhotosSubmodule {
 
   public getCount(): Promise<PhotosCount> {
     return axios
-      .get<PhotosCount>(`${this.model.baseUrl}/photos/count`)
+      .get<PhotosCount>(`${this.model.baseUrl}/photos/count`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+      })
       .then((result) => result.data)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
