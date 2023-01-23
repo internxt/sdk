@@ -11,6 +11,7 @@ import {
   PhotosUsage,
   UpdatePhotoPayload,
   PhotosCount,
+  PhotosSortBy,
 } from '../types';
 
 export default class PhotosSubmodule {
@@ -33,8 +34,13 @@ export default class PhotosSubmodule {
       });
   }
 
-  public getPhotosSorted(filter: { status?: PhotoStatus; updatedAt: Date }, skip: number, limit: number) {
-    const query = queryString.stringify({ ...filter, skip, limit });
+  public getPhotosSorted(
+    filter: { status?: PhotoStatus; updatedAt: Date },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
+    skip: number,
+    limit: number,
+  ) {
+    const query = queryString.stringify({ ...filter, skip, limit, ...sort });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
