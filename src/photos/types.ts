@@ -50,6 +50,12 @@ export enum PhotoStatus {
   Trashed = 'TRASHED',
   Deleted = 'DELETED',
 }
+
+export enum PhotosSortBy {
+  UpdatedAt = 'updatedAt',
+  TakenAt = 'takenAt',
+}
+
 export type FileId = string;
 export type PhotoId = string;
 export type PhotoPreviewType = 'PNG' | 'JPEG';
