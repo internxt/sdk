@@ -36,21 +36,21 @@ export default class PhotosSubmodule {
 
   public getPhotosSorted(
     filter: { status?: PhotoStatus; updatedAt?: Date },
-    sort: { sortBy?: PhotosSortBy; sortType?: 'ASC' | 'DESC' },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
     skip: number,
     limit: number,
     includeDownloadLinks: true,
   ): Promise<{ results: PhotoWithDownloadLink[]; bucketId: string }>;
   public getPhotosSorted(
     filter: { status?: PhotoStatus; updatedAt?: Date },
-    sort: { sortBy?: PhotosSortBy; sortType?: 'ASC' | 'DESC' },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
     skip: number,
     limit: number,
     includeDownloadLinks: false,
   ): Promise<{ results: Photo[]; bucketId: string }>;
   public getPhotosSorted(
     filter: { status?: PhotoStatus; updatedAt?: Date },
-    sort: { sortBy?: PhotosSortBy; sortType?: 'ASC' | 'DESC' },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
     skip: number,
     limit: number,
     includeDownloadLinks: boolean,
