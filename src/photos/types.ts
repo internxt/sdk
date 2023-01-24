@@ -83,6 +83,8 @@ export interface Photo {
   updatedAt: Date;
   duration?: number;
   itemType: PhotosItemType;
+  // Used to identify the bucket where the Photo is
+  networkBucketId?: string;
 }
 
 export interface UpdatePhotoPayload {
