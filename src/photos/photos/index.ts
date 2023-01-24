@@ -35,25 +35,47 @@ export default class PhotosSubmodule {
   }
 
   public getPhotosSorted(
-    filter: { status?: PhotoStatus; updatedAt: Date },
+    filter: { status?: PhotoStatus; updatedAt?: Date },
     sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
     skip: number,
     limit: number,
-  ) {
-    const query = queryString.stringify({ ...filter, skip, limit, ...sort });
+    includeDownloadLinks: true,
+  ): Promise<{ results: PhotoWithDownloadLink[]; bucketId: string }>;
+  public getPhotosSorted(
+    filter: { status?: PhotoStatus; updatedAt?: Date },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
+    skip: number,
+    limit: number,
+    includeDownloadLinks: false,
+  ): Promise<{ results: Photo[]; bucketId: string }>;
+  public getPhotosSorted(
+    filter: { status?: PhotoStatus; updatedAt?: Date },
+    sort: { sortBy: PhotosSortBy; sortType: 'ASC' | 'DESC' },
+    skip: number,
+    limit: number,
+    includeDownloadLinks: boolean,
+  ): Promise<{ results: Photo[]; bucketId: string }> {
+    const query = queryString.stringify({
+      ...filter,
+      skip,
+      limit,
+      ...sort,
+      includeDownloadLinks: includeDownloadLinks === true,
+    });
 
     if (skip < 0) {
       throw new Error('Invalid skip. Skip should be positive. Provided skip was: ' + skip);
     }
 
     return axios
-      .get<{ results: PhotoJSON[] }>(`${this.model.baseUrl}/photos/sorted?${query}`, {
+      .get<{ results: PhotoJSON[]; bucketId: string }>(`${this.model.baseUrl}/photos/sorted?${query}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
       .then((res) => ({
         results: res.data.results.map((photoJson) => this.parse(photoJson)),
+        bucketId: res.data.bucketId,
       }))
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
