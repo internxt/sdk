@@ -233,6 +233,14 @@ export class Storage {
   }
 
   /**
+   * Returns a list of the n most recent files
+   * @param limit
+   */
+   public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
+    return this.client.getWithParams('/users/search', { plain_name }, this.headers());
+  }
+
+  /**
    * Returns the current space usage of the user
    */
   public spaceUsage(): Promise<UsageResponse> {
