@@ -237,7 +237,7 @@ export class Storage {
    * @param limit
    */
    public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
-    return this.client.getWithParams('/users/search', { plain_name }, this.headers());
+    return this.client.post('/users/search', { plain_name }, this.headers());
   }
 
   /**
