@@ -86,6 +86,31 @@ export interface FetchFolderContentResponse {
   user_id: number;
 }
 
+export interface FetchTrashContentResponse {
+  result: {
+    id: number;
+    fileId: string;
+    folderId: number;
+    folder: string | null;
+    name: string;
+    type: string;
+    size: string;
+    bucket: string;
+    encryptVersion: string;
+    deleted: boolean;
+    deletedAt: Date;
+    userId: number;
+    user: string | null;
+    modificationTime: Date;
+    createdAt: Date;
+    updatedAt: Date;
+    folderUuid: string | null;
+    uuid: string;
+    plainName: string | null;
+  }[];
+}
+
+
 export enum EncryptionVersion {
   Aes03 = '03-aes',
 }
