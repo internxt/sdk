@@ -236,8 +236,8 @@ export class Storage {
    * Returns a list of the n most recent files
    * @param limit
    */
-   public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
-    return this.client.post('/users/search', { plain_name }, this.headers());
+   public searchItemsByName(plainName: string): Promise<DriveFileData[]> {
+    return this.client.getWithParams('/users/search', { plainName }, this.headers());
   }
 
   /**
