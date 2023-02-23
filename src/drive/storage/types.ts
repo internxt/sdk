@@ -106,7 +106,7 @@ export interface FetchTrashContentResponse {
     updatedAt: Date;
     folderUuid: string | null;
     uuid: string;
-    plainName: string | null;
+    plainName: string;
   }[];
 }
 

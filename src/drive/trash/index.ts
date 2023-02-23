@@ -50,6 +50,7 @@ export class Trash {
    * @param {number} [offset=0] - The number of items to skip before beginning to return items.
    * @param {'files' | 'folders'} type - The type of content to retrieve.
    * @param {boolean} root - A boolean indicating whether to retrieve content from the root folder.
+   * If is not true it has to get a folderId in order to obtain the items or given folderId
    * @param {number} [folderId] - The ID of the folder to retrieve content from.
    * @returns {Promise<FetchTrashContentResponse>} - A promise that resolves with the paginated list of trashed content.
    */
