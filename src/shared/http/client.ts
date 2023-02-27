@@ -35,6 +35,19 @@ export class HttpClient {
   }
 
   /**
+   * Requests a GET
+   * @param url
+   * @param params
+   * @param headers
+   */
+   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return this.axios.get(url, {
+      params,
+      headers,
+    });
+  }
+
+  /**
    * Requests a GET with option to cancel
    * @param url
    * @param headers

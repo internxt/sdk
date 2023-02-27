@@ -1,6 +1,6 @@
 import { headersWithTokenAndMnemonic } from '../../shared/headers';
 import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
-import { FetchFolderContentResponse } from '../storage/types';
+import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
 
@@ -45,16 +45,41 @@ export class Trash {
   }
 
   /**
+   * Retrieves a paginated list of trashed files or folders.
+   * @param {number} limit - The number of items to retrieve per page.
+   * @param {number} [offset=0] - The number of items to skip before beginning to return items.
+   * @param {'files' | 'folders'} type - The type of content to retrieve.
+   * @param {boolean} root - A boolean indicating whether to retrieve content from the root folder.
+   * If is not true it has to get a folderId in order to obtain the items or given folderId
+   * @param {number} [folderId] - The ID of the folder to retrieve content from.
+   * @returns {Promise<FetchTrashContentResponse>} - A promise that resolves with the paginated list of trashed content.
+   */
+  public getTrashedFilesPaginated(
+    limit: number,
+    offset = 0,
+    type: 'files' | 'folders',
+    root: boolean,
+    folderId?: number,
+  ): Promise<FetchTrashContentResponse> {
+    const endpoint = '/storage/trash/paginated';
+    const folderIdQuery = folderId !== undefined ? `folderId=${folderId}&` : '';
+
+    const url = `${endpoint}?${folderIdQuery}limit=${limit}&offset=${offset}&type=${type}&root=${root}`;
+
+    return this.client.get(url, this.headers());
+  }
+
+  /**
    * Add Items to Trash
    * @param payload
    */
   public addItemsToTrash(payload: AddItemsToTrashPayload) {
     return this.client.post(
-        '/storage/trash/add',
-        {
-          items: payload.items,
-        },
-        this.headers(),
+      '/storage/trash/add',
+      {
+        items: payload.items,
+      },
+      this.headers(),
     );
   }
 
@@ -81,10 +106,10 @@ export class Trash {
    */
   private headers() {
     return headersWithTokenAndMnemonic(
-        this.appDetails.clientName,
-        this.appDetails.clientVersion,
-        this.apiSecurity.token,
-        this.apiSecurity.mnemonic,
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.mnemonic,
     );
   }
 }
