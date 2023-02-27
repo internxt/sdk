@@ -146,6 +146,22 @@ export default class PhotosSubmodule {
       });
   }
 
+  public deletePhotosById(photos: { id: PhotoId }[]): Promise<void> {
+    return axios
+      .delete(`${this.model.baseUrl}/photos/photos`, {
+        headers: {
+          Authorization: `Bearer ${this.model.accessToken}`,
+        },
+        data: {
+          photos,
+        },
+      })
+      .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
   public deletePhotoById(photoId: PhotoId): Promise<void> {
     return axios
       .delete(`${this.model.baseUrl}/photos/${photoId}`, {
@@ -153,6 +169,42 @@ export default class PhotosSubmodule {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
       })
+      .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public trashPhotosById(photos: { id: PhotoId }[]): Promise<void> {
+    return axios
+      .post(
+        `${this.model.baseUrl}/photos/photos/trash`,
+        {
+          photos,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.model.accessToken}`,
+          },
+        },
+      )
+      .then(() => undefined)
+      .catch((err) => {
+        throw new Error(extractAxiosErrorMessage(err));
+      });
+  }
+
+  public trashPhotoById(photoId: PhotoId): Promise<void> {
+    return axios
+      .post(
+        `${this.model.baseUrl}/photos/${photoId}/trash`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${this.model.accessToken}`,
+          },
+        },
+      )
       .then(() => undefined)
       .catch((err) => {
         throw new Error(extractAxiosErrorMessage(err));
