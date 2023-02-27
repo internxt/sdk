@@ -112,7 +112,7 @@ export interface DisplayPrice {
 export interface CreateCheckoutSessionPayload {
   price_id: string;
   coupon_code?: string;
-  trialDays?: number;
+  trial_days?: number;
   success_url: string;
   cancel_url: string;
   customer_email: string;
