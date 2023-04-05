@@ -476,9 +476,9 @@ describe('# storage service tests', () => {
           const { client, headers } = clientAndHeaders();
           const callStub = sinon.stub(httpClient, 'post').resolves(true);
           const itemsToTrash = [
-            { id: 'id1', type: 'file'},
-            { id: 'id2', type: 'folder'}
-          ]
+            { id: 'id1', type: 'file' },
+            { id: 'id2', type: 'folder' },
+          ];
 
           // Act
           const body = await client.addItemsToTrash({ items: itemsToTrash});
@@ -508,9 +508,8 @@ function clientAndHeaders(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: mnemonic,
   };
   const client = Storage.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
   return { client, headers };
 }

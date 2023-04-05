@@ -40,7 +40,6 @@ export class Referrals {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic
     );
   }
 

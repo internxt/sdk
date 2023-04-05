@@ -46,10 +46,9 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
-  mnemonic = 'nemo'
 ): {
-  client: Referrals,
-  headers: object
+  client: Referrals;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
@@ -57,9 +56,8 @@ function clientAndHeaders(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: mnemonic,
   };
   const client = Referrals.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
   return { client, headers };
 }

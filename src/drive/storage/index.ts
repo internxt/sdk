@@ -263,7 +263,6 @@ export class Storage {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
     );
   }
 }

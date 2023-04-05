@@ -136,7 +136,6 @@ export class Users {
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
     );
   }
 }

@@ -137,7 +137,6 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
-  mnemonic = 'nemo',
 ): {
   client: Trash;
   headers: object;
@@ -148,9 +147,8 @@ function clientAndHeaders(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: mnemonic,
   };
   const client = Trash.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
   return { client, headers };
 }

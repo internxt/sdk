@@ -28,14 +28,11 @@ export function headersWithToken(clientName: string, clientVersion: string, toke
   };
 }
 
-export function headersWithTokenAndMnemonic(clientName: string, clientVersion: string, token: Token, mnemonic: string) {
+export function headersWithTokenAndMnemonic(clientName: string, clientVersion: string, token: Token) {
   const headers = headersWithToken(clientName, clientVersion, token);
-  const extra = {
-    'internxt-mnemonic': mnemonic,
-  };
+
   return {
     ...headers,
-    ...extra,
   };
 }
 
@@ -43,12 +40,10 @@ export function headersWithTokenAndMnemonicAndPassword(
   clientName: string,
   clientVersion: string,
   token: Token,
-  mnemonic: string,
   password: string,
 ) {
   const headers = headersWithToken(clientName, clientVersion, token);
   const extra = {
-    'internxt-mnemonic': mnemonic,
     'x-share-password': password,
   };
   return {

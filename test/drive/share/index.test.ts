@@ -280,7 +280,6 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
     token = 'my-token',
-    mnemonic = 'nemo',
   ): {
     client: Share;
     headers: object;
@@ -291,10 +290,9 @@ describe('# share service tests', () => {
     };
     const apiSecurity: ApiSecurity = {
       token: token,
-      mnemonic: mnemonic,
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+    const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
     return { client, headers };
   }
 
@@ -312,7 +310,6 @@ describe('# share service tests', () => {
     };
     const apiSecurity: ApiSecurity = {
       token: '',
-      mnemonic: '',
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
     const headers = basicHeaders(clientName, clientVersion);

@@ -148,11 +148,10 @@ export class Share {
    * @private
    */
   private headers(password?: string) {
-    const args: [string, string, string, string] = [
+    const args: [string, string, string] = [
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
     ];
     if (password) {
       return headersWithTokenAndMnemonicAndPassword(...args, password);
