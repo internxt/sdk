@@ -1,5 +1,5 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithToken } from '../../shared/headers';
 import { ChangePasswordPayload, FriendInvite, InitializeUserResponse, UpdateProfilePayload } from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
@@ -132,10 +132,6 @@ export class Users {
   }
 
   private headers() {
-    return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 }

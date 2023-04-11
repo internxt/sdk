@@ -1,6 +1,6 @@
 import sinon from 'sinon';
 import { Users } from '../../../src/drive';
-import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { ChangePasswordPayload } from '../../../src/drive/users/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
@@ -8,7 +8,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('# users service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -18,12 +17,11 @@ describe('# users service tests', () => {
   });
 
   describe('send invitation', () => {
-
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const postStub = sinon.stub(httpClient, 'post').resolves({
-        sent: true
+        sent: true,
       });
       const email = 'my@email.com';
 
@@ -34,28 +32,27 @@ describe('# users service tests', () => {
       expect(postStub.firstCall.args).toEqual([
         '/user/invite',
         {
-          email: email
+          email: email,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        sent: true
+        sent: true,
       });
     });
-
   });
 
   describe('initialize', () => {
-
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const callStub = sinon.stub(httpClient, 'post').resolves({
         user: {
-          root_folder: 1
-        }
+          root_folder: 1,
+        },
       });
-      const email = 'e', mnemonic = 'm';
+      const email = 'e',
+        mnemonic = 'm';
 
       // Act
       const body = await client.initialize(email, mnemonic);
@@ -65,19 +62,17 @@ describe('# users service tests', () => {
         '/initialize',
         {
           email: email,
-          mnemonic: mnemonic
+          mnemonic: mnemonic,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        root_folder: 1
+        root_folder: 1,
       });
     });
-
   });
 
   describe('refresh', () => {
-
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
@@ -90,20 +85,15 @@ describe('# users service tests', () => {
       const body = await client.refreshUser();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/user/refresh',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/user/refresh', headers]);
       expect(body).toEqual({
         user: {},
         token: 't',
       });
     });
-
   });
 
   describe('change password', () => {
-
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
@@ -113,7 +103,7 @@ describe('# users service tests', () => {
         encryptedMnemonic: '2',
         encryptedPrivateKey: '3',
         newEncryptedPassword: '4',
-        newEncryptedSalt: '5'
+        newEncryptedSalt: '5',
       };
 
       // Act
@@ -129,13 +119,11 @@ describe('# users service tests', () => {
           mnemonic: payload.encryptedMnemonic,
           privateKey: payload.encryptedPrivateKey,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({});
     });
-
   });
-
 });
 
 function clientAndHeaders(
@@ -143,10 +131,10 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
-  mnemonic = 'nemo'
+  mnemonic = 'nemo',
 ): {
-  client: Users,
-  headers: object
+  client: Users;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
@@ -156,6 +144,6 @@ function clientAndHeaders(
     token: token,
   };
   const client = Users.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }

@@ -1,8 +1,8 @@
 import {
   basicHeaders,
   basicHeadersWithPassword,
-  headersWithTokenAndMnemonic,
-  headersWithTokenAndMnemonicAndPassword,
+  headersWithToken,
+  headersWithTokenAndPassword,
 } from '../../shared/headers';
 import {
   GenerateShareLinkPayload,
@@ -128,9 +128,7 @@ export class Share {
     return this.client.get(
       `/storage/share/down/${payload.type}s?token=${payload.token}&folderId=${payload.folderId}&parentId=${
         payload.parentId
-      }&page=${payload.page}&perPage=${payload.perPage}${
-        payload.code ? '&code=' + payload.code : ''
-      }`,
+      }&page=${payload.page}&perPage=${payload.perPage}${payload.code ? '&code=' + payload.code : ''}`,
       headers,
     );
   }
@@ -154,9 +152,9 @@ export class Share {
       this.apiSecurity.token,
     ];
     if (password) {
-      return headersWithTokenAndMnemonicAndPassword(...args, password);
+      return headersWithTokenAndPassword(...args, password);
     }
-    return headersWithTokenAndMnemonic(...args);
+    return headersWithToken(...args);
   }
 
   /**

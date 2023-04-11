@@ -1,13 +1,12 @@
 import sinon from 'sinon';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { Referrals } from '../../../src/drive';
 import { HttpClient } from '../../../src/shared/http/client';
 
 const httpClient = HttpClient.create('');
 
 describe('# users service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -17,28 +16,23 @@ describe('# users service tests', () => {
   });
 
   describe('get referrals', () => {
-
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        referrals: [1, 2]
+        referrals: [1, 2],
       });
 
       // Act
       const body = await client.getReferrals();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/users-referrals',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/users-referrals', headers]);
       expect(body).toEqual({
-        referrals: [1, 2]
+        referrals: [1, 2],
       });
     });
   });
-
 });
 
 function clientAndHeaders(
@@ -58,6 +52,6 @@ function clientAndHeaders(
     token: token,
   };
   const client = Referrals.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }

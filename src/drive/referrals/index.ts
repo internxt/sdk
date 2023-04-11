@@ -1,4 +1,4 @@
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithToken } from '../../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { UserReferral } from './types';
 import { HttpClient } from '../../shared/http/client';
@@ -24,11 +24,7 @@ export class Referrals {
    * Returns a list of referrals of this user
    */
   public getReferrals(): Promise<UserReferral[]> {
-    return this.client
-      .get(
-        '/users-referrals',
-        this.headers()
-      );
+    return this.client.get('/users-referrals', this.headers());
   }
 
   /**
@@ -36,11 +32,6 @@ export class Referrals {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
-
 }

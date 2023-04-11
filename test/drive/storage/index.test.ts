@@ -14,7 +14,7 @@ import {
 import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
 import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
-import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -448,11 +448,11 @@ describe('# storage service tests', () => {
               cancel: () => null,
             },
           });
-  
+
           // Act
           const [promise, requestCanceler] = client.getTrash();
           const body = await promise;
-  
+
           // Assert
           expect(body.files).toHaveLength(2);
           expect(body.children).toHaveLength(2);
@@ -461,11 +461,11 @@ describe('# storage service tests', () => {
         it('Should cancel the request', async () => {
           // Arrange
           const { client } = clientAndHeaders();
-  
+
           // Act
           const [promise, requestCanceler] = client.getTrash();
           requestCanceler.cancel('My cancel message');
-  
+
           // Assert
           await expect(promise).rejects.toThrowError('My cancel message');
         });
@@ -481,10 +481,10 @@ describe('# storage service tests', () => {
           ];
 
           // Act
-          const body = await client.addItemsToTrash({ items: itemsToTrash});
+          const body = await client.addItemsToTrash({ items: itemsToTrash });
 
           // Assert
-          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', {items: itemsToTrash}, headers]);
+          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', { items: itemsToTrash }, headers]);
           expect(body).toEqual(true);
         });
       });
@@ -510,6 +510,6 @@ function clientAndHeaders(
     token: token,
   };
   const client = Storage.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }
