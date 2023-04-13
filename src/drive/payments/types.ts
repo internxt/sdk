@@ -117,3 +117,8 @@ export interface CreateCheckoutSessionPayload {
   cancel_url: string;
   customer_email: string;
 }
+
+export interface CouponAvailable {
+  elegible: boolean;
+  cupon: string;
+}
