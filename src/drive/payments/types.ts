@@ -120,5 +120,5 @@ export interface CreateCheckoutSessionPayload {
 
 export interface CouponAvailable {
   elegible: boolean;
-  cupon: string;
+  coupon: string;
 }

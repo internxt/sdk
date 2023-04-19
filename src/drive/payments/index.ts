@@ -89,6 +89,10 @@ export class Payments {
     return this.client.get('/request-coupon', this.headers());
   }
 
+  public applyCoupon(coupon: string): Promise<CouponAvailable> {
+    return this.client.put('/apply-coupon', { coupon: coupon }, this.headers());
+  }
+
   public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
     return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
   }
