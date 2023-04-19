@@ -144,6 +144,9 @@ export class HttpClient {
    * @param params
    */
   public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
+    console.log('delete sdk call');
+    console.log({ headers });
+    console.log({ params });
     return this.axios.delete(url, {
       headers: headers,
       data: params,

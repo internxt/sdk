@@ -100,10 +100,60 @@ export class Storage {
   }
 
   /**
+   * Gets the files in a folder.
+   *
+   * @param {number} folderId - ID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The number of files to be returned.
+   * @returns {[Promise<FetchFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFiles(
+    folderId: number,
+    offset = 0,
+    limit = 50,
+  ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const offsetQuery = `/?offset=${offset}`;
+    const limitQuery = limit ? `&limit=${limit}` : '';
+    const query = `${offsetQuery}${limitQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `folders/${folderId}/files${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets the subfolders of a folder.
+   *
+   * @param {number} folderId - The ID of the folder.
+   * @param {number} [offset=0] - The position of the first subfolder to return.
+   * @param {number} [limit=50] - The number of subfolders to return.
+   * @returns {[Promise<FetchFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFolders(
+    folderId: number,
+    offset = 0,
+    limit = 50,
+  ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const offsetQuery = `/?offset=${offset}`;
+    const limitQuery = limit ? `&limit=${limit}` : '';
+    const query = `${offsetQuery}${limitQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `folders/${folderId}/folders${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Removes a specific folder from the centralized persistence
    * @param folderId
    */
-   public deleteFolder(folderId: number): Promise<unknown> {
+  public deleteFolder(folderId: number): Promise<unknown> {
     return this.client.delete(`/storage/folder/${folderId}`, this.headers());
   }
 
@@ -178,7 +228,7 @@ export class Storage {
    * Deletes a specific file entry
    * @param payload
    */
-   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
+  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
@@ -210,7 +260,7 @@ export class Storage {
   /**
    * Returns a list of items in trash
    */
-   public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+  public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       '/storage/trash',
       this.headers(),
@@ -222,7 +272,7 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-   public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload) {
     return this.client.post(
       '/storage/trash/add',
       {
@@ -236,7 +286,7 @@ export class Storage {
    * Returns a list of the n most recent files
    * @param limit
    */
-   public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
+  public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
     return this.client.post('/users/search', { plain_name }, this.headers());
   }
 

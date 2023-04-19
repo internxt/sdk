@@ -84,6 +84,28 @@ export interface FetchFolderContentResponse {
   updatedAt: string;
   userId: number;
   user_id: number;
+  finished: boolean;
+}
+export interface FetchFolderContentResponse {
+  result: {
+    bucket: string;
+    children: FolderChild[];
+    color: string;
+    createdAt: string;
+    encrypt_version: string;
+    files: DriveFileData[];
+    icon: string;
+    id: number;
+    name: string;
+    plain_name: string;
+    parentId: number;
+    parent_id: number;
+    updatedAt: string;
+    userId: number;
+    user_id: number;
+    finished: boolean;
+    type: string;
+  }[];
 }
 
 export interface FetchTrashContentResponse {
