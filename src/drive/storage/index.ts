@@ -1,4 +1,4 @@
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithToken } from '../../shared/headers';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
@@ -103,7 +103,7 @@ export class Storage {
    * Removes a specific folder from the centralized persistence
    * @param folderId
    */
-   public deleteFolder(folderId: number): Promise<unknown> {
+  public deleteFolder(folderId: number): Promise<unknown> {
     return this.client.delete(`/storage/folder/${folderId}`, this.headers());
   }
 
@@ -178,7 +178,7 @@ export class Storage {
    * Deletes a specific file entry
    * @param payload
    */
-   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
+  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
@@ -210,7 +210,7 @@ export class Storage {
   /**
    * Returns a list of items in trash
    */
-   public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+  public getTrash(): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       '/storage/trash',
       this.headers(),
@@ -222,7 +222,7 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-   public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload) {
     return this.client.post(
       '/storage/trash/add',
       {
@@ -236,7 +236,7 @@ export class Storage {
    * Returns a list of the n most recent files
    * @param limit
    */
-   public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
+  public searchItemsByName(plain_name: string): Promise<DriveFileData[]> {
     return this.client.post('/users/search', { plain_name }, this.headers());
   }
 
@@ -259,11 +259,6 @@ export class Storage {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 }

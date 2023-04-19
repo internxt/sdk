@@ -132,7 +132,6 @@ function clientAndHeadersWithToken(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: '',
   };
   const client = Backups.client(apiUrl, appDetails, apiSecurity);
   const headers = headersWithToken(clientName, clientVersion, token);

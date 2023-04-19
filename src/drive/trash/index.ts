@@ -1,4 +1,4 @@
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithToken } from '../../shared/headers';
 import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
 import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -105,11 +105,6 @@ export class Trash {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 }
