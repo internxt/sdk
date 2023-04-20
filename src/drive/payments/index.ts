@@ -8,6 +8,7 @@ import {
   PaymentMethod,
   ProductData,
   UserSubscription,
+  CouponAvailable,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -82,6 +83,14 @@ export class Payments {
 
   public getPrices(): Promise<DisplayPrice[]> {
     return this.client.get<DisplayPrice[]>('/prices', this.headers());
+  }
+
+  public getCoupon(): Promise<CouponAvailable> {
+    return this.client.get('/request-coupon', this.headers());
+  }
+
+  public applyCoupon(): Promise<CouponAvailable> {
+    return this.client.put('/apply-coupon', {}, this.headers());
   }
 
   public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
