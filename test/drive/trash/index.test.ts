@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import { Trash } from '../../../src/drive';
 import { randomFolderContentResponse } from '../storage/mothers/folderContentResponse.mother';
 import { DeleteFilePayload, DeleteItemsPermanentlyPayload } from '../../../src/drive/trash/types';
-import { headersWithTokenAndMnemonic } from '../../../src/shared/headers';
+import { headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -137,7 +137,6 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
-  mnemonic = 'nemo',
 ): {
   client: Trash;
   headers: object;
@@ -148,9 +147,8 @@ function clientAndHeaders(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: mnemonic,
   };
   const client = Trash.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+  const headers = headersWithToken(clientName, clientVersion, token);
   return { client, headers };
 }

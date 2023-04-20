@@ -443,7 +443,6 @@ function clientAndHeadersWithToken(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: '',
   };
   const client = Auth.client(apiUrl, appDetails, apiSecurity);
   const headers = headersWithToken(clientName, clientVersion, token);

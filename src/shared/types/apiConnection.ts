@@ -9,7 +9,6 @@ export interface AppDetails {
 }
 
 export interface ApiSecurity {
-  token: Token
-  mnemonic: string,
-  unauthorizedCallback?: UnauthorizedCallback
+  token: Token;
+  unauthorizedCallback?: UnauthorizedCallback;
 }

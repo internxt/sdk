@@ -99,7 +99,6 @@ function clientAndHeadersWithToken(
   };
   const apiSecurity: ApiSecurity = {
     token: token,
-    mnemonic: '',
   };
   const client = Payments.client(apiUrl, appDetails, apiSecurity);
   const headers = headersWithToken(clientName, clientVersion, token);

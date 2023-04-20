@@ -1,4 +1,4 @@
-import { headersWithTokenAndMnemonic } from '../../shared/headers';
+import { headersWithToken } from '../../shared/headers';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
@@ -309,11 +309,6 @@ export class Storage {
    * @private
    */
   private headers() {
-    return headersWithTokenAndMnemonic(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.mnemonic,
-    );
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 }

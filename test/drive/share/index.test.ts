@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import { GenerateShareLinkPayload, GetSharedDirectoryPayload } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
-import { basicHeaders, headersWithTokenAndMnemonic } from '../../../src/shared/headers';
+import { basicHeaders, headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
@@ -30,7 +30,7 @@ describe('# share service tests', () => {
         encryptedMnemonic: '',
         encryptedCode: '',
         itemToken: '',
-        bucket: ''
+        bucket: '',
       };
 
       // Assert
@@ -52,7 +52,7 @@ describe('# share service tests', () => {
         itemToken: '',
         bucket: '',
         encryptedCode: '',
-        encryptedMnemonic: ''
+        encryptedMnemonic: '',
       };
 
       // Act
@@ -66,7 +66,7 @@ describe('# share service tests', () => {
           encryptedMnemonic: payload.encryptedMnemonic,
           itemToken: payload.itemToken,
           bucket: payload.bucket,
-          encryptedCode: payload.encryptedCode
+          encryptedCode: payload.encryptedCode,
         },
         headers,
       ]);
@@ -88,7 +88,7 @@ describe('# share service tests', () => {
         encryptedMnemonic: 'lola',
         itemId: '1',
         type: 'folder',
-        encryptedCode: ''
+        encryptedCode: '',
       };
 
       // Act
@@ -102,7 +102,7 @@ describe('# share service tests', () => {
           encryptedMnemonic: payload.encryptedMnemonic,
           itemToken: payload.itemToken,
           bucket: payload.bucket,
-          encryptedCode: payload.encryptedCode
+          encryptedCode: payload.encryptedCode,
         },
         headers,
       ]);
@@ -280,7 +280,6 @@ describe('# share service tests', () => {
     clientName = 'c-name',
     clientVersion = '0.1',
     token = 'my-token',
-    mnemonic = 'nemo',
   ): {
     client: Share;
     headers: object;
@@ -291,10 +290,9 @@ describe('# share service tests', () => {
     };
     const apiSecurity: ApiSecurity = {
       token: token,
-      mnemonic: mnemonic,
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = headersWithTokenAndMnemonic(clientName, clientVersion, token, mnemonic);
+    const headers = headersWithToken(clientName, clientVersion, token);
     return { client, headers };
   }
 
@@ -312,7 +310,6 @@ describe('# share service tests', () => {
     };
     const apiSecurity: ApiSecurity = {
       token: '',
-      mnemonic: '',
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
     const headers = basicHeaders(clientName, clientVersion);
