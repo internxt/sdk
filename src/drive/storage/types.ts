@@ -86,7 +86,7 @@ export interface FetchFolderContentResponse {
   user_id: number;
   finished: boolean;
 }
-export interface FetchFolderContentResponse {
+export interface FetchPaginatedFolderContentResponse {
   result: {
     bucket: string;
     children: FolderChild[];

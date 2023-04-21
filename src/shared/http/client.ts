@@ -40,7 +40,7 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+  public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
     return this.axios.get(url, {
       params,
       headers,
@@ -144,9 +144,6 @@ export class HttpClient {
    * @param params
    */
   public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    console.log('delete sdk call');
-    console.log({ headers });
-    console.log({ params });
     return this.axios.delete(url, {
       headers: headers,
       data: params,
