@@ -17,7 +17,6 @@ export function emptyFolderContentResponse() {
     updatedAt: '',
     userId: 0,
     user_id: 0,
-    finished: false,
   };
   return response;
 }

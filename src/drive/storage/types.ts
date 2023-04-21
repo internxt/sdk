@@ -84,8 +84,8 @@ export interface FetchFolderContentResponse {
   updatedAt: string;
   userId: number;
   user_id: number;
-  finished: boolean;
 }
+
 export interface FetchPaginatedFolderContentResponse {
   result: {
     bucket: string;
@@ -103,7 +103,6 @@ export interface FetchPaginatedFolderContentResponse {
     updatedAt: string;
     userId: number;
     user_id: number;
-    finished: boolean;
     type: string;
   }[];
 }
