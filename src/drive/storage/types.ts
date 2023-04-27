@@ -86,6 +86,27 @@ export interface FetchFolderContentResponse {
   user_id: number;
 }
 
+export interface FetchPaginatedFolderContentResponse {
+  result: {
+    bucket: string;
+    children: FolderChild[];
+    color: string;
+    createdAt: string;
+    encrypt_version: string;
+    files: DriveFileData[];
+    icon: string;
+    id: number;
+    name: string;
+    plain_name: string;
+    parentId: number;
+    parent_id: number;
+    updatedAt: string;
+    userId: number;
+    user_id: number;
+    type: string;
+  }[];
+}
+
 export interface FetchTrashContentResponse {
   result: {
     id: number;

@@ -40,7 +40,7 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+  public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
     return this.axios.get(url, {
       params,
       headers,
