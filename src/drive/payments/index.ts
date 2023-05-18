@@ -85,12 +85,12 @@ export class Payments {
     return this.client.get<DisplayPrice[]>('/prices', this.headers());
   }
 
-  public getCoupon(): Promise<CouponAvailable> {
-    return this.client.get('/request-coupon', this.headers());
+  public requestPreventCancellation(): Promise<CouponAvailable> {
+    return this.client.get('/request-prevent-cancellation', this.headers());
   }
 
-  public applyCoupon(): Promise<CouponAvailable> {
-    return this.client.put('/apply-coupon', {}, this.headers());
+  public preventCancellation(): Promise<CouponAvailable> {
+    return this.client.put('/prevent-cancellation', {}, this.headers());
   }
 
   public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
