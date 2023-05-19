@@ -118,7 +118,6 @@ export interface CreateCheckoutSessionPayload {
   customer_email: string;
 }
 
-export interface CouponAvailable {
+export interface FreeTrialAvailable {
   elegible: boolean;
-  coupon: string;
 }
