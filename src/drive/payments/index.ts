@@ -89,7 +89,7 @@ export class Payments {
     return this.client.get('/request-prevent-cancellation', this.headers());
   }
 
-  public preventCancellation(): Promise<FreeTrialAvailable> {
+  public preventCancellation(): Promise<void> {
     return this.client.put('/prevent-cancellation', {}, this.headers());
   }
 
