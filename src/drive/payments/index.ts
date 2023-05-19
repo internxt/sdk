@@ -8,7 +8,7 @@ import {
   PaymentMethod,
   ProductData,
   UserSubscription,
-  CouponAvailable,
+  FreeTrialAvailable,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -85,11 +85,11 @@ export class Payments {
     return this.client.get<DisplayPrice[]>('/prices', this.headers());
   }
 
-  public requestPreventCancellation(): Promise<CouponAvailable> {
+  public requestPreventCancellation(): Promise<FreeTrialAvailable> {
     return this.client.get('/request-prevent-cancellation', this.headers());
   }
 
-  public preventCancellation(): Promise<CouponAvailable> {
+  public preventCancellation(): Promise<FreeTrialAvailable> {
     return this.client.put('/prevent-cancellation', {}, this.headers());
   }
 
