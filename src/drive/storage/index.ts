@@ -101,6 +101,18 @@ export class Storage {
   }
 
   /**
+   * Returns metadata of a specific file
+   * @param fileId
+   */
+  public getFile(fileId: string): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `/files/${fileId}/meta`,
+      this.headers(),
+    );
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Gets the files in a folder.
    *
    * @param {number} folderId - ID of the folder.
