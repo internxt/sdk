@@ -18,6 +18,7 @@ import {
   ThumbnailEntry,
   Thumbnail,
   FetchPaginatedFolderContentResponse,
+  FileMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
@@ -104,11 +105,8 @@ export class Storage {
    * Returns metadata of a specific file
    * @param fileId
    */
-  public getFile(fileId: string): [Promise<FetchFolderContentResponse>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
-      `/files/${fileId}/meta`,
-      this.headers(),
-    );
+  public getFile(fileId: string): [Promise<FileMeta>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(`/files/${fileId}/meta`, this.headers());
     return [promise, requestCanceler];
   }
 

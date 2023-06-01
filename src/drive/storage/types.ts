@@ -86,6 +86,31 @@ export interface FetchFolderContentResponse {
   user_id: number;
 }
 
+export interface FileMeta {
+  bucket: string;
+  createdAt: Date;
+  deleted: boolean;
+  deletedAt: Date | null;
+  encryptVersion: string;
+  fileId: string;
+  folder: string | null;
+  folderId: number;
+  folderUuid: string;
+  id: number;
+  modificationTime: string;
+  name: string;
+  plainName: string;
+  removed: boolean;
+  removedAt: Date | null;
+  size: string;
+  status: string;
+  type: string;
+  updatedAt: Date;
+  user: string | null;
+  userId: number;
+  uuid: string;
+}
+
 export interface FetchPaginatedFolderContentResponse {
   result: {
     bucket: string;
@@ -130,7 +155,6 @@ export interface FetchTrashContentResponse {
     plainName: string;
   }[];
 }
-
 
 export enum EncryptionVersion {
   Aes03 = '03-aes',
@@ -234,5 +258,5 @@ export interface FetchLimitResponse {
 }
 
 export interface AddItemsToTrashPayload {
-  items: Array<{id: string, type: string}>;
+  items: Array<{ id: string; type: string }>;
 }
