@@ -121,3 +121,8 @@ export interface CreateCheckoutSessionPayload {
 export interface FreeTrialAvailable {
   elegible: boolean;
 }
+
+export interface RedeemCodePayload {
+  code: string;
+  provider: string;
+}
