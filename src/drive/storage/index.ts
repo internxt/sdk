@@ -114,8 +114,8 @@ export class Storage {
     folderId: number,
     offset = 0,
     limit = 50,
-    sort = 'plainName',
-    order = 'ASC',
+    sort = '',
+    order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
     const offsetQuery = `/?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
@@ -145,8 +145,8 @@ export class Storage {
     folderId: number,
     offset = 0,
     limit = 50,
-    sort = 'plainName',
-    order = 'ASC',
+    sort = '',
+    order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
     const offsetQuery = `/?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
