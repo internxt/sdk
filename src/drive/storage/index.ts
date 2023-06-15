@@ -121,7 +121,13 @@ export class Storage {
     const limitQuery = `&limit=${limit}`;
     const sortQuery = `&sort=${sort}`;
     const orderQuery = `&order=${order}`;
-    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    let query;
+
+    if (sort === '' && order === '') {
+      query = `${offsetQuery}${limitQuery}`;
+    } else {
+      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    }
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
       `folders/${folderId}/files${query}`,
@@ -152,7 +158,12 @@ export class Storage {
     const limitQuery = `&limit=${limit}`;
     const sortQuery = `&sort=${sort}`;
     const orderQuery = `&order=${order}`;
-    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    let query;
+    if (sort === '' && order === '') {
+      query = `${offsetQuery}${limitQuery}`;
+    } else {
+      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    }
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
       `folders/${folderId}/folders${query}`,
