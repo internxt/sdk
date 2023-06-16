@@ -116,16 +116,28 @@ export class Storage {
    * @param {number} folderId - ID of the folder.
    * @param {number} [offset=0] - The position of the first file to return.
    * @param {number} [limit=50] - The number of files to be returned.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getFolderFiles(
     folderId: number,
     offset = 0,
     limit = 50,
+    sort = '',
+    order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
     const offsetQuery = `/?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const query = `${offsetQuery}${limitQuery}`;
+    const sortQuery = `&sort=${sort}`;
+    const orderQuery = `&order=${order}`;
+    let query;
+
+    if (sort === '' && order === '') {
+      query = `${offsetQuery}${limitQuery}`;
+    } else {
+      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    }
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
       `folders/${folderId}/files${query}`,
@@ -141,16 +153,27 @@ export class Storage {
    * @param {number} folderId - The ID of the folder.
    * @param {number} [offset=0] - The position of the first subfolder to return.
    * @param {number} [limit=50] - The number of subfolders to return.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getFolderFolders(
     folderId: number,
     offset = 0,
     limit = 50,
+    sort = '',
+    order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
     const offsetQuery = `/?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const query = `${offsetQuery}${limitQuery}`;
+    const sortQuery = `&sort=${sort}`;
+    const orderQuery = `&order=${order}`;
+    let query;
+    if (sort === '' && order === '') {
+      query = `${offsetQuery}${limitQuery}`;
+    } else {
+      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+    }
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
       `folders/${folderId}/folders${query}`,

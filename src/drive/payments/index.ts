@@ -9,6 +9,7 @@ import {
   ProductData,
   UserSubscription,
   FreeTrialAvailable,
+  RedeemCodePayload,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -91,6 +92,10 @@ export class Payments {
 
   public preventCancellation(): Promise<void> {
     return this.client.put('/prevent-cancellation', {}, this.headers());
+  }
+
+  public applyRedeemCode(payload: RedeemCodePayload): Promise<void> {
+    return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
   }
 
   public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
