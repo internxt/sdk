@@ -106,7 +106,9 @@ export class Payments {
     return this.client.delete('/subscriptions', this.headers());
   }
 
-  public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
+  public createCheckoutSession(
+    payload: CreateCheckoutSessionPayload,
+  ): Promise<{ sessionId: string } | { client_secret: string }> {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
   }
 

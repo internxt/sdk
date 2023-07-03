@@ -116,6 +116,7 @@ export interface CreateCheckoutSessionPayload {
   success_url: string;
   cancel_url: string;
   customer_email: string;
+  payment_method?: string;
 }
 
 export interface FreeTrialAvailable {
