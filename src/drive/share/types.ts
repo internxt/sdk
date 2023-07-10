@@ -1,3 +1,5 @@
+import { FolderChild } from '../storage/types';
+
 export interface GenerateShareLinkPayload {
   itemId: string;
   type: string;
@@ -81,4 +83,8 @@ export type ListShareLinksItem = Pick<
 export type ListShareLinksResponse = {
   items: ListShareLinksItem[];
   pagination: { page: number; perPage: number; countAll: number; orderBy?: string };
+};
+
+export type ListPrivateSharedFoldersResponse = {
+  folders: FolderChild[];
 };

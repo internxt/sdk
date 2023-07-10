@@ -8,6 +8,7 @@ import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
+  ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
   ShareLink,
   UpdateShareLinkPayload,
@@ -139,6 +140,38 @@ export class Share {
    */
   public getShareLinkFolderSize(payload: GetShareLinkFolderSizePayload): Promise<any> {
     return this.client.get(`/storage/share/${payload.itemId}/folder/${payload.folderId}/size`, this.basicHeaders());
+  }
+
+  /**
+   * Fetches all folders shared by a user
+   */
+  public getSentSharedFolders(
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListPrivateSharedFoldersResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      `private-sharing/sent/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
+
+  /**
+   * Fetches folders shared with a user
+   */
+  public getReceivedSharedFolders(
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListPrivateSharedFoldersResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      `private-sharing/receive/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
   }
 
   /**
