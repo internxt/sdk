@@ -106,10 +106,22 @@ export class Payments {
     return this.client.delete('/subscriptions', this.headers());
   }
 
-  public createCheckoutSession(
-    payload: CreateCheckoutSessionPayload,
-  ): Promise<{ sessionId: string } | { client_secret: string }> {
+  public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
+  }
+
+  public getPaypalSetupIntent({
+    priceId,
+    coupon,
+  }: {
+    priceId: string;
+    coupon?: string;
+  }): Promise<{ client_secret: string }> {
+    const query = new URLSearchParams();
+    if (priceId !== undefined) query.set('priceId', priceId);
+    if (coupon !== undefined) query.set('coupon', coupon);
+
+    return this.client.get(`/paypal-setup-intent?${query.toString()}`, this.headers());
   }
 
   /**
