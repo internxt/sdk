@@ -9,6 +9,7 @@ import {
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
   ListShareLinksResponse,
+  ShareDomainsResponse,
   ShareLink,
   UpdateShareLinkPayload,
 } from './types';
@@ -133,6 +134,9 @@ export class Share {
     );
   }
 
+  public getShareDomains(): Promise<ShareDomainsResponse> {
+    return this.client.get('/storage/share/domains', this.headers());
+  }
   /**
    * Get size of folder in share links
    * @param payload
