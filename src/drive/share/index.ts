@@ -175,6 +175,25 @@ export class Share {
   }
 
   /**
+   * Grant privileges of folder to a user
+   */
+  public grantSharePrivilegesToUser(
+    userUuid: string,
+    privateFolderId: string,
+    roleId: string,
+  ): Promise<ListPrivateSharedFoldersResponse> {
+    return this.client.post(
+      'private-sharing/grant-privileges',
+      {
+        userUuid,
+        privateFolderId,
+        roleId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
