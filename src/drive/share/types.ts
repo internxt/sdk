@@ -92,3 +92,8 @@ export type ListShareLinksResponse = {
 export type ListPrivateSharedFoldersResponse = {
   folders: FolderChild[];
 };
+
+export type ListAllSharedFoldersResponse = {
+  sharedByMe: FolderChild[];
+  sharedWithMe: FolderChild[];
+};

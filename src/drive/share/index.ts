@@ -8,6 +8,7 @@ import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
+  ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
   ShareDomainsResponse,
@@ -174,6 +175,22 @@ export class Share {
 
     return this.client.get(
       `private-sharing/receive/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
+
+  /**
+   * Fetches all shared folders
+   */
+  public getAllSharedFolders(
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListAllSharedFoldersResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      `private-sharing/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
