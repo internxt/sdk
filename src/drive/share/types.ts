@@ -74,6 +74,10 @@ export interface SharedDirectoryFile {
   encryptionKey: string;
 }
 
+export interface ShareDomainsResponse {
+  list: string[];
+}
+
 export type ListShareLinksItem = Pick<
   ShareLink,
   'id' | 'token' | 'views' | 'timesValid' | 'active' | 'isFolder' | 'createdAt' | 'updatedAt' | 'fileSize'

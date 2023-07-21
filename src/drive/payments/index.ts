@@ -110,6 +110,20 @@ export class Payments {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
   }
 
+  public getPaypalSetupIntent({
+    priceId,
+    coupon,
+  }: {
+    priceId: string;
+    coupon?: string;
+  }): Promise<{ client_secret: string }> {
+    const query = new URLSearchParams();
+    if (priceId !== undefined) query.set('priceId', priceId);
+    if (coupon !== undefined) query.set('coupon', coupon);
+
+    return this.client.get(`/paypal-setup-intent?${query.toString()}`, this.headers());
+  }
+
   /**
    * Returns the needed headers for the module requests
    * @private
