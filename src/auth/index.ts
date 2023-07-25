@@ -222,17 +222,52 @@ export class Auth {
   public areCredentialsCorrect(email: string, hashedPassword: string): Promise<boolean> {
     // Uses fetch instead of httpClient since a 401 response
     // would log out the user
-    return fetch(
-      `${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`,
-      { headers: this.headersWithToken(this.apiSecurity?.token as string) }
-    ).then(
-      (res) => {
-        if (res.ok) {
-          return true;
-        } else if (res.status === 401) {
-          return false;
-        } else throw new Error(`Request failed with error ${res.status}`);
+    return fetch(`${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`, {
+      headers: this.headersWithToken(this.apiSecurity?.token as string),
+    }).then((res) => {
+      if (res.ok) {
+        return true;
+      } else if (res.status === 401) {
+        return false;
+      } else throw new Error(`Request failed with error ${res.status}`);
+    });
+  }
+
+  /**
+   * Send email to change password
+   * @param email
+   */
+  public sendChangePasswordEmail(email: string): Promise<void> {
+    return this.client.post(
+      '/users/recover-account',
+      {
+        email: email,
       },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Restore password with email link
+   * @param token
+   * @param password
+   * @param salt
+   * @param mnemonic
+   */
+  public changePasswordWithLink(
+    token: string | undefined,
+    password: string,
+    salt: string,
+    mnemonic: string,
+  ): Promise<void> {
+    return this.client.put(
+      `/users/recover-account?token=${token}`,
+      {
+        password: password,
+        salt: salt,
+        mnemonic: mnemonic,
+      },
+      this.basicHeaders(),
     );
   }
 
