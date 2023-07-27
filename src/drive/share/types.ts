@@ -97,3 +97,14 @@ export type ListAllSharedFoldersResponse = {
   sharedByMe: FolderChild[];
   sharedWithMe: FolderChild[];
 };
+
+export type SharePrivateFolderWithUserPayload = {
+  emailToShare: string;
+  privateFolderId: FolderChild['uuid'];
+  roleId: PrivateSharingRole['id'];
+  encryptionKey: string;
+};
+
+export type PrivateSharingRole = { id: string; role: string; createdAt: Date; updatedAt: Date };
+
+export type PrivateSharingRolesResponse = { roles: PrivateSharingRole[] };

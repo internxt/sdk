@@ -38,6 +38,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     updatedAt: '',
     userId: 0,
     user_id: 0,
+    uuid: '',
   };
   const file: DriveFileData = {
     bucket: '',

@@ -11,8 +11,10 @@ import {
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
+  PrivateSharingRolesResponse,
   ShareDomainsResponse,
   ShareLink,
+  SharePrivateFolderWithUserPayload,
   UpdateShareLinkPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -212,6 +214,34 @@ export class Share {
       },
       this.headers(),
     );
+  }
+
+  /**
+   * Share folder to a user
+   */
+  public sharePrivateFolderWithUser({
+    emailToShare,
+    privateFolderId,
+    roleId,
+    encryptionKey,
+  }: SharePrivateFolderWithUserPayload): Promise<void> {
+    return this.client.post(
+      'private-sharing/create',
+      {
+        email: emailToShare,
+        folderId: privateFolderId,
+        roleId,
+        encryptionKey,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Fetches roles for private sharing items
+   */
+  public getPrivateSharingRoles(): Promise<PrivateSharingRolesResponse> {
+    return this.client.get('private-sharing/roles', this.headers());
   }
 
   /**
