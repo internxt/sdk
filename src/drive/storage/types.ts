@@ -161,7 +161,8 @@ export enum EncryptionVersion {
 }
 
 export interface FileEntry {
-  id: string;
+  id?: string;
+  uuid?: string;
   type: string;
   size: number;
   name: string;

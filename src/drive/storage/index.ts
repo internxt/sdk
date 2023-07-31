@@ -214,6 +214,7 @@ export class Storage {
       '/storage/file',
       {
         file: {
+          uuid: fileEntry.uuid,
           fileId: fileEntry.id,
           type: fileEntry.type,
           bucket: fileEntry.bucket,
