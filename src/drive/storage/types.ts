@@ -161,10 +161,20 @@ export enum EncryptionVersion {
 }
 
 export interface FileEntry {
-  id?: string;
+  id: string;
   uuid?: string;
   type: string;
   size: number;
+  name: string;
+  plain_name: string;
+  bucket: string;
+  folder_id: number;
+  encrypt_version: EncryptionVersion;
+}
+
+export interface EmptyFileEntry {
+  uuid?: string;
+  type: string;
   name: string;
   plain_name: string;
   bucket: string;
