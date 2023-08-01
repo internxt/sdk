@@ -73,13 +73,14 @@ export class Users {
    */
   public changePassword(payload: ChangePasswordPayload) {
     return this.client.patch(
-      '/user/password',
+      '/users/password',
       {
         currentPassword: payload.currentEncryptedPassword,
         newPassword: payload.newEncryptedPassword,
         newSalt: payload.newEncryptedSalt,
         mnemonic: payload.encryptedMnemonic,
         privateKey: payload.encryptedPrivateKey,
+        encryptVersion: payload.encryptVersion,
       },
       this.headers(),
     );
