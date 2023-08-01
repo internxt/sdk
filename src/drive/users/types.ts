@@ -13,6 +13,7 @@ export interface ChangePasswordPayload {
   newEncryptedSalt: string;
   encryptedMnemonic: string;
   encryptedPrivateKey: string;
+  encryptVersion: string;
 }
 
 export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname'>>;
