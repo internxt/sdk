@@ -261,7 +261,31 @@ export class Auth {
     mnemonic: string,
   ): Promise<void> {
     return this.client.put(
-      `/users/recover-account?token=${token}`,
+      `/users/recover-account?token=${token}&reset=false`,
+      {
+        password: password,
+        salt: salt,
+        mnemonic: mnemonic,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Reset account with token
+   * @param token
+   * @param password
+   * @param salt
+   * @param mnemonic
+   */
+  public resetAccountWithToken(
+    token: string | undefined,
+    password: string,
+    salt: string,
+    mnemonic: string,
+  ): Promise<void> {
+    return this.client.put(
+      `/users/recover-account?token=${token}&reset=true`,
       {
         password: password,
         salt: salt,
