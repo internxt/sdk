@@ -108,3 +108,21 @@ export type SharePrivateFolderWithUserPayload = {
 export type PrivateSharingRole = { id: string; role: string; createdAt: Date; updatedAt: Date };
 
 export type PrivateSharingRolesResponse = { roles: PrivateSharingRole[] };
+
+export type GrantSharePrivilegesToUserResponse = { message: string };
+export type UpdateRoleFolderResponse = { message: string };
+
+export type SharedFolderUser = {
+  avatar: string | null;
+  email: string;
+  grantedFrom: string;
+  grantedFromPlainName: string;
+  id: number;
+  lastname: string;
+  name: string;
+  roleId: string;
+  roleName: string;
+  uuid: string;
+};
+
+export type getSharedFolderUsersResponse = { users: SharedFolderUser[] };

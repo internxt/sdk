@@ -8,13 +8,16 @@ import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
+  GrantSharePrivilegesToUserResponse,
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
   PrivateSharingRolesResponse,
+  SharedFolderUser,
   ShareDomainsResponse,
   ShareLink,
   SharePrivateFolderWithUserPayload,
+  UpdateRoleFolderResponse,
   UpdateShareLinkPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -198,17 +201,48 @@ export class Share {
   }
 
   /**
+   * Get all shared folders users
+   */
+  public getSharedFolderUsers(
+    folderUUID: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<{ users: SharedFolderUser[] }> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      `private-sharing/shared-with/by-folder-id/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
+
+  /**
    * Grant privileges of folder to a user
    */
   public grantSharePrivilegesToUser(
     userUuid: string,
     privateFolderId: string,
     roleId: string,
-  ): Promise<ListPrivateSharedFoldersResponse> {
+  ): Promise<GrantSharePrivilegesToUserResponse> {
     return this.client.post(
       'private-sharing/grant-privileges',
       {
         userUuid,
+        privateFolderId,
+        roleId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Update role of a user on a folder
+   */
+  public updateRoleFolder(privateFolderId: string, roleId: string): Promise<UpdateRoleFolderResponse> {
+    return this.client.put(
+      `private-sharing/role/${roleId}`,
+      {
         privateFolderId,
         roleId,
       },
