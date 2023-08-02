@@ -112,13 +112,14 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/user/password',
+        '/users/password',
         {
           currentPassword: payload.currentEncryptedPassword,
           newPassword: payload.newEncryptedPassword,
           newSalt: payload.newEncryptedSalt,
           mnemonic: payload.encryptedMnemonic,
           privateKey: payload.encryptedPrivateKey,
+          encryptVersion: payload.encryptVersion,
         },
         headers,
       ]);
