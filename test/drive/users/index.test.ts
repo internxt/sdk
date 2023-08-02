@@ -104,6 +104,7 @@ describe('# users service tests', () => {
         encryptedPrivateKey: '3',
         newEncryptedPassword: '4',
         newEncryptedSalt: '5',
+        encryptVersion: '6',
       };
 
       // Act
