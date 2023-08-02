@@ -12,6 +12,7 @@ import {
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
+  PrivateSharedFolder,
   PrivateSharingRolesResponse,
   SharedFolderUser,
   ShareDomainsResponse,
@@ -215,6 +216,13 @@ export class Share {
       `private-sharing/shared-with/by-folder-id/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
+  }
+
+  /**
+   * Get private folder data
+   */
+  public getPrivateSharedFolder(folderUUID: string): Promise<{ data: PrivateSharedFolder }> {
+    return this.client.get(`private-sharing/by-folder-id/${folderUUID}`, this.headers());
   }
 
   /**
