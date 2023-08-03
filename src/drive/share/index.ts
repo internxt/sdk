@@ -18,6 +18,7 @@ import {
   ShareDomainsResponse,
   ShareLink,
   SharePrivateFolderWithUserPayload,
+  UpdateRoleFolderPayload,
   UpdateRoleFolderResponse,
   UpdateShareLinkPayload,
 } from './types';
@@ -247,12 +248,16 @@ export class Share {
   /**
    * Update role of a user on a folder
    */
-  public updateRoleFolder(privateFolderId: string, roleId: string): Promise<UpdateRoleFolderResponse> {
+  public updateRoleFolder({
+    folderUUID,
+    roleId,
+    userEmail,
+  }: UpdateRoleFolderPayload): Promise<UpdateRoleFolderResponse> {
     return this.client.put(
       `private-sharing/role/${roleId}`,
       {
-        privateFolderId,
-        roleId,
+        folderId: folderUUID,
+        email: userEmail,
       },
       this.headers(),
     );

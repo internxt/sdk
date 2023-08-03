@@ -112,6 +112,12 @@ export type PrivateSharingRolesResponse = { roles: PrivateSharingRole[] };
 export type GrantSharePrivilegesToUserResponse = { message: string };
 export type UpdateRoleFolderResponse = { message: string };
 
+export type UpdateRoleFolderPayload = {
+  folderUUID: string;
+  roleId: string;
+  userEmail: string;
+};
+
 export type SharedFolderUser = {
   avatar: string | null;
   email: string;
