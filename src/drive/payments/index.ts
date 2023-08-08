@@ -98,8 +98,9 @@ export class Payments {
     return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
   }
 
-  public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
-    return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
+  public updateSubscriptionPrice(priceId: string, couponCode?: string): Promise<UserSubscription> {
+    const coupon = couponCode ? { couponCode: couponCode } : {};
+    return this.client.put('/subscriptions', { price_id: priceId, ...coupon }, this.headers());
   }
 
   public cancelSubscription(): Promise<void> {
@@ -108,20 +109,6 @@ export class Payments {
 
   public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
-  }
-
-  public getPaypalSetupIntent({
-    priceId,
-    coupon,
-  }: {
-    priceId: string;
-    coupon?: string;
-  }): Promise<{ client_secret: string }> {
-    const query = new URLSearchParams();
-    if (priceId !== undefined) query.set('priceId', priceId);
-    if (coupon !== undefined) query.set('coupon', coupon);
-
-    return this.client.get(`/paypal-setup-intent?${query.toString()}`, this.headers());
   }
 
   /**
