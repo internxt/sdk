@@ -99,7 +99,8 @@ export class Payments {
   }
 
   public updateSubscriptionPrice(priceId: string, couponCode?: string): Promise<UserSubscription> {
-    return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
+    const coupon = couponCode ? { couponCode: couponCode } : {};
+    return this.client.put('/subscriptions', { price_id: priceId, ...coupon }, this.headers());
   }
 
   public cancelSubscription(): Promise<void> {
