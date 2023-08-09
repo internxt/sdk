@@ -141,7 +141,6 @@ export type PrivateSharedFolder = {
   encryptionKey: string;
   createdAt: string;
   updatedAt: string;
-  shared_with: string;
   folder: {
     id: number;
     uuid: string;
