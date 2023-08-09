@@ -146,6 +146,7 @@ export class Share {
   public getShareDomains(): Promise<ShareDomainsResponse> {
     return this.client.get('/storage/share/domains', this.headers());
   }
+
   /**
    * Get size of folder in share links
    * @param payload
@@ -155,7 +156,12 @@ export class Share {
   }
 
   /**
-   * Fetches all folders shared by a user
+   * Fetches all folders shared by a user.
+   *
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @returns {Promise<ListPrivateSharedFoldersResponse>} A promise containing the list of shared folders.
    */
   public getSentSharedFolders(
     page = 0,
@@ -171,7 +177,12 @@ export class Share {
   }
 
   /**
-   * Fetches folders shared with a user
+   * Fetches folders shared with a user.
+   *
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @returns {Promise<ListPrivateSharedFoldersResponse>} A promise containing the list of shared folders.
    */
   public getReceivedSharedFolders(
     page = 0,
@@ -187,7 +198,12 @@ export class Share {
   }
 
   /**
-   * Fetches all shared folders
+   * Fetches all shared folders.
+   *
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @returns {Promise<ListAllSharedFoldersResponse>} A promise containing the list of shared folders.
    */
   public getAllSharedFolders(
     page = 0,
@@ -203,7 +219,13 @@ export class Share {
   }
 
   /**
-   * Get all shared folders users
+   * Get all users with access to a shared folder.
+   *
+   * @param {string} folderUUID - The UUID of the folder.
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @returns {Promise<{ users: SharedFolderUser[] }>} A promise containing the list of users with access to the folder.
    */
   public getSharedFolderUsers(
     folderUUID: string,
@@ -220,14 +242,22 @@ export class Share {
   }
 
   /**
-   * Get private folder data
+   * Get private folder data.
+   *
+   * @param {string} folderUUID - The UUID of the folder.
+   * @returns {Promise<{ data: PrivateSharedFolder }>} A promise containing the private folder data.
    */
   public getPrivateSharedFolder(folderUUID: string): Promise<{ data: PrivateSharedFolder }> {
     return this.client.get(`private-sharing/by-folder-id/${folderUUID}`, this.headers());
   }
 
   /**
-   * Grant privileges of folder to a user
+   * Grant privileges of folder to a user.
+   *
+   * @param {string} userUuid - The UUID of the user.
+   * @param {string} privateFolderId - The UUID of the shared folder.
+   * @param {string} roleId - The id of the role.
+   * @returns {Promise<GrantSharePrivilegesToUserResponse>} A promise with message field
    */
   public grantSharePrivilegesToUser(
     userUuid: string,
@@ -246,7 +276,13 @@ export class Share {
   }
 
   /**
-   * Update role of a user on a folder
+   * Update the role of a user on a folder.
+   *
+   * @param {UpdateRoleFolderPayload} options - The options for updating the user's role on the folder.
+   * @param {string} options.folderUUID - The unique identifier of the folder.
+   * @param {string} options.roleId - The identifier of the role to assign to the user.
+   * @param {string} options.userEmail - The email address of the user.
+   * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
    */
   public updateRoleFolder({
     folderUUID,
@@ -264,7 +300,14 @@ export class Share {
   }
 
   /**
-   * Share folder to a user
+   * Share a private folder with a user.
+   *
+   * @param {SharePrivateFolderWithUserPayload} options - The options for sharing the private folder with a user.
+   * @param {string} options.emailToShare - The email address of the user to share the folder with.
+   * @param {string} options.privateFolderId - The unique identifier of the private folder.
+   * @param {string} options.roleId - The identifier of the role to assign to the user for the shared folder.
+   * @param {string} options.encryptionKey - The encryption key for the shared folder.
+   * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
    */
   public sharePrivateFolderWithUser({
     emailToShare,
@@ -285,10 +328,32 @@ export class Share {
   }
 
   /**
-   * Fetches roles for private sharing items
+   * Fetches roles for private sharing items.
+   *
+   * @returns {Promise<PrivateSharingRolesResponse>} A promise containing the list of private sharing roles.
    */
   public getPrivateSharingRoles(): Promise<PrivateSharingRolesResponse> {
     return this.client.get('private-sharing/roles', this.headers());
+  }
+
+  /**
+   * Stop sharing folder
+   *
+   * @param {string} folderUUID - The unique identifier of the folder.
+   * @returns {Promise<{ stopped: boolean }>} A promise that resolves with an object indicating whether the sharing was stopped.
+   */
+  public stopSharingFolder(folderUUID: string): Promise<{ stoped: boolean }> {
+    return this.client.delete(`/private-sharing/stop/folder-id/${folderUUID}`, this.headers());
+  }
+
+  /**
+   * Remove user from the shared users list of a folder.
+   * @param {string} folderUUID - The UUID of the shared folder.
+   * @param {string} userUUID - The UUID of the user to be removed.
+   * @returns {Promise<{ removed: boolean }>} A promise indicating whether the user was removed.
+   */
+  public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ removed: boolean }> {
+    return this.client.delete(`/private-sharing/remove/folder-id/${folderUUID}/user-id/${userUUID}`, this.headers());
   }
 
   /**
