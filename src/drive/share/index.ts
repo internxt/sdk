@@ -18,8 +18,8 @@ import {
   ShareDomainsResponse,
   ShareLink,
   SharePrivateFolderWithUserPayload,
-  UpdateRoleFolderPayload,
-  UpdateRoleFolderResponse,
+  UpdateUserRolePayload,
+  UpdateUserRoleResponse,
   UpdateShareLinkPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -278,22 +278,18 @@ export class Share {
   /**
    * Update the role of a user on a folder.
    *
-   * @param {UpdateRoleFolderPayload} options - The options for updating the user's role on the folder.
+   * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
    * @param {string} options.folderUUID - The unique identifier of the folder.
    * @param {string} options.roleId - The identifier of the role to assign to the user.
-   * @param {string} options.userEmail - The email address of the user.
+   * @param {string} options.userUUID - The email address of the user.
    * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
    */
-  public updateRoleFolder({
-    folderUUID,
-    roleId,
-    userEmail,
-  }: UpdateRoleFolderPayload): Promise<UpdateRoleFolderResponse> {
+  public updateUserRole({ folderUUID, roleId, userUUID }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
     return this.client.put(
       `private-sharing/role/${roleId}`,
       {
         folderId: folderUUID,
-        email: userEmail,
+        userId: userUUID,
       },
       this.headers(),
     );
