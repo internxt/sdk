@@ -1,6 +1,12 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import { ChangePasswordPayload, FriendInvite, InitializeUserResponse, UpdateProfilePayload } from './types';
+import {
+  ChangePasswordPayload,
+  FriendInvite,
+  InitializeUserResponse,
+  UpdateProfilePayload,
+  UserPublicKeyResponse,
+} from './types';
 import { UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
 
@@ -129,6 +135,13 @@ export class Users {
    */
   public verifyEmail(payload: { verificationToken: string }) {
     return this.client.post<void>('/user/verifyEmail', payload, this.headers());
+  }
+
+  /**
+   * Get public key of given email
+   */
+  public getPublicKeyByEmail({ email }: { email: string }): Promise<UserPublicKeyResponse> {
+    return this.client.get<UserPublicKeyResponse>(`/users/public-key/${email}`, this.headers());
   }
 
   private headers() {

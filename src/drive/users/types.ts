@@ -18,3 +18,5 @@ export interface ChangePasswordPayload {
 export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname'>>;
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
+
+export type UserPublicKeyResponse = { publicKey: string };

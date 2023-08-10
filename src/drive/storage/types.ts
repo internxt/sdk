@@ -66,6 +66,7 @@ export interface FolderChild {
   updatedAt: string;
   userId: number;
   user_id: number;
+  uuid: string;
 }
 
 export interface FetchFolderContentResponse {
