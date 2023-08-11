@@ -312,7 +312,7 @@ export class Share {
     encryptionKey,
   }: SharePrivateFolderWithUserPayload): Promise<void> {
     return this.client.post(
-      'private-sharing/create',
+      'private-sharing/share',
       {
         email: emailToShare,
         folderId: privateFolderId,
