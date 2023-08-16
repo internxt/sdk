@@ -236,7 +236,7 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      `private-sharing/shared-with/by-folder-id/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `private-sharing/shared-with/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -356,7 +356,7 @@ export class Share {
    * @param {string} folderUUID - The unique identifier of the folder.
    * @returns {Promise<{ stopped: boolean }>} A promise that resolves with an object indicating whether the sharing was stopped.
    */
-  public stopSharingFolder(folderUUID: string): Promise<{ stoped: boolean }> {
+  public stopSharingFolder(folderUUID: string): Promise<{ message: string }> {
     return this.client.delete(`/private-sharing/stop/folder-id/${folderUUID}`, this.headers());
   }
 
@@ -366,8 +366,11 @@ export class Share {
    * @param {string} userUUID - The UUID of the user to be removed.
    * @returns {Promise<{ removed: boolean }>} A promise indicating whether the user was removed.
    */
-  public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ removed: boolean }> {
-    return this.client.delete(`/private-sharing/remove/folder-id/${folderUUID}/user-id/${userUUID}`, this.headers());
+  public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ message: string }> {
+    return this.client.delete(
+      `/private-sharing/shared-with/folder-id/${folderUUID}/user-id/${userUUID}`,
+      this.headers(),
+    );
   }
 
   /**
