@@ -242,6 +242,24 @@ export class Share {
   }
 
   /**
+   * Get shared folder content
+   */
+  public getSharedFolderContent(
+    sharedFolderId: string,
+    token: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListAllSharedFoldersResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      `private-sharing/items/${sharedFolderId}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
+
+  /**
    * Get private folder data.
    *
    * @param {string} folderUUID - The UUID of the folder.
