@@ -93,9 +93,61 @@ export type ListPrivateSharedFoldersResponse = {
   folders: FolderChild[];
 };
 
+export type SharedFolders = {
+  bucket: string | null;
+  createdAt: string;
+  dateShared: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  encryptVersion: string;
+  encryptionKey: string;
+  id: number;
+  name: string;
+  parent: { id: string; size: number; type: string; uuid: string } | null;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: string | null;
+  sharedWithMe: boolean;
+  size: number;
+  type: string;
+  updatedAt: string;
+  user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
+  userId: number;
+  uuid: string;
+};
+
+export type SharedFiles = {
+  bucket: string | null;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  encryptVersion: string;
+  fileiId: number;
+  folder: string | null;
+  folderId: number;
+  folderUuid: string;
+  id: number;
+  modificationTime: string;
+  name: string;
+  plainName: string;
+  removed: boolean;
+  removedAt: string | null;
+  shares: [];
+  size: string;
+  status: string;
+  thumbnails: [];
+  type: string;
+  updatedAt: string;
+  userId: number;
+  uuid: string;
+};
+
 export type ListAllSharedFoldersResponse = {
-  sharedByMe: FolderChild[];
-  sharedWithMe: FolderChild[];
+  credentials: { networkPass: string; networkUser: string };
+  files: SharedFiles[];
+  folders: SharedFolders[];
+  token: string;
 };
 
 export type SharePrivateFolderWithUserPayload = {
