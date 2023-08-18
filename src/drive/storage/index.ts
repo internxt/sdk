@@ -1,4 +1,3 @@
-import { headersWithToken } from '../../shared/headers';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
@@ -21,7 +20,9 @@ import {
   FileMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
+import { Token } from '../../auth';
 
 export * as StorageTypes from './types';
 
@@ -209,7 +210,7 @@ export class Storage {
    * Creates a new file entry
    * @param fileEntry
    */
-  public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
+  public createFileEntry(fileEntry: FileEntry, resourcesToken?: Token): Promise<DriveFileData> {
     return this.client.post(
       '/storage/file',
       {
@@ -224,7 +225,7 @@ export class Storage {
           encrypt_version: fileEntry.encrypt_version,
         },
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -232,13 +233,13 @@ export class Storage {
    * Creates a new thumbnail entry
    * @param thumbnailEntry
    */
-  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
+  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry, resourcesToken?: Token): Promise<Thumbnail> {
     return this.client.post(
       '/storage/thumbnail',
       {
         thumbnail: thumbnailEntry,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -246,7 +247,7 @@ export class Storage {
    * Updates the details of a file entry
    * @param payload
    */
-  public updateFile(payload: UpdateFilePayload): Promise<void> {
+  public updateFile(payload: UpdateFilePayload, resourcesToken?: Token): Promise<void> {
     return this.client.post(
       `/storage/file/${payload.fileId}/meta`,
       {
@@ -254,7 +255,7 @@ export class Storage {
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
