@@ -7,6 +7,7 @@ type InternxtHeaders = {
   'x-share-password'?: string;
   'Authorization'?: string;
   'x-token'?: string;
+  'internxt-resources-token'?: string;
 }
 
 export function basicHeaders(clientName: string, clientVersion: string): InternxtHeaders {
@@ -37,7 +38,12 @@ export function headersWithToken(clientName: string, clientVersion: string, toke
   };
 }
 
-export function headersWithTokenAndPassword(clientName: string, clientVersion: string, token: Token, password: string): InternxtHeaders {
+export function headersWithTokenAndPassword(
+  clientName: string,
+  clientVersion: string,
+  token: Token,
+  password: string
+): InternxtHeaders {
   const headers = headersWithToken(clientName, clientVersion, token);
   const extra = {
     'x-share-password': password,
@@ -67,4 +73,14 @@ export function headersWithAuthToken(clientName: string, clientVersion: string, 
     ...headers,
     'x-token': token,
   };
+}
+
+export function addResourcesTokenToHeaders(headers: InternxtHeaders, resourcesToken?: Token): InternxtHeaders {
+  if (resourcesToken && resourcesToken.length > 0) {
+    return {
+      ...headers,
+      'internxt-resources-token': resourcesToken,
+    };
+  }
+  return headers;
 }
