@@ -143,6 +143,12 @@ export type SharedFiles = {
   uuid: string;
 };
 
+export type ListSharedItemsResponse = {
+  credentials: { networkPass: string; networkUser: string };
+  items: SharedFiles[] | SharedFolders[];
+  token: string;
+};
+
 export type ListAllSharedFoldersResponse = {
   credentials: { networkPass: string; networkUser: string };
   files: SharedFiles[];
