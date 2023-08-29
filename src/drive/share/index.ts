@@ -399,11 +399,11 @@ export class Share {
   /**
    * Stop sharing folder
    *
-   * @param {string} folderUUID - The unique identifier of the folder.
-   * @returns {Promise<{ stopped: boolean }>} A promise that resolves with an object indicating whether the sharing was stopped.
+   * @param {string} sharingId - Id of the sharing to delete
+   * @returns
    */
-  public stopSharingFolder(folderUUID: string): Promise<{ message: string }> {
-    return this.client.delete(`sharings/${folderUUID}`, this.headers());
+  public async stopSharingFolder(sharingId: string): Promise<void> {
+    await this.client.delete(`sharings/${sharingId}`, this.headers());
   }
 
   /**
