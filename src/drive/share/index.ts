@@ -328,7 +328,7 @@ export class Share {
 
   public inviteUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
     return this.client.post(
-      'sharings/invite/send',
+      'sharings/invites/send',
       {
         ...createInviteDto,
         type: 'OWNER',
@@ -339,7 +339,7 @@ export class Share {
 
   public requestUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
     return this.client.post(
-      'sharings/invite/request',
+      'sharings/invites/send',
       {
         ...createInviteDto,
         type: 'SELF',
