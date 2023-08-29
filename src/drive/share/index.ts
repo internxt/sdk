@@ -172,7 +172,7 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      `private-sharing/sent/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/shared-by-me/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -193,7 +193,7 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      `private-sharing/receive/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/shared-with-me/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -213,10 +213,7 @@ export class Share {
   ): Promise<ListAllSharedFoldersResponse> {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
-    return this.client.get(
-      `private-sharing/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`,
-      this.headers(),
-    );
+    return this.client.get(`sharings/folders?page=${page}&perPage=${perPage}${orderByQueryParam}`, this.headers());
   }
 
   /**
@@ -237,7 +234,7 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      `private-sharing/shared-with/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/shared-with/${folderUUID}?page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -263,7 +260,7 @@ export class Share {
 
     return this.client.get(
       // eslint-disable-next-line max-len
-      `private-sharing/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -326,25 +323,65 @@ export class Share {
    * Share a private folder with a user.
    *
    * @param {SharePrivateFolderWithUserPayload} options - The options for sharing the private folder with a user.
-   * @param {string} options.emailToShare - The email address of the user to share the folder with.
-   * @param {string} options.privateFolderId - The unique identifier of the private folder.
-   * @param {string} options.roleId - The identifier of the role to assign to the user for the shared folder.
-   * @param {string} options.encryptionKey - The encryption key for the shared folder.
+   * @param {string} options.itemId - The id of the item to share.
+   * @param {string} options.itemType - The type of the item to share (folder | file).
+   * @param {string} options.sharedWith - The email address of the user to share the folder with.
+   * @param {string} options.encryptionKey - Owner\'s encryption key encrypted with the invited user\'s public key. This field should not be empty if the invitation type is "OWNER".
+   * @param {string} options.encryptionAlgorithm - Encryption algorithm used to encrypt the encryption key. This field should not be empty if the invitation type is "OWNER".
+   * @param {string} options.type - Owner's encryption key encrypted with the invited user's public key.
+   * @param {string} options.roleId - The id of the role to assign to the user.
    * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
    */
-  public sharePrivateFolderWithUser({
-    emailToShare,
-    privateFolderId,
-    roleId,
+
+  public inviteUserToSharedFolder({
+    itemId,
+    itemType,
+    sharedWith,
     encryptionKey,
+    encryptionAlgorithm,
+    type,
+    roleId,
   }: SharePrivateFolderWithUserPayload): Promise<void> {
     return this.client.post(
-      'private-sharing/share',
+      'sharings/invite/send',
       {
-        email: emailToShare,
-        folderId: privateFolderId,
-        roleId,
+        itemId,
+        itemType,
+        sharedWith,
         encryptionKey,
+        encryptionAlgorithm,
+        type,
+        roleId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Share a private folder with a user.
+   * @param {string} invitationId - The id of the invitation.
+   * @param {SharePrivateFolderWithUserPayload} options - The options for sharing the private folder with a user.
+   * @param {string} options.itemId - The id of the item to share.
+   * @param {string} options.itemType - The type of the item to share (folder | file).
+   * @param {string} options.sharedWith - The email address of the user to share the folder with.
+   * @param {string} options.encryptionKey - Owner\'s encryption key encrypted with the invited user\'s public key. This field should not be empty if the invitation type is "OWNER".
+   * @param {string} options.encryptionAlgorithm - Encryption algorithm used to encrypt the encryption key. This field should not be empty if the invitation type is "OWNER".
+   * @param {string} options.type - Owner's encryption key encrypted with the invited user's public key.
+   * @param {string} options.roleId - The id of the role to assign to the user.
+   * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
+   */
+
+  public acceptSharedFolderInvite({
+    invitationId,
+    body,
+  }: {
+    invitationId: string;
+    body: SharePrivateFolderWithUserPayload;
+  }): Promise<void> {
+    return this.client.post(
+      `sharings/invites/${invitationId}/accept`,
+      {
+        body,
       },
       this.headers(),
     );
