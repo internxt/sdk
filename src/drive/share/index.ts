@@ -17,7 +17,7 @@ import {
   SharedFolderUser,
   ShareDomainsResponse,
   ShareLink,
-  SharePrivateFolderWithUserPayload,
+  ShareFolderWithUserPayload,
   UpdateUserRolePayload,
   UpdateUserRoleResponse,
   UpdateShareLinkPayload,
@@ -276,53 +276,46 @@ export class Share {
   }
 
   /**
-   * Grant privileges of folder to a user.
-   *
-   * @param {string} userUuid - The UUID of the user.
-   * @param {string} privateFolderId - The UUID of the shared folder.
-   * @param {string} roleId - The id of the role.
-   * @returns {Promise<GrantSharePrivilegesToUserResponse>} A promise with message field
-   */
-  public grantSharePrivilegesToUser(
-    userUuid: string,
-    privateFolderId: string,
-    roleId: string,
-  ): Promise<GrantSharePrivilegesToUserResponse> {
-    return this.client.post(
-      'private-sharing/grant-privileges',
-      {
-        userUuid,
-        privateFolderId,
-        roleId,
-      },
-      this.headers(),
-    );
-  }
-
-  /**
    * Update the role of a user on a folder.
    *
    * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
    * @param {string} options.folderUUID - The unique identifier of the folder.
    * @param {string} options.roleId - The identifier of the role to assign to the user.
-   * @param {string} options.userUUID - The email address of the user.
+   * @param {string} options.newRoleId - The new role Id.
    * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
    */
-  public updateUserRole({ folderUUID, roleId, userUUID }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
+  public updateUserRole({ folderUUID, roleId, newRoleId }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
     return this.client.put(
-      `private-sharing/role/${roleId}`,
+      `sharings/${folderUUID}/roles/${roleId}`,
       {
-        folderId: folderUUID,
-        userId: userUUID,
+        roleId: newRoleId,
       },
       this.headers(),
     );
   }
 
   /**
+   * Get private folder data.
+   *
+   * @param {string} itemId - The itemId of the folder.
+   * @param {string} itemType - The itemType of the folder (file | folder).
+   * @returns {Promise<{ data: PrivateSharedFolder }>} A promise containing the private folder data.
+   */
+
+  public getSharedFolderInvitations({
+    itemId,
+    itemType,
+  }: {
+    itemId: string;
+    itemType: 'folder' | 'file';
+  }): Promise<any> {
+    return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
+  }
+
+  /**
    * Share a private folder with a user.
    *
-   * @param {SharePrivateFolderWithUserPayload} options - The options for sharing the private folder with a user.
+   * @param {ShareFolderWithUserPayload} options - The options for sharing the private folder with a user.
    * @param {string} options.itemId - The id of the item to share.
    * @param {string} options.itemType - The type of the item to share (folder | file).
    * @param {string} options.sharedWith - The email address of the user to share the folder with.
@@ -333,25 +326,23 @@ export class Share {
    * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
    */
 
-  public inviteUserToSharedFolder({
-    itemId,
-    itemType,
-    sharedWith,
-    encryptionKey,
-    encryptionAlgorithm,
-    type,
-    roleId,
-  }: SharePrivateFolderWithUserPayload): Promise<void> {
+  public inviteUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
     return this.client.post(
       'sharings/invite/send',
       {
-        itemId,
-        itemType,
-        sharedWith,
-        encryptionKey,
-        encryptionAlgorithm,
-        type,
-        roleId,
+        ...createInviteDto,
+        type: 'OWNER',
+      },
+      this.headers(),
+    );
+  }
+
+  public requestUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
+    return this.client.post(
+      'sharings/invite/request',
+      {
+        ...createInviteDto,
+        type: 'SELF',
       },
       this.headers(),
     );
@@ -360,7 +351,7 @@ export class Share {
   /**
    * Share a private folder with a user.
    * @param {string} invitationId - The id of the invitation.
-   * @param {SharePrivateFolderWithUserPayload} options - The options for sharing the private folder with a user.
+   * @param {ShareFolderWithUserPayload} options - The options for sharing the private folder with a user.
    * @param {string} options.itemId - The id of the item to share.
    * @param {string} options.itemType - The type of the item to share (folder | file).
    * @param {string} options.sharedWith - The email address of the user to share the folder with.
@@ -373,27 +364,36 @@ export class Share {
 
   public acceptSharedFolderInvite({
     invitationId,
-    body,
+    createInviteDto,
   }: {
     invitationId: string;
-    body: SharePrivateFolderWithUserPayload;
+    createInviteDto: ShareFolderWithUserPayload;
   }): Promise<void> {
     return this.client.post(
       `sharings/invites/${invitationId}/accept`,
       {
-        body,
+        createInviteDto,
       },
       this.headers(),
     );
   }
 
   /**
-   * Fetches roles for private sharing items.
+   * Fetches roles for sharing items.
    *
-   * @returns {Promise<PrivateSharingRolesResponse>} A promise containing the list of private sharing roles.
+   * @returns {Promise<PrivateSharingRolesResponse>} A promise containing the list of sharing roles.
    */
-  public getPrivateSharingRoles(): Promise<PrivateSharingRolesResponse> {
-    return this.client.get('private-sharing/roles', this.headers());
+
+  public getSharingRoles(): Promise<PrivateSharingRolesResponse> {
+    return this.client.get('/sharings/roles', this.headers());
+  }
+
+  public getAllAccessUsers({
+    folderId,
+  }: {
+    folderId: string;
+  }): Promise<Record<'users', any[]> | Record<'error', string>> {
+    return this.client.get(`sharings/shared-with/${folderId}`, this.headers());
   }
 
   /**
@@ -403,7 +403,7 @@ export class Share {
    * @returns {Promise<{ stopped: boolean }>} A promise that resolves with an object indicating whether the sharing was stopped.
    */
   public stopSharingFolder(folderUUID: string): Promise<{ message: string }> {
-    return this.client.delete(`/private-sharing/stop/folder-id/${folderUUID}`, this.headers());
+    return this.client.delete(`sharings/${folderUUID}`, this.headers());
   }
 
   /**

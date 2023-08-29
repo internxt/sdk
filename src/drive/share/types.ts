@@ -156,13 +156,12 @@ export type ListAllSharedFoldersResponse = {
   token: string;
 };
 
-export type SharePrivateFolderWithUserPayload = {
+export type ShareFolderWithUserPayload = {
   itemId: string;
   itemType: 'folder' | 'file';
   sharedWith: string;
-  encryptionKey: string;
-  encryptionAlgorithm: string;
-  type: string;
+  encryptionKey?: string;
+  encryptionAlgorithm?: string;
   roleId: string;
 };
 
@@ -176,7 +175,7 @@ export type UpdateUserRoleResponse = { message: string };
 export type UpdateUserRolePayload = {
   folderUUID: string;
   roleId: string;
-  userUUID: string;
+  newRoleId: string;
 };
 
 export type SharedFolderUser = {
