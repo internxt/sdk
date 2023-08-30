@@ -165,7 +165,12 @@ export type ShareFolderWithUserPayload = {
   roleId: string;
 };
 
-export type PrivateSharingRole = { id: string; role: string; createdAt: Date; updatedAt: Date };
+export type AcceptInviteToSharedFolderPayload = {
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+};
+
+export type PrivateSharingRole = { id: string; name: string; createdAt: Date; updatedAt: Date };
 
 export type PrivateSharingRolesResponse = { roles: PrivateSharingRole[] };
 
@@ -176,6 +181,11 @@ export type UpdateUserRolePayload = {
   folderUUID: string;
   roleId: string;
   newRoleId: string;
+};
+
+export type RemoveUserRolePayload = {
+  folderUUID: string;
+  roleId: string;
 };
 
 export type SharedFolderUser = {

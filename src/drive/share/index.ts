@@ -8,7 +8,6 @@ import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
-  GrantSharePrivilegesToUserResponse,
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
@@ -22,6 +21,8 @@ import {
   UpdateUserRoleResponse,
   UpdateShareLinkPayload,
   ListSharedItemsResponse,
+  AcceptInviteToSharedFolderPayload,
+  RemoveUserRolePayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -295,6 +296,19 @@ export class Share {
   }
 
   /**
+   * Update the role of a user on a folder.
+   *
+   * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
+   * @param {string} options.folderUUID - The unique identifier of the folder.
+   * @param {string} options.roleId - The identifier of the role to assign to the user.
+   * @param {string} options.roleToRemove - The role Id how we want to delete.
+   * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
+   */
+  public removeUserRole({ folderUUID, roleId }: RemoveUserRolePayload): Promise<UpdateUserRoleResponse> {
+    return this.client.delete(`sharings/${folderUUID}/roles/${roleId}`, this.headers());
+  }
+
+  /**
    * Get private folder data.
    *
    * @param {string} itemId - The itemId of the folder.
@@ -310,6 +324,10 @@ export class Share {
     itemType: 'folder' | 'file';
   }): Promise<any> {
     return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
+  }
+
+  public getSharedFolderInvitationsAsInvitedUser({ limit, offset }: { limit?: number; offset?: number }): Promise<any> {
+    return this.client.get(`sharings/invites?limit=${limit}&offset=${offset}`, this.headers());
   }
 
   /**
@@ -337,6 +355,10 @@ export class Share {
     );
   }
 
+  /**
+   * Request access to shared folder.
+   */
+
   public requestUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
     return this.client.post(
       'sharings/invites/send',
@@ -352,30 +374,36 @@ export class Share {
    * Share a private folder with a user.
    * @param {string} invitationId - The id of the invitation.
    * @param {ShareFolderWithUserPayload} options - The options for sharing the private folder with a user.
-   * @param {string} options.itemId - The id of the item to share.
-   * @param {string} options.itemType - The type of the item to share (folder | file).
-   * @param {string} options.sharedWith - The email address of the user to share the folder with.
-   * @param {string} options.encryptionKey - Owner\'s encryption key encrypted with the invited user\'s public key. This field should not be empty if the invitation type is "OWNER".
-   * @param {string} options.encryptionAlgorithm - Encryption algorithm used to encrypt the encryption key. This field should not be empty if the invitation type is "OWNER".
-   * @param {string} options.type - Owner's encryption key encrypted with the invited user's public key.
-   * @param {string} options.roleId - The id of the role to assign to the user.
+   * @param {string} options.encryptionKey - The encryption key (just in case the invitation is a request).
+   * @param {string} options.itemType - The encryption algorithm (just in case the invitation is a request).
+   
    * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
    */
 
   public acceptSharedFolderInvite({
     invitationId,
-    createInviteDto,
+    acceptInvite,
   }: {
     invitationId: string;
-    createInviteDto: ShareFolderWithUserPayload;
+    acceptInvite?: AcceptInviteToSharedFolderPayload;
   }): Promise<void> {
     return this.client.post(
       `sharings/invites/${invitationId}/accept`,
       {
-        createInviteDto,
+        acceptInvite,
       },
       this.headers(),
     );
+  }
+
+  public getUsersInvitedToSharedFolder({
+    itemType,
+    itemId,
+  }: {
+    itemType: 'file' | 'folder';
+    itemId: string;
+  }): Promise<any> {
+    return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
   }
 
   /**
@@ -412,12 +440,12 @@ export class Share {
    * @param {string} userUUID - The UUID of the user to be removed.
    * @returns {Promise<{ removed: boolean }>} A promise indicating whether the user was removed.
    */
-  public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ message: string }> {
-    return this.client.delete(
-      `/private-sharing/shared-with/folder-id/${folderUUID}/user-id/${userUUID}`,
-      this.headers(),
-    );
-  }
+  // public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ message: string }> {
+  //   return this.client.delete(
+  //     `/private-sharing/shared-with/folder-id/${folderUUID}/user-id/${userUUID}`,
+  //     this.headers(),
+  //   );
+  // }
 
   /**
    * Returns the needed headers for the module requests
