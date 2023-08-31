@@ -12,7 +12,6 @@ import {
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
   PrivateSharedFolder,
-  PrivateSharingRolesResponse,
   SharedFolderUser,
   ShareDomainsResponse,
   ShareLink,
@@ -21,10 +20,10 @@ import {
   UpdateUserRoleResponse,
   UpdateShareLinkPayload,
   ListSharedItemsResponse,
-  AcceptInviteToSharedFolderPayload,
+  AcceptInvitationToSharedFolderPayload,
   RemoveUserRolePayload,
-  SharingInvite,
   Role,
+  SharingInvite,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -298,16 +297,16 @@ export class Share {
   }
 
   /**
-   * Update the role of a user on a folder.
+   * Remove user from shared folder.
    *
    * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
-   * @param {string} options.folderUUID - The unique identifier of the folder.
-   * @param {string} options.roleId - The identifier of the role to assign to the user.
-   * @param {string} options.roleToRemove - The role Id how we want to delete.
+   * @param {string} options.itemType - The unique identifier of the folder.
+   * @param {string} options.itemId - The identifier of the role to assign to the user.
+   * @param {string} options.userId - The role Id how we want to delete.
    * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
    */
-  public removeUserRole({ folderUUID, roleId }: RemoveUserRolePayload): Promise<UpdateUserRoleResponse> {
-    return this.client.delete(`sharings/${folderUUID}/roles/${roleId}`, this.headers());
+  public removeUserRole({ itemType, itemId, userId }: RemoveUserRolePayload): Promise<UpdateUserRoleResponse> {
+    return this.client.delete(`sharings/${itemType}/${itemId}/users/${userId}`, this.headers());
   }
 
   /**
@@ -324,7 +323,7 @@ export class Share {
   }: {
     itemId: string;
     itemType: 'folder' | 'file';
-  }): Promise<SharingInvite[]> {
+  }): Promise<any[]> {
     return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
   }
 
@@ -400,7 +399,7 @@ export class Share {
     acceptInvite,
   }: {
     invitationId: string;
-    acceptInvite?: AcceptInviteToSharedFolderPayload;
+    acceptInvite?: AcceptInvitationToSharedFolderPayload;
   }): Promise<void> {
     return this.client.post(
       `sharings/invites/${invitationId}/accept`,
@@ -431,26 +430,13 @@ export class Share {
 
   /**
    * Stop sharing folder
-   *
-   * @param {string} sharingId - Id of the sharing to delete
+   * @param {string} itemType - Type of the sharing to delete
+   * @param {string} itemId - Id of the sharing to delete
    * @returns
    */
-  public async stopSharingFolder(sharingId: string): Promise<void> {
-    await this.client.delete(`sharings/${sharingId}`, this.headers());
+  public async stopSharingFolder(itemType: string, itemId: string): Promise<void> {
+    await this.client.delete(`sharings/${itemType}/${itemId}`, this.headers());
   }
-
-  /**
-   * Remove user from the shared users list of a folder.
-   * @param {string} folderUUID - The UUID of the shared folder.
-   * @param {string} userUUID - The UUID of the user to be removed.
-   * @returns {Promise<{ removed: boolean }>} A promise indicating whether the user was removed.
-   */
-  // public removeUserFromSharedFolder(folderUUID: string, userUUID: string): Promise<{ message: string }> {
-  //   return this.client.delete(
-  //     `/private-sharing/shared-with/folder-id/${folderUUID}/user-id/${userUUID}`,
-  //     this.headers(),
-  //   );
-  // }
 
   /**
    * Returns the needed headers for the module requests

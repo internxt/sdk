@@ -165,7 +165,7 @@ export type ShareFolderWithUserPayload = {
   roleId: string;
 };
 
-export type AcceptInviteToSharedFolderPayload = {
+export type AcceptInvitationToSharedFolderPayload = {
   encryptionKey: string;
   encryptionAlgorithm: string;
 };
@@ -184,8 +184,9 @@ export type UpdateUserRolePayload = {
 };
 
 export type RemoveUserRolePayload = {
-  folderUUID: string;
-  roleId: string;
+  itemType: string;
+  itemId: string;
+  userId: string;
 };
 
 export type SharedFolderUser = {
@@ -209,6 +210,35 @@ export type Role = {
 };
 
 export type getSharedFolderUsersResponse = { users: SharedFolderUser[] };
+
+export type SharingInvitation = {
+  id: number;
+  userId: string;
+  name: string;
+  lastname: string;
+  email: string;
+  username: string;
+  bridgeUser: string;
+  password: string;
+  mnemonic: string;
+  rootFolderId: number;
+  hKey: Buffer | string;
+  secret_2FA: string;
+  errorLoginCount: number;
+  isEmailActivitySended: number;
+  referralCode: string;
+  referrer: string;
+  syncDate: Date;
+  uuid: string;
+  lastResend: Date;
+  credit: number;
+  welcomePack: boolean;
+  registerCompleted: boolean;
+  backupsBucket: string;
+  sharedWorkspace: boolean;
+  tempKey: string;
+  avatar: string;
+};
 
 export type SharingInvite = {
   id: string;
