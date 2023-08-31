@@ -201,7 +201,27 @@ export type SharedFolderUser = {
   uuid: string;
 };
 
+export type Role = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type getSharedFolderUsersResponse = { users: SharedFolderUser[] };
+
+export type SharingInvite = {
+  id: string;
+  itemId: string;
+  itemType: 'file' | 'folder';
+  sharedWith: string;
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+  type: 'SELF' | 'OWNER';
+  roleId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type PrivateSharedFolder = {
   id: string;

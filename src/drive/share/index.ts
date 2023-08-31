@@ -23,6 +23,8 @@ import {
   ListSharedItemsResponse,
   AcceptInviteToSharedFolderPayload,
   RemoveUserRolePayload,
+  SharingInvite,
+  Role,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -313,7 +315,7 @@ export class Share {
    *
    * @param {string} itemId - The itemId of the folder.
    * @param {string} itemType - The itemType of the folder (file | folder).
-   * @returns {Promise<{ data: PrivateSharedFolder }>} A promise containing the private folder data.
+   * @returns {Promise<{ data: SharingInvite[] }>} A promise containing the private folder data.
    */
 
   public getSharedFolderInvitations({
@@ -322,11 +324,24 @@ export class Share {
   }: {
     itemId: string;
     itemType: 'folder' | 'file';
-  }): Promise<any> {
+  }): Promise<SharingInvite[]> {
     return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
   }
 
-  public getSharedFolderInvitationsAsInvitedUser({ limit, offset }: { limit?: number; offset?: number }): Promise<any> {
+  /**
+   * Get all invitations for a user.
+   * @param limit - The number of items per page for pagination.
+   * @param offset - The page number for pagination.
+   * @returns {Promise<invites: any>} A promise containing the list of invitations.
+   */
+
+  public getSharedFolderInvitationsAsInvitedUser({
+    limit,
+    offset,
+  }: {
+    limit?: number;
+    offset?: number;
+  }): Promise<{ invites: any }> {
     return this.client.get(`sharings/invites?limit=${limit}&offset=${offset}`, this.headers());
   }
 
@@ -341,10 +356,10 @@ export class Share {
    * @param {string} options.encryptionAlgorithm - Encryption algorithm used to encrypt the encryption key. This field should not be empty if the invitation type is "OWNER".
    * @param {string} options.type - Owner's encryption key encrypted with the invited user's public key.
    * @param {string} options.roleId - The id of the role to assign to the user.
-   * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
+   * @returns {Promise<SharingInvite>} A promise that resolves when the folder is shared with the user.
    */
 
-  public inviteUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<void> {
+  public inviteUserToSharedFolder(createInviteDto: ShareFolderWithUserPayload): Promise<SharingInvite> {
     return this.client.post(
       'sharings/invites/send',
       {
@@ -396,23 +411,13 @@ export class Share {
     );
   }
 
-  public getUsersInvitedToSharedFolder({
-    itemType,
-    itemId,
-  }: {
-    itemType: 'file' | 'folder';
-    itemId: string;
-  }): Promise<any> {
-    return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
-  }
-
   /**
    * Fetches roles for sharing items.
    *
    * @returns {Promise<PrivateSharingRolesResponse>} A promise containing the list of sharing roles.
    */
 
-  public getSharingRoles(): Promise<PrivateSharingRolesResponse> {
+  public getSharingRoles(): Promise<Role[]> {
     return this.client.get('/sharings/roles', this.headers());
   }
 
