@@ -156,14 +156,21 @@ export type ListAllSharedFoldersResponse = {
   token: string;
 };
 
-export type SharePrivateFolderWithUserPayload = {
-  emailToShare: string;
-  privateFolderId: FolderChild['uuid'];
-  roleId: PrivateSharingRole['id'];
-  encryptionKey: string;
+export type ShareFolderWithUserPayload = {
+  itemId: string;
+  itemType: 'folder' | 'file';
+  sharedWith: string;
+  encryptionKey?: string;
+  encryptionAlgorithm?: string;
+  roleId: string;
 };
 
-export type PrivateSharingRole = { id: string; role: string; createdAt: Date; updatedAt: Date };
+export type AcceptInvitationToSharedFolderPayload = {
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+};
+
+export type PrivateSharingRole = { id: string; name: string; createdAt: Date; updatedAt: Date };
 
 export type PrivateSharingRolesResponse = { roles: PrivateSharingRole[] };
 
@@ -173,7 +180,13 @@ export type UpdateUserRoleResponse = { message: string };
 export type UpdateUserRolePayload = {
   folderUUID: string;
   roleId: string;
-  userUUID: string;
+  newRoleId: string;
+};
+
+export type RemoveUserRolePayload = {
+  itemType: string;
+  itemId: string;
+  userId: string;
 };
 
 export type SharedFolderUser = {
@@ -189,7 +202,56 @@ export type SharedFolderUser = {
   uuid: string;
 };
 
+export type Role = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type getSharedFolderUsersResponse = { users: SharedFolderUser[] };
+
+export type SharingInvitation = {
+  id: number;
+  userId: string;
+  name: string;
+  lastname: string;
+  email: string;
+  username: string;
+  bridgeUser: string;
+  password: string;
+  mnemonic: string;
+  rootFolderId: number;
+  hKey: Buffer | string;
+  secret_2FA: string;
+  errorLoginCount: number;
+  isEmailActivitySended: number;
+  referralCode: string;
+  referrer: string;
+  syncDate: Date;
+  uuid: string;
+  lastResend: Date;
+  credit: number;
+  welcomePack: boolean;
+  registerCompleted: boolean;
+  backupsBucket: string;
+  sharedWorkspace: boolean;
+  tempKey: string;
+  avatar: string;
+};
+
+export type SharingInvite = {
+  id: string;
+  itemId: string;
+  itemType: 'file' | 'folder';
+  sharedWith: string;
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+  type: 'SELF' | 'OWNER';
+  roleId: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type PrivateSharedFolder = {
   id: string;
