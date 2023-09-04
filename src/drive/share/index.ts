@@ -11,7 +11,6 @@ import {
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
-  PrivateSharedFolder,
   SharedFolderUser,
   ShareDomainsResponse,
   ShareLink,
@@ -24,6 +23,7 @@ import {
   RemoveUserRolePayload,
   Role,
   SharingInvite,
+  SharedFoldersInvitationsAsInvitedUserResponse,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -268,16 +268,6 @@ export class Share {
   }
 
   /**
-   * Get private folder data.
-   *
-   * @param {string} folderUUID - The UUID of the folder.
-   * @returns {Promise<{ data: PrivateSharedFolder }>} A promise containing the private folder data.
-   */
-  public getPrivateSharedFolder(folderUUID: string): Promise<{ data: PrivateSharedFolder }> {
-    return this.client.get(`private-sharing/by-folder-id/${folderUUID}`, this.headers());
-  }
-
-  /**
    * Update the role of a user on a folder.
    *
    * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
@@ -287,7 +277,7 @@ export class Share {
    */
   public updateUserRole({ sharedWith, newRoleId }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
     return this.client.put(
-      `sharings/${sharedWith}/roles`,
+      `sharings/${sharedWith}/role`,
       {
         roleId: newRoleId,
       },
@@ -339,7 +329,7 @@ export class Share {
   }: {
     limit?: number;
     offset?: number;
-  }): Promise<{ invites: any }> {
+  }): Promise<{ invites: SharedFoldersInvitationsAsInvitedUserResponse[] }> {
     return this.client.get(`sharings/invites?limit=${limit}&offset=${offset}`, this.headers());
   }
 
