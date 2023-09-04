@@ -178,8 +178,7 @@ export type GrantSharePrivilegesToUserResponse = { message: string };
 export type UpdateUserRoleResponse = { message: string };
 
 export type UpdateUserRolePayload = {
-  folderUUID: string;
-  roleId: string;
+  sharedWith: string;
   newRoleId: string;
 };
 
