@@ -56,6 +56,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     size: 0,
     type: '',
     updatedAt: '',
+    status: '',
     thumbnails: [],
     currentThumbnail: null,
   };
