@@ -178,7 +178,7 @@ export type GrantSharePrivilegesToUserResponse = { message: string };
 export type UpdateUserRoleResponse = { message: string };
 
 export type UpdateUserRolePayload = {
-  sharedWith: string;
+  sharingId: string;
   newRoleId: string;
 };
 

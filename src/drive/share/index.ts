@@ -271,13 +271,13 @@ export class Share {
    * Update the role of a user on a folder.
    *
    * @param {UpdateUserRolePayload} options - The options for updating the user's role on the folder.
-   * @param {string} options.sharedWith - The unique identifier of the user to whom we will update the role.
+   * @param {string} options.sharingId - The unique identifier of the user to whom we will update the role.
    * @param {string} options.newRoleId - The new role Id.
    * @returns {Promise<UpdateRoleFolderResponse>} A promise that resolves when the user's role is updated.
    */
-  public updateUserRole({ sharedWith, newRoleId }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
+  public updateUserRole({ sharingId, newRoleId }: UpdateUserRolePayload): Promise<UpdateUserRoleResponse> {
     return this.client.put(
-      `sharings/${sharedWith}/role`,
+      `sharings/${sharingId}/role`,
       {
         roleId: newRoleId,
       },
