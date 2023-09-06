@@ -33,6 +33,7 @@ export interface DriveFileData {
   size: number;
   type: string;
   updatedAt: string;
+  status: string;
   thumbnails: Array<Thumbnail>;
   currentThumbnail: Thumbnail | null;
 }
