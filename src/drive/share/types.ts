@@ -178,8 +178,7 @@ export type GrantSharePrivilegesToUserResponse = { message: string };
 export type UpdateUserRoleResponse = { message: string };
 
 export type UpdateUserRolePayload = {
-  folderUUID: string;
-  roleId: string;
+  sharingId: string;
   newRoleId: string;
 };
 
@@ -210,6 +209,55 @@ export type Role = {
 };
 
 export type getSharedFolderUsersResponse = { users: SharedFolderUser[] };
+
+export type SharedFoldersInvitationsAsInvitedUserResponse = {
+  createdAt: Date;
+  encryptionAlgorithm: string;
+  encryptionKey: string;
+  id: string;
+  invited: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
+  item: ItemInvitation;
+  itemId: string;
+  itemType: string;
+  roleId: string;
+  sharedWith: string;
+  type: string;
+  updatedAt: Date;
+};
+
+type ItemInvitation = {
+  bucket: string | null;
+  createdAt: Date;
+  deleted: boolean;
+  deletedAt: Date | null;
+  encryptVersion: string;
+  id: number;
+  name: string;
+  parent: null;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: Date | null;
+  size: number;
+  type: string;
+  updatedAt: Date;
+  user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string } | null;
+  userId: number;
+  uuid: string;
+};
+
+export type FolderUserInfo = {
+  avatar: string | null;
+  email: string;
+  grantedFrom: string;
+  grantedFromPlainName: string;
+  id: number;
+  lastname: string;
+  name: string;
+  roleId: string;
+  roleName: string;
+  uuid: string;
+};
 
 export type SharingInvitation = {
   id: number;
@@ -251,39 +299,4 @@ export type SharingInvite = {
   roleId: string;
   createdAt: Date;
   updatedAt: Date;
-};
-
-export type PrivateSharedFolder = {
-  id: string;
-  folderId: string;
-  ownerId: string;
-  sharedWith: string;
-  encryptionKey: string;
-  createdAt: string;
-  updatedAt: string;
-  folder: {
-    id: number;
-    uuid: string;
-    parentId: number;
-    parentUuid: string | null;
-    name: string;
-    bucket: string | null;
-    userId: number;
-    encryptVersion: string;
-    plainName: string | null;
-    deleted: boolean;
-    removed: boolean;
-    deletedAt: string | null;
-    createdAt: string;
-    updatedAt: string;
-    removedAt: string | null;
-  };
-  owner: {
-    uuid: string;
-    email: string;
-    name: string;
-    lastname: string;
-    avatar: string | null;
-  };
-  fileSize: number;
 };
