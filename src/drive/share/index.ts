@@ -267,6 +267,19 @@ export class Share {
     );
   }
 
+    /**
+   * Get the role of a user on a folder.
+   *
+   * @param {string} options.sharingId - The unique identifier of the sharing.
+   * @returns {Promise<Role>} A promise containing the role of the current user in the sharing.
+   */
+  public getUserRole(sharingId : string): Promise<Role> {
+    return this.client.get(
+      `sharings/${sharingId}/role`,
+      this.headers(),
+    );
+  }
+
   /**
    * Update the role of a user on a folder.
    *
