@@ -98,8 +98,8 @@ export class Payments {
     return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
   }
 
-  public updateSubscriptionPrice(priceId: string): Promise<UserSubscription> {
-    return this.client.put('/subscriptions', { price_id: priceId }, this.headers());
+  public updateSubscriptionPrice(priceId: string, couponCode?: string): Promise<UserSubscription> {
+    return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
   }
 
   public cancelSubscription(): Promise<void> {
