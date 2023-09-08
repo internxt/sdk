@@ -18,6 +18,7 @@ import {
   Thumbnail,
   FetchPaginatedFolderContentResponse,
   FileMeta,
+  EmptyFileEntry,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -215,6 +216,7 @@ export class Storage {
       '/storage/file',
       {
         file: {
+          uuid: fileEntry.uuid,
           fileId: fileEntry.id,
           type: fileEntry.type,
           bucket: fileEntry.bucket,
@@ -226,6 +228,28 @@ export class Storage {
         },
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+  /*
+   * Creates a new empty file entry
+   * @param fileEntry
+   */
+  public createEmptyFileEntry(fileEntry: EmptyFileEntry): Promise<DriveFileData> {
+    return this.client.post(
+      '/storage/file',
+      {
+        file: {
+          uuid: fileEntry.uuid,
+          type: fileEntry.type,
+          bucket: fileEntry.bucket,
+          size: 0,
+          folder_id: fileEntry.folder_id,
+          name: fileEntry.name,
+          plain_name: fileEntry.plain_name,
+          encrypt_version: fileEntry.encrypt_version,
+        },
+      },
+      this.headers(),
     );
   }
 
