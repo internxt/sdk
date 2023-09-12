@@ -267,17 +267,14 @@ export class Share {
     );
   }
 
-    /**
+  /**
    * Get the role of a user on a folder.
    *
    * @param {string} options.sharingId - The unique identifier of the sharing.
    * @returns {Promise<Role>} A promise containing the role of the current user in the sharing.
    */
-  public getUserRole(sharingId : string): Promise<Role> {
-    return this.client.get(
-      `sharings/${sharingId}/role`,
-      this.headers(),
-    );
+  public getUserRole(sharingId: string): Promise<Role> {
+    return this.client.get(`sharings/${sharingId}/role`, this.headers());
   }
 
   /**
@@ -357,6 +354,10 @@ export class Share {
    * @param {string} options.encryptionAlgorithm - Encryption algorithm used to encrypt the encryption key. This field should not be empty if the invitation type is "OWNER".
    * @param {string} options.type - Owner's encryption key encrypted with the invited user's public key.
    * @param {string} options.roleId - The id of the role to assign to the user.
+   * @param {string} options.notifyUser - If it has to notify the users
+   * @param {string} options.notificationMessage - Message of the notificacion
+   *
+   *
    * @returns {Promise<SharingInvite>} A promise that resolves when the folder is shared with the user.
    */
 
