@@ -159,6 +159,8 @@ export type ListAllSharedFoldersResponse = {
 export type ShareFolderWithUserPayload = {
   itemId: string;
   itemType: 'folder' | 'file';
+  notifyUser: boolean;
+  notificationMessage?: string;
   sharedWith: string;
   encryptionKey?: string;
   encryptionAlgorithm?: string;
