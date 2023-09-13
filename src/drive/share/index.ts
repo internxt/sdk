@@ -400,21 +400,26 @@ export class Share {
   public acceptSharedFolderInvite({
     invitationId,
     acceptInvite,
+    token,
   }: {
     invitationId: string;
     acceptInvite?: AcceptInvitationToSharedFolderPayload;
+    token?: string;
   }): Promise<void> {
-    return this.client.post(
-      `sharings/invites/${invitationId}/accept`,
-      {
-        acceptInvite,
-      },
-      this.headers(),
-    );
+    const headers = this.getRequestHeaders(token);
+
+   return this.client.post(
+     `sharings/invites/${invitationId}/accept`,
+     {
+       acceptInvite,
+     },
+     headers,
+   );
   }
 
-  public declineSharedFolderInvite(invitationId: string): Promise<void> {
-    return this.client.delete(`sharings/invites/${invitationId}`, this.headers());
+  public declineSharedFolderInvite(invitationId: string, token?: string): Promise<void> {
+    const headers = this.getRequestHeaders(token);
+    return this.client.delete(`sharings/invites/${invitationId}`, headers);
   }
 
   /**
@@ -475,5 +480,23 @@ export class Share {
    */
   private basicHeadersWithPassword(password: string) {
     return basicHeadersWithPassword(this.appDetails.clientName, this.appDetails.clientVersion, password);
+  }
+
+  /**
+   * Get request headers with optional authorization token.
+   *
+   * @param {string} [token] - Optional authorization token.
+   * @returns {Object} - Request headers object.
+   */
+  private getRequestHeaders(token?: string) {
+    const headers = {
+      ...this.headers(),
+    };
+
+    if (token) {
+      headers.Authorization = 'Bearer ' + token;
+    }
+
+    return headers;
   }
 }
