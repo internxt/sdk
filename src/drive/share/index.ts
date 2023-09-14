@@ -219,6 +219,24 @@ export class Share {
   }
 
   /**
+   * Fetches all shared files.
+   *
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @returns {Promise<ListAllSharedFoldersResponse>} A promise containing the list of shared folders.
+   */
+  public getAllSharedFiles(
+    page = 0,
+    perPage = 50,
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListAllSharedFoldersResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(`sharings/files?page=${page}&perPage=${perPage}${orderByQueryParam}`, this.headers());
+  }
+
+  /**
    * Get all users with access to a shared folder.
    *
    * @param {string} folderUUID - The UUID of the folder.
@@ -408,13 +426,13 @@ export class Share {
   }): Promise<void> {
     const headers = this.getRequestHeaders(token);
 
-   return this.client.post(
-     `sharings/invites/${invitationId}/accept`,
-     {
-       acceptInvite,
-     },
-     headers,
-   );
+    return this.client.post(
+      `sharings/invites/${invitationId}/accept`,
+      {
+        acceptInvite,
+      },
+      headers,
+    );
   }
 
   public declineSharedFolderInvite(invitationId: string, token?: string): Promise<void> {
@@ -433,11 +451,13 @@ export class Share {
   }
 
   public getAllAccessUsers({
+    itemType,
     folderId,
   }: {
+    itemType: string;
     folderId: string;
   }): Promise<Record<'users', any[]> | Record<'error', string>> {
-    return this.client.get(`sharings/shared-with/${folderId}`, this.headers());
+    return this.client.get(`sharings/shared-with/${itemType}/${folderId}`, this.headers());
   }
 
   /**
