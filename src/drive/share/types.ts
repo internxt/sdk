@@ -167,7 +167,7 @@ export type ShareFolderWithUserPayload = {
   roleId: string;
 };
 
-export type CreateSharingDto = {
+export type CreateSharingPayload = {
   itemId: string;
   itemType: 'folder' | 'file';
   encryptionKey: string;
@@ -321,4 +321,6 @@ export type SharingMeta = {
   createdAt: Date;
   updatedAt: Date;
   type: 'public' | 'private';
+  item: SharedFiles | SharedFolders;
+  itemToken: string;
 };

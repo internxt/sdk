@@ -24,7 +24,7 @@ import {
   Role,
   SharingInvite,
   SharedFoldersInvitationsAsInvitedUserResponse,
-  CreateSharingDto,
+  CreateSharingPayload,
   SharingMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
@@ -395,11 +395,11 @@ export class Share {
   /**
    * Create a sharing.
    */
-  public createSharing(createSharingDto: CreateSharingDto): Promise<void> {
+  public createSharing(createSharingPayload: CreateSharingPayload): Promise<SharingMeta> {
     return this.client.post(
       'sharings',
       {
-        ...createSharingDto,
+        ...createSharingPayload,
       },
       this.headers(),
     );
@@ -408,8 +408,12 @@ export class Share {
   /**
    * Get sharing meta with code
    */
-  public getSharingMeta(sharingId: string, code: string): Promise<SharingMeta> {
-    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, this.headers());
+  public getSharingMeta(sharingId: string, code: string, password?: string): Promise<SharingMeta> {
+    const extraHeaders = password ? { 'x-share-password': password } : {};
+    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, {
+      ...this.headers(),
+      ...extraHeaders,
+    });
   }
   /**
    * Request access to shared folder.
