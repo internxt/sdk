@@ -24,6 +24,8 @@ import {
   Role,
   SharingInvite,
   SharedFoldersInvitationsAsInvitedUserResponse,
+  CreateSharingDto,
+  SharingMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -390,6 +392,25 @@ export class Share {
     );
   }
 
+  /**
+   * Create a sharing.
+   */
+  public createSharing(createSharingDto: CreateSharingDto): Promise<void> {
+    return this.client.post(
+      'sharings',
+      {
+        ...createSharingDto,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Get sharing meta with code
+   */
+  public getSharingMeta(sharingId: string, code: string): Promise<SharingMeta> {
+    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, this.headers());
+  }
   /**
    * Request access to shared folder.
    */
