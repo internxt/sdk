@@ -286,6 +286,32 @@ export class Share {
       this.headers(),
     );
   }
+  /**
+   * Get public shared folder content
+   * @param {string} sharedFolderId - The UUID of the shared folder.
+   * @param {string} type - The item type for the query folders/files
+   * @param {string} token - Key that enables invited users to navigate the folders
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   */
+  public getPublicSharedFolderContent(
+    sharedFolderId: string,
+    type: 'folders' | 'files',
+    token: string | null,
+    page = 0,
+    perPage = 50,
+    code = '',
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListSharedItemsResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      // eslint-disable-next-line max-len
+      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&code=${code}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
 
   /**
    * Get the role of a user on a folder.
