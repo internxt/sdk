@@ -281,7 +281,6 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      // eslint-disable-next-line max-len
       `sharings/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
