@@ -24,6 +24,8 @@ import {
   Role,
   SharingInvite,
   SharedFoldersInvitationsAsInvitedUserResponse,
+  CreateSharingPayload,
+  SharingMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -279,8 +281,33 @@ export class Share {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
 
     return this.client.get(
-      // eslint-disable-next-line max-len
       `sharings/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      this.headers(),
+    );
+  }
+  /**
+   * Get public shared folder content
+   * @param {string} sharedFolderId - The UUID of the shared folder.
+   * @param {string} type - The item type for the query folders/files
+   * @param {string} token - Key that enables invited users to navigate the folders
+   * @param {number} page - The page number for pagination.
+   * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   */
+  public getPublicSharedFolderContent(
+    sharedFolderId: string,
+    type: 'folders' | 'files',
+    token: string | null,
+    page = 0,
+    perPage = 50,
+    code = '',
+    orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+  ): Promise<ListSharedItemsResponse> {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    return this.client.get(
+      // eslint-disable-next-line max-len
+      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&code=${code}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
       this.headers(),
     );
   }
@@ -390,6 +417,29 @@ export class Share {
     );
   }
 
+  /**
+   * Create a sharing.
+   */
+  public createSharing(createSharingPayload: CreateSharingPayload): Promise<SharingMeta> {
+    return this.client.post(
+      'sharings',
+      {
+        ...createSharingPayload,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Get sharing meta with code
+   */
+  public getSharingMeta(sharingId: string, code: string, password?: string): Promise<SharingMeta> {
+    const extraHeaders = password ? { 'x-share-password': password } : {};
+    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, {
+      ...this.headers(),
+      ...extraHeaders,
+    });
+  }
   /**
    * Request access to shared folder.
    */

@@ -167,6 +167,13 @@ export type ShareFolderWithUserPayload = {
   roleId: string;
 };
 
+export type CreateSharingPayload = {
+  itemId: string;
+  itemType: 'folder' | 'file';
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+};
+
 export type AcceptInvitationToSharedFolderPayload = {
   encryptionKey: string;
   encryptionAlgorithm: string;
@@ -301,4 +308,19 @@ export type SharingInvite = {
   roleId: string;
   createdAt: Date;
   updatedAt: Date;
+};
+
+export type SharingMeta = {
+  id: string;
+  itemId: string;
+  itemType: 'file' | 'folder';
+  ownerId: string;
+  sharedWith: string;
+  encryptionKey: string;
+  encryptionAlgorithm: string;
+  createdAt: Date;
+  updatedAt: Date;
+  type: 'public' | 'private';
+  item: SharedFiles | SharedFolders;
+  itemToken: string;
 };
