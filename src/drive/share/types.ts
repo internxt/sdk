@@ -172,6 +172,7 @@ export type CreateSharingPayload = {
   itemType: 'folder' | 'file';
   encryptionKey: string;
   encryptionAlgorithm: string;
+  encryptedCode: string;
 };
 
 export type AcceptInvitationToSharedFolderPayload = {
@@ -317,6 +318,7 @@ export type SharingMeta = {
   ownerId: string;
   sharedWith: string;
   encryptionKey: string;
+  encryptedCode: string;
   encryptionAlgorithm: string;
   createdAt: Date;
   updatedAt: Date;
@@ -324,3 +326,5 @@ export type SharingMeta = {
   item: SharedFiles | SharedFolders;
   itemToken: string;
 };
+
+export type Sharing = { type: string; id: string };
