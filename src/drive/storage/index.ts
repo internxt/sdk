@@ -223,6 +223,7 @@ export class Storage {
           name: fileEntry.name,
           plain_name: fileEntry.plain_name,
           encrypt_version: fileEntry.encrypt_version,
+          modificationTime: fileEntry.modificationTime,
         },
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),

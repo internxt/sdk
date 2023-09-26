@@ -171,6 +171,7 @@ export interface FileEntry {
   bucket: string;
   folder_id: number;
   encrypt_version: EncryptionVersion;
+  modificationTime?: number;
 }
 
 export interface ThumbnailEntry {
