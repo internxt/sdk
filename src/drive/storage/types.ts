@@ -262,3 +262,16 @@ export interface FetchLimitResponse {
 export interface AddItemsToTrashPayload {
   items: Array<{ id: string; type: string }>;
 }
+
+export interface SearchResultData {
+  data: [
+    {
+      id: string;
+      itemId: string;
+      itemType: string;
+      name: string;
+      rank: number;
+      similarity: number;
+    },
+  ];
+}
