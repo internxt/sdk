@@ -18,6 +18,7 @@ import {
   Thumbnail,
   FetchPaginatedFolderContentResponse,
   FileMeta,
+  SearchResultData,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -337,6 +338,21 @@ export class Storage {
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
     return this.client.get('/limit', this.headers());
+  }
+
+  /**
+   * Get global search items.
+   *
+   * @param {string} search - The name of the item.
+   * @returns {[Promise<SearchResultData>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getGlobalSearchItems(search: string): [Promise<SearchResultData>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<SearchResultData>(
+      `fuzzy/${search}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
   }
 
   /**
