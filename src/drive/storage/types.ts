@@ -263,15 +263,23 @@ export interface AddItemsToTrashPayload {
   items: Array<{ id: string; type: string }>;
 }
 
+export interface SearchResult {
+  id: string;
+  itemId: string;
+  itemType: string;
+  name: string;
+  rank: number;
+  similarity: number;
+  userId: string;
+  item: {
+    id: number;
+    bucket?: string;
+    fileId?: string;
+    plainName?: string;
+    size?: string;
+    type?: string;
+  };
+}
 export interface SearchResultData {
-  data: [
-    {
-      id: string;
-      itemId: string;
-      itemType: string;
-      name: string;
-      rank: number;
-      similarity: number;
-    },
-  ];
+  data: [SearchResult];
 }
