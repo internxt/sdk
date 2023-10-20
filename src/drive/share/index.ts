@@ -485,6 +485,48 @@ export class Share {
     );
   }
 
+  /**
+   * Change Sharing Mode.
+   * @param {string} options.itemType - folder | file
+   * @param {string} options.itemId - id of folder or file
+   * @param {string} options.sharingType - New Sharing type.
+   
+   * @returns {Promise<void>} A promise that resolves when sharing mode has been updated.
+   */
+
+  public updateSharingType({
+    itemId,
+    itemType,
+    sharingType,
+  }: {
+    itemId: string;
+    itemType: string;
+    sharingType: string;
+  }): Promise<void> {
+    const headers = this.headers();
+
+    return this.client.put(
+      `sharings/${itemType}/${itemId}/type`,
+      {
+        sharingType,
+      },
+      headers,
+    );
+  }
+
+  /**
+   * Get Sharing type
+   * @param {string} options.itemType - folder | file
+   * @param {string} options.itemId - id of folder or file
+   * @returns {Promise<void>} A promise that returns the sharing data.
+   */
+
+  public getSharingType({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingMeta> {
+    const headers = this.headers();
+
+    return this.client.get(`sharings/${itemType}/${itemId}/type`, headers);
+  }
+
   public declineSharedFolderInvite(invitationId: string, token?: string): Promise<void> {
     const headers = this.getRequestHeaders(token);
     return this.client.delete(`sharings/invites/${invitationId}`, headers);
