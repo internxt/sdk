@@ -518,7 +518,7 @@ export class Share {
    * Get Sharing type
    * @param {string} options.itemType - folder | file
    * @param {string} options.itemId - id of folder or file
-   * @returns {Promise<void>} A promise that returns the sharing data.
+   * @returns {Promise<SharingMeta>} A promise that returns the sharing data.
    */
 
   public getSharingType({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingMeta> {
