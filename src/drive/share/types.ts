@@ -165,6 +165,7 @@ export type ShareFolderWithUserPayload = {
   encryptionKey?: string;
   encryptionAlgorithm?: string;
   roleId: string;
+  persistPreviousSharing?: boolean;
 };
 
 export type CreateSharingPayload = {
@@ -173,6 +174,7 @@ export type CreateSharingPayload = {
   encryptionKey: string;
   encryptionAlgorithm: string;
   encryptedCode: string;
+  persistPreviousSharing?: boolean;
 };
 
 export type AcceptInvitationToSharedFolderPayload = {
