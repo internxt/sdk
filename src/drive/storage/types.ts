@@ -283,3 +283,25 @@ export interface SearchResult {
 export interface SearchResultData {
   data: [SearchResult];
 }
+
+
+export interface FolderAncestor {
+  bucket: null | string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: null | string;
+  encryptVersion: null | string;
+  id: number;
+  name: string;
+  parent: null | string;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: null | string;
+  size: number;
+  type: string;
+  updatedAt: string;
+  user: null | string;
+  userId: number;
+  uuid: string;
+}

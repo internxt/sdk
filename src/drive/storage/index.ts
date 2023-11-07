@@ -19,6 +19,7 @@ import {
   FetchPaginatedFolderContentResponse,
   FileMeta,
   SearchResultData,
+  FolderAncestor,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -361,5 +362,15 @@ export class Storage {
    */
   private headers() {
     return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  }
+
+  /**
+   * Gets the ancestors of a given folder UUID
+   *
+   * @param {string} folderUUID - UUID of the folder.
+   * @returns {Promise<FolderAncestor[]>}
+   */
+  public getFolderAncestors(uuid: string): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors`, this.headers());
   }
 }
