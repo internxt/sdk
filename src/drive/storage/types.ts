@@ -90,27 +90,46 @@ export interface FetchFolderContentResponse {
 
 export interface FileMeta {
   bucket: string;
-  createdAt: Date;
+  createdAt: string;
+  created_at: string;
   deleted: boolean;
-  deletedAt: Date | null;
-  encryptVersion: string;
+  deletedAt: null;
+  encrypt_version: string;
   fileId: string;
-  folder: string | null;
   folderId: number;
-  folderUuid: string;
+  folder_id: number;
   id: number;
-  modificationTime: string;
   name: string;
-  plainName: string;
-  removed: boolean;
-  removedAt: Date | null;
-  size: string;
-  status: string;
+  plain_name: string | null;
+  plainName?: string | null;
+  size: number;
   type: string;
-  updatedAt: Date;
-  user: string | null;
-  userId: number;
-  uuid: string;
+  updatedAt: string;
+  status: string;
+  thumbnails: Array<Thumbnail>;
+  currentThumbnail: Thumbnail | null;
+  shares?: Array<ShareLink>;
+  uuid?: string;
+}
+
+export interface ShareLink {
+  id: string;
+  token: string;
+  mnemonic: string;
+  user: any;
+  item: any;
+  encryptionKey: string;
+  bucket: string;
+  itemToken: string;
+  isFolder: boolean;
+  views: number;
+  timesValid: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fileSize: number;
+  hashed_password: string | null;
+  code: string;
 }
 
 export interface FetchPaginatedFolderContentResponse {
@@ -284,8 +303,27 @@ export interface SearchResultData {
   data: [SearchResult];
 }
 
-
 export interface FolderAncestor {
+  bucket: null | string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: null | string;
+  encryptVersion: null | string;
+  id: number;
+  name: string;
+  parent: null | string;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: null | string;
+  size: number;
+  type: string;
+  updatedAt: string;
+  user: null | string;
+  userId: number;
+  uuid: string;
+}
+export interface FolderMeta {
   bucket: null | string;
   createdAt: string;
   deleted: boolean;

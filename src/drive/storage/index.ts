@@ -20,6 +20,7 @@ import {
   FileMeta,
   SearchResultData,
   FolderAncestor,
+  FolderMeta,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -372,5 +373,15 @@ export class Storage {
    */
   public getFolderAncestors(uuid: string): Promise<FolderAncestor[]> {
     return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors`, this.headers());
+  }
+
+  /**
+   * Gets the meta of a given folder UUID
+   *
+   * @param {string} folderUUID - UUID of the folder.
+   * @returns {Promise<FolderMeta>}
+   */
+  public getFolderMeta(uuid: string): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
   }
 }
