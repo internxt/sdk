@@ -7,7 +7,7 @@ import {
   UpdateProfilePayload,
   UserPublicKeyResponse,
 } from './types';
-import { UserSettings } from '../../shared/types/userSettings';
+import { UUID, UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
 
 export * as UserTypes from './types';
@@ -86,6 +86,23 @@ export class Users {
         newSalt: payload.newEncryptedSalt,
         mnemonic: payload.encryptedMnemonic,
         privateKey: payload.encryptedPrivateKey,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Pre registers an email
+   * @param email
+   */
+  public preRegister(email: string): Promise<{
+    publicKey: string;
+    user: { uuid: UUID; email: string };
+  }> {
+    return this.client.post(
+      '/users/pre-create',
+      {
+        email,
       },
       this.headers(),
     );
