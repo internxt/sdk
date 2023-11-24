@@ -22,6 +22,10 @@ export interface RegisterDetails {
   referral?: string,
 }
 
+export interface RegisterPreCreatedUser extends RegisterDetails {
+  invitationId: string,
+}
+
 export interface Keys {
   privateKeyEncrypted: string,
   publicKey: string,
@@ -33,7 +37,7 @@ export interface CryptoProvider {
   generateKeys: (password: Password) => Promise<Keys>,
 }
 
-export class UserAccessError extends Error {}
+export class UserAccessError extends Error { }
 
 export interface SecurityDetails {
   encryptedSalt: string
