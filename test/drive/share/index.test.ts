@@ -154,6 +154,28 @@ describe('# share service tests', () => {
     });
   });
 
+  describe('Validate Invitation', () => {
+    it('Valid invitation', async () => {
+      // Arrange
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        uuid: mockUuid,
+      });
+      const { client, headers } = clientAndHeaders();
+      const shareId = mockUuid;
+
+      // Act
+      const body = await client.validateInviteExpiration(shareId);
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject([`sharings/invites/${mockUuid}/validate`, headers]);
+      expect(body).toEqual({
+        uuid: mockUuid,
+      });
+    });
+  });
+
   describe('get shares list', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
@@ -231,9 +253,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${
-          payload.parentId
-        }&page=${payload.page}&perPage=${payload.perPage}`,
+        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}`,
         headers,
       ]);
       expect(body).toEqual({
@@ -264,9 +284,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${
-          payload.parentId
-        }&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
+        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
         headers,
       ]);
       expect(body).toEqual({

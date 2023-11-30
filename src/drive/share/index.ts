@@ -459,7 +459,7 @@ export class Share {
    * Check if the expirationDate of invite is valid.
    * @param {string} invitationId - The id of the invitation.
    
-   * @returns {Promise<{uuid: string}>} A promise that resolves when the folder is shared with the user.
+   * @returns {Promise<{uuid: string}>}  A promise returning the uuid of the invitation if valid.
    */
   public validateInviteExpiration(invitationId: string): Promise<{ uuid: string }> {
     return this.client.get(`sharings/invites/${invitationId}/validate`, this.headers());

@@ -8,6 +8,7 @@ import {
   SecurityDetails,
   TwoFactorAuthQR,
   RegisterPreCreatedUser,
+  RegisterPreCreatedUserResponse,
 } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -66,12 +67,9 @@ export class Auth {
   /**
    * Registers a precreated user
    * @param registerDetails
+   * @returns {Promise<RegisterPreCreatedUserResponse>} Returns sign in token, user data and uuid.
    */
-  public registerPreCreatedUser(registerDetails: RegisterPreCreatedUser): Promise<{
-    token: Token;
-    user: Omit<UserSettings, 'bucket'> & { referralCode: string };
-    uuid: UUID;
-  }> {
+  public registerPreCreatedUser(registerDetails: RegisterPreCreatedUser): Promise<RegisterPreCreatedUserResponse> {
     return this.client.post(
       'users/pre-created-users/register',
       {

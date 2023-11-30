@@ -1,3 +1,5 @@
+import { UUID, UserSettings } from 'src/shared/types/userSettings';
+
 export type Password = string;
 export type Email = string;
 
@@ -25,7 +27,11 @@ export interface RegisterDetails {
 export interface RegisterPreCreatedUser extends RegisterDetails {
   invitationId: string,
 }
-
+export interface RegisterPreCreatedUserResponse {
+  token: Token,
+  user: Omit<UserSettings, 'bucket'> & { referralCode: string },
+  uuid: UUID,
+}
 export interface Keys {
   privateKeyEncrypted: string,
   publicKey: string,

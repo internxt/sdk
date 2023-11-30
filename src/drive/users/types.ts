@@ -1,4 +1,4 @@
-import { UserSettings } from '../../shared/types/userSettings';
+import { UUID, UserSettings } from '../../shared/types/userSettings';
 
 export interface InitializeUserResponse {
   email: string;
@@ -16,6 +16,11 @@ export interface ChangePasswordPayload {
 }
 
 export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname'>>;
+
+export type PreCreateUserResponse = {
+  publicKey: string;
+  user: { uuid: UUID; email: string };
+};
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 

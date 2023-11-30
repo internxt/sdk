@@ -1,10 +1,10 @@
-import {Keys, RegisterDetails} from '../../src';
+import { Keys, RegisterDetails } from '../../src';
 
 export function emptyRegisterDetails(): RegisterDetails {
   const keys: Keys = {
     privateKeyEncrypted: '',
     publicKey: '',
-    revocationCertificate: ''
+    revocationCertificate: '',
   };
   return {
     name: '',

@@ -4,6 +4,7 @@ import {
   ChangePasswordPayload,
   FriendInvite,
   InitializeUserResponse,
+  PreCreateUserResponse,
   UpdateProfilePayload,
   UserPublicKeyResponse,
 } from './types';
@@ -94,11 +95,9 @@ export class Users {
   /**
    * Pre registers an email
    * @param email
+   * @returns {Promise<PreCreateUserResponse>} A promise that returns a public key for this user.
    */
-  public preRegister(email: string): Promise<{
-    publicKey: string;
-    user: { uuid: UUID; email: string };
-  }> {
+  public preRegister(email: string): Promise<PreCreateUserResponse> {
     return this.client.post(
       '/users/pre-create',
       {
