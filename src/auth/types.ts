@@ -29,7 +29,7 @@ export interface RegisterPreCreatedUser extends RegisterDetails {
 }
 export interface RegisterPreCreatedUserResponse {
   token: Token,
-  user: Omit<UserSettings, 'bucket'> & { referralCode: string },
+  user: UserSettings & { referralCode: string },
   uuid: UUID,
 }
 export interface Keys {
