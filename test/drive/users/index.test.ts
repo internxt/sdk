@@ -93,6 +93,28 @@ describe('# users service tests', () => {
     });
   });
 
+  describe('pre register user', () => {
+    it('should pre create user', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const email = 'test@test.com';
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        publicKey: 'publicKey',
+        user: { uuid: 'exampleUuid', email }
+      });
+
+      // Act
+      const body = await client.preRegister(email);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual(['/users/pre-create', { email }, headers]);
+      expect(body).toEqual({
+        publicKey: 'publicKey',
+        user: { uuid: 'exampleUuid', email }
+      });
+    });
+  });
+
   describe('change password', () => {
     it('should call with right params & return response', async () => {
       // Arrange

@@ -7,6 +7,8 @@ import {
   UserAccessError,
   SecurityDetails,
   TwoFactorAuthQR,
+  RegisterPreCreatedUser,
+  RegisterPreCreatedUserResponse,
 } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -57,6 +59,33 @@ export class Auth {
         revocationKey: registerDetails.keys.revocationCertificate,
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Registers a precreated user
+   * @param registerDetails
+   * @returns {Promise<RegisterPreCreatedUserResponse>} Returns sign in token, user data and uuid.
+   */
+  public registerPreCreatedUser(registerDetails: RegisterPreCreatedUser): Promise<RegisterPreCreatedUserResponse> {
+    return this.client.post(
+      'users/pre-created-users/register',
+      {
+        name: registerDetails.name,
+        captcha: registerDetails.captcha,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
+        privateKey: registerDetails.keys.privateKeyEncrypted,
+        publicKey: registerDetails.keys.publicKey,
+        revocationKey: registerDetails.keys.revocationCertificate,
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
+        invitationId: registerDetails.invitationId,
       },
       this.basicHeaders(),
     );

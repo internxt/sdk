@@ -1,3 +1,5 @@
+import { UUID, UserSettings } from 'src/shared/types/userSettings';
+
 export type Password = string;
 export type Email = string;
 
@@ -22,6 +24,14 @@ export interface RegisterDetails {
   referral?: string,
 }
 
+export interface RegisterPreCreatedUser extends RegisterDetails {
+  invitationId: string,
+}
+export interface RegisterPreCreatedUserResponse {
+  token: Token,
+  user: UserSettings & { referralCode: string },
+  uuid: UUID,
+}
 export interface Keys {
   privateKeyEncrypted: string,
   publicKey: string,
@@ -33,7 +43,7 @@ export interface CryptoProvider {
   generateKeys: (password: Password) => Promise<Keys>,
 }
 
-export class UserAccessError extends Error {}
+export class UserAccessError extends Error { }
 
 export interface SecurityDetails {
   encryptedSalt: string
