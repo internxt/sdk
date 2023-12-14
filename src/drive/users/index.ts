@@ -2,13 +2,15 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import {
   ChangePasswordPayload,
+  CheckChangeEmailExpirationResponse,
   FriendInvite,
   InitializeUserResponse,
   PreCreateUserResponse,
   UpdateProfilePayload,
   UserPublicKeyResponse,
+  VerifyEmailChangeResponse,
 } from './types';
-import { UUID, UserSettings } from '../../shared/types/userSettings';
+import { UserSettings } from '../../shared/types/userSettings';
 import { HttpClient } from '../../shared/http/client';
 
 export * as UserTypes from './types';
@@ -151,6 +153,50 @@ export class Users {
    */
   public verifyEmail(payload: { verificationToken: string }) {
     return this.client.post<void>('/user/verifyEmail', payload, this.headers());
+  }
+
+  /**
+   * Change user email by new email
+   *
+   * @param {string} newEmail
+   *
+   * @returns {Promise<void>}
+   */
+  public changeUserEmail(newEmail: string): Promise<void> {
+    return this.client.post(
+      'users/attempt-change-email',
+      {
+        newEmail,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Verify user email change
+   *
+   * @param {string} encryptedAttemptChangeEmailId
+   *
+   * @returns {Promise<VerifyEmailChangeResponse>}
+   */
+  public verifyEmailChange(encryptedAttemptChangeEmailId: string): Promise<VerifyEmailChangeResponse> {
+    return this.client.post(`users/attempt-change-email/${encryptedAttemptChangeEmailId}/accept`, {}, this.headers());
+  }
+
+  /**
+   * Check if user email change verification link is expired
+   *
+   * @param {string} encryptedAttemptChangeEmailId
+   *
+   * @returns {Promise<CheckChangeEmailExpirationResponse>}
+   */
+  public checkChangeEmailExpiration(
+    encryptedAttemptChangeEmailId: string,
+  ): Promise<CheckChangeEmailExpirationResponse> {
+    return this.client.get(
+      `users/attempt-change-email/${encryptedAttemptChangeEmailId}/verify-expiration`,
+      this.headers(),
+    );
   }
 
   /**
