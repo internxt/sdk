@@ -440,6 +440,34 @@ export class Share {
       ...extraHeaders,
     });
   }
+
+  /**
+   * Add/edit sharing Password
+   * @param {string} sharingId - id of sharing.
+   * @param {string} code - code to encrypt password
+   * @param {string} password - plain password
+   * @returns {Promise<SharingMeta>} A promise that returns the sharing info with the new encrypted password
+   */
+  public saveSharingPassword(sharingId: string, code: string, password: string): Promise<SharingMeta> {
+    return this.client.post(
+      `sharings/${sharingId}/password`,
+      {
+        code,
+        password,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Remove password protection from sharing
+   * @param {string} sharingId - id of sharing.
+   * @returns {Promise<void>} A promise that resolves when password was successfully deleted.
+   */
+  public removeSharingPassword(sharingId: string): Promise<void> {
+    return this.client.delete(`sharings/${sharingId}/password`, this.headers());
+  }
+
   /**
    * Request access to shared folder.
    */

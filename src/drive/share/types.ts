@@ -321,6 +321,7 @@ export type SharingMeta = {
   sharedWith: string;
   encryptionKey: string;
   encryptedCode: string;
+  encryptedPassword: string | null;
   encryptionAlgorithm: string;
   createdAt: Date;
   updatedAt: Date;
