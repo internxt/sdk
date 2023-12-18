@@ -175,6 +175,7 @@ export type CreateSharingPayload = {
   encryptionAlgorithm: string;
   encryptedCode: string;
   persistPreviousSharing?: boolean;
+  encryptedPassword?: string;
 };
 
 export type AcceptInvitationToSharedFolderPayload = {

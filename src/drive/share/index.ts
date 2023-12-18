@@ -444,16 +444,14 @@ export class Share {
   /**
    * Add/edit sharing Password
    * @param {string} sharingId - id of sharing.
-   * @param {string} code - code to encrypt password
-   * @param {string} password - plain password
+   * @param {string} encryptedPassword - password encrypted with CODE as key
    * @returns {Promise<SharingMeta>} A promise that returns the sharing info with the new encrypted password
    */
-  public saveSharingPassword(sharingId: string, code: string, password: string): Promise<SharingMeta> {
+  public saveSharingPassword(sharingId: string, encryptedPassword: string): Promise<SharingMeta> {
     return this.client.post(
       `sharings/${sharingId}/password`,
       {
-        code,
-        password,
+        encryptedPassword,
       },
       this.headers(),
     );

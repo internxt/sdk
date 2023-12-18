@@ -206,12 +206,12 @@ describe('# share service tests', () => {
       const { client, headers } = clientAndHeaders();
 
       // Act
-      const body = await client.saveSharingPassword(mockUuid, 'code', 'password');
+      const body = await client.saveSharingPassword(mockUuid, 'encryptedPassword');
 
       // Assert
       expect(callStub.firstCall.args).toMatchObject([
         `sharings/${mockUuid}/password`,
-        { code: 'code', password: 'password' },
+        { encryptedPassword: 'encryptedPassword' },
         headers,
       ]);
       expect(body).toEqual(sharedFile);
