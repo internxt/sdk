@@ -178,6 +178,12 @@ export type CreateSharingPayload = {
   encryptedPassword?: string;
 };
 
+export type PublicSharedItemInfo = {
+  plainName: string;
+  size: number;
+  type: string;
+};
+
 export type AcceptInvitationToSharedFolderPayload = {
   encryptionKey: string;
   encryptionAlgorithm: string;

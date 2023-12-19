@@ -234,6 +234,30 @@ describe('# share service tests', () => {
     });
   });
 
+  describe('get public shared item info', () => {
+    it('Should be called with sharingId and return basic info', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        plainName: 'anyname',
+        size: 30,
+        type: 'pdf',
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Act
+      const body = await client.getPublicSharedItemInfo(mockUuid);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/item`, headers]);
+      expect(body).toEqual({
+        plainName: 'anyname',
+        size: 30,
+        type: 'pdf',
+      });
+    });
+  });
+
   describe('get shares list', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange

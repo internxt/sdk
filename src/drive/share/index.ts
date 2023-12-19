@@ -26,6 +26,7 @@ import {
   SharedFoldersInvitationsAsInvitedUserResponse,
   CreateSharingPayload,
   SharingMeta,
+  PublicSharedItemInfo,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -464,6 +465,15 @@ export class Share {
    */
   public removeSharingPassword(sharingId: string): Promise<void> {
     return this.client.delete(`sharings/${sharingId}/password`, this.headers());
+  }
+
+  /**
+   * Get public information of the item shared.
+   * @param {string} sharingId - id of sharing.
+   * @returns {Promise<PublicSharedItemInfo>} A promise that returns data of the public shared item.
+   */
+  public getPublicSharedItemInfo(sharingId: string): Promise<PublicSharedItemInfo> {
+    return this.client.get(`sharings/public/${sharingId}/item`, this.headers());
   }
 
   /**
