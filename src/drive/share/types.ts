@@ -175,6 +175,13 @@ export type CreateSharingPayload = {
   encryptionAlgorithm: string;
   encryptedCode: string;
   persistPreviousSharing?: boolean;
+  encryptedPassword?: string;
+};
+
+export type PublicSharedItemInfo = {
+  plainName: string;
+  size: number;
+  type: string;
 };
 
 export type AcceptInvitationToSharedFolderPayload = {
@@ -321,6 +328,7 @@ export type SharingMeta = {
   sharedWith: string;
   encryptionKey: string;
   encryptedCode: string;
+  encryptedPassword: string | null;
   encryptionAlgorithm: string;
   createdAt: Date;
   updatedAt: Date;

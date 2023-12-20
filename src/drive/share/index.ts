@@ -26,6 +26,7 @@ import {
   SharedFoldersInvitationsAsInvitedUserResponse,
   CreateSharingPayload,
   SharingMeta,
+  PublicSharedItemInfo,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -440,6 +441,41 @@ export class Share {
       ...extraHeaders,
     });
   }
+
+  /**
+   * Add/edit sharing Password
+   * @param {string} sharingId - id of sharing.
+   * @param {string} encryptedPassword - password encrypted with CODE as key
+   * @returns {Promise<SharingMeta>} A promise that returns the sharing info with the new encrypted password
+   */
+  public saveSharingPassword(sharingId: string, encryptedPassword: string): Promise<SharingMeta> {
+    return this.client.patch(
+      `sharings/${sharingId}/password`,
+      {
+        encryptedPassword,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Remove password protection from sharing
+   * @param {string} sharingId - id of sharing.
+   * @returns {Promise<void>} A promise that resolves when password was successfully deleted.
+   */
+  public removeSharingPassword(sharingId: string): Promise<void> {
+    return this.client.delete(`sharings/${sharingId}/password`, this.headers());
+  }
+
+  /**
+   * Get public information of the item shared.
+   * @param {string} sharingId - id of sharing.
+   * @returns {Promise<PublicSharedItemInfo>} A promise that returns data of the public shared item.
+   */
+  public getPublicSharedItemInfo(sharingId: string): Promise<PublicSharedItemInfo> {
+    return this.client.get(`sharings/public/${sharingId}/item`, this.headers());
+  }
+
   /**
    * Request access to shared folder.
    */
