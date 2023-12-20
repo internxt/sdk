@@ -202,7 +202,7 @@ describe('# share service tests', () => {
         itemToken: 'sampleItemToken',
       };
 
-      const callStub = sinon.stub(httpClient, 'post').resolves(sharedFile);
+      const callStub = sinon.stub(httpClient, 'patch').resolves(sharedFile);
       const { client, headers } = clientAndHeaders();
 
       // Act

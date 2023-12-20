@@ -449,7 +449,7 @@ export class Share {
    * @returns {Promise<SharingMeta>} A promise that returns the sharing info with the new encrypted password
    */
   public saveSharingPassword(sharingId: string, encryptedPassword: string): Promise<SharingMeta> {
-    return this.client.post(
+    return this.client.patch(
       `sharings/${sharingId}/password`,
       {
         encryptedPassword,
