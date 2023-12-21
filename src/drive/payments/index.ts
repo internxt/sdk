@@ -82,8 +82,8 @@ export class Payments {
     });
   }
 
-  public getPrices(): Promise<DisplayPrice[]> {
-    return this.client.get<DisplayPrice[]>('/prices', this.headers());
+  public async getPrices(currency: string): Promise<DisplayPrice[]> {
+    return this.client.get<DisplayPrice[]>(`/prices?currency=${currency}`, this.headers());
   }
 
   public requestPreventCancellation(): Promise<FreeTrialAvailable> {

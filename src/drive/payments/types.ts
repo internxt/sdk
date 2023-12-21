@@ -107,6 +107,7 @@ export interface DisplayPrice {
   bytes: number;
   interval: 'year' | 'month' | 'lifetime';
   amount: number;
+  currency: string;
 }
 
 export interface CreateCheckoutSessionPayload {
@@ -116,6 +117,7 @@ export interface CreateCheckoutSessionPayload {
   success_url: string;
   cancel_url: string;
   customer_email: string;
+  currency: string;
 }
 
 export interface FreeTrialAvailable {
