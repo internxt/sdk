@@ -82,8 +82,10 @@ export class Payments {
     });
   }
 
-  public getPrices(): Promise<DisplayPrice[]> {
-    return this.client.get<DisplayPrice[]>('/prices', this.headers());
+  public async getPrices(currency?: string): Promise<DisplayPrice[]> {
+    const query = new URLSearchParams();
+    if (currency !== undefined) query.set('currency', currency);
+    return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
   }
 
   public requestPreventCancellation(): Promise<FreeTrialAvailable> {
