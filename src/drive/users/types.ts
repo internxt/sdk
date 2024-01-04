@@ -30,6 +30,11 @@ export type UserPublicKeyResponse = { publicKey: string };
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
   newEmail: string;
+  newAuthentication: {
+    user: UserSettings;
+    token: string;
+    newToken: string;
+  };
 };
 
 export type CheckChangeEmailExpirationResponse = { isExpired: boolean };
