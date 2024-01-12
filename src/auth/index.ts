@@ -92,6 +92,30 @@ export class Auth {
   }
 
   /**
+   * Requests account unblock email
+   * @param email
+   * @returns {Promise<void>} Resolves when email is sent
+   */
+  public requestUnblockAccount(email: string): Promise<void> {
+    return this.client.post(
+      'users/unblock-account',
+      {
+        email,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Unblocks account with token
+   * @param token token sent by email
+   * @returns {Promise<void>} Resolves successfuly when account is unblocked
+   */
+  public unblockAccount(token: string): Promise<void> {
+    return this.client.put('users/unblock-account', { token }, this.basicHeaders());
+  }
+
+  /**
    * Tries to log in a user given its login details
    * @param details
    * @param cryptoProvider
