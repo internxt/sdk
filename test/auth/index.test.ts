@@ -472,6 +472,40 @@ describe('# auth service tests', () => {
 
   });
 
+
+
+  describe('-> send email unblock account', () => {
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const email = 'email@gmail.com';
+
+      // Act
+      const body = await client.requestUnblockAccount(email);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { email }, headers]);
+      expect(body).toEqual({});
+    });
+  });
+
+  describe('-> unblock account', () => {
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+
+      // Act
+      const body = await client.unblockAccount(token);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { token }, headers]);
+      expect(body).toEqual({});
+    });
+  });
+
 });
 
 function clientAndHeaders(
