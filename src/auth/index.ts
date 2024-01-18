@@ -93,8 +93,9 @@ export class Auth {
 
   /**
    * Requests account unblock email
-   * @param email
-   * @returns {Promise<void>} Resolves when email is sent
+   *
+   * @param {string} email - The email address associated with the account.
+   * @returns {Promise<void>} - Resolves when the email is sent.
    */
   public requestUnblockAccount(email: string): Promise<void> {
     return this.client.post(
@@ -108,8 +109,9 @@ export class Auth {
 
   /**
    * Unblocks account with token
-   * @param token token sent by email
-   * @returns {Promise<void>} Resolves successfuly when account is unblocked
+   *
+   * @param {string} token - The token received via email to verify and unblock the account.
+   * @returns {Promise<void>} - Resolves successfuly when account is unblocked
    */
   public unblockAccount(token: string): Promise<void> {
     return this.client.put('users/unblock-account', { token }, this.basicHeaders());
