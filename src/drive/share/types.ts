@@ -338,3 +338,5 @@ export type SharingMeta = {
 };
 
 export type Sharing = { type: string; id: string };
+
+export type SharedFolderSize = { size: number };
