@@ -375,6 +375,26 @@ describe('# share service tests', () => {
     });
   });
 
+  describe('get shared folder size', () => {
+    it('Should be called with right arguments & return folder size', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        size: 30,
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Act
+      const body = await client.getSharedFolderSize(mockUuid);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/folder/size`, headers]);
+      expect(body).toEqual({
+        size: 30,
+      });
+    });
+  });
+
   function clientAndHeadersWithToken(
     apiUrl = '',
     clientName = 'c-name',
