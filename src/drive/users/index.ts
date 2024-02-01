@@ -77,10 +77,12 @@ export class Users {
   }
 
   /**
-   * Updates the authentication credentials
+   * Updates the authentication credentials and invalidates previous tokens
    * @param payload
+   * 
+   * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
    */
-  public changePassword(payload: ChangePasswordPayload) {
+  public changePassword(payload: ChangePasswordPayload): Promise<{token: string, newToken: string}> {
     return this.client.patch(
       '/user/password',
       {

@@ -106,3 +106,4 @@ dist
 coverage/
 
 .npmrc
+.DS_Store

@@ -4,7 +4,6 @@ import {
   Keys,
   LoginDetails,
   RegisterDetails,
-  UserAccessError,
   SecurityDetails,
   TwoFactorAuthQR,
   RegisterPreCreatedUser,
@@ -159,9 +158,6 @@ export class Auth {
         // @ts-ignore
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
-      })
-      .catch((error) => {
-        throw new UserAccessError(error.message);
       });
   }
 
