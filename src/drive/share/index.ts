@@ -27,6 +27,7 @@ import {
   CreateSharingPayload,
   SharingMeta,
   PublicSharedItemInfo,
+  SharedFolderSize,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
@@ -656,5 +657,15 @@ export class Share {
     }
 
     return headers;
+  }
+
+  /**
+   * Gets the size of a shared folder given sharing id
+   *
+   * @param {string} sharingId - Sharing ID.
+   * @returns {Promise<SharedFolderSize>}
+   */
+  public getSharedFolderSize(id: string): Promise<SharedFolderSize> {
+    return this.client.get<SharedFolderSize>(`sharings/public/${id}/folder/size`, this.headers());
   }
 }
