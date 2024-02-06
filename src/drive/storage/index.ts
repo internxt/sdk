@@ -21,6 +21,7 @@ import {
   SearchResultData,
   FolderAncestor,
   FolderMeta,
+  ReplaceFile,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -383,5 +384,16 @@ export class Storage {
    */
   public getFolderMeta(uuid: string): Promise<FolderMeta> {
     return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
+  }
+
+  /**
+   * Replaces a file with a new one.
+   *
+   * @param {string} uuid - UUID of the file.
+   * @param {ReplaceFile} payload
+   * @returns {Promise<DriveFileData>} - The replaced file data.
+   */
+  public replaceFile(uuid: string, payload: ReplaceFile): Promise<DriveFileData> {
+    return this.client.put<DriveFileData>(`/files/${uuid}`, { ...payload }, this.headers());
   }
 }
