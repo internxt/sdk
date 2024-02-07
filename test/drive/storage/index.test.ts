@@ -17,6 +17,8 @@ import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
 import { headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
+import { v4 } from 'uuid';
+import { randomFileData } from './mothers/fileData.mother';
 
 const httpClient = HttpClient.create('');
 
@@ -393,6 +395,35 @@ describe('# storage service tests', () => {
         expect(body).toEqual({
           files: [],
         });
+      });
+    });
+
+    describe('replace file', () => {
+      it('Should call with right arguments & return content', async () => {
+        // Arrange
+        const fileId = 'https://api.4shared.com/v1_2/files/replace';
+        const size = 100;
+        const fileUUID = v4();
+        const response = randomFileData();
+        const callStub = sinon.stub(httpClient, 'put').resolves(response);
+        const { client, headers } = clientAndHeaders();
+
+        // Act
+        const body = await client.replaceFile(fileUUID, {
+          fileId,
+          size,
+        });
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `/files/${fileUUID}`,
+          {
+            fileId,
+            size,
+          },
+          headers,
+        ]);
+        expect(body).toEqual(response);
       });
     });
   });

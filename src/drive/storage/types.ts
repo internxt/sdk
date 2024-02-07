@@ -343,3 +343,8 @@ export interface FolderMeta {
   userId: number;
   uuid: string;
 }
+
+export interface ReplaceFile {
+  fileId: string;
+  size: number;
+}
