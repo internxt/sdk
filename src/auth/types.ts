@@ -1,4 +1,4 @@
-import { UUID, UserSettings } from '../../src/shared/types/userSettings';
+import { UUID, UserSettings } from '../shared/types/userSettings';
 
 export type Password = string;
 export type Email = string;
