@@ -18,6 +18,7 @@ export interface DriveFolderData {
 }
 
 export interface DriveFileData {
+  uuid: string;
   bucket: string;
   createdAt: string;
   created_at: string;
