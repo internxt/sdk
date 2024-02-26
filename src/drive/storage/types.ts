@@ -1,3 +1,5 @@
+import { SharingMeta } from '../share/types';
+
 export interface DriveFolderData {
   id: number;
   bucket: string | null;
@@ -151,6 +153,65 @@ export interface FetchPaginatedFolderContentResponse {
     userId: number;
     user_id: number;
     type: string;
+  }[];
+}
+
+export enum FileStatus {
+  EXISTS = 'EXISTS',
+  TRASHED = 'TRASHED',
+  DELETED = 'DELETED',
+}
+
+export interface FetchPaginatedFilesContent {
+  files: {
+    id: number;
+    uuid: string;
+    fileId: string;
+    name: string;
+    type: string;
+    size: bigint;
+    bucket: string;
+    folderId: number;
+    folder?: any;
+    folderUuid: string;
+    encryptVersion: string;
+    deleted: boolean;
+    deletedAt: Date | null;
+    removed: boolean;
+    removedAt: Date | null;
+    userId: number;
+    user?: any;
+    modificationTime: Date;
+    plainName: string;
+    createdAt: Date;
+    updatedAt: Date;
+    status: FileStatus;
+    shares?: ShareLink[];
+    thumbnails?: Thumbnail[];
+    sharings?: SharingMeta[];
+  }[];
+}
+
+export interface FetchPaginatedFoldersContent {
+  folders: {
+    id: number;
+    parentId: number;
+    parentUuid: string;
+    parent?: any;
+    name: string;
+    bucket: string;
+    userId: number;
+    uuid: string;
+    user?: any;
+    plainName: string;
+    encryptVersion: string;
+    deleted: boolean;
+    removed: boolean;
+    deletedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+    removedAt: Date | null;
+    sharings?: SharingMeta[];
   }[];
 }
 

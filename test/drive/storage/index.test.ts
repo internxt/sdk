@@ -1,12 +1,13 @@
 import sinon from 'sinon';
 import { Storage, StorageTypes } from '../../../src/drive';
-import { randomFolderContentResponse } from './mothers/folderContentResponse.mother';
+import { randomFolderContentResponse, randomSubfilesResponse, randomSubfoldersResponse } from './mothers/folderContentResponse.mother';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFolderData,
   EncryptionVersion,
+  FetchPaginatedFolderContentResponse,
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
@@ -76,6 +77,51 @@ describe('# storage service tests', () => {
         expect(body.result[0].files).toHaveLength(5);
         expect(body.result[1].children).toHaveLength(3);
         expect(body.result[1].files).toHaveLength(1);
+      });
+
+      it('Should return the expected elements, when getFolderFilesByUUid is called', async () => {
+        // Arrange
+        const responseSubfiles = randomSubfilesResponse(3);
+        const randomUUID = v4();
+        const { client, headers } = clientAndHeaders();
+        sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(responseSubfiles),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const getFolderContentFilesStub = jest.spyOn(httpClient, 'getCancellable');
+
+        // Act
+        const [promise] = client.getFolderFilesByUUid(randomUUID);
+        const body = await promise;
+
+        // Assert
+        expect(body.files).toHaveLength(3);
+        expect(getFolderContentFilesStub).toHaveBeenCalledWith(`folders/content/${randomUUID}/files/?offset=0&limit=50`, headers);
+      });
+
+      it('Should return the expected elements, when getFolderFoldersByUuid is called', async () => {
+        // Arrange
+        const randomUUID = v4();
+        const responseSubfolders = randomSubfoldersResponse(4);
+        const { client, headers } = clientAndHeaders();
+
+        sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(responseSubfolders),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const getFolderContentFoldersStub = jest.spyOn(httpClient, 'getCancellable');
+
+        // Act
+        const [promise] = client.getFolderFoldersByUuid(randomUUID);
+        const body = await promise;
+
+        // Assert
+        expect(body.folders).toHaveLength(4);
+        expect(getFolderContentFoldersStub).toHaveBeenCalledWith(`folders/content/${randomUUID}/folders/?offset=0&limit=50`, headers);
       });
 
       it('Should cancel the request', async () => {
@@ -547,6 +593,8 @@ describe('# storage service tests', () => {
     });
   });
 });
+
+
 
 function clientAndHeaders(
   apiUrl = '',

@@ -22,6 +22,8 @@ import {
   FolderAncestor,
   FolderMeta,
   ReplaceFile,
+  FetchPaginatedFilesContent,
+  FetchPaginatedFoldersContent,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -156,7 +158,7 @@ export class Storage {
    * @param {number} [limit=50] - The max number of files to be returned.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
-   * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   * @returns {[Promise<FetchPaginatedFilesContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getFolderFilesByUUid(
     folderUuid: UUID,
@@ -164,7 +166,7 @@ export class Storage {
     limit = 50,
     sort = '',
     order = '',
-  ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
+  ): [Promise<FetchPaginatedFilesContent>, RequestCanceler] {
     const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
     const sortQuery = sort !== '' ? `&sort=${sort}` : '';
@@ -172,7 +174,7 @@ export class Storage {
 
     const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
-    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFilesContent>(
       `folders/content/${folderUuid}/files/${query}`,
       this.headers(),
     );
@@ -220,7 +222,7 @@ export class Storage {
    * @param {number} [limit=50] - The max number of subfolders to return.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
-   * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   * @returns {[Promise<FetchPaginatedFoldersContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getFolderFoldersByUuid(
     folderUuid: UUID,
@@ -228,7 +230,7 @@ export class Storage {
     limit = 50,
     sort = '',
     order = '',
-  ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
+  ): [Promise<FetchPaginatedFoldersContent>, RequestCanceler] {
     const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
     const sortQuery = sort !== '' ? `&sort=${sort}` : '';
@@ -236,7 +238,7 @@ export class Storage {
 
     const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
-    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFoldersContent>(
       `folders/content/${folderUuid}/folders/${query}`,
       this.headers(),
     );
