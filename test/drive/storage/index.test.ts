@@ -33,7 +33,7 @@ describe('# storage service tests', () => {
 
   describe('-> folders', () => {
     describe('get folder content', () => {
-      it('Should return the expected elements', async () => {
+      it('Should return the expected elements, when getFolderContent is called', async () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client } = clientAndHeaders();
@@ -51,6 +51,31 @@ describe('# storage service tests', () => {
         // Assert
         expect(body.files).toHaveLength(2);
         expect(body.children).toHaveLength(2);
+      });
+
+      it('Should return the expected elements, when getFolderFolders is called', async () => {
+        // Arrange
+        const subFolder1 = randomFolderContentResponse(4, 5);
+        const subFolder2 = randomFolderContentResponse(3, 1);
+        const response: FetchPaginatedFolderContentResponse = { result: [{ ...subFolder1, type: 'folder' }, { ...subFolder2, type: 'folder' }] };
+        const { client } = clientAndHeaders();
+        sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+
+        // Act
+        const [promise] = client.getFolderFolders(1);
+        const body = await promise;
+
+        // Assert
+        expect(body.result).toHaveLength(2);
+        expect(body.result[0].children).toHaveLength(4);
+        expect(body.result[0].files).toHaveLength(5);
+        expect(body.result[1].children).toHaveLength(3);
+        expect(body.result[1].files).toHaveLength(1);
       });
 
       it('Should cancel the request', async () => {
