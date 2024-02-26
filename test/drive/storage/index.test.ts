@@ -79,7 +79,7 @@ describe('# storage service tests', () => {
         expect(body.result[1].files).toHaveLength(1);
       });
 
-      it('Should return the expected elements, when getFolderFilesByUUid is called', async () => {
+      it('Should return the expected elements, when getFolderFilesByUuid is called', async () => {
         // Arrange
         const responseSubfiles = randomSubfilesResponse(3);
         const randomUUID = v4();
@@ -93,7 +93,7 @@ describe('# storage service tests', () => {
         const getFolderContentFilesStub = jest.spyOn(httpClient, 'getCancellable');
 
         // Act
-        const [promise] = client.getFolderFilesByUUid(randomUUID);
+        const [promise] = client.getFolderFilesByUuid(randomUUID);
         const body = await promise;
 
         // Assert

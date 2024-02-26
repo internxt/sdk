@@ -160,7 +160,7 @@ export class Storage {
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFilesContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
-  public getFolderFilesByUUid(
+  public getFolderFilesByUuid(
     folderUuid: UUID,
     offset = 0,
     limit = 50,
