@@ -162,57 +162,61 @@ export enum FileStatus {
   DELETED = 'DELETED',
 }
 
+export interface FetchPaginatedFile {
+  id: number;
+  uuid: string;
+  fileId: string;
+  name: string;
+  type: string;
+  size: bigint;
+  bucket: string;
+  folderId: number;
+  folder?: any;
+  folderUuid: string;
+  encryptVersion: string;
+  deleted: boolean;
+  deletedAt: Date | null;
+  removed: boolean;
+  removedAt: Date | null;
+  userId: number;
+  user?: any;
+  modificationTime: Date;
+  plainName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: FileStatus;
+  shares?: ShareLink[];
+  thumbnails?: Thumbnail[];
+  sharings?: SharingMeta[];
+}
+
+export interface FetchPaginatedFolder {
+  id: number;
+  parentId: number;
+  parentUuid: string;
+  parent?: any;
+  name: string;
+  bucket: string;
+  userId: number;
+  uuid: string;
+  user?: any;
+  plainName: string;
+  encryptVersion: string;
+  deleted: boolean;
+  removed: boolean;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  removedAt: Date | null;
+  sharings?: SharingMeta[];
+}
+
 export interface FetchPaginatedFilesContent {
-  files: {
-    id: number;
-    uuid: string;
-    fileId: string;
-    name: string;
-    type: string;
-    size: bigint;
-    bucket: string;
-    folderId: number;
-    folder?: any;
-    folderUuid: string;
-    encryptVersion: string;
-    deleted: boolean;
-    deletedAt: Date | null;
-    removed: boolean;
-    removedAt: Date | null;
-    userId: number;
-    user?: any;
-    modificationTime: Date;
-    plainName: string;
-    createdAt: Date;
-    updatedAt: Date;
-    status: FileStatus;
-    shares?: ShareLink[];
-    thumbnails?: Thumbnail[];
-    sharings?: SharingMeta[];
-  }[];
+  files: FetchPaginatedFile[];
 }
 
 export interface FetchPaginatedFoldersContent {
-  folders: {
-    id: number;
-    parentId: number;
-    parentUuid: string;
-    parent?: any;
-    name: string;
-    bucket: string;
-    userId: number;
-    uuid: string;
-    user?: any;
-    plainName: string;
-    encryptVersion: string;
-    deleted: boolean;
-    removed: boolean;
-    deletedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-    removedAt: Date | null;
-    sharings?: SharingMeta[];
-  }[];
+  folders: FetchPaginatedFolder[];
 }
 
 export interface FetchTrashContentResponse {
@@ -333,8 +337,8 @@ export interface MoveFileResponse {
 export type UsageResponse = {
   _id: string;
 } & {
-  [k in 'drive' | 'backups' | 'total']: number;
-};
+    [k in 'drive' | 'backups' | 'total']: number;
+  };
 
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
