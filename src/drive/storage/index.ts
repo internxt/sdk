@@ -445,6 +445,16 @@ export class Storage {
   }
 
   /**
+   * Gets the meta of a given folder Id
+   *
+   * @param {number} folderId - Id of the folder.
+   * @returns {Promise<FolderMeta>}
+   */
+  public getFolderMetaById(folderId: number): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/${folderId}/metadata`, this.headers());
+  }
+
+  /**
    * Replaces a file with a new one.
    *
    * @param {string} uuid - UUID of the file.
