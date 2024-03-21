@@ -24,6 +24,8 @@ import {
   ReplaceFile,
   FetchPaginatedFilesContent,
   FetchPaginatedFoldersContent,
+  MoveFolderUuidPayload,
+  MoveFileUuidPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
@@ -75,6 +77,20 @@ export class Storage {
       {
         folderId: payload.folderId,
         destination: payload.destinationFolderId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Moves a specific folder to a new location
+   * @param payload
+   */
+  public async moveFolderByUuid(payload: MoveFolderUuidPayload): Promise<FolderMeta> {
+    return this.client.patch(
+      `/folders/${payload.folderUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
       },
       this.headers(),
     );
@@ -341,6 +357,20 @@ export class Storage {
         destination: payload.destination,
         relativePath: payload.destinationPath,
         bucketId: payload.bucketId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Moves a specific file to a new location
+   * @param payload
+   */
+  public async moveFileByUuid(payload: MoveFileUuidPayload): Promise<FileMeta> {
+    return this.client.patch(
+      `/files/${payload.fileUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
       },
       this.headers(),
     );

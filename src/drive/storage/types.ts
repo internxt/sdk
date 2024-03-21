@@ -290,6 +290,11 @@ export interface MoveFolderPayload {
   destinationFolderId: number;
 }
 
+export interface MoveFolderUuidPayload {
+  folderUuid: string;
+  destinationFolderUuid: string;
+}
+
 export interface MoveFolderResponse {
   item: DriveFolderData;
   destination: number;
@@ -326,6 +331,11 @@ export interface MoveFilePayload {
   destination: number;
   destinationPath: string;
   bucketId: string;
+}
+
+export interface MoveFileUuidPayload {
+  fileUuid: string;
+  destinationFolderUuid: string;
 }
 
 export interface MoveFileResponse {
