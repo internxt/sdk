@@ -176,11 +176,13 @@ export class HttpClient {
     let errorMessage: string, errorStatus: number;
 
     if (error.response) {
-      const response = error.response as AxiosResponse<{ error: string }>;
+      const response = error.response as AxiosResponse<{ error: string, message: string, statusCode: number }>;
       if (response.status === 401) {
         this.unauthorizedCallback();
       }
-      if (response.data.error !== undefined) {
+      if (response.data.message !== undefined) {
+        errorMessage = response.data.message;
+      } else if (response.data.error !== undefined) {
         errorMessage = response.data.error;
       } else {
         // TODO : remove when endpoints of updateMetadata(file/folder) are updated
