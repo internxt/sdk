@@ -73,7 +73,7 @@ export class Trash {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {
