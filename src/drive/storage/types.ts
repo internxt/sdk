@@ -355,7 +355,7 @@ export interface FetchLimitResponse {
 }
 
 export interface AddItemsToTrashPayload {
-  items: Array<{ id: string; type: string }>;
+  items: Array<{ id?: string; uuid?: string; type: string }>;
 }
 
 export interface SearchResult {
@@ -424,3 +424,10 @@ export interface ReplaceFile {
   fileId: string;
   size: number;
 }
+
+export enum ItemTypes {
+  FILE = 'file',
+  FOLDER = 'folder',
+}
+
+export type ItemType = 'file' | 'folder';
