@@ -424,10 +424,3 @@ export interface ReplaceFile {
   fileId: string;
   size: number;
 }
-
-export enum ItemTypes {
-  FILE = 'file',
-  FOLDER = 'folder',
-}
-
-export type ItemType = 'file' | 'folder';
