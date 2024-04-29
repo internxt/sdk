@@ -76,7 +76,10 @@ export class Payments {
   public isCouponUsedByUser({ couponCode }: { couponCode: string }): Promise<{
     isCouponUsed: boolean;
   }> {
-    return this.client.get(`/coupon-in-use?code=${couponCode}`, this.headers());
+    const query = new URLSearchParams();
+    if (couponCode !== undefined) query.set('code', couponCode);
+
+    return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
   public getUserSubscription(): Promise<UserSubscription> {
