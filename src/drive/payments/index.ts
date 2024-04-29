@@ -73,10 +73,10 @@ export class Payments {
     return this.client.get(`/invoices?${query.toString()}`, this.headers());
   }
 
-  public isCouponUsedByUser({ couponName }: { couponName: string }): Promise<{
+  public isCouponUsedByUser({ couponCode }: { couponCode: string }): Promise<{
     isCouponUsed: boolean;
   }> {
-    return this.client.get(`/coupons/${couponName}/used`, this.headers());
+    return this.client.get(`/coupon-in-use?code=${couponCode}`, this.headers());
   }
 
   public getUserSubscription(): Promise<UserSubscription> {
