@@ -73,6 +73,12 @@ export class Payments {
     return this.client.get(`/invoices?${query.toString()}`, this.headers());
   }
 
+  public isCouponUsedByUser({ couponName }: { couponName: string }): Promise<{
+    isCouponUsed: boolean;
+  }> {
+    return this.client.get(`/coupons/${couponName}/used`, this.headers());
+  }
+
   public getUserSubscription(): Promise<UserSubscription> {
     return this.client.get<UserSubscription>('/subscriptions', this.headers()).catch((err) => {
       const error = err as AppError;
