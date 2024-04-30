@@ -22,11 +22,16 @@ import {
   FolderAncestor,
   FolderMeta,
   ReplaceFile,
+  FetchPaginatedFilesContent,
+  FetchPaginatedFoldersContent,
+  MoveFolderUuidPayload,
+  MoveFileUuidPayload,
 } from './types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { Token } from '../../auth';
+import { UUID } from '../../shared/types/userSettings';
 
 export * as StorageTypes from './types';
 
@@ -78,6 +83,20 @@ export class Storage {
   }
 
   /**
+   * Moves a specific folder to a new location
+   * @param payload
+   */
+  public async moveFolderByUuid(payload: MoveFolderUuidPayload): Promise<FolderMeta> {
+    return this.client.patch(
+      `/folders/${payload.folderUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
    * Updates the metadata of a folder
    * @param payload
    */
@@ -118,9 +137,9 @@ export class Storage {
   /**
    * Gets the files in a folder.
    *
-   * @param {number} folderId - ID of the folder.
+   * @param {number} folderId - The ID of the folder.
    * @param {number} [offset=0] - The position of the first file to return.
-   * @param {number} [limit=50] - The number of files to be returned.
+   * @param {number} [limit=50] - The max number of files to be returned.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
@@ -132,20 +151,47 @@ export class Storage {
     sort = '',
     order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
-    const offsetQuery = `/?offset=${offset}`;
+    const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const sortQuery = `&sort=${sort}`;
-    const orderQuery = `&order=${order}`;
-    let query;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
 
-    if (sort === '' && order === '') {
-      query = `${offsetQuery}${limitQuery}`;
-    } else {
-      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
-    }
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
-      `folders/${folderId}/files${query}`,
+      `folders/${folderId}/files/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets the files in a folder by its UUID.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The max number of files to be returned.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
+   * @returns {[Promise<FetchPaginatedFilesContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFilesByUuid(
+    folderUuid: UUID,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFilesContent>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFilesContent>(
+      `folders/content/${folderUuid}/files/${query}`,
       this.headers(),
     );
 
@@ -157,7 +203,7 @@ export class Storage {
    *
    * @param {number} folderId - The ID of the folder.
    * @param {number} [offset=0] - The position of the first subfolder to return.
-   * @param {number} [limit=50] - The number of subfolders to return.
+   * @param {number} [limit=50] - The max number of subfolders to return.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
@@ -169,19 +215,47 @@ export class Storage {
     sort = '',
     order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
-    const offsetQuery = `/?offset=${offset}`;
+    const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const sortQuery = `&sort=${sort}`;
-    const orderQuery = `&order=${order}`;
-    let query;
-    if (sort === '' && order === '') {
-      query = `${offsetQuery}${limitQuery}`;
-    } else {
-      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
-    }
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
-      `folders/${folderId}/folders${query}`,
+      `folders/${folderId}/folders/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets the subfolders of a folder by its UUID.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first subfolder to return.
+   * @param {number} [limit=50] - The max number of subfolders to return.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
+   * @returns {[Promise<FetchPaginatedFoldersContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFoldersByUuid(
+    folderUuid: UUID,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFoldersContent>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFoldersContent>(
+      `folders/content/${folderUuid}/folders/${query}`,
       this.headers(),
     );
 
@@ -289,6 +363,20 @@ export class Storage {
   }
 
   /**
+   * Moves a specific file to a new location
+   * @param payload
+   */
+  public async moveFileByUuid(payload: MoveFileUuidPayload): Promise<FileMeta> {
+    return this.client.patch(
+      `/files/${payload.fileUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
    * Returns a list of the n most recent files
    * @param limit
    */
@@ -311,7 +399,7 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {
@@ -384,6 +472,16 @@ export class Storage {
    */
   public getFolderMeta(uuid: string): Promise<FolderMeta> {
     return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
+  }
+
+  /**
+   * Gets the meta of a given folder Id
+   *
+   * @param {number} folderId - Id of the folder.
+   * @returns {Promise<FolderMeta>}
+   */
+  public getFolderMetaById(folderId: number): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/${folderId}/metadata`, this.headers());
   }
 
   /**
