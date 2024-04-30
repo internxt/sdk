@@ -1,6 +1,6 @@
 import sinon from 'sinon';
+import { v4 } from 'uuid';
 import { Storage, StorageTypes } from '../../../src/drive';
-import { randomFolderContentResponse, randomSubfilesResponse, randomSubfoldersResponse } from './mothers/folderContentResponse.mother';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
@@ -12,14 +12,18 @@ import {
   MoveFolderResponse,
   UpdateFilePayload,
 } from '../../../src/drive/storage/types';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
+import { headersWithToken } from '../../../src/shared/headers';
+import { HttpClient } from '../../../src/shared/http/client';
+import { randomFileData } from './mothers/fileData.mother';
+import {
+  randomFolderContentResponse,
+  randomSubfilesResponse,
+  randomSubfoldersResponse,
+} from './mothers/folderContentResponse.mother';
+import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
 import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
-import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
-import { headersWithToken } from '../../../src/shared/headers';
-import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { HttpClient } from '../../../src/shared/http/client';
-import { v4 } from 'uuid';
-import { randomFileData } from './mothers/fileData.mother';
 
 const httpClient = HttpClient.create('');
 
@@ -59,7 +63,12 @@ describe('# storage service tests', () => {
         const folderId = 1;
         const subFolder1 = randomFolderContentResponse(4, 5);
         const subFolder2 = randomFolderContentResponse(3, 1);
-        const response: FetchPaginatedFolderContentResponse = { result: [{ ...subFolder1, type: 'folder' }, { ...subFolder2, type: 'folder' }] };
+        const response: FetchPaginatedFolderContentResponse = {
+          result: [
+            { ...subFolder1, type: 'folder' },
+            { ...subFolder2, type: 'folder' },
+          ],
+        };
         const { client, headers } = clientAndHeaders();
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
@@ -87,7 +96,12 @@ describe('# storage service tests', () => {
         const folderId = 345;
         const subFolder1 = randomFolderContentResponse(1, 2);
         const subFolder2 = randomFolderContentResponse(6, 8);
-        const response: FetchPaginatedFolderContentResponse = { result: [{ ...subFolder1, type: 'file' }, { ...subFolder2, type: 'file' }] };
+        const response: FetchPaginatedFolderContentResponse = {
+          result: [
+            { ...subFolder1, type: 'file' },
+            { ...subFolder2, type: 'file' },
+          ],
+        };
         const { client, headers } = clientAndHeaders();
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
@@ -129,7 +143,10 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(body.files).toHaveLength(3);
-        expect(getFolderContentFilesStub).toHaveBeenCalledWith(`folders/content/${randomUUID}/files/?offset=0&limit=50`, headers);
+        expect(getFolderContentFilesStub).toHaveBeenCalledWith(
+          `folders/content/${randomUUID}/files/?offset=0&limit=50`,
+          headers,
+        );
       });
 
       it('Should return the expected elements, when getFolderFoldersByUuid is called', async () => {
@@ -152,7 +169,10 @@ describe('# storage service tests', () => {
 
         // Assert
         expect(body.folders).toHaveLength(4);
-        expect(getFolderContentFoldersStub).toHaveBeenCalledWith(`folders/content/${randomUUID}/folders/?offset=0&limit=50`, headers);
+        expect(getFolderContentFoldersStub).toHaveBeenCalledWith(
+          `folders/content/${randomUUID}/folders/?offset=0&limit=50`,
+          headers,
+        );
       });
 
       it('Should cancel the request', async () => {
@@ -624,8 +644,6 @@ describe('# storage service tests', () => {
     });
   });
 });
-
-
 
 function clientAndHeaders(
   apiUrl = '',
