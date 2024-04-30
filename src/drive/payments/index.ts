@@ -74,7 +74,7 @@ export class Payments {
   }
 
   public isCouponUsedByUser({ couponCode }: { couponCode: string }): Promise<{
-    isCouponUsed: boolean;
+    couponUsed: boolean;
   }> {
     const query = new URLSearchParams();
     if (couponCode !== undefined) query.set('code', couponCode);
