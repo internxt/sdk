@@ -283,6 +283,7 @@ export interface CreateFolderResponse {
   createdAt: string;
   updatedAt: string;
   userId: number;
+  uuid: string;
 }
 
 export interface MoveFolderPayload {
@@ -347,8 +348,8 @@ export interface MoveFileResponse {
 export type UsageResponse = {
   _id: string;
 } & {
-    [k in 'drive' | 'backups' | 'total']: number;
-  };
+  [k in 'drive' | 'backups' | 'total']: number;
+};
 
 export interface FetchLimitResponse {
   maxSpaceBytes: number;

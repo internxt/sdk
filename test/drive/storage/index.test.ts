@@ -225,6 +225,7 @@ describe('# storage service tests', () => {
           parentId: 0,
           updatedAt: '',
           userId: 1,
+          uuid: '1234-5678-1234-5678',
         };
         const callStub = sinon.stub(httpClient, 'postCancellable').returns({
           promise: Promise.resolve(createFolderResponse),
