@@ -151,13 +151,7 @@ export class Workspaces {
   }
 
   public declineInvitation(inviteId: string, token: string): Promise<void> {
-    return this.client.post<void>(
-      'workspaces/invitations/decline',
-      {
-        inviteId,
-      },
-      this.getRequestHeaders(token),
-    );
+    return this.client.delete<void>(`workspaces/invitations/${inviteId}`, this.getRequestHeaders(token));
   }
 }
 
