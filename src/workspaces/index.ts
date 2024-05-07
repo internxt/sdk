@@ -32,6 +32,18 @@ export class Workspaces {
     return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
   }
 
+  private getRequestHeaders(token?: string) {
+    const headers = {
+      ...this.headers(),
+    };
+
+    if (token) {
+      headers.Authorization = 'Bearer ' + token;
+    }
+
+    return headers;
+  }
+
   public getWorkspaces(): Promise<WorkspacesResponse> {
     return this.client.get<WorkspacesResponse>('workspaces/', this.headers());
   }
@@ -125,6 +137,26 @@ export class Workspaces {
         encryptionAlgorithm,
       },
       this.headers(),
+    );
+  }
+
+  public acceptInvitation(inviteId: string, token: string): Promise<void> {
+    return this.client.post<void>(
+      'workspaces/invitations/accept',
+      {
+        inviteId,
+      },
+      this.getRequestHeaders(token),
+    );
+  }
+
+  public declineInvitation(inviteId: string, token: string): Promise<void> {
+    return this.client.post<void>(
+      'workspaces/invitations/decline',
+      {
+        inviteId,
+      },
+      this.getRequestHeaders(token),
     );
   }
 }
