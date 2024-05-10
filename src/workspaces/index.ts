@@ -4,6 +4,7 @@ import { HttpClient } from '../shared/http/client';
 import {
   CreateTeamData,
   InviteMemberBody,
+  WorkspaceMembers,
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
   WorkspacesResponse,
@@ -75,6 +76,10 @@ export class Workspaces {
       },
       this.headers(),
     );
+  }
+
+  public getWorkspacesMembers(workspaceId: string): Promise<WorkspaceMembers> {
+    return this.client.get<WorkspaceMembers>(`workspaces/${workspaceId}/members`, this.headers());
   }
 
   public getWorkspacesTeams(workspaceId: string): Promise<WorkspaceTeamResponse> {
