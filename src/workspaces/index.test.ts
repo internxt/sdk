@@ -15,60 +15,63 @@ describe('Workspaces service tests', () => {
   });
 
   describe('Workspaces methods', () => {
-    const workspacesResponse: WorkspacesResponse = [
-      {
-        workspaceUser: {
-          id: '1',
-          memberId: 'member1',
-          key: 'user_key_1',
-          workspaceId: 'workspace1',
-          spaceLimit: '10GB',
-          driveUsage: '2GB',
-          backupsUsage: '1GB',
-          deactivated: false,
-          createdAt: '2024-04-30T12:00:00Z',
-          updatedAt: '2024-04-30T12:00:00Z',
+    const workspacesResponse: WorkspacesResponse = {
+      availableWorkspaces: [
+        {
+          workspaceUser: {
+            id: '1',
+            memberId: 'member1',
+            key: 'user_key_1',
+            workspaceId: 'workspace1',
+            spaceLimit: '10GB',
+            driveUsage: '2GB',
+            backupsUsage: '1GB',
+            deactivated: false,
+            createdAt: '2024-04-30T12:00:00Z',
+            updatedAt: '2024-04-30T12:00:00Z',
+          },
+          workspace: {
+            id: 'workspace1',
+            ownerId: 'owner1',
+            address: '123 Main St',
+            name: 'Workspace 1',
+            description: 'Description for Workspace 1',
+            defaultTeamId: 'team1',
+            workspaceUserId: '1',
+            setupCompleted: true,
+            createdAt: '2024-04-30T12:00:00Z',
+            updatedAt: '2024-04-30T12:00:00Z',
+          },
         },
-        workspace: {
-          id: 'workspace1',
-          ownerId: 'owner1',
-          address: '123 Main St',
-          name: 'Workspace 1',
-          description: 'Description for Workspace 1',
-          defaultTeamId: 'team1',
-          workspaceUserId: '1',
-          setupCompleted: true,
-          createdAt: '2024-04-30T12:00:00Z',
-          updatedAt: '2024-04-30T12:00:00Z',
+        {
+          workspaceUser: {
+            id: '2',
+            memberId: 'member2',
+            key: 'user_key_2',
+            workspaceId: 'workspace2',
+            spaceLimit: '15GB',
+            driveUsage: '5GB',
+            backupsUsage: '3GB',
+            deactivated: false,
+            createdAt: '2024-04-30T12:00:00Z',
+            updatedAt: '2024-04-30T12:00:00Z',
+          },
+          workspace: {
+            id: 'workspace2',
+            ownerId: 'owner2',
+            address: '456 Elm St',
+            name: 'Workspace 2',
+            description: 'Description for Workspace 2',
+            defaultTeamId: 'team2',
+            workspaceUserId: '2',
+            setupCompleted: true,
+            createdAt: '2024-04-30T12:00:00Z',
+            updatedAt: '2024-04-30T12:00:00Z',
+          },
         },
-      },
-      {
-        workspaceUser: {
-          id: '2',
-          memberId: 'member2',
-          key: 'user_key_2',
-          workspaceId: 'workspace2',
-          spaceLimit: '15GB',
-          driveUsage: '5GB',
-          backupsUsage: '3GB',
-          deactivated: false,
-          createdAt: '2024-04-30T12:00:00Z',
-          updatedAt: '2024-04-30T12:00:00Z',
-        },
-        workspace: {
-          id: 'workspace2',
-          ownerId: 'owner2',
-          address: '456 Elm St',
-          name: 'Workspace 2',
-          description: 'Description for Workspace 2',
-          defaultTeamId: 'team2',
-          workspaceUserId: '2',
-          setupCompleted: true,
-          createdAt: '2024-04-30T12:00:00Z',
-          updatedAt: '2024-04-30T12:00:00Z',
-        },
-      },
-    ];
+      ],
+      pendingWorkspaces: [],
+    };
     describe('getWorkspaces', () => {
       it('should return the expected workspaces when getWorkspaces is called', async () => {
         const { client } = clientAndHeaders();
