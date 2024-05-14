@@ -1,37 +1,37 @@
+import { Token } from '../../auth';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
+import { HttpClient, RequestCanceler } from '../../shared/http/client';
+import { UUID } from '../../shared/types/userSettings';
 import {
+  AddItemsToTrashPayload,
   CreateFolderPayload,
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFileData,
   FetchFolderContentResponse,
-  FileEntry,
-  MoveFilePayload,
-  MoveFileResponse,
-  MoveFolderPayload,
-  MoveFolderResponse,
-  UpdateFilePayload,
-  UpdateFolderMetadataPayload,
   FetchLimitResponse,
-  UsageResponse,
-  AddItemsToTrashPayload,
-  ThumbnailEntry,
-  Thumbnail,
+  FetchPaginatedFilesContent,
   FetchPaginatedFolderContentResponse,
+  FetchPaginatedFoldersContent,
+  FileEntry,
   FileMeta,
-  SearchResultData,
   FolderAncestor,
   FolderMeta,
-  ReplaceFile,
-  FetchPaginatedFilesContent,
-  FetchPaginatedFoldersContent,
-  MoveFolderUuidPayload,
+  MoveFilePayload,
+  MoveFileResponse,
   MoveFileUuidPayload,
+  MoveFolderPayload,
+  MoveFolderResponse,
+  MoveFolderUuidPayload,
+  ReplaceFile,
+  SearchResultData,
+  Thumbnail,
+  ThumbnailEntry,
+  UpdateFilePayload,
+  UpdateFolderMetadataPayload,
+  UsageResponse,
 } from './types';
-import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { headersWithToken, addResourcesTokenToHeaders } from '../../shared/headers';
-import { HttpClient, RequestCanceler } from '../../shared/http/client';
-import { Token } from '../../auth';
-import { UUID } from '../../shared/types/userSettings';
 
 export * as StorageTypes from './types';
 
@@ -493,5 +493,23 @@ export class Storage {
    */
   public replaceFile(uuid: string, payload: ReplaceFile): Promise<DriveFileData> {
     return this.client.put<DriveFileData>(`/files/${uuid}`, { ...payload }, this.headers());
+  }
+
+  /**
+   * Checks the size limit for a file.
+   *
+   * @param {number} size - The size of the file to check.
+   * @return {Promise<void>} - A promise that resolves when the size limit check is complete.
+   */
+  public async checkSizeLimit(size: number): Promise<void> {
+    return this.client.post(
+      '/files/check-size-limit',
+      {
+        file: {
+          size,
+        },
+      },
+      this.headers(),
+    );
   }
 }
