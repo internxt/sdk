@@ -1,14 +1,19 @@
-interface WorkspaceUser {
-  id: string;
-  memberId: string;
-  key: string;
-  workspaceId: string;
-  spaceLimit: string;
-  driveUsage: string;
+export interface WorkspaceUser {
   backupsUsage: string;
-  deactivated: boolean;
   createdAt: string;
+  deactivated: boolean;
+  driveUsage: string;
+  freeSpace: string;
+  id: string;
+  isManager: boolean;
+  isOwner: boolean;
+  key: string;
+  member: Member;
+  memberId: string;
+  spaceLimit: string;
   updatedAt: string;
+  usedSpace: string;
+  workspaceId: string;
 }
 
 export interface Workspace {
@@ -76,28 +81,28 @@ export type WorkspaceMembers = {
 };
 
 export type Member = {
-  id: number;
-  userId: string;
-  name: string;
-  lastname: string;
-  email: string;
-  username: string;
+  avatar: string | null;
+  backupsBucket: string | null;
   bridgeUser: string;
-  rootFolderId: number;
+  credit: number;
+  email: string;
   errorLoginCount: number;
+  id: number;
   isEmailActivitySended: boolean;
+  lastPasswordChangedAt: string | null;
+  lastResend: string | null;
+  lastname: string;
+  name: string;
   referralCode: string;
   referrer: string | null;
-  syncDate: string | null;
-  uuid: string;
-  lastResend: string | null;
-  credit: number;
-  welcomePack: boolean;
   registerCompleted: boolean;
-  backupsBucket: string | null;
+  rootFolderId: number;
   sharedWorkspace: boolean;
-  avatar: string | null;
-  lastPasswordChangedAt: string | null;
+  syncDate: string | null;
+  userId: string;
+  username: string;
+  uuid: string;
+  welcomePack: boolean;
 };
 
 export type ActivatedUser = {
