@@ -1,6 +1,6 @@
 import axios, { Axios, AxiosError, AxiosResponse, CancelToken } from 'axios';
-import { Headers, URL, RequestCanceler, Parameters, UnauthorizedCallback } from './types';
 import AppError from '../types/errors';
+import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 
 export { RequestCanceler } from './types';
 
@@ -173,23 +173,21 @@ export class HttpClient {
    * @private
    */
   private normalizeError(error: AxiosError) {
-    let errorMessage: string, errorStatus: number;
+    let errorMessage: string, errorStatus: number, errorCode: string | undefined;
 
     if (error.response) {
-      const response = error.response as AxiosResponse<{ error: string, message: string, statusCode: number }>;
+      const response = error.response as AxiosResponse<{
+        error: string;
+        message: string;
+        statusCode: number;
+        code?: string;
+      }>;
       if (response.status === 401) {
         this.unauthorizedCallback();
       }
-      if (response.data.message !== undefined) {
-        errorMessage = response.data.message;
-      } else if (response.data.error !== undefined) {
-        errorMessage = response.data.error;
-      } else {
-        // TODO : remove when endpoints of updateMetadata(file/folder) are updated
-        // after all clients use th SDK
-        errorMessage = JSON.stringify(response.data);
-      }
+      errorMessage = response.data.message || response.data.error || JSON.stringify(response.data);
       errorStatus = response.status;
+      errorCode = response.data.code;
     } else if (error.request) {
       errorMessage = 'Server unavailable';
       errorStatus = 500;
@@ -198,7 +196,7 @@ export class HttpClient {
       errorStatus = 400;
     }
 
-    throw new AppError(errorMessage, errorStatus);
+    throw new AppError(errorMessage, errorStatus, errorCode);
   }
 }
 
