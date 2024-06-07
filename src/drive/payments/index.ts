@@ -10,6 +10,7 @@ import {
   UserSubscription,
   FreeTrialAvailable,
   RedeemCodePayload,
+  CreatedSubscriptionData,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -27,6 +28,51 @@ export class Payments {
     this.client = HttpClient.create(apiUrl, apiSecurity.unauthorizedCallback);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
+  }
+
+  private createCustomer(name: string, email: string): Promise<{ customerId: string }> {
+    return this.client.post('/create-customer', { name, email }, this.headers());
+  }
+
+  public getCustomerId(name: string, email: string): Promise<{ customerId: string }> {
+    const query = new URLSearchParams();
+    if (email !== undefined) query.set('email', email);
+    return this.client
+      .get<{ customerId: string }>(`/get-customer-id?${query.toString()}`, this.headers())
+      .catch((err) => {
+        const error = err as AppError;
+        if (error.status === 404) {
+          return this.createCustomer(name, email);
+        } else {
+          throw error;
+        }
+      });
+  }
+
+  public createSubscription(customerId: string, priceId: string, promoCode?: string): Promise<CreatedSubscriptionData> {
+    return this.client.post(
+      '/create-subscription',
+      {
+        customerId,
+        priceId,
+        promoCode,
+      },
+      this.headers(),
+    );
+  }
+
+  public createPaymentIntent(
+    customerId: string,
+    amount: number,
+    planId: string,
+    promoCode?: string,
+  ): Promise<{ clientSecret: string }> {
+    const query = new URLSearchParams();
+    if (customerId !== undefined) query.set('customerId', customerId);
+    if (amount !== undefined) query.set('amount', String(amount));
+    if (planId !== undefined) query.set('planId', planId);
+    if (promoCode !== undefined) query.set('code', promoCode);
+    return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
 
   /**

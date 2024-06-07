@@ -128,3 +128,8 @@ export interface RedeemCodePayload {
   code: string;
   provider: string;
 }
+
+export type CreatedSubscriptionData = {
+  type: 'setup' | 'payment';
+  clientSecret: string;
+};
