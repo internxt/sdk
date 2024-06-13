@@ -1,5 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
+import { HttpClient } from '../../shared/http/client';
+import { UserSettings } from '../../shared/types/userSettings';
 import {
   ChangePasswordPayload,
   CheckChangeEmailExpirationResponse,
@@ -10,8 +12,6 @@ import {
   UserPublicKeyResponse,
   VerifyEmailChangeResponse,
 } from './types';
-import { UserSettings } from '../../shared/types/userSettings';
-import { HttpClient } from '../../shared/http/client';
 
 export * as UserTypes from './types';
 
@@ -77,12 +77,21 @@ export class Users {
   }
 
   /**
+   * Returns user data
+   */
+  public getUserData({ userUuid }: { userUuid: string }): Promise<{
+    user: UserSettings;
+  }> {
+    return this.client.get(`/users/c/${userUuid}`, this.headers());
+  }
+
+  /**
    * Updates the authentication credentials and invalidates previous tokens
    * @param payload
-   * 
+   *
    * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
    */
-  public changePassword(payload: ChangePasswordPayload): Promise<{token: string, newToken: string}> {
+  public changePassword(payload: ChangePasswordPayload): Promise<{ token: string; newToken: string }> {
     return this.client.patch(
       '/user/password',
       {
