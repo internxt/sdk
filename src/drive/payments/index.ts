@@ -49,13 +49,17 @@ export class Payments {
       });
   }
 
-  public createSubscription(customerId: string, priceId: string, promoCode?: string): Promise<CreatedSubscriptionData> {
+  public createSubscription(
+    customerId: string,
+    priceId: string,
+    promoCodeId?: string,
+  ): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/create-subscription',
       {
         customerId,
         priceId,
-        promoCode,
+        promoCodeId,
       },
       this.headers(),
     );
@@ -65,13 +69,13 @@ export class Payments {
     customerId: string,
     amount: number,
     planId: string,
-    promoCode?: string,
+    promoCodeId?: string,
   ): Promise<{ clientSecret: string }> {
     const query = new URLSearchParams();
     if (customerId !== undefined) query.set('customerId', customerId);
     if (amount !== undefined) query.set('amount', String(amount));
     if (planId !== undefined) query.set('planId', planId);
-    if (promoCode !== undefined) query.set('code', promoCode);
+    if (promoCodeId !== undefined) query.set('promoCodeId', promoCodeId);
     return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
 
