@@ -77,9 +77,18 @@ export class Users {
   }
 
   /**
-   * Returns user data
+   * Retrieves the user data for a specific user identified by the uuid.
+   *
+   * @param {string} params.userUuid - The UUID of the user.
+   * @return {Promise<Object>} A promise that resolves to an object containing the user data.
+   * The object has the following properties:
+   * - `newToken` (string): The new token of the user.
+   * - `oldToken` (string): The old drive token of the user.
+   * - `user` (UserSettings): The user data.
    */
   public getUserData({ userUuid }: { userUuid: string }): Promise<{
+    newToken: string;
+    oldToken: string;
     user: UserSettings;
   }> {
     return this.client.get(`/users/c/${userUuid}`, this.headers());
