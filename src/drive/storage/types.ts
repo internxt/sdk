@@ -258,6 +258,17 @@ export interface FileEntry {
   encrypt_version: EncryptionVersion;
 }
 
+export interface FileEntryByUuid {
+  id: string;
+  type: string;
+  size: number;
+  name: string;
+  plain_name: string;
+  bucket: string;
+  folder_id: string;
+  encrypt_version: EncryptionVersion;
+}
+
 export interface ThumbnailEntry {
   file_id: number;
   max_width: number;
@@ -272,6 +283,10 @@ export interface ThumbnailEntry {
 export interface CreateFolderPayload {
   parentFolderId: number;
   folderName: string;
+}
+export interface CreateFolderByUuidPayload {
+  plainName: string;
+  parentFolderUuid: string;
 }
 
 export interface CreateFolderResponse {

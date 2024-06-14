@@ -181,6 +181,40 @@ export class Workspaces {
   }
 
   /**
+   * Retrieves a paginated list of folders within a specific folder in a workspace.
+   *
+   * @param {string} workspaceId - The ID of the workspace.
+   * @param {string} folderUUID - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The max number of files to be returned.
+   * @param {string} [sort=''] - The reference column to sort it.
+   * @param {string} [order=''] - The order to be followed.
+   * @return {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolders(
+    workspaceId: string,
+    folderUUID: string,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
+      `workspaces/${workspaceId}/folders/${folderUUID}/folders/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Retrieves a paginated list of files within a specific folder in a workspace.
    *
    * @param {string} workspaceId - The ID of the workspace.

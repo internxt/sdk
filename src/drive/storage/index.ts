@@ -6,6 +6,7 @@ import { UUID } from '../../shared/types/userSettings';
 import {
   AddItemsToTrashPayload,
   CreateFolderPayload,
+  CreateFolderByUuidPayload,
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFileData,
@@ -15,6 +16,7 @@ import {
   FetchPaginatedFolderContentResponse,
   FetchPaginatedFoldersContent,
   FileEntry,
+  FileEntryByUuid,
   FileMeta,
   FolderAncestor,
   FolderMeta,
@@ -60,6 +62,23 @@ export class Storage {
       {
         parentFolderId: payload.parentFolderId,
         folderName: payload.folderName,
+      },
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Creates a new folder
+   * @param payload
+   */
+  public createFolderByUuid(payload: CreateFolderByUuidPayload): [Promise<CreateFolderResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.postCancellable<CreateFolderResponse>(
+      '/folders',
+      {
+        plainName: payload.plainName,
+        parentFolderUuid: payload.parentFolderUuid,
       },
       this.headers(),
     );
@@ -304,6 +323,27 @@ export class Storage {
         },
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Creates a new file entry
+   * @param fileEntry
+   */
+  public createFileEntryByUuid(fileEntry: FileEntryByUuid): Promise<DriveFileData> {
+    return this.client.post(
+      '/files',
+      {
+        name: fileEntry.name,
+        bucket: fileEntry.bucket,
+        fileId: fileEntry.id,
+        encrypt_version: fileEntry.encrypt_version,
+        folder_id: fileEntry.folder_id,
+        size: fileEntry.size,
+        plain_name: fileEntry.plain_name,
+        type: fileEntry.type,
+      },
+      this.headers(),
     );
   }
 
