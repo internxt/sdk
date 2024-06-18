@@ -32,6 +32,7 @@ describe('Workspaces service tests', () => {
             freeSpace: '0',
             isManager: false,
             isOwner: false,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
             member: {
               avatar: null,
               backupsBucket: null,
@@ -86,6 +87,7 @@ describe('Workspaces service tests', () => {
             freeSpace: '0',
             isManager: false,
             isOwner: false,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
             member: {
               avatar: null,
               backupsBucket: null,

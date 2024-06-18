@@ -10,6 +10,7 @@ export interface WorkspaceUser {
   key: string;
   member: Member;
   memberId: string;
+  rootFolderId: string;
   spaceLimit: string;
   updatedAt: string;
   usedSpace: string;
