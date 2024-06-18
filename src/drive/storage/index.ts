@@ -5,8 +5,8 @@ import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
   AddItemsToTrashPayload,
-  CreateFolderPayload,
   CreateFolderByUuidPayload,
+  CreateFolderPayload,
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFileData,
@@ -144,6 +144,26 @@ export class Storage {
     return [promise, requestCanceler];
   }
 
+  /**
+   * Fetches and returns the contents of a specific folder by its UUID.
+   *
+   * @param {string} folderUuid - The UUID of the folder.
+   * @param {boolean} [trash=false] - Whether to include trash items in the response.
+   * @return {[Promise<FetchFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderContentByUuid(
+    folderUuid: string,
+    trash = false,
+  ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const query = trash ? '/?trash=true' : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `/folders/content/${folderUuid}${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
   /**
    * Returns metadata of a specific file
    * @param fileId
@@ -337,10 +357,10 @@ export class Storage {
         name: fileEntry.name,
         bucket: fileEntry.bucket,
         fileId: fileEntry.id,
-        encrypt_version: fileEntry.encrypt_version,
-        folder_id: fileEntry.folder_id,
+        encryptVersion: fileEntry.encrypt_version,
+        folderUuid: fileEntry.folder_id,
         size: fileEntry.size,
-        plain_name: fileEntry.plain_name,
+        plainName: fileEntry.plain_name,
         type: fileEntry.type,
       },
       this.headers(),
