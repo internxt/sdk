@@ -301,6 +301,7 @@ export interface CreateFolderResponse {
   name: string;
   plain_name: string;
   parentId: number;
+  parentUuid: string;
   createdAt: string;
   updatedAt: string;
   userId: number;
