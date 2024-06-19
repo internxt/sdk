@@ -69,13 +69,13 @@ export class Payments {
     customerId: string,
     amount: number,
     planId: string,
-    promoCodeId?: string,
+    promoCodeName?: string,
   ): Promise<{ clientSecret: string }> {
     const query = new URLSearchParams();
     if (customerId !== undefined) query.set('customerId', customerId);
     if (amount !== undefined) query.set('amount', String(amount));
     if (planId !== undefined) query.set('planId', planId);
-    if (promoCodeId !== undefined) query.set('promoCodeId', promoCodeId);
+    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
 
