@@ -14,6 +14,7 @@ export interface DriveFolderData {
   plain_name: string;
   parentId: number | null;
   parent_id: number | null;
+  parentUuid: string;
   updatedAt: string;
   userId: number;
   user_id: number;
