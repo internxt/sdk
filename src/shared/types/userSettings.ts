@@ -13,6 +13,7 @@ export interface UserSettings {
   bucket: string;
   backupsBucket: string | null;
   root_folder_id: number;
+  rootFolderId: string;
   sharedWorkspace: boolean;
   credit: number;
   mnemonic: string;

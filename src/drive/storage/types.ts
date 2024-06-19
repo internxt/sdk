@@ -14,13 +14,14 @@ export interface DriveFolderData {
   plain_name: string;
   parentId: number | null;
   parent_id: number | null;
+  parentUuid: string;
   updatedAt: string;
   userId: number;
   user_id: number;
+  uuid: string;
 }
 
 export interface DriveFileData {
-  uuid: string;
   bucket: string;
   createdAt: string;
   created_at: string;
@@ -30,15 +31,20 @@ export interface DriveFileData {
   fileId: string;
   folderId: number;
   folder_id: number;
+  folderUuid: string;
   id: number;
   name: string;
-  plain_name: string;
+  plain_name: string | null;
+  plainName?: string | null;
   size: number;
   type: string;
   updatedAt: string;
   status: string;
   thumbnails: Array<Thumbnail>;
   currentThumbnail: Thumbnail | null;
+  shares?: Array<ShareLink>;
+  sharings?: { type: string; id: string }[];
+  uuid: string;
 }
 
 export interface Thumbnail {
@@ -101,6 +107,7 @@ export interface FileMeta {
   fileId: string;
   folderId: number;
   folder_id: number;
+  folderUuid: string;
   id: number;
   name: string;
   plain_name: string | null;
@@ -112,7 +119,7 @@ export interface FileMeta {
   thumbnails: Array<Thumbnail>;
   currentThumbnail: Thumbnail | null;
   shares?: Array<ShareLink>;
-  uuid?: string;
+  uuid: string;
 }
 
 export interface ShareLink {
@@ -258,6 +265,17 @@ export interface FileEntry {
   encrypt_version: EncryptionVersion;
 }
 
+export interface FileEntryByUuid {
+  id: string;
+  type: string;
+  size: number;
+  name: string;
+  plain_name: string;
+  bucket: string;
+  folder_id: string;
+  encrypt_version: EncryptionVersion;
+}
+
 export interface ThumbnailEntry {
   file_id: number;
   max_width: number;
@@ -273,6 +291,10 @@ export interface CreateFolderPayload {
   parentFolderId: number;
   folderName: string;
 }
+export interface CreateFolderByUuidPayload {
+  plainName: string;
+  parentFolderUuid: string;
+}
 
 export interface CreateFolderResponse {
   bucket: string;
@@ -280,6 +302,7 @@ export interface CreateFolderResponse {
   name: string;
   plain_name: string;
   parentId: number;
+  parentUuid: string;
   createdAt: string;
   updatedAt: string;
   userId: number;
