@@ -5,7 +5,11 @@ import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers'
 import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
   CreateTeamData,
+  EditWorkspaceDetailsBody,
+  GetMemberDetailsResponse,
   InviteMemberBody,
+  PendingInvitesResponse,
+  WorkspaceCredentialsResponse,
   WorkspaceMembers,
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
@@ -55,6 +59,34 @@ export class Workspaces {
     return this.client.get<WorkspacesResponse>('workspaces/pending-setup', this.headers());
   }
 
+  public getPendingInvites(): Promise<PendingInvitesResponse> {
+    return this.client.get<PendingInvitesResponse>('workspaces/invitations', this.headers());
+  }
+
+  public validateWorkspaceInvite(inviteId: string): Promise<string> {
+    return this.client.get<string>(`workspaces/invitations/${inviteId}validate`, this.headers());
+  }
+
+  /**
+   * Uploads an avatar for a specific workspace.
+   * @param workspaceId The UUID of the workspace to upload the avatar for.
+   * @param file The file to upload as the workspace's avatar.
+   * @returns The response from the server.
+   */
+  public uploadWorkspaceAvatar(workspaceId: string, file: File) {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    return this.client.post<void>(`workspaces/${workspaceId}/avatar`, formData, {
+      ...this.headers(),
+      'content-type': 'multipart/form-data',
+    });
+  }
+
+  public deleteWorkspaceAvatar(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`workspaces/${workspaceId}/avatar`, this.headers());
+  }
+
   public setupWorkspace({
     workspaceId,
     name,
@@ -67,6 +99,10 @@ export class Workspaces {
       { name, address, description, encryptedMnemonic },
       this.headers(),
     );
+  }
+
+  public getWorkspaceCredentials(workspaceId: string): Promise<WorkspaceCredentialsResponse> {
+    return this.client.get<WorkspaceCredentialsResponse>(`workspaces/${workspaceId}/credentials`, this.headers());
   }
 
   public createTeam({ workspaceId, name, managerId }: CreateTeamData): Promise<void> {
@@ -118,6 +154,18 @@ export class Workspaces {
     return this.client.patch<void>(`/workspaces/teams/${teamId}/manager`, {}, this.headers());
   }
 
+  public getPersonalTrash(workspaceId: string, type: 'file' | 'folder', offset = 0, limit = 50): Promise<void> {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const typeQuery = `&type=${type}`;
+    const query = `${offsetQuery}${limitQuery}${typeQuery}`;
+    return this.client.get<void>(`/workspaces/${workspaceId}/trash${query}`, this.headers());
+  }
+
+  public emptyPersonalTrash(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`/workspaces/${workspaceId}/trash`, this.headers());
+  }
+
   public changeUserRole(teamId: string, memberId: string, role: string): Promise<void> {
     return this.client.patch<void>(
       `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
@@ -145,6 +193,29 @@ export class Workspaces {
       },
       this.headers(),
     );
+  }
+
+  public editWorkspaceDetails({ workspaceId, description, name }: EditWorkspaceDetailsBody): Promise<void> {
+    return this.client.patch<void>(
+      `workspaces/${workspaceId}`,
+      {
+        name,
+        description,
+      },
+      this.headers(),
+    );
+  }
+
+  public leaveWorkspace(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`${workspaceId}/members/leave`, this.headers());
+  }
+
+  public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
+    return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
+  public deactivateMember(workspaceId: string, memberId: string): Promise<void> {
+    return this.client.patch<void>(`workspaces/${workspaceId}/members/${memberId}/deactivate`, {}, this.headers());
   }
 
   public acceptInvitation(inviteId: string, token: string): Promise<void> {

@@ -138,3 +138,53 @@ export type InviteMemberBody = {
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
 };
+
+interface Invite {
+  id: string;
+  workspaceId: string;
+  invitedUser: string;
+  encryptionAlgorithm: string;
+  encryptionKey: string;
+  spaceLimit: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type PendingInvitesResponse = (Invite & {
+  workspace: Workspace;
+})[];
+
+export type WorkspaceCredentialsResponse = {
+  workspaceId: string;
+  bucket: string;
+  workspaceUserId: string;
+  email: string;
+  credentials: {
+    networkPass: string;
+    networkUser: string;
+  };
+};
+
+export type EditWorkspaceDetailsBody = {
+  workspaceId: string;
+  name?: string;
+  description?: string;
+};
+
+export type GetMemberDetailsResponse = {
+  user: {
+    name: string;
+    lastname: string;
+    email: string;
+    uuid: string;
+    id: number;
+    avatar: string | null;
+    memberId: string;
+    workspaceId: string;
+    spaceLimit: string;
+    driveUsage: string;
+    backupsUsage: string;
+    deactivated: boolean;
+  };
+  teams: (Team & { isManager: boolean })[];
+};
