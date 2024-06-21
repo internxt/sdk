@@ -1,6 +1,8 @@
+import { Token } from '../auth';
+import { DriveFileData, FetchPaginatedFolderContentResponse, FileEntry } from '../drive/storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
-import { headersWithToken } from '../shared/headers';
-import { HttpClient } from '../shared/http/client';
+import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers';
+import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
   CreateTeamData,
   InviteMemberBody,
@@ -157,6 +159,93 @@ export class Workspaces {
 
   public declineInvitation(inviteId: string, token: string): Promise<void> {
     return this.client.delete<void>(`workspaces/invitations/${inviteId}`, this.getRequestHeaders(token));
+  }
+
+  public createFileEntry(fileEntry: FileEntry, workspaceId: string, resourcesToken?: Token): Promise<DriveFileData> {
+    return this.client.post(
+      `/workspaces/${workspaceId}/files`,
+      {
+        file: {
+          fileId: fileEntry.id,
+          type: fileEntry.type,
+          bucket: fileEntry.bucket,
+          size: fileEntry.size,
+          folder_id: fileEntry.folder_id,
+          name: fileEntry.name,
+          plain_name: fileEntry.plain_name,
+          encrypt_version: fileEntry.encrypt_version,
+        },
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Retrieves a paginated list of folders within a specific folder in a workspace.
+   *
+   * @param {string} workspaceId - The ID of the workspace.
+   * @param {string} folderUUID - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The max number of files to be returned.
+   * @param {string} [sort=''] - The reference column to sort it.
+   * @param {string} [order=''] - The order to be followed.
+   * @return {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolders(
+    workspaceId: string,
+    folderUUID: string,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
+      `workspaces/${workspaceId}/folders/${folderUUID}/folders/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Retrieves a paginated list of files within a specific folder in a workspace.
+   *
+   * @param {string} workspaceId - The ID of the workspace.
+   * @param {string} folderUUID - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The max number of files to be returned.
+   * @param {string} [sort=''] - The reference column to sort it.
+   * @param {string} [order=''] - The order to be followed.
+   * @return {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFiles(
+    workspaceId: string,
+    folderUUID: string,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
+      `workspaces/${workspaceId}/folders/${folderUUID}/files/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
   }
 }
 
