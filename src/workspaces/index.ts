@@ -1,11 +1,14 @@
 import { Token } from '../auth';
-import { DriveFileData, FetchPaginatedFolderContentResponse, FileEntry } from '../drive/storage/types';
+import { CreateFolderResponse, DriveFileData, FetchPaginatedFolderContentResponse } from '../drive/storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
+  CreateFolderPayload,
   CreateTeamData,
+  FileEntry,
   InviteMemberBody,
+  WorkspaceCredentialsDetails,
   WorkspaceMembers,
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
@@ -161,23 +164,53 @@ export class Workspaces {
     return this.client.delete<void>(`workspaces/invitations/${inviteId}`, this.getRequestHeaders(token));
   }
 
+  public getWorkspaceCredentials(workspaceId: string): Promise<WorkspaceCredentialsDetails> {
+    return this.client.get<WorkspaceCredentialsDetails>(`workspaces/${workspaceId}/credentials`, this.headers());
+  }
+
   public createFileEntry(fileEntry: FileEntry, workspaceId: string, resourcesToken?: Token): Promise<DriveFileData> {
     return this.client.post(
       `/workspaces/${workspaceId}/files`,
       {
-        file: {
-          fileId: fileEntry.id,
-          type: fileEntry.type,
-          bucket: fileEntry.bucket,
-          size: fileEntry.size,
-          folder_id: fileEntry.folder_id,
-          name: fileEntry.name,
-          plain_name: fileEntry.plain_name,
-          encrypt_version: fileEntry.encrypt_version,
-        },
+        name: fileEntry.name,
+        bucket: fileEntry.bucket,
+        fileId: fileEntry.fileId,
+        encryptVersion: fileEntry.encryptVersion,
+        folderUuid: fileEntry.folderUuid,
+        size: fileEntry.size,
+        plainName: fileEntry.plainName,
+        type: fileEntry.type,
+        modificationTime: fileEntry.modificationTime,
+        date: fileEntry.date,
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
+  }
+
+  /**
+   * Creates a new folder in the specified workspace.
+   *
+   * @param {CreateFolderPayload} options - The options for creating the folder.
+   * @param {string} options.workspaceId - The ID of the workspace.
+   * @param {string} options.plainName - The plain name of the folder.
+   * @param {string} options.parentFolderUuid - The UUID of the parent folder.
+   * @return {[Promise<CreateFolderResponse>, RequestCanceler]} A tuple containing a promise to get the API response and a function to cancel the request.
+   */
+  public createFolder({
+    workspaceId,
+    plainName,
+    parentFolderUuid,
+  }: CreateFolderPayload): [Promise<CreateFolderResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.postCancellable<CreateFolderResponse>(
+      `/workspaces/${workspaceId}/folders`,
+      {
+        name: plainName,
+        parentFolderUuid: parentFolderUuid,
+      },
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
   }
 
   /**
