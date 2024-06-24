@@ -100,6 +100,8 @@ export type UserSubscription =
       interval: 'year' | 'month';
       nextPayment: number;
       priceId: string;
+      subscriptionType: 'individual' | 'business';
+      planId?: string;
     };
 
 export interface DisplayPrice {
@@ -130,6 +132,6 @@ export interface RedeemCodePayload {
 }
 
 export interface UpdateSubscriptionPaymentMethod {
-  subscriptionType: string;
+  subscriptionType: 'individual' | 'business';
   paymentMethodId: string;
 }
