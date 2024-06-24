@@ -165,6 +165,7 @@ export interface WorkspaceCredentialsDetails {
   workspaceUserId: string;
   email: string;
   credentials: WorkspaceCredentials;
+  tokenHeader: string;
 }
 
 export interface CreateFolderPayload {

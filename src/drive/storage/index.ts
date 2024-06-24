@@ -1,6 +1,6 @@
 import { Token } from '../../auth';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
+import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
@@ -510,8 +510,13 @@ export class Storage {
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  private headers(customHeaders?: CustomHeaders) {
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      customHeaders,
+    );
   }
 
   /**
@@ -530,8 +535,13 @@ export class Storage {
    * @param {string} folderUUID - UUID of the folder.
    * @returns {Promise<FolderMeta>}
    */
-  public getFolderMeta(uuid: string): Promise<FolderMeta> {
-    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
+  public getFolderMeta(uuid: string, workspacesToken?: string): Promise<FolderMeta> {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers(customHeaders));
   }
 
   /**
