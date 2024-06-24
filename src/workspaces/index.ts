@@ -70,7 +70,7 @@ export class Workspaces {
   /**
    * Uploads an avatar for a specific workspace.
    * @param workspaceId The UUID of the workspace to upload the avatar for.
-   * @param file The file to upload as the workspace's avatar.
+   * @param avatar The avatar to upload.
    * @returns The response from the server.
    */
   public uploadWorkspaceAvatar(workspaceId: string, avatar: Blob) {
