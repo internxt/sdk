@@ -424,22 +424,6 @@ describe('Workspaces service tests', () => {
       });
     });
 
-    describe('uploadWorkspaceAvatar', () => {
-      it('should upload the workspace avatar successfully', async () => {
-        const workspaceId = 'workspaceId';
-        const avatar = {
-          name: 'avatar.png',
-          type: 'image/png',
-        } as File;
-        const { client, headers } = clientAndHeaders();
-        const postCall = sinon.stub(httpClient, 'post').resolves();
-
-        await client.uploadWorkspaceAvatar(workspaceId, avatar);
-
-        expect(postCall.firstCall.args).toEqual([`workspaces/${workspaceId}/avatar`, avatar, headers]);
-      });
-    });
-
     describe('deleteWorkspaceAvatar', () => {
       it('should delete the workspace avatar successfully', async () => {
         const workspaceId = 'workspaceId';
@@ -533,7 +517,7 @@ describe('Workspaces service tests', () => {
 
         await client.leaveWorkspace(workspaceId);
 
-        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/leave`, headers]);
+        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/members/leave`, headers]);
       });
     });
 

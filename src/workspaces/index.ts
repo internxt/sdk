@@ -73,9 +73,9 @@ export class Workspaces {
    * @param file The file to upload as the workspace's avatar.
    * @returns The response from the server.
    */
-  public uploadWorkspaceAvatar(workspaceId: string, file: File) {
+  public uploadWorkspaceAvatar(workspaceId: string, avatar: Blob) {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', avatar);
 
     return this.client.post<void>(`workspaces/${workspaceId}/avatar`, formData, {
       ...this.headers(),
@@ -207,7 +207,7 @@ export class Workspaces {
   }
 
   public leaveWorkspace(workspaceId: string): Promise<void> {
-    return this.client.delete<void>(`${workspaceId}/members/leave`, this.headers());
+    return this.client.delete<void>(`workspaces/${workspaceId}/members/leave`, this.headers());
   }
 
   public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
