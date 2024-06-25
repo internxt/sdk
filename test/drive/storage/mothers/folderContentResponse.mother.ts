@@ -1,4 +1,11 @@
-import { DriveFileData, FetchFolderContentResponse, FetchPaginatedFilesContent, FetchPaginatedFoldersContent, FileStatus, FolderChild } from '../../../../src/drive/storage/types';
+import {
+  DriveFileData,
+  FetchFolderContentResponse,
+  FetchPaginatedFilesContent,
+  FetchPaginatedFoldersContent,
+  FileStatus,
+  FolderChild,
+} from '../../../../src/drive/storage/types';
 
 export function emptyFolderContentResponse() {
   const response: FetchFolderContentResponse = {
@@ -49,6 +56,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     deletedAt: null,
     encrypt_version: '',
     fileId: '',
+    folderUuid: '',
     folderId: 0,
     folder_id: 0,
     id: 0,

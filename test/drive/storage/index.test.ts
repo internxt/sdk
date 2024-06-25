@@ -222,6 +222,7 @@ describe('# storage service tests', () => {
           id: 2,
           name: 'zero',
           plain_name: 'ma-fol',
+          parentUuid: v4(),
           parentId: 0,
           updatedAt: '',
           userId: 1,
