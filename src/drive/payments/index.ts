@@ -11,6 +11,7 @@ import {
   FreeTrialAvailable,
   RedeemCodePayload,
   UpdateSubscriptionPaymentMethod,
+  SubscriptionType,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -62,7 +63,7 @@ export class Payments {
     return this.client.get('/setup-intent', this.headers());
   }
 
-  public getDefaultPaymentMethod(subscriptionType?: 'individual' | 'business'): Promise<PaymentMethod> {
+  public getDefaultPaymentMethod(subscriptionType?: SubscriptionType): Promise<PaymentMethod> {
     const query = new URLSearchParams();
     if (subscriptionType) query.set('subscriptionType', subscriptionType);
     return this.client.get(`/default-payment-method?${query.toString()}`, this.headers());
@@ -85,7 +86,7 @@ export class Payments {
     return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
-  public getUserSubscription(subscriptionType?: 'individual' | 'business'): Promise<UserSubscription> {
+  public getUserSubscription(subscriptionType?: SubscriptionType): Promise<UserSubscription> {
     const query = new URLSearchParams();
     if (subscriptionType) query.set('subscriptionType', subscriptionType);
     return this.client.get<UserSubscription>(`/subscriptions?${query.toString()}`, this.headers()).catch((err) => {
@@ -96,7 +97,7 @@ export class Payments {
     });
   }
 
-  public async getPrices(currency?: string, subscriptionType?: 'individual' | 'business'): Promise<DisplayPrice[]> {
+  public async getPrices(currency?: string, subscriptionType?: SubscriptionType): Promise<DisplayPrice[]> {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
     if (subscriptionType) query.set('subscriptionType', subscriptionType);
@@ -126,7 +127,7 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
   }
 
-  public cancelSubscription(subscriptionType?: 'individual' | 'business'): Promise<void> {
+  public cancelSubscription(subscriptionType?: SubscriptionType): Promise<void> {
     const query = new URLSearchParams();
     if (subscriptionType) query.set('subscriptionType', subscriptionType);
     return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
