@@ -10,6 +10,8 @@ import {
   UserSubscription,
   FreeTrialAvailable,
   RedeemCodePayload,
+  UpdateSubscriptionPaymentMethod,
+  SubscriptionType,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -61,8 +63,10 @@ export class Payments {
     return this.client.get('/setup-intent', this.headers());
   }
 
-  public getDefaultPaymentMethod(): Promise<PaymentMethod> {
-    return this.client.get('/default-payment-method', this.headers());
+  public getDefaultPaymentMethod(subscriptionType?: SubscriptionType): Promise<PaymentMethod> {
+    const query = new URLSearchParams();
+    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    return this.client.get(`/default-payment-method?${query.toString()}`, this.headers());
   }
 
   public getInvoices({ startingAfter, limit }: { startingAfter?: string; limit?: number }): Promise<Invoice[]> {
@@ -82,8 +86,10 @@ export class Payments {
     return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
-  public getUserSubscription(): Promise<UserSubscription> {
-    return this.client.get<UserSubscription>('/subscriptions', this.headers()).catch((err) => {
+  public getUserSubscription(subscriptionType?: SubscriptionType): Promise<UserSubscription> {
+    const query = new URLSearchParams();
+    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    return this.client.get<UserSubscription>(`/subscriptions?${query.toString()}`, this.headers()).catch((err) => {
       const error = err as AppError;
 
       if (error.status === 404) return { type: 'free' };
@@ -91,9 +97,10 @@ export class Payments {
     });
   }
 
-  public async getPrices(currency?: string): Promise<DisplayPrice[]> {
+  public async getPrices(currency?: string, subscriptionType?: SubscriptionType): Promise<DisplayPrice[]> {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
+    if (subscriptionType) query.set('subscriptionType', subscriptionType);
     return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
   }
 
@@ -109,6 +116,10 @@ export class Payments {
     return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
   }
 
+  public updateSubscriptionPaymentMethod(payload: UpdateSubscriptionPaymentMethod): Promise<void | Error> {
+    return this.client.post('/subscriptions/update-payment-method', { ...payload }, this.headers());
+  }
+
   public updateSubscriptionPrice(
     priceId: string,
     couponCode?: string,
@@ -116,8 +127,10 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
   }
 
-  public cancelSubscription(): Promise<void> {
-    return this.client.delete('/subscriptions', this.headers());
+  public cancelSubscription(subscriptionType?: SubscriptionType): Promise<void> {
+    const query = new URLSearchParams();
+    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
   }
 
   public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
