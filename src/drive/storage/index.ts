@@ -169,12 +169,24 @@ export class Storage {
 
     return [promise, requestCanceler];
   }
+
   /**
-   * Returns metadata of a specific file
-   * @param fileId
+   * Retrieves a file with the specified fileId along with the associated workspacesToken.
+   *
+   * @param {string} fileId - The ID of the file to retrieve.
+   * @param {string} [workspacesToken] - Token for accessing workspaces.
+   * @return {[Promise<FileMeta>, RequestCanceler]} A promise with FileMeta and a canceler for the request.
    */
-  public getFile(fileId: string): [Promise<FileMeta>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(`/files/${fileId}/meta`, this.headers());
+  public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
+      `/files/${fileId}/meta`,
+      this.headers(customHeaders),
+    );
     return [promise, requestCanceler];
   }
 
