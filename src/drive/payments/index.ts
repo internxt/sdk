@@ -59,8 +59,10 @@ export class Payments {
     );
   }
 
-  public getSetupIntent(): Promise<{ clientSecret: string }> {
-    return this.client.get('/setup-intent', this.headers());
+  public getSetupIntent(subscriptionType?: SubscriptionType): Promise<{ clientSecret: string }> {
+    const query = new URLSearchParams();
+    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    return this.client.get(`/setup-intent?${query.toString()}`, this.headers());
   }
 
   public getDefaultPaymentMethod(subscriptionType?: SubscriptionType): Promise<PaymentMethod> {
