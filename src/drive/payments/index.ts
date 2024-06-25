@@ -10,7 +10,6 @@ import {
   UserSubscription,
   FreeTrialAvailable,
   RedeemCodePayload,
-  UpdateSubscriptionPaymentMethod,
   SubscriptionType,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
@@ -116,10 +115,6 @@ export class Payments {
 
   public applyRedeemCode(payload: RedeemCodePayload): Promise<void> {
     return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
-  }
-
-  public updateSubscriptionPaymentMethod(payload: UpdateSubscriptionPaymentMethod): Promise<void | Error> {
-    return this.client.post('/subscriptions/update-payment-method', { ...payload }, this.headers());
   }
 
   public updateSubscriptionPrice(

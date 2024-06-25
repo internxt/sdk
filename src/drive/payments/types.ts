@@ -132,8 +132,3 @@ export interface RedeemCodePayload {
   code: string;
   provider: string;
 }
-
-export interface UpdateSubscriptionPaymentMethod {
-  subscriptionType: SubscriptionType;
-  paymentMethodId: string;
-}
