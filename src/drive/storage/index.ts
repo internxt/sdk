@@ -154,12 +154,17 @@ export class Storage {
   public getFolderContentByUuid(
     folderUuid: string,
     trash = false,
+    workspacesToken?: string,
   ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const query = trash ? '/?trash=true' : '';
-
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       `/folders/content/${folderUuid}${query}`,
-      this.headers(),
+      this.headers(customHeaders),
     );
 
     return [promise, requestCanceler];
