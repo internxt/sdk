@@ -28,6 +28,8 @@ export interface Workspace {
   setupCompleted: boolean;
   createdAt: string;
   updatedAt: string;
+  avatar: null | string;
+  rootFolderId: string;
 }
 
 export interface WorkspaceData {
@@ -138,3 +140,36 @@ export type InviteMemberBody = {
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
 };
+
+export type FileEntry = {
+  name: string;
+  bucket: string;
+  fileId: string;
+  encryptVersion: string;
+  folderUuid: string;
+  size: number;
+  plainName: string;
+  type: string;
+  modificationTime: string;
+  date: string;
+};
+
+export interface WorkspaceCredentials {
+  networkPass: string;
+  networkUser: string;
+}
+
+export interface WorkspaceCredentialsDetails {
+  workspaceId: string;
+  bucket: string;
+  workspaceUserId: string;
+  email: string;
+  credentials: WorkspaceCredentials;
+  tokenHeader: string;
+}
+
+export interface CreateFolderPayload {
+  workspaceId: string;
+  plainName: string;
+  parentFolderUuid: string;
+}
