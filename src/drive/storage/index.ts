@@ -1,6 +1,6 @@
 import { Token } from '../../auth';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
+import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
@@ -154,22 +154,39 @@ export class Storage {
   public getFolderContentByUuid(
     folderUuid: string,
     trash = false,
+    workspacesToken?: string,
   ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const query = trash ? '/?trash=true' : '';
-
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       `/folders/content/${folderUuid}${query}`,
-      this.headers(),
+      this.headers(customHeaders),
     );
 
     return [promise, requestCanceler];
   }
+
   /**
-   * Returns metadata of a specific file
-   * @param fileId
+   * Retrieves a file with the specified fileId along with the associated workspacesToken.
+   *
+   * @param {string} fileId - The ID of the file to retrieve.
+   * @param {string} [workspacesToken] - Token for accessing workspaces.
+   * @return {[Promise<FileMeta>, RequestCanceler]} A promise with FileMeta and a canceler for the request.
    */
-  public getFile(fileId: string): [Promise<FileMeta>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(`/files/${fileId}/meta`, this.headers());
+  public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
+      `/files/${fileId}/meta`,
+      this.headers(customHeaders),
+    );
     return [promise, requestCanceler];
   }
 
@@ -510,8 +527,13 @@ export class Storage {
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  private headers(customHeaders?: CustomHeaders) {
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      customHeaders,
+    );
   }
 
   /**
@@ -530,8 +552,13 @@ export class Storage {
    * @param {string} folderUUID - UUID of the folder.
    * @returns {Promise<FolderMeta>}
    */
-  public getFolderMeta(uuid: string): Promise<FolderMeta> {
-    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
+  public getFolderMeta(uuid: string, workspacesToken?: string): Promise<FolderMeta> {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers(customHeaders));
   }
 
   /**

@@ -78,6 +78,8 @@ describe('Workspaces service tests', () => {
             setupCompleted: true,
             createdAt: '2024-04-30T12:00:00Z',
             updatedAt: '2024-04-30T12:00:00Z',
+            avatar: null,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
           },
         },
         {
@@ -133,6 +135,8 @@ describe('Workspaces service tests', () => {
             setupCompleted: true,
             createdAt: '2024-04-30T12:00:00Z',
             updatedAt: '2024-04-30T12:00:00Z',
+            avatar: null,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
           },
         },
       ],
