@@ -63,6 +63,8 @@ export enum ProductPriceType {
   OneTime = 'one_time',
 }
 
+export type SubscriptionType = 'individual' | 'business';
+
 export interface CreatePaymentSessionPayload {
   test?: boolean;
   lifetime_tier?: LifetimeTier;
@@ -100,6 +102,8 @@ export type UserSubscription =
       interval: 'year' | 'month';
       nextPayment: number;
       priceId: string;
+      subscriptionType: SubscriptionType;
+      planId?: string;
     };
 
 export interface DisplayPrice {
@@ -127,4 +131,9 @@ export interface FreeTrialAvailable {
 export interface RedeemCodePayload {
   code: string;
   provider: string;
+}
+
+export interface UpdateSubscriptionPaymentMethod {
+  subscriptionType: SubscriptionType;
+  paymentMethodId: string;
 }
