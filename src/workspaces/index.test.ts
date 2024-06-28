@@ -4,7 +4,7 @@ import { HttpClient } from '../shared/http/client';
 import {
   GetMemberDetailsResponse,
   PendingInvitesResponse,
-  WorkspaceCredentialsResponse,
+  WorkspaceCredentialsDetails,
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
   Workspaces,
@@ -404,6 +404,8 @@ describe('Workspaces service tests', () => {
               ownerId: 'owner1',
               setupCompleted: true,
               workspaceUserId: '1',
+              avatar: null,
+              rootFolderId: 'asdf-123-asdf',
             },
           },
         ];
@@ -444,7 +446,7 @@ describe('Workspaces service tests', () => {
       it('should return the workspace credentials successfully', async () => {
         const { client } = clientAndHeaders();
         const workspaceId = 'workspaceId';
-        const getWorkspaceCredentialsResponse: WorkspaceCredentialsResponse = {
+        const getWorkspaceCredentialsResponse: WorkspaceCredentialsDetails = {
           workspaceId,
           bucket: 'bucket',
           workspaceUserId: 'workspaceUserId',
@@ -453,6 +455,7 @@ describe('Workspaces service tests', () => {
             networkPass: 'networkPass',
             networkUser: 'networkUser',
           },
+          tokenHeader: 'tokenHeader',
         };
 
         sinon.stub(httpClient, 'get').resolves(getWorkspaceCredentialsResponse);
@@ -589,6 +592,7 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
+  workspaceToken = 'workspaceToken',
 ): {
   client: Workspaces;
   headers: object;
@@ -599,6 +603,7 @@ function clientAndHeaders(
   };
   const apiSecurity = {
     token,
+    workspaceToken,
   };
   const client = Workspaces.client(apiUrl, appDetails, apiSecurity);
   const headers = headersWithToken(clientName, clientVersion, token);

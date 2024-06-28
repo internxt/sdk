@@ -1,5 +1,10 @@
 import { Token } from '../auth';
-import { CreateFolderResponse, DriveFileData, FetchPaginatedFolderContentResponse } from '../drive/storage/types';
+import {
+  CreateFolderResponse,
+  DriveFileData,
+  FetchPaginatedFolderContentResponse,
+  FetchTrashContentResponse,
+} from '../drive/storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient, RequestCanceler } from '../shared/http/client';
@@ -38,7 +43,12 @@ export class Workspaces {
    * @private
    */
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.workspaceToken,
+    );
   }
 
   private getRequestHeaders(token?: string) {
@@ -152,12 +162,17 @@ export class Workspaces {
     return this.client.patch<void>(`/workspaces/teams/${teamId}/manager`, {}, this.headers());
   }
 
-  public getPersonalTrash(workspaceId: string, type: 'file' | 'folder', offset = 0, limit = 50): Promise<void> {
+  public getPersonalTrash(
+    workspaceId: string,
+    type: 'file' | 'folder',
+    offset = 0,
+    limit = 50,
+  ): Promise<FetchTrashContentResponse> {
     const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
     const typeQuery = `&type=${type}`;
     const query = `${offsetQuery}${limitQuery}${typeQuery}`;
-    return this.client.get<void>(`/workspaces/${workspaceId}/trash${query}`, this.headers());
+    return this.client.get<FetchTrashContentResponse>(`/workspaces/${workspaceId}/trash${query}`, this.headers());
   }
 
   public emptyPersonalTrash(workspaceId: string): Promise<void> {
