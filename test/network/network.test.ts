@@ -231,7 +231,7 @@ describe('network ', () => {
       const staticGetDownloadLinks = jest.spyOn(Network.prototype as any, 'getDownloadLinks');
 
       // Act
-      const links = await client.getDownloadLinks(idBucket, file);
+      const links = await client.getDownloadLinks(idBucket, file, {});
 
       // Assert
       expect(links).toEqual(resolvesTo);

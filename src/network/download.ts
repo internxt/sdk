@@ -26,7 +26,10 @@ export async function downloadFile(
   toBinaryData: ToBinaryDataFunction,
   downloadFile: DownloadFileFunction,
   decryptFile: DecryptFileFunction,
-  opts?: { token: string }
+  opts?: {
+    token?: string,
+    partSize?: number,
+  }
 ): Promise<void> {
   let iv: BinaryData;
   let indexHex: BinaryData;
@@ -41,7 +44,11 @@ export async function downloadFile(
       }
     }
 
-    const { index, shards, version, size } = await network.getDownloadLinks(bucketId, fileId, opts?.token);
+    const { index, shards, version, size } = await network.getDownloadLinks(
+      bucketId,
+      fileId,
+      opts ? opts : {}
+    );
 
     if (!version || version === 1) {
       throw new FileVersionOneError();

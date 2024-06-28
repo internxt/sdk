@@ -172,7 +172,11 @@ export class Network {
     });
   }
 
-  getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
+  getDownloadLinks(
+    bucketId: string,
+    fileId: string,
+    opts: { token?: string, partSize?: number }
+  ): Promise<GetDownloadLinksResponse> {
     return Network.getDownloadLinks(
       bucketId,
       fileId,
@@ -181,7 +185,7 @@ export class Network {
         appDetails: this.appDetails,
         auth: this.auth,
       },
-      token,
+      opts,
     );
   }
 
@@ -236,13 +240,15 @@ export class Network {
     bucketId: string,
     fileId: string,
     { client, appDetails, auth }: NetworkRequestConfig,
-    token?: string,
+    opts: { token?: string, partSize?: number }
   ) {
-    const headers = token
-      ? Network.headersWithAuthToken(appDetails, token)
+    const headers = opts.token
+      ? Network.headersWithAuthToken(appDetails, opts.token)
       : Network.headersWithBasicAuth(appDetails, auth);
 
-    return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info`, {
+    const queryParam = opts.partSize ? `?partSize=${opts.partSize}` : '';
+
+    return client.get<GetDownloadLinksResponse>(`/buckets/${bucketId}/files/${fileId}/info${queryParam}`, {
       ...headers,
       'x-api-version': '2',
     });

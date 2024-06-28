@@ -96,7 +96,7 @@ describe('network/download', () => {
           expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
 
           expect(getDownloadLinksStub.calledOnce).toBeTruthy();
-          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, undefined]);
+          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, {}]);
 
           expect(toBinaryDataMock).toBeCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
@@ -177,7 +177,7 @@ describe('network/download', () => {
           expect(validateMnemonicStub.callCount).toBe(0);
 
           expect(getDownloadLinksStub.calledOnce).toBeTruthy();
-          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, token]);
+          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, { token }]);
 
           expect(toBinaryDataMock).toBeCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
