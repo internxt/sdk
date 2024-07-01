@@ -173,3 +173,22 @@ export interface CreateFolderPayload {
   plainName: string;
   parentFolderUuid: string;
 }
+
+export interface WorkspacePendingInvitations {
+  id: string;
+  workspaceId: string;
+  invitedUser: string;
+  encryptionAlgorithm: string;
+  encryptionKey: string;
+  spaceLimit: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    name: string;
+    lastname: string;
+    email: string;
+    uuid: string;
+    avatar: string | null;
+  };
+  isGuessInvite: boolean;
+}

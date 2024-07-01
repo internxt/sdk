@@ -13,6 +13,7 @@ import {
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
   WorkspacesResponse,
+  WorkspacePendingInvitations,
 } from './types';
 
 export class Workspaces {
@@ -279,6 +280,22 @@ export class Workspaces {
     );
 
     return [promise, requestCanceler];
+  }
+
+  public getWorkspacePendingInvitations(
+    workspaceId: string,
+    limit: number,
+    offset: number,
+  ): Promise<WorkspacePendingInvitations[]> {
+    const limitQuery = `?limit=${limit}`;
+    const offsetQuery = `&offset=${offset}`;
+
+    const query = `${limitQuery}${offsetQuery}`;
+
+    return this.client.get<WorkspacePendingInvitations[]>(
+      `workspaces/${workspaceId}/invitations/${query}`,
+      this.headers(),
+    );
   }
 }
 
