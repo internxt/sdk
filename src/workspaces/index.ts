@@ -297,6 +297,10 @@ export class Workspaces {
       this.headers(),
     );
   }
+
+  public validateWorkspaceInvitation(inviteId: string): Promise<{ uuid: string }> {
+    return this.client.get<{ uuid: string }>(`workspaces/invitations/${inviteId}/validate`, this.headers());
+  }
 }
 
 export * from './types';
