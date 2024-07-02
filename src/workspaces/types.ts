@@ -139,6 +139,7 @@ export type InviteMemberBody = {
   spaceLimitBytes: number;
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
+  message: string;
 };
 
 export type FileEntry = {

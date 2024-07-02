@@ -138,6 +138,7 @@ export class Workspaces {
     spaceLimitBytes,
     encryptedMnemonicInBase64,
     encryptionAlgorithm = 'aes-256-gcm',
+    message,
   }: InviteMemberBody): Promise<void> {
     return this.client.post<void>(
       `workspaces/${workspaceId}/members/invite`,
@@ -146,6 +147,7 @@ export class Workspaces {
         spaceLimit: spaceLimitBytes,
         encryptionKey: encryptedMnemonicInBase64,
         encryptionAlgorithm,
+        message: message,
       },
       this.headers(),
     );
