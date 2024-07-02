@@ -1,4 +1,5 @@
 import { Token } from '../auth';
+import { ListAllSharedFoldersResponse, SharingMeta } from '../drive/share/types';
 import {
   CreateFolderResponse,
   DriveFileData,
@@ -11,10 +12,13 @@ import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
   CreateFolderPayload,
   CreateTeamData,
+  CreateWorkspaceSharingPayload,
   EditWorkspaceDetailsBody,
   FileEntry,
   GetMemberDetailsResponse,
   InviteMemberBody,
+  ListWorkspaceSharedItemsResponse,
+  OrderByOptions,
   PendingInvitesResponse,
   WorkspaceCredentialsDetails,
   WorkspaceMembers,
@@ -356,6 +360,97 @@ export class Workspaces {
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
       `workspaces/${workspaceId}/folders/${folderUUID}/files/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Creates a new sharing for a workspace item.
+   *
+   * @param {CreateWorkspaceSharingPayload} options - The options for creating the sharing.
+   * @param {string} options.workspaceId - The ID of the workspace.
+   * @param {string} options.teamUUID - The UUID of the team.
+   * @param {...CreateSharingPayload} options.createSharingPayload - The payload for creating the sharing.
+   * @returns {Promise<SharingMeta>} A promise that resolves to the sharing metadata.
+   */
+  public shareItem({
+    workspaceId,
+    teamUUID,
+    ...createSharingPayload
+  }: CreateWorkspaceSharingPayload): Promise<SharingMeta> {
+    return this.client.post(
+      `workspaces/${workspaceId}/shared`,
+      {
+        ...createSharingPayload,
+        sharedWith: teamUUID,
+      },
+      this.headers(),
+    );
+  }
+
+  public getWorkspaceTeamSharedFiles(
+    workspaceId: string,
+    teamId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/files${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  public getWorkspaceTeamSharedFolders(
+    workspaceId: string,
+    teamId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/folders${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+  public getWorkspaceTeamSharedFolderFiles(
+    workspaceId: string,
+    teamId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/files?page=${page}&perPage=${perPage}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  public getWorkspaceTeamSharedFolderFolders(
+    workspaceId: string,
+    teamId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/folders?page=${page}&perPage=${perPage}
+      ${orderByQueryParam}`,
       this.headers(),
     );
 

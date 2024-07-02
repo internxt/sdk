@@ -1,3 +1,5 @@
+import { SharedFiles, SharedFolders } from '../drive/share/types';
+
 export interface WorkspaceUser {
   backupsUsage: string;
   createdAt: string;
@@ -212,3 +214,29 @@ export interface CreateFolderPayload {
   plainName: string;
   parentFolderUuid: string;
 }
+
+export type ItemType = 'file' | 'folder';
+
+export interface CreateWorkspaceSharingPayload {
+  workspaceId: string;
+  itemId: string;
+  itemType: ItemType;
+  teamUUID: string;
+  roleId: string;
+}
+
+export type ListWorkspaceSharedItemsResponse = {
+  items: SharedFiles[] | SharedFolders[];
+  token: string;
+  role: string;
+  parent: Parent;
+  bucket: string;
+  encryptionKey: null | string;
+};
+
+export type Parent = {
+  uuid: string;
+  name: string;
+};
+
+export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC';
