@@ -77,7 +77,10 @@ export class Workspaces {
   }
 
   public getPendingInvites(): Promise<PendingInvitesResponse> {
-    return this.client.get<PendingInvitesResponse>('workspaces/invitations', this.headers());
+    const limitQuery = '?limit=25';
+    const offsetQuery = '&offset=0';
+    const query = `${limitQuery}${offsetQuery}`;
+    return this.client.get<PendingInvitesResponse>(`workspaces/invitations/${query}`, this.headers());
   }
 
   public validateWorkspaceInvite(inviteId: string): Promise<string> {
