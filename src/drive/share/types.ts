@@ -147,6 +147,7 @@ export type ListSharedItemsResponse = {
   credentials: { networkPass: string; networkUser: string };
   items: SharedFiles[] | SharedFolders[];
   token: string;
+  role: string;
 };
 
 export type ListAllSharedFoldersResponse = {
@@ -154,6 +155,7 @@ export type ListAllSharedFoldersResponse = {
   files: SharedFiles[];
   folders: SharedFolders[];
   token: string;
+  role: string;
 };
 
 export type ShareFolderWithUserPayload = {

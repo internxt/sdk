@@ -1,36 +1,36 @@
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import {
   basicHeaders,
   basicHeadersWithPassword,
   headersWithToken,
   headersWithTokenAndPassword,
 } from '../../shared/headers';
+import { HttpClient } from '../../shared/http/client';
 import {
+  AcceptInvitationToSharedFolderPayload,
+  CreateSharingPayload,
   GenerateShareLinkPayload,
-  GetSharedDirectoryPayload,
   GetShareLinkFolderSizePayload,
+  GetSharedDirectoryPayload,
   ListAllSharedFoldersResponse,
   ListPrivateSharedFoldersResponse,
   ListShareLinksResponse,
-  SharedFolderUser,
-  ShareDomainsResponse,
-  ShareLink,
-  ShareFolderWithUserPayload,
-  UpdateUserRolePayload,
-  UpdateUserRoleResponse,
-  UpdateShareLinkPayload,
   ListSharedItemsResponse,
-  AcceptInvitationToSharedFolderPayload,
+  PublicSharedItemInfo,
   RemoveUserRolePayload,
   Role,
-  SharingInvite,
-  SharedFoldersInvitationsAsInvitedUserResponse,
-  CreateSharingPayload,
-  SharingMeta,
-  PublicSharedItemInfo,
+  ShareDomainsResponse,
+  ShareFolderWithUserPayload,
+  ShareLink,
   SharedFolderSize,
+  SharedFolderUser,
+  SharedFoldersInvitationsAsInvitedUserResponse,
+  SharingInvite,
+  SharingMeta,
+  UpdateShareLinkPayload,
+  UpdateUserRolePayload,
+  UpdateUserRoleResponse,
 } from './types';
-import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { HttpClient } from '../../shared/http/client';
 
 export * as ShareTypes from './types';
 
@@ -614,10 +614,11 @@ export class Share {
    * @private
    */
   private headers(password?: string) {
-    const args: [string, string, string] = [
+    const args: [string, string, string, string | undefined] = [
       this.appDetails.clientName,
       this.appDetails.clientVersion,
       this.apiSecurity.token,
+      this.apiSecurity.workspaceToken,
     ];
     if (password) {
       return headersWithTokenAndPassword(...args, password);
