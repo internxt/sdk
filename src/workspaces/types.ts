@@ -1,3 +1,5 @@
+import { SharedFiles, SharedFolders } from '../drive/share/types';
+
 export interface WorkspaceUser {
   backupsUsage: string;
   createdAt: string;
@@ -142,6 +144,45 @@ export type InviteMemberBody = {
   message: string;
 };
 
+interface Invite {
+  id: string;
+  workspaceId: string;
+  invitedUser: string;
+  encryptionAlgorithm: string;
+  encryptionKey: string;
+  spaceLimit: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type PendingInvitesResponse = (Invite & {
+  workspace: Workspace;
+})[];
+
+export type EditWorkspaceDetailsBody = {
+  workspaceId: string;
+  name?: string;
+  description?: string;
+};
+
+export type GetMemberDetailsResponse = {
+  user: {
+    name: string;
+    lastname: string;
+    email: string;
+    uuid: string;
+    id: number;
+    avatar: string | null;
+    memberId: string;
+    workspaceId: string;
+    spaceLimit: string;
+    driveUsage: string;
+    backupsUsage: string;
+    deactivated: boolean;
+  };
+  teams: (Team & { isManager: boolean })[];
+};
+
 export type FileEntry = {
   name: string;
   bucket: string;
@@ -175,7 +216,7 @@ export interface CreateFolderPayload {
   parentFolderUuid: string;
 }
 
-export interface WorkspacePendingInvitations {
+export type WorkspacePendingInvitations = {
   id: string;
   workspaceId: string;
   invitedUser: string;
@@ -192,4 +233,30 @@ export interface WorkspacePendingInvitations {
     avatar: string | null;
   };
   isGuessInvite: boolean;
+};
+
+export type ItemType = 'file' | 'folder';
+
+export interface CreateWorkspaceSharingPayload {
+  workspaceId: string;
+  itemId: string;
+  itemType: ItemType;
+  teamUUID: string;
+  roleId: string;
 }
+
+export type ListWorkspaceSharedItemsResponse = {
+  items: SharedFiles[] | SharedFolders[];
+  token: string;
+  role: string;
+  parent: Parent;
+  bucket: string;
+  encryptionKey: null | string;
+};
+
+export type Parent = {
+  uuid: string;
+  name: string;
+};
+
+export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC';

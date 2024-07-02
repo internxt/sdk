@@ -1,8 +1,8 @@
-import { headersWithToken } from '../../shared/headers';
-import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
-import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
+import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
+import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
 
 export * as TrashTypes from './types';
 
@@ -105,6 +105,11 @@ export class Trash {
    * @private
    */
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.workspaceToken,
+    );
   }
 }

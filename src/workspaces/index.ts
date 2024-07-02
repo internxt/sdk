@@ -1,13 +1,25 @@
 import { Token } from '../auth';
-import { CreateFolderResponse, DriveFileData, FetchPaginatedFolderContentResponse } from '../drive/storage/types';
+import { ListAllSharedFoldersResponse, SharingMeta } from '../drive/share/types';
+import {
+  CreateFolderResponse,
+  DriveFileData,
+  FetchPaginatedFolderContentResponse,
+  FetchTrashContentResponse,
+} from '../drive/storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
   CreateFolderPayload,
   CreateTeamData,
+  CreateWorkspaceSharingPayload,
+  EditWorkspaceDetailsBody,
   FileEntry,
+  GetMemberDetailsResponse,
   InviteMemberBody,
+  ListWorkspaceSharedItemsResponse,
+  OrderByOptions,
+  PendingInvitesResponse,
   WorkspaceCredentialsDetails,
   WorkspaceMembers,
   WorkspaceSetupInfo,
@@ -36,7 +48,12 @@ export class Workspaces {
    * @private
    */
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.workspaceToken,
+    );
   }
 
   private getRequestHeaders(token?: string) {
@@ -57,6 +74,34 @@ export class Workspaces {
 
   public getPendingWorkspaces(): Promise<WorkspacesResponse> {
     return this.client.get<WorkspacesResponse>('workspaces/pending-setup', this.headers());
+  }
+
+  public getPendingInvites(): Promise<PendingInvitesResponse> {
+    return this.client.get<PendingInvitesResponse>('workspaces/invitations', this.headers());
+  }
+
+  public validateWorkspaceInvite(inviteId: string): Promise<string> {
+    return this.client.get<string>(`workspaces/invitations/${inviteId}validate`, this.headers());
+  }
+
+  /**
+   * Uploads an avatar for a specific workspace.
+   * @param workspaceId The UUID of the workspace to upload the avatar for.
+   * @param avatar The avatar to upload.
+   * @returns The response from the server.
+   */
+  public uploadWorkspaceAvatar(workspaceId: string, avatar: Blob) {
+    const formData = new FormData();
+    formData.append('file', avatar);
+
+    return this.client.post<void>(`workspaces/${workspaceId}/avatar`, formData, {
+      ...this.headers(),
+      'content-type': 'multipart/form-data',
+    });
+  }
+
+  public deleteWorkspaceAvatar(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`workspaces/${workspaceId}/avatar`, this.headers());
   }
 
   public setupWorkspace({
@@ -122,6 +167,23 @@ export class Workspaces {
     return this.client.patch<void>(`/workspaces/teams/${teamId}/manager`, {}, this.headers());
   }
 
+  public getPersonalTrash(
+    workspaceId: string,
+    type: 'file' | 'folder',
+    offset = 0,
+    limit = 50,
+  ): Promise<FetchTrashContentResponse> {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const typeQuery = `&type=${type}`;
+    const query = `${offsetQuery}${limitQuery}${typeQuery}`;
+    return this.client.get<FetchTrashContentResponse>(`/workspaces/${workspaceId}/trash${query}`, this.headers());
+  }
+
+  public emptyPersonalTrash(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`/workspaces/${workspaceId}/trash`, this.headers());
+  }
+
   public changeUserRole(teamId: string, memberId: string, role: string): Promise<void> {
     return this.client.patch<void>(
       `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
@@ -151,6 +213,29 @@ export class Workspaces {
       },
       this.headers(),
     );
+  }
+
+  public editWorkspaceDetails({ workspaceId, description, name }: EditWorkspaceDetailsBody): Promise<void> {
+    return this.client.patch<void>(
+      `workspaces/${workspaceId}`,
+      {
+        name,
+        description,
+      },
+      this.headers(),
+    );
+  }
+
+  public leaveWorkspace(workspaceId: string): Promise<void> {
+    return this.client.delete<void>(`workspaces/${workspaceId}/members/leave`, this.headers());
+  }
+
+  public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
+    return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
+  public deactivateMember(workspaceId: string, memberId: string): Promise<void> {
+    return this.client.patch<void>(`workspaces/${workspaceId}/members/${memberId}/deactivate`, {}, this.headers());
   }
 
   public acceptInvitation(inviteId: string, token: string): Promise<void> {
@@ -300,8 +385,99 @@ export class Workspaces {
     );
   }
 
+  /**
+   * Creates a new sharing for a workspace item.
+   *
+   * @param {CreateWorkspaceSharingPayload} options - The options for creating the sharing.
+   * @param {string} options.workspaceId - The ID of the workspace.
+   * @param {string} options.teamUUID - The UUID of the team.
+   * @param {...CreateSharingPayload} options.createSharingPayload - The payload for creating the sharing.
+   * @returns {Promise<SharingMeta>} A promise that resolves to the sharing metadata.
+   */
+  public shareItem({
+    workspaceId,
+    teamUUID,
+    ...createSharingPayload
+  }: CreateWorkspaceSharingPayload): Promise<SharingMeta> {
+    return this.client.post(
+      `workspaces/${workspaceId}/shared`,
+      {
+        ...createSharingPayload,
+        sharedWith: teamUUID,
+      },
+      this.headers(),
+    );
+  }
+
   public validateWorkspaceInvitation(inviteId: string): Promise<{ uuid: string }> {
     return this.client.get<{ uuid: string }>(`workspaces/invitations/${inviteId}/validate`, this.headers());
+  }
+
+  public getWorkspaceTeamSharedFiles(
+    workspaceId: string,
+    teamId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/files${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  public getWorkspaceTeamSharedFolders(
+    workspaceId: string,
+    teamId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/folders${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+  public getWorkspaceTeamSharedFolderFiles(
+    workspaceId: string,
+    teamId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/files?page=${page}&perPage=${perPage}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  public getWorkspaceTeamSharedFolderFolders(
+    workspaceId: string,
+    teamId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/folders?page=${page}&perPage=${perPage}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
   }
 }
 
