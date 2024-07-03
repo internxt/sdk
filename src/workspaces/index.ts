@@ -117,6 +117,21 @@ export class Workspaces {
     );
   }
 
+  public editWorkspace(workspaceId: string, details: { name?: string, description?: string }): Promise<void> {
+    return this.client.patch<void>(`workspaces/${workspaceId}`, details, this.headers());
+  }
+
+  public updateAvatar(workspaceId: string, payload: { avatar: Blob }) {
+    const formData = new FormData();
+    formData.set('file', payload.avatar);
+
+    return this.client.post<{ avatar: string }>(`workspaces/${workspaceId}/avatar`, formData, this.headers());
+  }
+
+  public deleteAvatar(workspaceId: string) {
+    return this.client.delete<void>(`workspaces/${workspaceId}/avatar`, this.headers());
+  }
+
   public createTeam({ workspaceId, name, managerId }: CreateTeamData): Promise<void> {
     return this.client.post<void>(
       `workspaces/${workspaceId}/teams`,
