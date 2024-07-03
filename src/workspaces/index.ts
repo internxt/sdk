@@ -25,6 +25,7 @@ import {
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
   WorkspacesResponse,
+  WorkspacePendingInvitations,
 } from './types';
 
 export class Workspaces {
@@ -76,7 +77,10 @@ export class Workspaces {
   }
 
   public getPendingInvites(): Promise<PendingInvitesResponse> {
-    return this.client.get<PendingInvitesResponse>('workspaces/invitations', this.headers());
+    const limitQuery = '?limit=25';
+    const offsetQuery = '&offset=0';
+    const query = `${limitQuery}${offsetQuery}`;
+    return this.client.get<PendingInvitesResponse>(`workspaces/invitations/${query}`, this.headers());
   }
 
   public validateWorkspaceInvite(inviteId: string): Promise<string> {
@@ -199,6 +203,7 @@ export class Workspaces {
     spaceLimitBytes,
     encryptedMnemonicInBase64,
     encryptionAlgorithm = 'aes-256-gcm',
+    message,
   }: InviteMemberBody): Promise<void> {
     return this.client.post<void>(
       `workspaces/${workspaceId}/members/invite`,
@@ -207,6 +212,7 @@ export class Workspaces {
         spaceLimit: spaceLimitBytes,
         encryptionKey: encryptedMnemonicInBase64,
         encryptionAlgorithm,
+        message: message,
       },
       this.headers(),
     );
@@ -366,6 +372,22 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
+  public getWorkspacePendingInvitations(
+    workspaceId: string,
+    limit: number,
+    offset: number,
+  ): Promise<WorkspacePendingInvitations[]> {
+    const limitQuery = `?limit=${limit}`;
+    const offsetQuery = `&offset=${offset}`;
+
+    const query = `${limitQuery}${offsetQuery}`;
+
+    return this.client.get<WorkspacePendingInvitations[]>(
+      `workspaces/${workspaceId}/invitations/${query}`,
+      this.headers(),
+    );
+  }
+
   /**
    * Creates a new sharing for a workspace item.
    *
@@ -388,6 +410,10 @@ export class Workspaces {
       },
       this.headers(),
     );
+  }
+
+  public validateWorkspaceInvitation(inviteId: string): Promise<{ uuid: string }> {
+    return this.client.get<{ uuid: string }>(`workspaces/invitations/${inviteId}/validate`, this.headers());
   }
 
   public getWorkspaceTeamSharedFiles(
