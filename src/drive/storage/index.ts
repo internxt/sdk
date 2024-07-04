@@ -130,6 +130,29 @@ export class Storage {
   }
 
   /**
+   * Updates the name of a folder with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the folder UUID and the new name.
+   * @param {string} payload.folderUuid - The UUID of the folder to update.
+   * @param {string} payload.name - The new name for the folder.
+   * @param {Token} [resourcesToken] - An optional token for authentication.
+   * @return {Promise<void>} A promise that resolves when the folder name is successfully updated.
+   */
+  public updateFolderNameWithUUID(
+    payload: { folderUuid: string; name: string },
+    resourcesToken?: Token,
+  ): Promise<void> {
+    const { folderUuid, name } = payload;
+    return this.client.put(
+      `/folders/${folderUuid}/meta`,
+      {
+        plainName: name,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
@@ -409,6 +432,26 @@ export class Storage {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Updates the name of a file with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the UUID and new name of the file.
+   * @param {string} payload.fileUuid - The UUID of the file.
+   * @param {string} payload.name - The new name of the file.
+   * @param {string} [resourcesToken] - The token for accessing resources.
+   * @return {Promise<void>} - A Promise that resolves when the file name is successfully updated.
+   */
+  public updateFileNameWithUUID(payload: { fileUuid: string; name: string }, resourcesToken?: Token): Promise<void> {
+    const { fileUuid, name } = payload;
+    return this.client.put(
+      `/files/${fileUuid}/meta`,
+      {
+        plainName: name,
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
