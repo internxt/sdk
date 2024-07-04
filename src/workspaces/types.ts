@@ -141,6 +141,7 @@ export type InviteMemberBody = {
   spaceLimitBytes: number;
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
+  message: string;
 };
 
 interface Invite {
@@ -214,6 +215,25 @@ export interface CreateFolderPayload {
   plainName: string;
   parentFolderUuid: string;
 }
+
+export type WorkspacePendingInvitations = {
+  id: string;
+  workspaceId: string;
+  invitedUser: string;
+  encryptionAlgorithm: string;
+  encryptionKey: string;
+  spaceLimit: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: {
+    name: string;
+    lastname: string;
+    email: string;
+    uuid: string;
+    avatar: string | null;
+  };
+  isGuessInvite: boolean;
+};
 
 export type ItemType = 'file' | 'folder';
 

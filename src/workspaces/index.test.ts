@@ -358,6 +358,7 @@ describe('Workspaces service tests', () => {
         const encryptionAlgorithm = 'aes-256-gcm';
         const { client, headers } = clientAndHeaders();
         const postCall = sinon.stub(httpClient, 'post').resolves();
+        const message = 'Test message';
 
         await client.inviteMemberToWorkspace({
           workspaceId,
@@ -365,6 +366,7 @@ describe('Workspaces service tests', () => {
           spaceLimitBytes,
           encryptedMnemonicInBase64,
           encryptionAlgorithm,
+          message,
         });
 
         expect(postCall.firstCall.args).toEqual([
@@ -374,6 +376,7 @@ describe('Workspaces service tests', () => {
             spaceLimit: spaceLimitBytes,
             encryptionKey: encryptedMnemonicInBase64,
             encryptionAlgorithm: 'aes-256-gcm',
+            message: message,
           },
           headers,
         ]);
