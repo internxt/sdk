@@ -211,9 +211,11 @@ export default class PhotosSubmodule {
       });
   }
 
-  public getUsage(): Promise<PhotosUsage> {
+  public getUsage(workspaceUserId?: string): Promise<PhotosUsage> {
+    const query = new URLSearchParams();
+    if (workspaceUserId) query.set('workspaceUserId', workspaceUserId);
     return axios
-      .get(`${this.model.baseUrl}/photos/usage`, {
+      .get(`${this.model.baseUrl}/photos/usage?${query.toString()}`, {
         headers: {
           Authorization: `Bearer ${this.model.accessToken}`,
         },
