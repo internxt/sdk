@@ -565,7 +565,7 @@ describe('# storage service tests', () => {
         const body = await client.spaceUsage();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/usage', headers]);
+        expect(callStub.firstCall.args).toEqual(['/usage?', headers]);
         expect(body).toEqual({
           total: 10,
         });
@@ -584,7 +584,7 @@ describe('# storage service tests', () => {
         const body = await client.spaceLimit();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/limit', headers]);
+        expect(callStub.firstCall.args).toEqual(['/limit?', headers]);
         expect(body).toEqual({
           total: 10,
         });

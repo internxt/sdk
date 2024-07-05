@@ -498,26 +498,18 @@ export class Storage {
    * Returns the current space usage of the user
    */
   public spaceUsage(workspaceUserId?: string): Promise<UsageResponse> {
-    let url = '/usage';
-    if (workspaceUserId) {
-      const query = new URLSearchParams();
-      query.set('workspaceUserId', workspaceUserId);
-      url += `?${query.toString()}`;
-    }
-    return this.client.get(url, this.headers());
+    const query = new URLSearchParams();
+    if (workspaceUserId) query.set('workspaceUserId', workspaceUserId);
+    return this.client.get(`/usage?${query.toString()}`, this.headers());
   }
 
   /**
    * Returns the current space limit for the user
    */
   public spaceLimit(workspaceUserId?: string): Promise<FetchLimitResponse> {
-    let url = '/limit';
-    if (workspaceUserId) {
-      const query = new URLSearchParams();
-      query.set('workspaceUserId', workspaceUserId);
-      url += `?${query.toString()}`;
-    }
-    return this.client.get(url, this.headers());
+    const query = new URLSearchParams();
+    if (workspaceUserId) query.set('workspaceUserId', workspaceUserId);
+    return this.client.get(`/limit?${query.toString()}`, this.headers());
   }
 
   /**
