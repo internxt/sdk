@@ -11,7 +11,8 @@ import {
   FreeTrialAvailable,
   RedeemCodePayload,
   UpdateSubscriptionPaymentMethod,
-  SubscriptionType,
+  UserType,
+  InvoicePayload,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -59,18 +60,21 @@ export class Payments {
     );
   }
 
-  public getSetupIntent(): Promise<{ clientSecret: string }> {
-    return this.client.get('/setup-intent', this.headers());
+  public getSetupIntent(userType?: UserType): Promise<{ clientSecret: string }> {
+    const query = new URLSearchParams();
+    if (userType) query.set('userType', userType);
+    return this.client.get(`/setup-intent?${query.toString()}`, this.headers());
   }
 
-  public getDefaultPaymentMethod(subscriptionType?: SubscriptionType): Promise<PaymentMethod> {
+  public getDefaultPaymentMethod(userType?: UserType): Promise<PaymentMethod> {
     const query = new URLSearchParams();
-    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    if (userType) query.set('userType', userType);
     return this.client.get(`/default-payment-method?${query.toString()}`, this.headers());
   }
 
-  public getInvoices({ startingAfter, limit }: { startingAfter?: string; limit?: number }): Promise<Invoice[]> {
+  public getInvoices({ subscriptionId, startingAfter, limit }: InvoicePayload): Promise<Invoice[]> {
     const query = new URLSearchParams();
+    if (subscriptionId) query.set('subscription', subscriptionId);
     if (startingAfter !== undefined) query.set('starting_after', startingAfter);
     if (limit !== undefined) query.set('limit', limit.toString());
 
@@ -86,9 +90,9 @@ export class Payments {
     return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
-  public getUserSubscription(subscriptionType?: SubscriptionType): Promise<UserSubscription> {
+  public getUserSubscription(userType?: UserType): Promise<UserSubscription> {
     const query = new URLSearchParams();
-    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    if (userType) query.set('userType', userType);
     return this.client.get<UserSubscription>(`/subscriptions?${query.toString()}`, this.headers()).catch((err) => {
       const error = err as AppError;
 
@@ -97,10 +101,10 @@ export class Payments {
     });
   }
 
-  public async getPrices(currency?: string, subscriptionType?: SubscriptionType): Promise<DisplayPrice[]> {
+  public async getPrices(currency?: string, userType?: UserType): Promise<DisplayPrice[]> {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
-    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    if (userType) query.set('userType', userType);
     return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
   }
 
@@ -127,9 +131,9 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
   }
 
-  public cancelSubscription(subscriptionType?: SubscriptionType): Promise<void> {
+  public cancelSubscription(userType?: UserType): Promise<void> {
     const query = new URLSearchParams();
-    if (subscriptionType) query.set('subscriptionType', subscriptionType);
+    if (userType) query.set('userType', userType);
     return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
   }
 

@@ -1,3 +1,4 @@
+import { AppSumoDetails } from './../../shared/types/appsumo';
 export interface ProductData {
   id: string;
   name: string;
@@ -63,7 +64,28 @@ export enum ProductPriceType {
   OneTime = 'one_time',
 }
 
-export type SubscriptionType = 'individual' | 'business';
+export enum UserType {
+  Individual = 'individual',
+  Business = 'business',
+}
+
+export type StoragePlan = {
+  planId: string;
+  productId: string;
+  name: string;
+  simpleName: string;
+  paymentInterval: RenewalPeriod;
+  price: number;
+  monthlyPrice: number;
+  currency: string;
+  isTeam: boolean;
+  isLifetime: boolean;
+  renewalPeriod: RenewalPeriod;
+  storageLimit: number;
+  amountOfSeats: number;
+  isAppSumo?: boolean;
+  details?: AppSumoDetails;
+};
 
 export interface CreatePaymentSessionPayload {
   test?: boolean;
@@ -90,20 +112,30 @@ export interface Invoice {
   created: number;
   bytesInPlan: number;
   pdf: string;
+  total: number;
+  currency: string;
+}
+
+export interface InvoicePayload {
+  subscriptionId: string;
+  startingAfter?: string;
+  limit?: number;
 }
 
 export type UserSubscription =
   | { type: 'free' | 'lifetime' }
   | {
       type: 'subscription';
+      subscriptionId: string;
       amount: number;
       currency: string;
       amountAfterCoupon?: number;
       interval: 'year' | 'month';
       nextPayment: number;
       priceId: string;
-      subscriptionType: SubscriptionType;
+      userType?: UserType;
       planId?: string;
+      plan?: StoragePlan;
     };
 
 export interface DisplayPrice {
@@ -112,6 +144,7 @@ export interface DisplayPrice {
   interval: 'year' | 'month' | 'lifetime';
   amount: number;
   currency: string;
+  userType: UserType;
 }
 
 export interface CreateCheckoutSessionPayload {
@@ -134,6 +167,6 @@ export interface RedeemCodePayload {
 }
 
 export interface UpdateSubscriptionPaymentMethod {
-  subscriptionType: SubscriptionType;
+  userType: UserType;
   paymentMethodId: string;
 }
