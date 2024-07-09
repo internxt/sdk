@@ -448,3 +448,27 @@ export interface ReplaceFile {
   fileId: string;
   size: number;
 }
+
+export interface FolderTree {
+  id: number;
+  bucket: string | null;
+  children: FolderTree[];
+  encrypt_version: string;
+  files: DriveFileData[];
+  name: string;
+  plainName: string;
+  parentId: number;
+  userId: number;
+  uuid: string;
+  parentUuid: string;
+  createdAt: string;
+  updatedAt: string;
+  size: number;
+  type: string;
+  deleted: boolean;
+  removed: boolean;
+}
+
+export interface FolderTreeResponse {
+  tree: FolderTree;
+}

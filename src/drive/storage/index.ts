@@ -20,6 +20,7 @@ import {
   FileMeta,
   FolderAncestor,
   FolderMeta,
+  FolderTreeResponse,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -642,5 +643,15 @@ export class Storage {
       },
       this.headers(),
     );
+  }
+
+  /**
+   * Retrieves the folder tree based on the UUID.
+   *
+   * @param {string} uuid - The UUID of the folder.
+   * @return {Promise<FolderTreeResponse>} The promise containing the folder tree response.
+   */
+  public getFolderTree(uuid: string): Promise<FolderTreeResponse> {
+    return this.client.get(`/folders/${uuid}/tree`, this.headers());
   }
 }
