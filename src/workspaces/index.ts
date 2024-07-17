@@ -16,16 +16,17 @@ import {
   EditWorkspaceDetailsBody,
   FileEntry,
   GetMemberDetailsResponse,
+  GetMemberUsageResponse,
   InviteMemberBody,
   ListWorkspaceSharedItemsResponse,
   OrderByOptions,
   PendingInvitesResponse,
   WorkspaceCredentialsDetails,
   WorkspaceMembers,
+  WorkspacePendingInvitations,
   WorkspaceSetupInfo,
   WorkspaceTeamResponse,
   WorkspacesResponse,
-  WorkspacePendingInvitations,
 } from './types';
 
 export class Workspaces {
@@ -121,7 +122,7 @@ export class Workspaces {
     );
   }
 
-  public editWorkspace(workspaceId: string, details: { name?: string, description?: string }): Promise<void> {
+  public editWorkspace(workspaceId: string, details: { name?: string; description?: string }): Promise<void> {
     return this.client.patch<void>(`workspaces/${workspaceId}`, details, this.headers());
   }
 
@@ -250,6 +251,10 @@ export class Workspaces {
 
   public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
     return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
+  public getMemberUsage(workspaceId: string): Promise<GetMemberUsageResponse> {
+    return this.client.get<GetMemberUsageResponse>(`workspaces/${workspaceId}/usage/member`, this.headers());
   }
 
   public deactivateMember(workspaceId: string, memberId: string): Promise<void> {
