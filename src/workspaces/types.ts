@@ -260,3 +260,5 @@ export type Parent = {
 };
 
 export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC';
+
+export type GetMemberUsageResponse = { backupsUsage: number; driveUsage: number; spaceLimit: number };
