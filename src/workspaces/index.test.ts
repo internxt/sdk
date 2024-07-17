@@ -527,7 +527,7 @@ describe('Workspaces service tests', () => {
 
         await client.leaveWorkspace(workspaceId);
 
-        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/members/leave`, headers]);
+        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/members/leave`, headers]);
       });
     });
 
