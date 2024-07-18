@@ -502,6 +502,20 @@ export class Workspaces {
 
     return [promise, requestCanceler];
   }
+
+  public getWorkspaceBillingAddress(workspaceId: string): Promise<string> {
+    return this.client.get<string>(`workspaces/${workspaceId}/billing-address`, this.headers());
+  }
+
+  public editWorkspaceBillingAddress(workspaceId: string, address: string): Promise<void> {
+    return this.client.patch<void>(
+      `workspaces/${workspaceId}/billing-address`,
+      {
+        address,
+      },
+      this.headers(),
+    );
+  }
 }
 
 export * from './types';

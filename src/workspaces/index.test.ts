@@ -587,6 +587,33 @@ describe('Workspaces service tests', () => {
         ]);
       });
     });
+
+    describe('getWorkspaceBillingAddress', () => {
+      it('should return the workspace billing address successfully', async () => {
+        const { client } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const getWorkspaceBillingAddressResponse = 'Test address';
+
+        sinon.stub(httpClient, 'get').resolves(getWorkspaceBillingAddressResponse);
+
+        const response = await client.getWorkspaceBillingAddress(workspaceId);
+
+        expect(response).toEqual(getWorkspaceBillingAddressResponse);
+      });
+    });
+
+    describe('editWorkspaceBillingAddress', () => {
+      it('should set the workspace billing address successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const address = 'Test address';
+        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+
+        await client.editWorkspaceBillingAddress(workspaceId, address);
+
+        expect(patchCall.firstCall.args).toEqual([`workspaces/${workspaceId}/billing-address`, { address }, headers]);
+      });
+    });
   });
 });
 
