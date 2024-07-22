@@ -13,7 +13,6 @@ import {
   CreateFolderPayload,
   CreateTeamData,
   CreateWorkspaceSharingPayload,
-  EditWorkspaceDetailsBody,
   FileEntry,
   GetMemberDetailsResponse,
   GetMemberUsageResponse,
@@ -21,6 +20,7 @@ import {
   ListWorkspaceSharedItemsResponse,
   OrderByOptions,
   PendingInvitesResponse,
+  Workspace,
   WorkspaceCredentialsDetails,
   WorkspaceMembers,
   WorkspacePendingInvitations,
@@ -495,8 +495,8 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
-  public getWorkspace(workspaceId: string): Promise<string> {
-    return this.client.get<string>(`workspaces/${workspaceId}`, this.headers());
+  public getWorkspace(workspaceId: string): Promise<Workspace> {
+    return this.client.get<Workspace>(`workspaces/${workspaceId}`, this.headers());
   }
 }
 
