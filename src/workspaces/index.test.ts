@@ -499,20 +499,21 @@ describe('Workspaces service tests', () => {
       });
     });
 
-    describe('editWorkspaceDetails', () => {
+    describe('editWorkspace', () => {
       it('should edit the workspace details successfully', async () => {
         const { client, headers } = clientAndHeaders();
         const workspaceId = 'workspaceId';
         const workspaceData = {
           name: 'Workspace Name',
           description: 'Workspace Description',
+          address: 'Workspace Address',
         };
         const patchCall = sinon.stub(httpClient, 'patch').resolves();
 
-        await client.editWorkspaceDetails({
-          workspaceId,
+        await client.editWorkspace(workspaceId, {
           description: workspaceData.description,
           name: workspaceData.name,
+          address: workspaceData.address,
         });
 
         expect(patchCall.firstCall.args).toEqual([`workspaces/${workspaceId}`, workspaceData, headers]);
@@ -585,6 +586,33 @@ describe('Workspaces service tests', () => {
           {},
           headers,
         ]);
+      });
+    });
+
+    describe('getWorkspace', () => {
+      it('should return the workspace billing address successfully', async () => {
+        const workspace = {
+          id: 'workspace2',
+          ownerId: 'owner2',
+          address: '456 Elm St',
+          name: 'Workspace 2',
+          description: 'Description for Workspace 2',
+          defaultTeamId: 'team2',
+          workspaceUserId: '2',
+          setupCompleted: true,
+          createdAt: '2024-04-30T12:00:00Z',
+          updatedAt: '2024-04-30T12:00:00Z',
+          avatar: null,
+          rootFolderId: 'asflaksfoau0su0fewnlsd',
+        };
+        const { client } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+
+        sinon.stub(httpClient, 'get').resolves(workspace);
+
+        const response = await client.getWorkspace(workspaceId);
+
+        expect(response).toEqual(workspace);
       });
     });
   });

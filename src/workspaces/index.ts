@@ -13,7 +13,6 @@ import {
   CreateFolderPayload,
   CreateTeamData,
   CreateWorkspaceSharingPayload,
-  EditWorkspaceDetailsBody,
   FileEntry,
   GetMemberDetailsResponse,
   GetMemberUsageResponse,
@@ -21,6 +20,7 @@ import {
   ListWorkspaceSharedItemsResponse,
   OrderByOptions,
   PendingInvitesResponse,
+  Workspace,
   WorkspaceCredentialsDetails,
   WorkspaceMembers,
   WorkspacePendingInvitations,
@@ -122,7 +122,10 @@ export class Workspaces {
     );
   }
 
-  public editWorkspace(workspaceId: string, details: { name?: string; description?: string }): Promise<void> {
+  public editWorkspace(
+    workspaceId: string,
+    details: { name?: string; description?: string; address?: string },
+  ): Promise<void> {
     return this.client.patch<void>(`workspaces/${workspaceId}`, details, this.headers());
   }
 
@@ -229,17 +232,6 @@ export class Workspaces {
         encryptionKey: encryptedMnemonicInBase64,
         encryptionAlgorithm,
         message: message,
-      },
-      this.headers(),
-    );
-  }
-
-  public editWorkspaceDetails({ workspaceId, description, name }: EditWorkspaceDetailsBody): Promise<void> {
-    return this.client.patch<void>(
-      `workspaces/${workspaceId}`,
-      {
-        name,
-        description,
       },
       this.headers(),
     );
@@ -501,6 +493,10 @@ export class Workspaces {
     );
 
     return [promise, requestCanceler];
+  }
+
+  public getWorkspace(workspaceId: string): Promise<Workspace> {
+    return this.client.get<Workspace>(`workspaces/${workspaceId}`, this.headers());
   }
 }
 
