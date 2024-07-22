@@ -589,6 +589,23 @@ describe('Workspaces service tests', () => {
       });
     });
 
+    describe('activateMember', () => {
+      it('should activate the member successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const memberId = 'memberId';
+        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+
+        await client.activateMember(workspaceId, memberId);
+
+        expect(patchCall.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/members/${memberId}/activate`,
+          {},
+          headers,
+        ]);
+      });
+    });
+
     describe('getWorkspace', () => {
       it('should return the workspace billing address successfully', async () => {
         const workspace = {
