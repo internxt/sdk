@@ -32,6 +32,7 @@ export interface Workspace {
   updatedAt: string;
   avatar: null | string;
   rootFolderId: string;
+  phoneNumber: null | string;
 }
 
 export interface WorkspaceData {

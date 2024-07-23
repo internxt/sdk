@@ -170,3 +170,8 @@ export interface UpdateSubscriptionPaymentMethod {
   userType: UserType;
   paymentMethodId: string;
 }
+
+export interface CustomerBillingInfo {
+  address?: string;
+  phoneNumber?: string;
+}
