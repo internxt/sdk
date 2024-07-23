@@ -13,6 +13,7 @@ import {
   UpdateSubscriptionPaymentMethod,
   UserType,
   InvoicePayload,
+  CustomerBillingInfo,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -139,6 +140,10 @@ export class Payments {
 
   public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
+  }
+
+  public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
+    return this.client.patch('/billing', { ...payload }, this.headers());
   }
 
   public getPaypalSetupIntent({

@@ -80,6 +80,7 @@ describe('Workspaces service tests', () => {
             updatedAt: '2024-04-30T12:00:00Z',
             avatar: null,
             rootFolderId: 'asflaksfoau0su0fewnlsd',
+            phoneNumber: null,
           },
         },
         {
@@ -137,6 +138,7 @@ describe('Workspaces service tests', () => {
             updatedAt: '2024-04-30T12:00:00Z',
             avatar: null,
             rootFolderId: 'asflaksfoau0su0fewnlsd',
+            phoneNumber: null,
           },
         },
       ],
@@ -409,6 +411,7 @@ describe('Workspaces service tests', () => {
               workspaceUserId: '1',
               avatar: null,
               rootFolderId: 'asdf-123-asdf',
+              phoneNumber: null,
             },
           },
         ];
