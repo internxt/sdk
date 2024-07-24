@@ -97,16 +97,18 @@ export interface CreatePaymentSessionPayload {
 }
 
 export interface StripeAddress {
-  ity: string | null;
+  city: string | null;
   country: string | null;
   line1: string | null;
   line2: string | null;
+  // TODO: Change this as camelCase
   postal_code: string | null;
   state: string | null;
 }
 
 export interface PaymentMethod {
   id: string;
+  // TODO: Change this as camelCase
   billing_details?: {
     address: StripeAddress | null;
     email: string | null;
