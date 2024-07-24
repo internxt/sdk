@@ -96,8 +96,25 @@ export interface CreatePaymentSessionPayload {
   canceledUrl?: string;
 }
 
+export interface StripeAddress {
+  city: string | null;
+  country: string | null;
+  line1: string | null;
+  line2: string | null;
+  // TODO: Change this as camelCase
+  postal_code: string | null;
+  state: string | null;
+}
+
 export interface PaymentMethod {
   id: string;
+  // TODO: Change this as camelCase
+  billing_details?: {
+    address: StripeAddress | null;
+    email: string | null;
+    name: string | null;
+    phone: string | null;
+  };
   card: {
     brand: 'amex' | 'diners' | 'discover' | 'jcb' | 'mastercard' | 'unionpay' | 'visa' | 'unknown';
     exp_month: number;
