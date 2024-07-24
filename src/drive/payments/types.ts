@@ -96,8 +96,23 @@ export interface CreatePaymentSessionPayload {
   canceledUrl?: string;
 }
 
+export interface StripeAddress {
+  ity: string | null;
+  country: string | null;
+  line1: string | null;
+  line2: string | null;
+  postal_code: string | null;
+  state: string | null;
+}
+
 export interface PaymentMethod {
   id: string;
+  billing_details?: {
+    address: StripeAddress | null;
+    email: string | null;
+    name: string | null;
+    phone: string | null;
+  };
   card: {
     brand: 'amex' | 'diners' | 'discover' | 'jcb' | 'mastercard' | 'unionpay' | 'visa' | 'unknown';
     exp_month: number;
