@@ -471,10 +471,11 @@ export class Workspaces {
     orderBy?: OrderByOptions,
   ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    let params = `?page=${page}&perPage=${perPage}`;
+    if (token) params = params + `&token=${token}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
-      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/files?page=${page}
-      &perPage=${perPage}&token=${token}
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/files${params}
       ${orderByQueryParam}`,
       this.headers(),
     );
@@ -492,10 +493,11 @@ export class Workspaces {
     orderBy?: OrderByOptions,
   ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    let params = `?page=${page}&perPage=${perPage}`;
+    if (token) params = params + `&token=${token}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
-      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/folders?page=${page}
-      &perPage=${perPage}&token=${token}
+      `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/folders${params}
       ${orderByQueryParam}`,
       this.headers(),
     );
