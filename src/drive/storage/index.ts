@@ -391,7 +391,7 @@ export class Storage {
    * Creates a new file entry
    * @param fileEntry
    */
-  public createFileEntryByUuid(fileEntry: FileEntryByUuid): Promise<DriveFileData> {
+  public createFileEntryByUuid(fileEntry: FileEntryByUuid, resourcesToken?: string): Promise<DriveFileData> {
     return this.client.post(
       '/files',
       {
@@ -404,7 +404,7 @@ export class Storage {
         plainName: fileEntry.plain_name,
         type: fileEntry.type,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -597,13 +597,17 @@ export class Storage {
    * @param {string} folderUUID - UUID of the folder.
    * @returns {Promise<FolderMeta>}
    */
-  public getFolderMeta(uuid: string, workspacesToken?: string): Promise<FolderMeta> {
+  public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
     const customHeaders = workspacesToken
       ? {
           'x-internxt-workspace': workspacesToken,
         }
       : undefined;
-    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers(customHeaders));
+
+    return this.client.get<FolderMeta>(
+      `folders/${uuid}/meta`,
+      addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
+    );
   }
 
   /**
