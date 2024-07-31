@@ -1,6 +1,6 @@
 import { Token } from '../../auth';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
+import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
@@ -20,6 +20,7 @@ import {
   FileMeta,
   FolderAncestor,
   FolderMeta,
+  FolderTreeResponse,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -130,6 +131,29 @@ export class Storage {
   }
 
   /**
+   * Updates the name of a folder with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the folder UUID and the new name.
+   * @param {string} payload.folderUuid - The UUID of the folder to update.
+   * @param {string} payload.name - The new name for the folder.
+   * @param {Token} [resourcesToken] - An optional token for authentication.
+   * @return {Promise<void>} A promise that resolves when the folder name is successfully updated.
+   */
+  public updateFolderNameWithUUID(
+    payload: { folderUuid: string; name: string },
+    resourcesToken?: Token,
+  ): Promise<void> {
+    const { folderUuid, name } = payload;
+    return this.client.put(
+      `/folders/${folderUuid}/meta`,
+      {
+        plainName: name,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
@@ -154,22 +178,39 @@ export class Storage {
   public getFolderContentByUuid(
     folderUuid: string,
     trash = false,
+    workspacesToken?: string,
   ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
     const query = trash ? '/?trash=true' : '';
-
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       `/folders/content/${folderUuid}${query}`,
-      this.headers(),
+      this.headers(customHeaders),
     );
 
     return [promise, requestCanceler];
   }
+
   /**
-   * Returns metadata of a specific file
-   * @param fileId
+   * Retrieves a file with the specified fileId along with the associated workspacesToken.
+   *
+   * @param {string} fileId - The ID of the file to retrieve.
+   * @param {string} [workspacesToken] - Token for accessing workspaces.
+   * @return {[Promise<FileMeta>, RequestCanceler]} A promise with FileMeta and a canceler for the request.
    */
-  public getFile(fileId: string): [Promise<FileMeta>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(`/files/${fileId}/meta`, this.headers());
+  public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
+      `/files/${fileId}/meta`,
+      this.headers(customHeaders),
+    );
     return [promise, requestCanceler];
   }
 
@@ -350,7 +391,7 @@ export class Storage {
    * Creates a new file entry
    * @param fileEntry
    */
-  public createFileEntryByUuid(fileEntry: FileEntryByUuid): Promise<DriveFileData> {
+  public createFileEntryByUuid(fileEntry: FileEntryByUuid, resourcesToken?: string): Promise<DriveFileData> {
     return this.client.post(
       '/files',
       {
@@ -363,7 +404,7 @@ export class Storage {
         plainName: fileEntry.plain_name,
         type: fileEntry.type,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -392,6 +433,26 @@ export class Storage {
         metadata: payload.metadata,
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Updates the name of a file with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the UUID and new name of the file.
+   * @param {string} payload.fileUuid - The UUID of the file.
+   * @param {string} payload.name - The new name of the file.
+   * @param {string} [resourcesToken] - The token for accessing resources.
+   * @return {Promise<void>} - A Promise that resolves when the file name is successfully updated.
+   */
+  public updateFileNameWithUUID(payload: { fileUuid: string; name: string }, resourcesToken?: Token): Promise<void> {
+    const { fileUuid, name } = payload;
+    return this.client.put(
+      `/files/${fileUuid}/meta`,
+      {
+        plainName: name,
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
@@ -510,8 +571,14 @@ export class Storage {
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  private headers(customHeaders?: CustomHeaders) {
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity?.workspaceToken,
+      customHeaders,
+    );
   }
 
   /**
@@ -530,8 +597,17 @@ export class Storage {
    * @param {string} folderUUID - UUID of the folder.
    * @returns {Promise<FolderMeta>}
    */
-  public getFolderMeta(uuid: string): Promise<FolderMeta> {
-    return this.client.get<FolderMeta>(`folders/${uuid}/meta`, this.headers());
+  public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+
+    return this.client.get<FolderMeta>(
+      `folders/${uuid}/meta`,
+      addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
+    );
   }
 
   /**
@@ -571,5 +647,15 @@ export class Storage {
       },
       this.headers(),
     );
+  }
+
+  /**
+   * Retrieves the folder tree based on the UUID.
+   *
+   * @param {string} uuid - The UUID of the folder.
+   * @return {Promise<FolderTreeResponse>} The promise containing the folder tree response.
+   */
+  public getFolderTree(uuid: string): Promise<FolderTreeResponse> {
+    return this.client.get(`/folders/${uuid}/tree`, this.headers());
   }
 }

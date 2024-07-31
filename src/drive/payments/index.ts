@@ -10,6 +10,10 @@ import {
   UserSubscription,
   FreeTrialAvailable,
   RedeemCodePayload,
+  UpdateSubscriptionPaymentMethod,
+  UserType,
+  InvoicePayload,
+  CustomerBillingInfo,
   CreatedSubscriptionData,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
@@ -107,16 +111,21 @@ export class Payments {
     );
   }
 
-  public getSetupIntent(): Promise<{ clientSecret: string }> {
-    return this.client.get('/setup-intent', this.headers());
-  }
-
-  public getDefaultPaymentMethod(): Promise<PaymentMethod> {
-    return this.client.get('/default-payment-method', this.headers());
-  }
-
-  public getInvoices({ startingAfter, limit }: { startingAfter?: string; limit?: number }): Promise<Invoice[]> {
+  public getSetupIntent(userType?: UserType): Promise<{ clientSecret: string }> {
     const query = new URLSearchParams();
+    if (userType) query.set('userType', userType);
+    return this.client.get(`/setup-intent?${query.toString()}`, this.headers());
+  }
+
+  public getDefaultPaymentMethod(userType?: UserType): Promise<PaymentMethod> {
+    const query = new URLSearchParams();
+    if (userType) query.set('userType', userType);
+    return this.client.get(`/default-payment-method?${query.toString()}`, this.headers());
+  }
+
+  public getInvoices({ subscriptionId, startingAfter, limit }: InvoicePayload): Promise<Invoice[]> {
+    const query = new URLSearchParams();
+    if (subscriptionId) query.set('subscription', subscriptionId);
     if (startingAfter !== undefined) query.set('starting_after', startingAfter);
     if (limit !== undefined) query.set('limit', limit.toString());
 
@@ -132,8 +141,10 @@ export class Payments {
     return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
-  public getUserSubscription(): Promise<UserSubscription> {
-    return this.client.get<UserSubscription>('/subscriptions', this.headers()).catch((err) => {
+  public getUserSubscription(userType?: UserType): Promise<UserSubscription> {
+    const query = new URLSearchParams();
+    if (userType) query.set('userType', userType);
+    return this.client.get<UserSubscription>(`/subscriptions?${query.toString()}`, this.headers()).catch((err) => {
       const error = err as AppError;
 
       if (error.status === 404) return { type: 'free' };
@@ -141,9 +152,10 @@ export class Payments {
     });
   }
 
-  public async getPrices(currency?: string): Promise<DisplayPrice[]> {
+  public async getPrices(currency?: string, userType?: UserType): Promise<DisplayPrice[]> {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
+    if (userType) query.set('userType', userType);
     return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
   }
 
@@ -159,6 +171,10 @@ export class Payments {
     return this.client.post('/licenses', { code: payload.code, provider: payload.provider }, this.headers());
   }
 
+  public updateSubscriptionPaymentMethod(payload: UpdateSubscriptionPaymentMethod): Promise<void | Error> {
+    return this.client.post('/subscriptions/update-payment-method', { ...payload }, this.headers());
+  }
+
   public updateSubscriptionPrice(
     priceId: string,
     couponCode?: string,
@@ -166,12 +182,18 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
   }
 
-  public cancelSubscription(): Promise<void> {
-    return this.client.delete('/subscriptions', this.headers());
+  public cancelSubscription(userType?: UserType): Promise<void> {
+    const query = new URLSearchParams();
+    if (userType) query.set('userType', userType);
+    return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
   }
 
   public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
     return this.client.post('/checkout-session', { ...payload }, this.headers());
+  }
+
+  public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
+    return this.client.patch('/billing', { ...payload }, this.headers());
   }
 
   public getPaypalSetupIntent({

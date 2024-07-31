@@ -14,6 +14,7 @@ export interface UserSettings {
   backupsBucket: string | null;
   root_folder_id: number;
   rootFolderId: string;
+  rootFolderUuid: string | undefined;
   sharedWorkspace: boolean;
   credit: number;
   mnemonic: string;

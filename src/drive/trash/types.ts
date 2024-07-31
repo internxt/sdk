@@ -10,3 +10,7 @@ export interface DeleteFilePayload {
 export interface DeleteItemsPermanentlyPayload {
   items: Array<{ id: number; type: 'folder' } | { id: string; type: 'file' }>;
 }
+
+export interface DeleteItemsPermanentlyByUUIDPayload {
+  items: Array<{ uuid: string; type: 'folder' } | { uuid: string; type: 'file' }>;
+}

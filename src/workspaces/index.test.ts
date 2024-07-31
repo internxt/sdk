@@ -1,7 +1,15 @@
 import sinon from 'sinon';
 import { headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { WorkspaceSetupInfo, WorkspaceTeamResponse, Workspaces, WorkspacesResponse } from './index';
+import {
+  GetMemberDetailsResponse,
+  PendingInvitesResponse,
+  WorkspaceCredentialsDetails,
+  WorkspaceSetupInfo,
+  WorkspaceTeamResponse,
+  Workspaces,
+  WorkspacesResponse,
+} from './index';
 
 const httpClient = HttpClient.create('');
 
@@ -70,6 +78,9 @@ describe('Workspaces service tests', () => {
             setupCompleted: true,
             createdAt: '2024-04-30T12:00:00Z',
             updatedAt: '2024-04-30T12:00:00Z',
+            avatar: null,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
+            phoneNumber: null,
           },
         },
         {
@@ -125,6 +136,9 @@ describe('Workspaces service tests', () => {
             setupCompleted: true,
             createdAt: '2024-04-30T12:00:00Z',
             updatedAt: '2024-04-30T12:00:00Z',
+            avatar: null,
+            rootFolderId: 'asflaksfoau0su0fewnlsd',
+            phoneNumber: null,
           },
         },
       ],
@@ -346,6 +360,7 @@ describe('Workspaces service tests', () => {
         const encryptionAlgorithm = 'aes-256-gcm';
         const { client, headers } = clientAndHeaders();
         const postCall = sinon.stub(httpClient, 'post').resolves();
+        const message = 'Test message';
 
         await client.inviteMemberToWorkspace({
           workspaceId,
@@ -353,6 +368,7 @@ describe('Workspaces service tests', () => {
           spaceLimitBytes,
           encryptedMnemonicInBase64,
           encryptionAlgorithm,
+          message,
         });
 
         expect(postCall.firstCall.args).toEqual([
@@ -362,9 +378,261 @@ describe('Workspaces service tests', () => {
             spaceLimit: spaceLimitBytes,
             encryptionKey: encryptedMnemonicInBase64,
             encryptionAlgorithm: 'aes-256-gcm',
+            message: message,
           },
           headers,
         ]);
+      });
+    });
+
+    describe('getPendingInvites', () => {
+      it('should return the pending invites when getPendingInvites is called', async () => {
+        const { client } = clientAndHeaders();
+        const pendingInvitesResponse: PendingInvitesResponse = [
+          {
+            id: '1',
+            workspaceId: 'workspace1',
+            invitedUser: 'user1',
+            encryptionAlgorithm: 'AES',
+            encryptionKey: 'key1',
+            spaceLimit: 100,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            workspace: {
+              address: '123 Main St',
+              createdAt: '2024-04-30T12:00:00Z',
+              updatedAt: '2024-04-30T12:00:00Z',
+              defaultTeamId: 'team1',
+              description: 'Description for Workspace 1',
+              id: 'workspace1',
+              name: 'Workspace 1',
+              ownerId: 'owner1',
+              setupCompleted: true,
+              workspaceUserId: '1',
+              avatar: null,
+              rootFolderId: 'asdf-123-asdf',
+              phoneNumber: null,
+            },
+          },
+        ];
+        sinon.stub(httpClient, 'get').resolves(pendingInvitesResponse);
+
+        const response = await client.getPendingInvites();
+
+        expect(response).toEqual(pendingInvitesResponse);
+      });
+    });
+
+    describe('validateWorkspaceInvite', () => {
+      it('should return the inviteId successfully', async () => {
+        const { client } = clientAndHeaders();
+        const inviteId = 'inviteId';
+
+        sinon.stub(httpClient, 'get').resolves(inviteId);
+
+        const response = await client.validateWorkspaceInvite(inviteId);
+
+        expect(response).toEqual(inviteId);
+      });
+    });
+
+    describe('deleteWorkspaceAvatar', () => {
+      it('should delete the workspace avatar successfully', async () => {
+        const workspaceId = 'workspaceId';
+        const { client, headers } = clientAndHeaders();
+        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+
+        await client.deleteWorkspaceAvatar(workspaceId);
+
+        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/avatar`, headers]);
+      });
+    });
+
+    describe('getWorkspaceCredentials', () => {
+      it('should return the workspace credentials successfully', async () => {
+        const { client } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const getWorkspaceCredentialsResponse: WorkspaceCredentialsDetails = {
+          workspaceId,
+          bucket: 'bucket',
+          workspaceUserId: 'workspaceUserId',
+          email: 'email',
+          credentials: {
+            networkPass: 'networkPass',
+            networkUser: 'networkUser',
+          },
+          tokenHeader: 'tokenHeader',
+        };
+
+        sinon.stub(httpClient, 'get').resolves(getWorkspaceCredentialsResponse);
+
+        const response = await client.getWorkspaceCredentials(workspaceId);
+
+        expect(response).toEqual(getWorkspaceCredentialsResponse);
+      });
+    });
+
+    describe('getPersonalTrash', () => {
+      it('should return the personal trash successfully', async () => {
+        const { client } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const getPersonalTrashResponse = {
+          bucket: 'bucket',
+          files: [],
+          folders: [],
+        };
+
+        sinon.stub(httpClient, 'get').resolves(getPersonalTrashResponse);
+
+        const response = await client.getPersonalTrash(workspaceId, 'file');
+
+        expect(response).toEqual(getPersonalTrashResponse);
+      });
+    });
+
+    describe('emptyPersonalTrash', () => {
+      it('should empty the personal trash successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+
+        await client.emptyPersonalTrash(workspaceId);
+
+        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/trash`, headers]);
+      });
+    });
+
+    describe('editWorkspace', () => {
+      it('should edit the workspace details successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const workspaceData = {
+          name: 'Workspace Name',
+          description: 'Workspace Description',
+          address: 'Workspace Address',
+        };
+        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+
+        await client.editWorkspace(workspaceId, {
+          description: workspaceData.description,
+          name: workspaceData.name,
+          address: workspaceData.address,
+        });
+
+        expect(patchCall.firstCall.args).toEqual([`workspaces/${workspaceId}`, workspaceData, headers]);
+      });
+    });
+
+    describe('leaveWorkspace', () => {
+      it('should leave the workspace successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+
+        await client.leaveWorkspace(workspaceId);
+
+        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/members/leave`, headers]);
+      });
+    });
+
+    describe('getMemberDetails', () => {
+      it('should return the member details successfully', async () => {
+        const { client } = clientAndHeaders();
+        const memberId = 'memberId';
+        const getMemberDetailsResponse: GetMemberDetailsResponse = {
+          user: {
+            avatar: null,
+            backupsUsage: '1324',
+            deactivated: false,
+            driveUsage: '12332411',
+            email: 'email@email.com',
+            id: 123,
+            lastname: 'Lastname',
+            memberId: 'memberId',
+            name: 'Name',
+            spaceLimit: '5368709120',
+            uuid: 'asflaksfoau0su0fewnlsd',
+            workspaceId: 'workspaceId',
+          },
+          teams: [
+            {
+              isManager: false,
+              id: 'teamId',
+              name: 'teamName',
+              managerId: 'managerId',
+              createdAt: '2024-04-30T12:00:00Z',
+              updatedAt: '2024-04-30T12:00:00Z',
+              workspaceId: 'workspaceId',
+            },
+          ],
+        };
+
+        sinon.stub(httpClient, 'get').resolves(getMemberDetailsResponse);
+
+        const response = await client.getMemberDetails('workspaceId', memberId);
+
+        expect(response).toEqual(getMemberDetailsResponse);
+      });
+    });
+
+    describe('deactivateMember', () => {
+      it('should deactivate the member successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const memberId = 'memberId';
+        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+
+        await client.deactivateMember(workspaceId, memberId);
+
+        expect(patchCall.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/members/${memberId}/deactivate`,
+          {},
+          headers,
+        ]);
+      });
+    });
+
+    describe('activateMember', () => {
+      it('should activate the member successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const memberId = 'memberId';
+        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+
+        await client.activateMember(workspaceId, memberId);
+
+        expect(patchCall.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/members/${memberId}/activate`,
+          {},
+          headers,
+        ]);
+      });
+    });
+
+    describe('getWorkspace', () => {
+      it('should return the workspace billing address successfully', async () => {
+        const workspace = {
+          id: 'workspace2',
+          ownerId: 'owner2',
+          address: '456 Elm St',
+          name: 'Workspace 2',
+          description: 'Description for Workspace 2',
+          defaultTeamId: 'team2',
+          workspaceUserId: '2',
+          setupCompleted: true,
+          createdAt: '2024-04-30T12:00:00Z',
+          updatedAt: '2024-04-30T12:00:00Z',
+          avatar: null,
+          rootFolderId: 'asflaksfoau0su0fewnlsd',
+        };
+        const { client } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+
+        sinon.stub(httpClient, 'get').resolves(workspace);
+
+        const response = await client.getWorkspace(workspaceId);
+
+        expect(response).toEqual(workspace);
       });
     });
   });
@@ -375,6 +643,7 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
+  workspaceToken = 'workspaceToken',
 ): {
   client: Workspaces;
   headers: object;
@@ -385,8 +654,9 @@ function clientAndHeaders(
   };
   const apiSecurity = {
     token,
+    workspaceToken,
   };
   const client = Workspaces.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token, workspaceToken);
   return { client, headers };
 }
