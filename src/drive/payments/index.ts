@@ -40,7 +40,7 @@ export class Payments {
 
   public getCustomerId(name: string, email: string): Promise<{ customerId: string }> {
     const query = new URLSearchParams();
-    if (email !== undefined) query.set('email', email);
+    query.set('email', email);
     return this.client
       .get<{ customerId: string }>(`/get-customer-id?${query.toString()}`, this.headers())
       .catch((err) => {
@@ -76,9 +76,9 @@ export class Payments {
     promoCodeName?: string,
   ): Promise<{ clientSecret: string }> {
     const query = new URLSearchParams();
-    if (customerId !== undefined) query.set('customerId', customerId);
-    if (amount !== undefined) query.set('amount', String(amount));
-    if (planId !== undefined) query.set('planId', planId);
+    query.set('customerId', customerId);
+    query.set('amount', String(amount));
+    query.set('planId', planId);
     if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
