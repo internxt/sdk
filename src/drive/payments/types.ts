@@ -192,3 +192,8 @@ export interface CustomerBillingInfo {
   address?: string;
   phoneNumber?: string;
 }
+
+export type CreatedSubscriptionData = {
+  type: 'setup' | 'payment';
+  clientSecret: string;
+};
