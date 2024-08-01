@@ -27,6 +27,7 @@ import {
   WorkspaceSetupInfo,
   WorkspacesResponse,
   WorkspaceTeamResponse,
+  TeamMembers,
 } from './types';
 
 export class Workspaces {
@@ -173,8 +174,8 @@ export class Workspaces {
     return this.client.delete<void>(`workspaces/teams/${teamId}`, this.headers());
   }
 
-  public getWorkspacesTeamMembers(workspaceId: string, teamId: string): Promise<void> {
-    return this.client.get<void>(`workspaces/${workspaceId}/teams/${teamId}/members`, this.headers());
+  public getWorkspacesTeamMembers(teamId: string): Promise<TeamMembers> {
+    return this.client.get<TeamMembers>(`workspaces/teams/${teamId}/members`, this.headers());
   }
 
   public addTeamUser(teamId: string, userUuid: string): Promise<void> {
