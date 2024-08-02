@@ -284,14 +284,13 @@ describe('Workspaces service tests', () => {
 
     describe('getWorkspacesTeamMembers', () => {
       it('should return the members of a team when getWorkspacesTeamMembers is called', async () => {
-        const workspaceId = 'workspaceId';
         const teamId = 'teamId';
         const { client, headers } = clientAndHeaders();
         const getCall = sinon.stub(httpClient, 'get').resolves();
 
-        await client.getWorkspacesTeamMembers(workspaceId, teamId);
+        await client.getWorkspacesTeamMembers(teamId);
 
-        expect(getCall.firstCall.args).toEqual([`workspaces/${workspaceId}/teams/${teamId}/members`, headers]);
+        expect(getCall.firstCall.args).toEqual([`workspaces/teams/${teamId}/members`, headers]);
       });
     });
 
