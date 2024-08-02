@@ -57,6 +57,7 @@ export class Payments {
     customerId: string,
     priceId: string,
     token: string,
+    currency?: string,
     promoCodeId?: string,
   ): Promise<CreatedSubscriptionData> {
     return this.client.post(
@@ -65,6 +66,7 @@ export class Payments {
         customerId,
         priceId,
         token,
+        currency,
         promoCodeId,
       },
       this.headers(),
@@ -76,6 +78,7 @@ export class Payments {
     amount: number,
     planId: string,
     token: string,
+    currency?: string,
     promoCodeName?: string,
   ): Promise<{ clientSecret: string }> {
     const query = new URLSearchParams();
@@ -83,6 +86,7 @@ export class Payments {
     query.set('amount', String(amount));
     query.set('planId', planId);
     query.set('token', token);
+    if (currency !== undefined) query.set('currency', currency);
     if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
