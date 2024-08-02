@@ -14,6 +14,7 @@ import {
   UserType,
   InvoicePayload,
   CustomerBillingInfo,
+  CreatedSubscriptionData,
 } from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
@@ -31,6 +32,59 @@ export class Payments {
     this.client = HttpClient.create(apiUrl, apiSecurity.unauthorizedCallback);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
+  }
+
+  private createCustomer(name: string, email: string): Promise<{ customerId: string; token: string }> {
+    return this.client.post('/create-customer', { name, email }, this.headers());
+  }
+
+  public getCustomerId(name: string, email: string): Promise<{ customerId: string; token: string }> {
+    const query = new URLSearchParams();
+    query.set('email', email);
+    return this.client
+      .get<{ customerId: string; token: string }>(`/get-customer-id?${query.toString()}`, this.headers())
+      .catch((err) => {
+        const error = err as AppError;
+        if (error.status === 404) {
+          return this.createCustomer(name, email);
+        } else {
+          throw error;
+        }
+      });
+  }
+
+  public createSubscription(
+    customerId: string,
+    priceId: string,
+    token: string,
+    promoCodeId?: string,
+  ): Promise<CreatedSubscriptionData> {
+    return this.client.post(
+      '/create-subscription',
+      {
+        customerId,
+        priceId,
+        token,
+        promoCodeId,
+      },
+      this.headers(),
+    );
+  }
+
+  public createPaymentIntent(
+    customerId: string,
+    amount: number,
+    planId: string,
+    token: string,
+    promoCodeName?: string,
+  ): Promise<{ clientSecret: string }> {
+    const query = new URLSearchParams();
+    query.set('customerId', customerId);
+    query.set('amount', String(amount));
+    query.set('planId', planId);
+    query.set('token', token);
+    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
+    return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
   }
 
   /**
