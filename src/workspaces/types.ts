@@ -86,14 +86,16 @@ export type WorkspaceMembers = {
   disabledUsers: WorkspaceUser[];
 };
 
-export type TeamMembers = {
+export type TeamMember = {
   name: string;
   lastname: string;
   email: string;
   id: number;
   uuid: string;
   avatar: string | null;
-}[];
+};
+
+export type TeamMembers = TeamMember[];
 
 export type Member = {
   avatar: string | null;

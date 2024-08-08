@@ -170,8 +170,8 @@ export class Workspaces {
     );
   }
 
-  public deleteTeam({ teamId }: { teamId: string }): Promise<void> {
-    return this.client.delete<void>(`workspaces/teams/${teamId}`, this.headers());
+  public deleteTeam({ workspaceId, teamId }: { workspaceId: string; teamId: string }): Promise<void> {
+    return this.client.delete<void>(`workspaces/${workspaceId}/teams/${teamId}`, this.headers());
   }
 
   public getWorkspacesTeamMembers(teamId: string): Promise<TeamMembers> {
@@ -186,8 +186,12 @@ export class Workspaces {
     return this.client.delete<void>(`/workspaces/teams/${teamId}/user/${userUuid}`, this.headers());
   }
 
-  public changeTeamManager(teamId: string): Promise<void> {
-    return this.client.patch<void>(`/workspaces/teams/${teamId}/manager`, {}, this.headers());
+  public changeTeamManager(workspaceId: string, teamId: string, userUuid: string): Promise<void> {
+    return this.client.patch<void>(
+      `/workspaces/${workspaceId}/teams/${teamId}/manager`,
+      { managerId: userUuid },
+      this.headers(),
+    );
   }
 
   public getPersonalTrash(
