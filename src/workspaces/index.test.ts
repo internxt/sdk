@@ -272,13 +272,14 @@ describe('Workspaces service tests', () => {
 
     describe('deleteTeam', () => {
       it('should delete the team successfully', async () => {
+        const workspaceId = 'workspaceId';
         const teamId = 'teamId';
         const { client, headers } = clientAndHeaders();
         const deleteCall = sinon.stub(httpClient, 'delete').resolves();
 
-        await client.deleteTeam({ teamId });
+        await client.deleteTeam({ workspaceId, teamId });
 
-        expect(deleteCall.firstCall.args).toEqual([`workspaces/teams/${teamId}`, headers]);
+        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/teams/${teamId}`, headers]);
       });
     });
 
@@ -322,13 +323,19 @@ describe('Workspaces service tests', () => {
 
     describe('changeTeamManager', () => {
       it('should change the team manager successfully', async () => {
+        const workspaceId = 'workspaceId';
         const teamId = 'teamId';
+        const userUuid = 'userUuid';
         const { client, headers } = clientAndHeaders();
         const patchCall = sinon.stub(httpClient, 'patch').resolves();
 
-        await client.changeTeamManager(teamId);
+        await client.changeTeamManager(workspaceId, teamId, userUuid);
 
-        expect(patchCall.firstCall.args).toEqual([`/workspaces/teams/${teamId}/manager`, {}, headers]);
+        expect(patchCall.firstCall.args).toEqual([
+          `/workspaces/${workspaceId}/teams/${teamId}/manager`,
+          { managerId: userUuid },
+          headers,
+        ]);
       });
     });
 
