@@ -1,23 +1,23 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
-import {
-  CreateCheckoutSessionPayload,
-  CreatePaymentSessionPayload,
-  DisplayPrice,
-  Invoice,
-  PaymentMethod,
-  ProductData,
-  UserSubscription,
-  FreeTrialAvailable,
-  RedeemCodePayload,
-  UpdateSubscriptionPaymentMethod,
-  UserType,
-  InvoicePayload,
-  CustomerBillingInfo,
-  CreatedSubscriptionData,
-} from './types';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
+import {
+  CreateCheckoutSessionPayload,
+  CreatedSubscriptionData,
+  CreatePaymentSessionPayload,
+  CustomerBillingInfo,
+  DisplayPrice,
+  FreeTrialAvailable,
+  Invoice,
+  InvoicePayload,
+  PaymentMethod,
+  ProductData,
+  RedeemCodePayload,
+  UpdateSubscriptionPaymentMethod,
+  UserSubscription,
+  UserType,
+} from './types';
 
 export class Payments {
   private readonly client: HttpClient;
@@ -183,11 +183,16 @@ export class Payments {
     return this.client.post('/subscriptions/update-payment-method', { ...payload }, this.headers());
   }
 
-  public updateSubscriptionPrice(
-    priceId: string,
-    couponCode?: string,
-  ): Promise<{ userSubscription: UserSubscription; request3DSecure: boolean; clientSecret: string }> {
-    return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode }, this.headers());
+  public updateSubscriptionPrice({
+    priceId,
+    couponCode,
+    userType,
+  }: {
+    priceId: string;
+    couponCode?: string;
+    userType: UserType;
+  }): Promise<{ userSubscription: UserSubscription; request3DSecure: boolean; clientSecret: string }> {
+    return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode, userType }, this.headers());
   }
 
   public cancelSubscription(userType?: UserType): Promise<void> {
