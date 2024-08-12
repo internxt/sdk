@@ -279,7 +279,7 @@ describe('Workspaces service tests', () => {
 
         await client.deleteTeam({ workspaceId, teamId });
 
-        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/teams/${teamId}`, headers]);
+        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/teams/${teamId}`, headers]);
       });
     });
 
