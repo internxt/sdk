@@ -196,4 +196,6 @@ export interface CustomerBillingInfo {
 export type CreatedSubscriptionData = {
   type: 'setup' | 'payment';
   clientSecret: string;
+  subscriptionId?: string;
+  paymentIntentId?: string;
 };
