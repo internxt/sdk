@@ -80,7 +80,7 @@ export class Payments {
     token: string,
     currency?: string,
     promoCodeName?: string,
-  ): Promise<{ clientSecret: string }> {
+  ): Promise<{ clientSecret: string; id: string }> {
     const query = new URLSearchParams();
     query.set('customerId', customerId);
     query.set('amount', String(amount));
