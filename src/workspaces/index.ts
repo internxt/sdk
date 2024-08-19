@@ -262,6 +262,10 @@ export class Workspaces {
     return this.client.patch<void>(`workspaces/${workspaceId}/members/${memberId}/activate`, {}, this.headers());
   }
 
+  public removeMember(workspaceId: string, memberId: string): Promise<void> {
+    return this.client.delete<void>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
   public acceptInvitation(inviteId: string, token: string): Promise<void> {
     return this.client.post<void>(
       'workspaces/invitations/accept',
