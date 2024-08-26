@@ -77,6 +77,7 @@ export interface FolderChild {
   userId: number;
   user_id: number;
   uuid: string;
+  plainName?: string;
 }
 
 export interface FetchFolderContentResponse {
