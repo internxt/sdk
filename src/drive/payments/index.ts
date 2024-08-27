@@ -57,6 +57,7 @@ export class Payments {
     customerId: string,
     priceId: string,
     token: string,
+    quantity: number,
     currency?: string,
     promoCodeId?: string,
   ): Promise<CreatedSubscriptionData> {
@@ -66,6 +67,7 @@ export class Payments {
         customerId,
         priceId,
         token,
+        quantity,
         currency,
         promoCodeId,
       },
