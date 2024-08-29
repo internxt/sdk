@@ -34,23 +34,13 @@ export class Payments {
     this.apiSecurity = apiSecurity;
   }
 
-  private createCustomer(name: string, email: string): Promise<{ customerId: string; token: string }> {
-    return this.client.post('/create-customer', { name, email }, this.headers());
-  }
-
-  public getCustomerId(name: string, email: string): Promise<{ customerId: string; token: string }> {
-    const query = new URLSearchParams();
-    query.set('email', email);
-    return this.client
-      .get<{ customerId: string; token: string }>(`/get-customer-id?${query.toString()}`, this.headers())
-      .catch((err) => {
-        const error = err as AppError;
-        if (error.status === 404) {
-          return this.createCustomer(name, email);
-        } else {
-          throw error;
-        }
-      });
+  public createCustomer(
+    name: string,
+    email: string,
+    country?: string,
+    companyVatId?: string,
+  ): Promise<{ customerId: string; token: string }> {
+    return this.client.post('/create-customer', { name, email, country, companyVatId }, this.headers());
   }
 
   public createSubscription(
