@@ -72,7 +72,7 @@ export class Payments {
     token: string,
     currency?: string,
     promoCodeName?: string,
-  ): Promise<{ clientSecret: string; id: string }> {
+  ): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
     const query = new URLSearchParams();
     query.set('customerId', customerId);
     query.set('amount', String(amount));
