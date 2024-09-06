@@ -34,15 +34,15 @@ export class Payments {
     this.apiSecurity = apiSecurity;
   }
 
-  public createOrGetCustomer(
+  public getCustomerId(
     name: string,
     email: string,
     country?: string,
     companyVatId?: string,
   ): Promise<{ customerId: string; token: string }> {
     const query = new URLSearchParams();
-    query.set('customerId', name);
-    query.set('amount', email);
+    query.set('name', name);
+    query.set('email', email);
     if (country !== undefined) query.set('country', country);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
     return this.client.get(`/get-customer-id?${query.toString()}`, this.headers());
