@@ -34,20 +34,20 @@ export class Payments {
     this.apiSecurity = apiSecurity;
   }
 
-  public createCustomer(
+  public createOrGetCustomer(
     name: string,
     email: string,
     country?: string,
     companyVatId?: string,
   ): Promise<{ customerId: string; token: string }> {
-    return this.client.post('/create-customer', { name, email, country, companyVatId }, this.headers());
+    return this.client.post('/get-customer-id', { name, email, country, companyVatId }, this.headers());
   }
 
   public createSubscription(
     customerId: string,
     priceId: string,
     token: string,
-    quantity: number,
+    seatsForBusinessSubscription: number,
     currency?: string,
     promoCodeId?: string,
   ): Promise<CreatedSubscriptionData> {
@@ -57,7 +57,7 @@ export class Payments {
         customerId,
         priceId,
         token,
-        quantity,
+        seatsForBusinessSubscription,
         currency,
         promoCodeId,
       },
