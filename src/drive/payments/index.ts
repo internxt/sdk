@@ -40,7 +40,12 @@ export class Payments {
     country?: string,
     companyVatId?: string,
   ): Promise<{ customerId: string; token: string }> {
-    return this.client.post('/get-customer-id', { name, email, country, companyVatId }, this.headers());
+    const query = new URLSearchParams();
+    query.set('customerId', name);
+    query.set('amount', email);
+    if (country !== undefined) query.set('country', country);
+    if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
+    return this.client.get(`/get-customer-id?${query.toString()}`, this.headers());
   }
 
   public createSubscription(
@@ -68,19 +73,23 @@ export class Payments {
   public createPaymentIntent(
     customerId: string,
     amount: number,
-    planId: string,
+    priceId: string,
     token: string,
     currency?: string,
     promoCodeName?: string,
   ): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
-    const query = new URLSearchParams();
-    query.set('customerId', customerId);
-    query.set('amount', String(amount));
-    query.set('planId', planId);
-    query.set('token', token);
-    if (currency !== undefined) query.set('currency', currency);
-    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
-    return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
+    return this.client.post(
+      '/payment-intent',
+      {
+        customerId,
+        amount,
+        priceId,
+        token,
+        currency,
+        promoCodeName,
+      },
+      this.headers(),
+    );
   }
 
   /**
