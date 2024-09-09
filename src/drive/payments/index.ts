@@ -34,6 +34,15 @@ export class Payments {
     this.apiSecurity = apiSecurity;
   }
 
+  /**
+   *  This endpoint searches through Stripe if the customer already exists (using the email). If not, then we create the customer with the given data.
+   *
+   * @param name Customer name
+   * @param email Customer email
+   * @param country Company country - if the subscription is a Business one
+   * @param companyVatId Company Tax Id - If the subscription is a business one
+   * @returns customerID and token
+   */
   public getCustomerId(
     name: string,
     email: string,
