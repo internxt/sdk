@@ -34,20 +34,34 @@ export class Payments {
     this.apiSecurity = apiSecurity;
   }
 
-  public createCustomer(
+  /**
+   *  This endpoint searches through Stripe if the customer already exists (using the email). If not, then we create the customer with the given data.
+   *
+   * @param name Customer name
+   * @param email Customer email
+   * @param country Company country - if the subscription is a Business one
+   * @param companyVatId Company Tax Id - If the subscription is a business one
+   * @returns customerID and token
+   */
+  public getCustomerId(
     name: string,
     email: string,
     country?: string,
     companyVatId?: string,
   ): Promise<{ customerId: string; token: string }> {
-    return this.client.post('/create-customer', { name, email, country, companyVatId }, this.headers());
+    const query = new URLSearchParams();
+    query.set('name', name);
+    query.set('email', email);
+    if (country !== undefined) query.set('country', country);
+    if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
+    return this.client.get(`/get-customer-id?${query.toString()}`, this.headers());
   }
 
   public createSubscription(
     customerId: string,
     priceId: string,
     token: string,
-    quantity: number,
+    seatsForBusinessSubscription: number,
     currency?: string,
     promoCodeId?: string,
   ): Promise<CreatedSubscriptionData> {
@@ -57,7 +71,7 @@ export class Payments {
         customerId,
         priceId,
         token,
-        quantity,
+        seatsForBusinessSubscription,
         currency,
         promoCodeId,
       },
@@ -68,19 +82,23 @@ export class Payments {
   public createPaymentIntent(
     customerId: string,
     amount: number,
-    planId: string,
+    priceId: string,
     token: string,
     currency?: string,
     promoCodeName?: string,
   ): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
-    const query = new URLSearchParams();
-    query.set('customerId', customerId);
-    query.set('amount', String(amount));
-    query.set('planId', planId);
-    query.set('token', token);
-    if (currency !== undefined) query.set('currency', currency);
-    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
-    return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
+    return this.client.post(
+      '/payment-intent',
+      {
+        customerId,
+        amount,
+        priceId,
+        token,
+        currency,
+        promoCodeName,
+      },
+      this.headers(),
+    );
   }
 
   /**
