@@ -5,6 +5,10 @@ import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
   AddItemsToTrashPayload,
+  CheckDuplicatedFilesPayload,
+  CheckDuplicatedFilesResponse,
+  CheckDuplicatedFolderPayload,
+  CheckDuplicatedFoldersResponse,
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
@@ -657,5 +661,31 @@ export class Storage {
    */
   public getFolderTree(uuid: string): Promise<FolderTreeResponse> {
     return this.client.get(`/folders/${uuid}/tree`, this.headers());
+  }
+
+  public checkDuplicatedFiles({
+    folderUuid,
+    filesList,
+  }: CheckDuplicatedFilesPayload): Promise<CheckDuplicatedFilesResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/files/existence`,
+      {
+        files: filesList,
+      },
+      this.headers(),
+    );
+  }
+
+  public checkDuplicatedFolders({
+    folderUuid,
+    folderNamesList,
+  }: CheckDuplicatedFolderPayload): Promise<CheckDuplicatedFoldersResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/folders/existence`,
+      {
+        plainNames: folderNamesList,
+      },
+      this.headers(),
+    );
   }
 }

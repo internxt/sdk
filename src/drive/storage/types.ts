@@ -473,3 +473,26 @@ export interface FolderTree {
 export interface FolderTreeResponse {
   tree: FolderTree;
 }
+
+export interface CheckDuplicatedFilesPayload {
+  folderUuid: string;
+  filesList: FileStructure[];
+}
+
+export interface FileStructure {
+  plainName: string;
+  type: string;
+}
+
+export interface CheckDuplicatedFilesResponse {
+  existentFiles: DriveFileData[];
+}
+
+export interface CheckDuplicatedFolderPayload {
+  folderUuid: string;
+  folderNamesList: string[];
+}
+
+export interface CheckDuplicatedFoldersResponse {
+  existentFolders: DriveFolderData[];
+}
