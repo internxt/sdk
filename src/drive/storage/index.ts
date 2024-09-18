@@ -5,6 +5,10 @@ import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import {
   AddItemsToTrashPayload,
+  CheckDuplicatedFilesPayload,
+  CheckDuplicatedFilesResponse,
+  CheckDuplicatedFolderPayload,
+  CheckDuplicatedFoldersResponse,
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
@@ -657,5 +661,43 @@ export class Storage {
    */
   public getFolderTree(uuid: string): Promise<FolderTreeResponse> {
     return this.client.get(`/folders/${uuid}/tree`, this.headers());
+  }
+
+  /**
+   * Checks if the given files already exist in the given folder.
+   *
+   * @param {CheckDuplicatedFilesPayload} payload - Payload containing the folder UUID and the list of files to check.
+   * @return {Promise<CheckDuplicatedFilesResponse>} - Promise that contains the duplicated files in a list.
+   */
+  public checkDuplicatedFiles({
+    folderUuid,
+    filesList,
+  }: CheckDuplicatedFilesPayload): Promise<CheckDuplicatedFilesResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/files/existence`,
+      {
+        files: filesList,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Checks if the given folders names already exist in the given folder
+   *
+   * @param {CheckDuplicatedFolderPayload} payload - Payload containing the folder UUID and the list of folders to check.
+   * @return {Promise<CheckDuplicatedFoldersResponse>} - Promise that contains the duplicated folders in a list.
+   */
+  public checkDuplicatedFolders({
+    folderUuid,
+    folderNamesList,
+  }: CheckDuplicatedFolderPayload): Promise<CheckDuplicatedFoldersResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/folders/existence`,
+      {
+        plainNames: folderNamesList,
+      },
+      this.headers(),
+    );
   }
 }
