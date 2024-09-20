@@ -177,21 +177,36 @@ export class Storage {
    *
    * @param {string} folderUuid - The UUID of the folder.
    * @param {boolean} [trash=false] - Whether to include trash items in the response.
+   * @param {boolean} [offset] - The position of the first file to return.
+   * @param {boolean} [limit] - The max number of files to be returned.
+   * @param {boolean} [workspacesToken] - Token for accessing workspaces.
    * @return {[Promise<FetchFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
-  public getFolderContentByUuid(
-    folderUuid: string,
+  public getFolderContentByUuid({
+    folderUuid,
     trash = false,
-    workspacesToken?: string,
-  ): [Promise<FetchFolderContentResponse>, RequestCanceler] {
-    const query = trash ? '/?trash=true' : '';
+    offset,
+    limit,
+    workspacesToken,
+  }: {
+    folderUuid: string;
+    trash?: boolean;
+    limit?: number;
+    offset?: number;
+    workspacesToken?: string;
+  }): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const query = new URLSearchParams();
+    if (offset !== undefined) query.set('offset', String(offset));
+    if (limit !== undefined) query.set('limit', String(limit));
+    if (trash) query.set('trash', 'true');
+
     const customHeaders = workspacesToken
       ? {
           'x-internxt-workspace': workspacesToken,
         }
       : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
-      `/folders/content/${folderUuid}${query}`,
+      `/folders/content/${folderUuid}?${query}`,
       this.headers(customHeaders),
     );
 
