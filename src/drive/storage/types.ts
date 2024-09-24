@@ -275,6 +275,7 @@ export interface FileEntryByUuid {
   bucket: string;
   folder_id: string;
   encrypt_version: EncryptionVersion;
+  modificationTime: string;
 }
 
 export interface ThumbnailEntry {
