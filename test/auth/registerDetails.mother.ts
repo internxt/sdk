@@ -5,6 +5,8 @@ export function emptyRegisterDetails(): RegisterDetails {
     privateKeyEncrypted: '',
     publicKey: '',
     revocationCertificate: '',
+    publicKyberKey: '',
+    privateKyberKeyEncrypted: '',
   };
   return {
     name: '',

@@ -26,7 +26,6 @@ export type FriendInvite = { guestEmail: string; host: number; accepted: boolean
 
 export type UserPublicKeyResponse = { publicKey: string };
 
-
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
   newEmail: string;

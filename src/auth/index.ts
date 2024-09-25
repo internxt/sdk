@@ -55,6 +55,8 @@ export class Auth {
         salt: registerDetails.salt,
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
+        privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
+        publicKyberKey: registerDetails.keys.publicKyberKey,
         revocationKey: registerDetails.keys.revocationCertificate,
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
@@ -81,6 +83,8 @@ export class Auth {
         salt: registerDetails.salt,
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
+        privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
+        publicKyberKey: registerDetails.keys.publicKyberKey,
         revocationKey: registerDetails.keys.revocationCertificate,
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
@@ -132,7 +136,7 @@ export class Auth {
   }> {
     const securityDetails = await this.securityDetails(details.email);
     const encryptedSalt = securityDetails.encryptedSalt;
-    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+    const encryptedPasswordHash = await cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.client
@@ -150,6 +154,8 @@ export class Auth {
           privateKey: keys.privateKeyEncrypted,
           publicKey: keys.publicKey,
           revocateKey: keys.revocationCertificate,
+          publicKyberKey: keys.publicKyberKey,
+          privateKyberKey: keys.privateKyberKeyEncrypted,
         },
         this.basicHeaders(),
       )
@@ -173,6 +179,8 @@ export class Auth {
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
+        publicKyberKey: keys.publicKyberKey,
+        privateKyberKey: keys.privateKyberKeyEncrypted,
       },
       this.headersWithToken(token),
     );

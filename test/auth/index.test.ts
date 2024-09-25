@@ -8,7 +8,6 @@ import { HttpClient } from '../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('# auth service tests', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -18,7 +17,6 @@ describe('# auth service tests', () => {
   });
 
   describe('-> register use case', () => {
-
     it('Should have all the correct params on call', async () => {
       // Arrange
       const registerDetails: RegisterDetails = emptyRegisterDetails();
@@ -30,8 +28,10 @@ describe('# auth service tests', () => {
       registerDetails.salt = '6';
       registerDetails.keys.privateKeyEncrypted = '7';
       registerDetails.keys.publicKey = '8';
-      registerDetails.keys.revocationCertificate = '9';
-      registerDetails.captcha = '10';
+      registerDetails.keys.privateKyberKeyEncrypted = '9';
+      registerDetails.keys.publicKyberKey = '10';
+      registerDetails.keys.revocationCertificate = '11';
+      registerDetails.captcha = '12';
 
       const postCall = sinon.stub(httpClient, 'post').resolves({});
       const { client, headers } = clientAndHeaders();
@@ -51,10 +51,12 @@ describe('# auth service tests', () => {
           salt: registerDetails.salt,
           privateKey: registerDetails.keys.privateKeyEncrypted,
           publicKey: registerDetails.keys.publicKey,
+          privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
+          publicKyberKey: registerDetails.keys.publicKyberKey,
           revocationKey: registerDetails.keys.revocationCertificate,
           referral: registerDetails.referral,
           referrer: registerDetails.referrer,
-          captcha: registerDetails.captcha
+          captcha: registerDetails.captcha,
         },
         headers,
       ]);
@@ -63,7 +65,7 @@ describe('# auth service tests', () => {
     it('Should resolve valid on valid response', async () => {
       // Arrange
       sinon.stub(httpClient, 'post').resolves({
-        valid: true
+        valid: true,
       });
       const { client } = clientAndHeaders();
       const registerDetails: RegisterDetails = emptyRegisterDetails();
@@ -73,10 +75,9 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(body).toEqual({
-        valid: true
+        valid: true,
       });
     });
-
   });
 
   describe('-> pre-register use case', () => {
@@ -91,8 +92,10 @@ describe('# auth service tests', () => {
       registerDetails.salt = '6';
       registerDetails.keys.privateKeyEncrypted = '7';
       registerDetails.keys.publicKey = '8';
-      registerDetails.keys.revocationCertificate = '9';
-      registerDetails.captcha = '10';
+      registerDetails.keys.privateKyberKeyEncrypted = '9';
+      registerDetails.keys.publicKyberKey = '10';
+      registerDetails.keys.revocationCertificate = '11';
+      registerDetails.captcha = '12';
 
       const mockInvitatioId = 'invitationId';
 
@@ -114,11 +117,13 @@ describe('# auth service tests', () => {
           salt: registerDetails.salt,
           privateKey: registerDetails.keys.privateKeyEncrypted,
           publicKey: registerDetails.keys.publicKey,
+          privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
+          publicKyberKey: registerDetails.keys.publicKyberKey,
           revocationKey: registerDetails.keys.revocationCertificate,
           referral: registerDetails.referral,
           referrer: registerDetails.referrer,
           captcha: registerDetails.captcha,
-          invitationId: mockInvitatioId
+          invitationId: mockInvitatioId,
         },
         headers,
       ]);
@@ -143,7 +148,6 @@ describe('# auth service tests', () => {
   });
 
   describe('-> login use case', () => {
-
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
       const error = new Error('Network error');
@@ -152,18 +156,20 @@ describe('# auth service tests', () => {
       const loginDetails: LoginDetails = {
         email: '',
         password: '',
-        tfaCode: undefined
+        tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => '',
+        encryptPasswordHash: () => Promise.resolve(''),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
-            revocationCertificate: ''
+            revocationCertificate: '',
+            publicKyberKey: '',
+            privateKyberKeyEncrypted: '',
           };
           return Promise.resolve(keys);
-        }
+        },
       };
 
       // Act
@@ -180,24 +186,26 @@ describe('# auth service tests', () => {
       const loginDetails: LoginDetails = {
         email: '',
         password: '',
-        tfaCode: undefined
+        tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => '',
+        encryptPasswordHash: () => Promise.resolve(''),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
-            revocationCertificate: ''
+            revocationCertificate: '',
+            publicKyberKey: '',
+            privateKyberKeyEncrypted: '',
           };
           return Promise.resolve(keys);
-        }
+        },
       };
       const postStub = sinon.stub(httpClient, 'post');
       postStub
         .onFirstCall()
         .resolves({
-          sKey: 'encrypted_salt'
+          sKey: 'encrypted_salt',
         })
         .onSecondCall()
         .rejects(error);
@@ -215,30 +223,32 @@ describe('# auth service tests', () => {
       const loginDetails: LoginDetails = {
         email: 'my_email',
         password: 'password',
-        tfaCode: undefined
+        tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        encryptPasswordHash: (password, encryptedSalt) => Promise.resolve(password + '-' + encryptedSalt),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: 'priv',
             publicKey: 'pub',
-            revocationCertificate: 'rev'
+            revocationCertificate: 'rev',
+            publicKyberKey: 'pubKyber',
+            privateKyberKeyEncrypted: 'privKyber',
           };
           return Promise.resolve(keys);
-        }
+        },
       };
       const postStub = sinon.stub(httpClient, 'post');
       postStub
         .onFirstCall()
         .resolves({
-          sKey: 'encrypted_salt'
+          sKey: 'encrypted_salt',
         })
         .onSecondCall()
         .resolves({
           user: {
-            revocateKey: 'key'
-          }
+            revocateKey: 'key',
+          },
         });
 
       // Act
@@ -248,7 +258,7 @@ describe('# auth service tests', () => {
       expect(postStub.firstCall.args).toEqual([
         '/login',
         {
-          email: loginDetails.email
+          email: loginDetails.email,
         },
         headers,
       ]);
@@ -261,6 +271,8 @@ describe('# auth service tests', () => {
           privateKey: 'priv',
           publicKey: 'pub',
           revocateKey: 'rev',
+          publicKyberKey: 'pubKyber',
+          privateKyberKey: 'privKyber',
         },
         headers,
       ]);
@@ -268,14 +280,12 @@ describe('# auth service tests', () => {
         user: {
           revocateKey: 'key',
           revocationKey: 'key',
-        }
+        },
       });
     });
-
   });
 
   describe('-> update keys use case', () => {
-
     it('Should have a header with the auth token', async () => {
       // Arrange
       const token: Token = 'my-secure-token';
@@ -283,7 +293,9 @@ describe('# auth service tests', () => {
       const keys: Keys = {
         privateKeyEncrypted: 'prik',
         publicKey: 'pubk',
-        revocationCertificate: 'crt'
+        revocationCertificate: 'crt',
+        publicKyberKey: 'pubKyber',
+        privateKyberKeyEncrypted: 'privKyber',
       };
       const axiosStub = sinon.stub(httpClient, 'patch').resolves({});
 
@@ -297,20 +309,21 @@ describe('# auth service tests', () => {
           publicKey: 'pubk',
           privateKey: 'prik',
           revocationKey: 'crt',
+          publicKyberKey: 'pubKyber',
+          privateKyberKey: 'privKyber',
         },
-        headers
+        headers,
       ]);
     });
   });
 
   describe('-> security details', () => {
-
     it('Should call with right parameters & return correct content', async () => {
       // Arrange
       const postStub = sinon.stub(httpClient, 'post').resolves({
         hasKeys: true,
         sKey: 'gibberish',
-        tfa: true
+        tfa: true,
       });
       const { client, headers } = clientAndHeaders();
       const email = 'my@email.com';
@@ -322,13 +335,13 @@ describe('# auth service tests', () => {
       expect(postStub.firstCall.args).toEqual([
         '/login',
         {
-          email: email
+          email: email,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
-        tfaEnabled: true
+        tfaEnabled: true,
       });
     });
 
@@ -337,7 +350,7 @@ describe('# auth service tests', () => {
       sinon.stub(httpClient, 'post').resolves({
         hasKeys: true,
         sKey: 'gibberish',
-        tfa: null
+        tfa: null,
       });
       const { client } = clientAndHeaders();
       const email = 'my@email.com';
@@ -348,19 +361,17 @@ describe('# auth service tests', () => {
       // Assert
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
-        tfaEnabled: false
+        tfaEnabled: false,
       });
     });
-
   });
 
   describe('-> generate twoFactorAuth code', () => {
-
     it('Should call with right params & return data', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
         qr: 'qr',
-        code: 'code'
+        code: 'code',
       });
       const { client, headers } = clientAndHeadersWithToken();
 
@@ -368,25 +379,21 @@ describe('# auth service tests', () => {
       const body = await client.generateTwoFactorAuthQR();
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([
-        '/tfa',
-        headers
-      ]);
+      await expect(callStub.firstCall.args).toEqual(['/tfa', headers]);
       expect(body).toEqual({
         qr: 'qr',
-        backupKey: 'code'
+        backupKey: 'code',
       });
     });
-
   });
 
   describe('-> disable twoFactorAuth', () => {
-
     it('Should call with right params & return values', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'delete').resolves({});
       const { client, headers } = clientAndHeadersWithToken();
-      const pass = 'pass', code = 'code';
+      const pass = 'pass',
+        code = 'code';
 
       // Act
       const body = await client.disableTwoFactorAuth(pass, code);
@@ -398,20 +405,19 @@ describe('# auth service tests', () => {
         {
           pass: pass,
           code: code,
-        }
+        },
       ]);
       expect(body).toEqual({});
     });
-
   });
 
   describe('-> store twoFactorAuth key', () => {
-
     it('Should call with right params & return values', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'put').resolves({});
       const { client, headers } = clientAndHeadersWithToken();
-      const backupKey = 'key', code = 'code';
+      const backupKey = 'key',
+        code = 'code';
 
       // Act
       const body = await client.storeTwoFactorAuthKey(backupKey, code);
@@ -423,15 +429,13 @@ describe('# auth service tests', () => {
           key: backupKey,
           code: code,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({});
     });
-
   });
 
   describe('-> send email to deactivate account', () => {
-
     it('Should call with right params & return values', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({});
@@ -442,17 +446,12 @@ describe('# auth service tests', () => {
       const body = await client.sendDeactivationEmail(email);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([
-        `/deactivate/${email}`,
-        headers
-      ]);
+      await expect(callStub.firstCall.args).toEqual([`/deactivate/${email}`, headers]);
       expect(body).toEqual({});
     });
-
   });
 
   describe('-> confirm account deactivation', () => {
-
     it('Should call with right params & return values', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({});
@@ -463,16 +462,10 @@ describe('# auth service tests', () => {
       const body = await client.confirmDeactivation(token);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([
-        `/confirmDeactivation/${token}`,
-        headers
-      ]);
+      await expect(callStub.firstCall.args).toEqual([`/confirmDeactivation/${token}`, headers]);
       expect(body).toEqual({});
     });
-
   });
-
-
 
   describe('-> send email unblock account', () => {
     it('Should call with right params & return values', async () => {
@@ -485,7 +478,7 @@ describe('# auth service tests', () => {
       const body = await client.requestUnblockAccount(email);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { email }, headers]);
+      expect(callStub.firstCall.args).toEqual(['users/unblock-account', { email }, headers]);
       expect(body).toEqual({});
     });
   });
@@ -501,11 +494,10 @@ describe('# auth service tests', () => {
       const body = await client.unblockAccount(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { token }, headers]);
+      expect(callStub.firstCall.args).toEqual(['users/unblock-account', { token }, headers]);
       expect(body).toEqual({});
     });
   });
-
 });
 
 function clientAndHeaders(
@@ -513,8 +505,8 @@ function clientAndHeaders(
   clientName = 'c-name',
   clientVersion = '0.1',
 ): {
-  client: Auth,
-  headers: object
+  client: Auth;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
@@ -529,10 +521,10 @@ function clientAndHeadersWithToken(
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
-  token = 'token'
+  token = 'token',
 ): {
-  client: Auth,
-  headers: object
+  client: Auth;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
