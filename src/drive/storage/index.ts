@@ -422,7 +422,6 @@ export class Storage {
         size: fileEntry.size,
         plainName: fileEntry.plain_name,
         type: fileEntry.type,
-        modificationTime: fileEntry.modificationTime,
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
