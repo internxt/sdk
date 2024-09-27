@@ -607,7 +607,7 @@ export class Storage {
    * @param {string} folderUUID - UUID of the folder.
    * @returns {Promise<FolderAncestor[]>}
    */
-  public getFolderAncestors(uuid: string, isShared: boolean = false): Promise<FolderAncestor[]> {
+  public getFolderAncestors(uuid: string, isShared = false): Promise<FolderAncestor[]> {
     return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?isSharedItem=${isShared}`, this.headers());
   }
 
