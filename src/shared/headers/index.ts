@@ -1,6 +1,20 @@
 import { BasicAuth, Token } from '../../auth';
 
-export function basicHeaders(clientName: string, clientVersion: string) {
+export interface CustomHeaders {
+  [key: string]: string;
+}
+
+type InternxtHeaders = {
+  'content-type': string;
+  'internxt-version': string;
+  'internxt-client': string;
+  'x-share-password'?: string;
+  Authorization?: string;
+  'x-token'?: string;
+  'internxt-resources-token'?: string;
+};
+
+export function basicHeaders(clientName: string, clientVersion: string): InternxtHeaders {
   return {
     'content-type': 'application/json; charset=utf-8',
     'internxt-version': clientVersion,
@@ -8,7 +22,7 @@ export function basicHeaders(clientName: string, clientVersion: string) {
   };
 }
 
-export function basicHeadersWithPassword(clientName: string, clientVersion: string, password: string) {
+export function basicHeadersWithPassword(clientName: string, clientVersion: string, password: string): InternxtHeaders {
   return {
     'content-type': 'application/json; charset=utf-8',
     'internxt-version': clientVersion,
@@ -17,19 +31,40 @@ export function basicHeadersWithPassword(clientName: string, clientVersion: stri
   };
 }
 
-export function headersWithToken(clientName: string, clientVersion: string, token: Token) {
+type ExtraHeaders = {
+  Authorization?: string;
+  'x-internxt-workspace'?: Token;
+};
+
+export function headersWithToken(
+  clientName: string,
+  clientVersion: string,
+  token: Token,
+  workspaceToken?: Token,
+  customHeaders?: CustomHeaders,
+): InternxtHeaders {
   const headers = basicHeaders(clientName, clientVersion);
-  const extra = {
+  const extra: ExtraHeaders = {
     Authorization: 'Bearer ' + token,
   };
+  if (workspaceToken !== undefined) {
+    extra['x-internxt-workspace'] = workspaceToken;
+  }
   return {
     ...headers,
     ...extra,
+    ...customHeaders,
   };
 }
 
-export function headersWithTokenAndPassword(clientName: string, clientVersion: string, token: Token, password: string) {
-  const headers = headersWithToken(clientName, clientVersion, token);
+export function headersWithTokenAndPassword(
+  clientName: string,
+  clientVersion: string,
+  token: Token,
+  workspaceToken: Token | undefined,
+  password: string,
+): InternxtHeaders {
+  const headers = headersWithToken(clientName, clientVersion, token, workspaceToken);
   const extra = {
     'x-share-password': password,
   };
@@ -39,24 +74,52 @@ export function headersWithTokenAndPassword(clientName: string, clientVersion: s
   };
 }
 
-export function headersWithBasicAuth(clientName: string, clientVersion: string, auth: BasicAuth) {
+export function headersWithBasicAuth(
+  clientName: string,
+  clientVersion: string,
+  auth: BasicAuth,
+  workspaceToken?: Token,
+): InternxtHeaders {
   const headers = basicHeaders(clientName, clientVersion);
   const token = `${auth.username}:${auth.password}`;
   const encodedToken = Buffer.from(token).toString('base64');
-  const extra = {
+  const extra: ExtraHeaders = {
     Authorization: 'Basic ' + encodedToken,
   };
+  if (workspaceToken !== undefined) {
+    extra['x-internxt-workspace'] = workspaceToken;
+  }
   return {
     ...headers,
     ...extra,
   };
 }
 
-export function headersWithAuthToken(clientName: string, clientVersion: string, token: string) {
+export function headersWithAuthToken(
+  clientName: string,
+  clientVersion: string,
+  token: Token,
+  workspaceToken?: Token,
+): InternxtHeaders {
   const headers = basicHeaders(clientName, clientVersion);
+  const extra: ExtraHeaders = {};
+  if (workspaceToken !== undefined) {
+    extra['x-internxt-workspace'] = workspaceToken;
+  }
 
   return {
     ...headers,
     'x-token': token,
+    ...extra,
   };
+}
+
+export function addResourcesTokenToHeaders(headers: InternxtHeaders, resourcesToken?: Token): InternxtHeaders {
+  if (resourcesToken && resourcesToken.length > 0) {
+    return {
+      ...headers,
+      'internxt-resources-token': resourcesToken,
+    };
+  }
+  return headers;
 }

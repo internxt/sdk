@@ -79,6 +79,69 @@ describe('# auth service tests', () => {
 
   });
 
+  describe('-> pre-register use case', () => {
+    it('Should have all the correct params on call', async () => {
+      // Arrange
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+      registerDetails.name = '1';
+      registerDetails.lastname = '2';
+      registerDetails.email = '3';
+      registerDetails.password = '4';
+      registerDetails.mnemonic = '5';
+      registerDetails.salt = '6';
+      registerDetails.keys.privateKeyEncrypted = '7';
+      registerDetails.keys.publicKey = '8';
+      registerDetails.keys.revocationCertificate = '9';
+      registerDetails.captcha = '10';
+
+      const mockInvitatioId = 'invitationId';
+
+      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      await client.registerPreCreatedUser({ ...registerDetails, invitationId: mockInvitatioId });
+
+      // Assert
+      expect(postCall.firstCall.args).toEqual([
+        'users/pre-created-users/register',
+        {
+          name: registerDetails.name,
+          lastname: registerDetails.lastname,
+          email: registerDetails.email,
+          password: registerDetails.password,
+          mnemonic: registerDetails.mnemonic,
+          salt: registerDetails.salt,
+          privateKey: registerDetails.keys.privateKeyEncrypted,
+          publicKey: registerDetails.keys.publicKey,
+          revocationKey: registerDetails.keys.revocationCertificate,
+          referral: registerDetails.referral,
+          referrer: registerDetails.referrer,
+          captcha: registerDetails.captcha,
+          invitationId: mockInvitatioId
+        },
+        headers,
+      ]);
+    });
+
+    it('Should resolve valid on valid response', async () => {
+      // Arrange
+      sinon.stub(httpClient, 'post').resolves({
+        valid: true,
+      });
+      const { client } = clientAndHeaders();
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+
+      // Act
+      const body = await client.register(registerDetails);
+
+      // Assert
+      expect(body).toEqual({
+        valid: true,
+      });
+    });
+  });
+
   describe('-> login use case', () => {
 
     it('Should bubble up the error on first call failure', async () => {
@@ -407,6 +470,40 @@ describe('# auth service tests', () => {
       expect(body).toEqual({});
     });
 
+  });
+
+
+
+  describe('-> send email unblock account', () => {
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'post').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const email = 'email@gmail.com';
+
+      // Act
+      const body = await client.requestUnblockAccount(email);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { email }, headers]);
+      expect(body).toEqual({});
+    });
+  });
+
+  describe('-> unblock account', () => {
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+
+      // Act
+      const body = await client.unblockAccount(token);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`users/unblock-account`, { token }, headers]);
+      expect(body).toEqual({});
+    });
   });
 
 });

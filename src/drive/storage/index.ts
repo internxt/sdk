@@ -1,27 +1,44 @@
-import { headersWithToken } from '../../shared/headers';
+import { Token } from '../../auth';
+import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
+import { HttpClient, RequestCanceler } from '../../shared/http/client';
+import { UUID } from '../../shared/types/userSettings';
 import {
+  AddItemsToTrashPayload,
+  CheckDuplicatedFilesPayload,
+  CheckDuplicatedFilesResponse,
+  CheckDuplicatedFolderPayload,
+  CheckDuplicatedFoldersResponse,
+  CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
   DeleteFilePayload,
   DriveFileData,
   FetchFolderContentResponse,
+  FetchLimitResponse,
+  FetchPaginatedFilesContent,
+  FetchPaginatedFolderContentResponse,
+  FetchPaginatedFoldersContent,
   FileEntry,
+  FileEntryByUuid,
+  FileMeta,
+  FolderAncestor,
+  FolderMeta,
+  FolderTreeResponse,
   MoveFilePayload,
   MoveFileResponse,
+  MoveFileUuidPayload,
   MoveFolderPayload,
   MoveFolderResponse,
+  MoveFolderUuidPayload,
+  ReplaceFile,
+  SearchResultData,
+  Thumbnail,
+  ThumbnailEntry,
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
-  FetchLimitResponse,
   UsageResponse,
-  AddItemsToTrashPayload,
-  ThumbnailEntry,
-  Thumbnail,
-  FetchPaginatedFolderContentResponse,
-  FileMeta,
 } from './types';
-import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { HttpClient, RequestCanceler } from '../../shared/http/client';
 
 export * as StorageTypes from './types';
 
@@ -58,6 +75,23 @@ export class Storage {
   }
 
   /**
+   * Creates a new folder
+   * @param payload
+   */
+  public createFolderByUuid(payload: CreateFolderByUuidPayload): [Promise<CreateFolderResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.postCancellable<CreateFolderResponse>(
+      '/folders',
+      {
+        plainName: payload.plainName,
+        parentFolderUuid: payload.parentFolderUuid,
+      },
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Moves a specific folder to a new location
    * @param payload
    */
@@ -67,6 +101,20 @@ export class Storage {
       {
         folderId: payload.folderId,
         destination: payload.destinationFolderId,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Moves a specific folder to a new location
+   * @param payload
+   */
+  public async moveFolderByUuid(payload: MoveFolderUuidPayload): Promise<FolderMeta> {
+    return this.client.patch(
+      `/folders/${payload.folderUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
       },
       this.headers(),
     );
@@ -87,6 +135,29 @@ export class Storage {
   }
 
   /**
+   * Updates the name of a folder with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the folder UUID and the new name.
+   * @param {string} payload.folderUuid - The UUID of the folder to update.
+   * @param {string} payload.name - The new name for the folder.
+   * @param {Token} [resourcesToken] - An optional token for authentication.
+   * @return {Promise<void>} A promise that resolves when the folder name is successfully updated.
+   */
+  public updateFolderNameWithUUID(
+    payload: { folderUuid: string; name: string },
+    resourcesToken?: Token,
+  ): Promise<void> {
+    const { folderUuid, name } = payload;
+    return this.client.put(
+      `/folders/${folderUuid}/meta`,
+      {
+        plainName: name,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
    * Fetches & returns the contents of a specific folder
    * @param folderId
    */
@@ -102,20 +173,72 @@ export class Storage {
   }
 
   /**
-   * Returns metadata of a specific file
-   * @param fileId
+   * Fetches and returns the contents of a specific folder by its UUID.
+   *
+   * @param {string} folderUuid - The UUID of the folder.
+   * @param {boolean} [trash=false] - Whether to include trash items in the response.
+   * @param {boolean} [offset] - The position of the first file to return.
+   * @param {boolean} [limit] - The max number of files to be returned.
+   * @param {boolean} [workspacesToken] - Token for accessing workspaces.
+   * @return {[Promise<FetchFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
-  public getFile(fileId: string): [Promise<FileMeta>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(`/files/${fileId}/meta`, this.headers());
+  public getFolderContentByUuid({
+    folderUuid,
+    trash = false,
+    offset,
+    limit,
+    workspacesToken,
+  }: {
+    folderUuid: string;
+    trash?: boolean;
+    limit?: number;
+    offset?: number;
+    workspacesToken?: string;
+  }): [Promise<FetchFolderContentResponse>, RequestCanceler] {
+    const query = new URLSearchParams();
+    if (offset !== undefined) query.set('offset', String(offset));
+    if (limit !== undefined) query.set('limit', String(limit));
+    if (trash) query.set('trash', 'true');
+
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
+      `/folders/content/${folderUuid}?${query}`,
+      this.headers(customHeaders),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Retrieves a file with the specified fileId along with the associated workspacesToken.
+   *
+   * @param {string} fileId - The ID of the file to retrieve.
+   * @param {string} [workspacesToken] - Token for accessing workspaces.
+   * @return {[Promise<FileMeta>, RequestCanceler]} A promise with FileMeta and a canceler for the request.
+   */
+  public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+    const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
+      `/files/${fileId}/meta`,
+      this.headers(customHeaders),
+    );
     return [promise, requestCanceler];
   }
 
   /**
    * Gets the files in a folder.
    *
-   * @param {number} folderId - ID of the folder.
+   * @param {number} folderId - The ID of the folder.
    * @param {number} [offset=0] - The position of the first file to return.
-   * @param {number} [limit=50] - The number of files to be returned.
+   * @param {number} [limit=50] - The max number of files to be returned.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
@@ -127,20 +250,47 @@ export class Storage {
     sort = '',
     order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
-    const offsetQuery = `/?offset=${offset}`;
+    const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const sortQuery = `&sort=${sort}`;
-    const orderQuery = `&order=${order}`;
-    let query;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
 
-    if (sort === '' && order === '') {
-      query = `${offsetQuery}${limitQuery}`;
-    } else {
-      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
-    }
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
-      `folders/${folderId}/files${query}`,
+      `folders/${folderId}/files/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets the files in a folder by its UUID.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first file to return.
+   * @param {number} [limit=50] - The max number of files to be returned.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
+   * @returns {[Promise<FetchPaginatedFilesContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFilesByUuid(
+    folderUuid: UUID,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFilesContent>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFilesContent>(
+      `folders/content/${folderUuid}/files/${query}`,
       this.headers(),
     );
 
@@ -152,7 +302,7 @@ export class Storage {
    *
    * @param {number} folderId - The ID of the folder.
    * @param {number} [offset=0] - The position of the first subfolder to return.
-   * @param {number} [limit=50] - The number of subfolders to return.
+   * @param {number} [limit=50] - The max number of subfolders to return.
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFolderContentResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
@@ -164,19 +314,47 @@ export class Storage {
     sort = '',
     order = '',
   ): [Promise<FetchPaginatedFolderContentResponse>, RequestCanceler] {
-    const offsetQuery = `/?offset=${offset}`;
+    const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
-    const sortQuery = `&sort=${sort}`;
-    const orderQuery = `&order=${order}`;
-    let query;
-    if (sort === '' && order === '') {
-      query = `${offsetQuery}${limitQuery}`;
-    } else {
-      query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
-    }
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
 
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFolderContentResponse>(
-      `folders/${folderId}/folders${query}`,
+      `folders/${folderId}/folders/${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets the subfolders of a folder by its UUID.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {number} [offset=0] - The position of the first subfolder to return.
+   * @param {number} [limit=50] - The max number of subfolders to return.
+   * @param {string} [sort=plainName] - The reference column to sort it.
+   * @param {string} [order=ASC] - The order to be followed.
+   * @returns {[Promise<FetchPaginatedFoldersContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFoldersByUuid(
+    folderUuid: UUID,
+    offset = 0,
+    limit = 50,
+    sort = '',
+    order = '',
+  ): [Promise<FetchPaginatedFoldersContent>, RequestCanceler] {
+    const offsetQuery = `?offset=${offset}`;
+    const limitQuery = `&limit=${limit}`;
+    const sortQuery = sort !== '' ? `&sort=${sort}` : '';
+    const orderQuery = order !== '' ? `&order=${order}` : '';
+
+    const query = `${offsetQuery}${limitQuery}${sortQuery}${orderQuery}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFoldersContent>(
+      `folders/content/${folderUuid}/folders/${query}`,
       this.headers(),
     );
 
@@ -209,7 +387,7 @@ export class Storage {
    * Creates a new file entry
    * @param fileEntry
    */
-  public createFileEntry(fileEntry: FileEntry): Promise<DriveFileData> {
+  public createFileEntry(fileEntry: FileEntry, resourcesToken?: Token): Promise<DriveFileData> {
     return this.client.post(
       '/storage/file',
       {
@@ -224,7 +402,28 @@ export class Storage {
           encrypt_version: fileEntry.encrypt_version,
         },
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Creates a new file entry
+   * @param fileEntry
+   */
+  public createFileEntryByUuid(fileEntry: FileEntryByUuid, resourcesToken?: string): Promise<DriveFileData> {
+    return this.client.post(
+      '/files',
+      {
+        name: fileEntry.name,
+        bucket: fileEntry.bucket,
+        fileId: fileEntry.id,
+        encryptVersion: fileEntry.encrypt_version,
+        folderUuid: fileEntry.folder_id,
+        size: fileEntry.size,
+        plainName: fileEntry.plain_name,
+        type: fileEntry.type,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -232,13 +431,13 @@ export class Storage {
    * Creates a new thumbnail entry
    * @param thumbnailEntry
    */
-  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry): Promise<Thumbnail> {
+  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry, resourcesToken?: Token): Promise<Thumbnail> {
     return this.client.post(
       '/storage/thumbnail',
       {
         thumbnail: thumbnailEntry,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -246,7 +445,7 @@ export class Storage {
    * Updates the details of a file entry
    * @param payload
    */
-  public updateFile(payload: UpdateFilePayload): Promise<void> {
+  public updateFile(payload: UpdateFilePayload, resourcesToken?: Token): Promise<void> {
     return this.client.post(
       `/storage/file/${payload.fileId}/meta`,
       {
@@ -254,7 +453,27 @@ export class Storage {
         bucketId: payload.bucketId,
         relativePath: payload.destinationPath,
       },
-      this.headers(),
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Updates the name of a file with the given UUID.
+   *
+   * @param {Object} payload - The payload containing the UUID and new name of the file.
+   * @param {string} payload.fileUuid - The UUID of the file.
+   * @param {string} payload.name - The new name of the file.
+   * @param {string} [resourcesToken] - The token for accessing resources.
+   * @return {Promise<void>} - A Promise that resolves when the file name is successfully updated.
+   */
+  public updateFileNameWithUUID(payload: { fileUuid: string; name: string }, resourcesToken?: Token): Promise<void> {
+    const { fileUuid, name } = payload;
+    return this.client.put(
+      `/files/${fileUuid}/meta`,
+      {
+        plainName: name,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
   }
 
@@ -284,6 +503,20 @@ export class Storage {
   }
 
   /**
+   * Moves a specific file to a new location
+   * @param payload
+   */
+  public async moveFileByUuid(payload: MoveFileUuidPayload): Promise<FileMeta> {
+    return this.client.patch(
+      `/files/${payload.fileUuid}`,
+      {
+        destinationFolder: payload.destinationFolderUuid,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
    * Returns a list of the n most recent files
    * @param limit
    */
@@ -306,7 +539,7 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {
@@ -339,10 +572,147 @@ export class Storage {
   }
 
   /**
+   * Get global search items.
+   *
+   * @param {string} search - The name of the item.
+   * @returns {[Promise<SearchResultData>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getGlobalSearchItems(search: string): [Promise<SearchResultData>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<SearchResultData>(
+      `fuzzy/${search}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
-  private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  private headers(customHeaders?: CustomHeaders) {
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity?.workspaceToken,
+      customHeaders,
+    );
+  }
+
+  /**
+   * Gets the ancestors of a given folder UUID
+   *
+   * @param {string} folderUUID - UUID of the folder.
+   * @returns {Promise<FolderAncestor[]>}
+   */
+  public getFolderAncestors(uuid: string): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors`, this.headers());
+  }
+
+  /**
+   * Gets the meta of a given folder UUID
+   *
+   * @param {string} folderUUID - UUID of the folder.
+   * @returns {Promise<FolderMeta>}
+   */
+  public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
+    const customHeaders = workspacesToken
+      ? {
+          'x-internxt-workspace': workspacesToken,
+        }
+      : undefined;
+
+    return this.client.get<FolderMeta>(
+      `folders/${uuid}/meta`,
+      addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
+    );
+  }
+
+  /**
+   * Gets the meta of a given folder Id
+   *
+   * @param {number} folderId - Id of the folder.
+   * @returns {Promise<FolderMeta>}
+   */
+  public getFolderMetaById(folderId: number): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/${folderId}/metadata`, this.headers());
+  }
+
+  /**
+   * Replaces a file with a new one.
+   *
+   * @param {string} uuid - UUID of the file.
+   * @param {ReplaceFile} payload
+   * @returns {Promise<DriveFileData>} - The replaced file data.
+   */
+  public replaceFile(uuid: string, payload: ReplaceFile): Promise<DriveFileData> {
+    return this.client.put<DriveFileData>(`/files/${uuid}`, { ...payload }, this.headers());
+  }
+
+  /**
+   * Checks the size limit for a file.
+   *
+   * @param {number} size - The size of the file to check.
+   * @return {Promise<void>} - A promise that resolves when the size limit check is complete.
+   */
+  public async checkSizeLimit(size: number): Promise<void> {
+    return this.client.post(
+      '/files/check-size-limit',
+      {
+        file: {
+          size,
+        },
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Retrieves the folder tree based on the UUID.
+   *
+   * @param {string} uuid - The UUID of the folder.
+   * @return {Promise<FolderTreeResponse>} The promise containing the folder tree response.
+   */
+  public getFolderTree(uuid: string): Promise<FolderTreeResponse> {
+    return this.client.get(`/folders/${uuid}/tree`, this.headers());
+  }
+
+  /**
+   * Checks if the given files already exist in the given folder.
+   *
+   * @param {CheckDuplicatedFilesPayload} payload - Payload containing the folder UUID and the list of files to check.
+   * @return {Promise<CheckDuplicatedFilesResponse>} - Promise that contains the duplicated files in a list.
+   */
+  public checkDuplicatedFiles({
+    folderUuid,
+    filesList,
+  }: CheckDuplicatedFilesPayload): Promise<CheckDuplicatedFilesResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/files/existence`,
+      {
+        files: filesList,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Checks if the given folders names already exist in the given folder
+   *
+   * @param {CheckDuplicatedFolderPayload} payload - Payload containing the folder UUID and the list of folders to check.
+   * @return {Promise<CheckDuplicatedFoldersResponse>} - Promise that contains the duplicated folders in a list.
+   */
+  public checkDuplicatedFolders({
+    folderUuid,
+    folderNamesList,
+  }: CheckDuplicatedFolderPayload): Promise<CheckDuplicatedFoldersResponse> {
+    return this.client.post(
+      `/folders/content/${folderUuid}/folders/existence`,
+      {
+        plainNames: folderNamesList,
+      },
+      this.headers(),
+    );
   }
 }

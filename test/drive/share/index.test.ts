@@ -1,5 +1,10 @@
 import sinon from 'sinon';
-import { GenerateShareLinkPayload, GetSharedDirectoryPayload } from '../../../src/drive/share/types';
+import {
+  GenerateShareLinkPayload,
+  GetSharedDirectoryPayload,
+  SharedFiles,
+  SharingMeta,
+} from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
 import { basicHeaders, headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
@@ -154,6 +159,105 @@ describe('# share service tests', () => {
     });
   });
 
+  describe('Validate Invitation', () => {
+    it('Valid invitation', async () => {
+      // Arrange
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        uuid: mockUuid,
+      });
+      const { client, headers } = clientAndHeaders();
+      const shareId = mockUuid;
+
+      // Act
+      const body = await client.validateInviteExpiration(shareId);
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject([`sharings/invites/${mockUuid}/validate`, headers]);
+      expect(body).toEqual({
+        uuid: mockUuid,
+      });
+    });
+  });
+
+  describe('Add password to public sharing', () => {
+    it('Add password', async () => {
+      // Arrange
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+      const sharedFile: SharingMeta = {
+        id: '1',
+        itemId: 'file123',
+        itemType: 'file',
+        ownerId: 'user123',
+        sharedWith: 'user456',
+        encryptionKey: 'sampleEncryptionKey',
+        encryptedCode: 'sampleEncryptedCode',
+        encryptedPassword: 'sampleEncryptedPassword',
+        encryptionAlgorithm: 'AES-256',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        type: 'private',
+        item: {} as SharedFiles,
+        itemToken: 'sampleItemToken',
+      };
+
+      const callStub = sinon.stub(httpClient, 'patch').resolves(sharedFile);
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      const body = await client.saveSharingPassword(mockUuid, 'encryptedPassword');
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject([
+        `sharings/${mockUuid}/password`,
+        { encryptedPassword: 'encryptedPassword' },
+        headers,
+      ]);
+      expect(body).toEqual(sharedFile);
+    });
+  });
+
+  describe('Remove password', () => {
+    it('Password removed', async () => {
+      // Arrange
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      const callStub = sinon.stub(httpClient, 'delete').resolves();
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      await client.removeSharingPassword(mockUuid);
+
+      // Assert
+      expect(callStub.firstCall.args).toMatchObject([`sharings/${mockUuid}/password`, headers]);
+    });
+  });
+
+  describe('get public shared item info', () => {
+    it('Should be called with sharingId and return basic info', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        plainName: 'anyname',
+        size: 30,
+        type: 'pdf',
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Act
+      const body = await client.getPublicSharedItemInfo(mockUuid);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/item`, headers]);
+      expect(body).toEqual({
+        plainName: 'anyname',
+        size: 30,
+        type: 'pdf',
+      });
+    });
+  });
+
   describe('get shares list', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
@@ -231,9 +335,7 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${
-          payload.parentId
-        }&page=${payload.page}&perPage=${payload.perPage}`,
+        `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}`,
         headers,
       ]);
       expect(body).toEqual({
@@ -264,13 +366,31 @@ describe('# share service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${
-          payload.parentId
-        }&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
+        `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
         headers,
       ]);
       expect(body).toEqual({
         info: 'some',
+      });
+    });
+  });
+
+  describe('get shared folder size', () => {
+    it('Should be called with right arguments & return folder size', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        size: 30,
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+      const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
+
+      // Act
+      const body = await client.getSharedFolderSize(mockUuid);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/folder/size`, headers]);
+      expect(body).toEqual({
+        size: 30,
       });
     });
   });

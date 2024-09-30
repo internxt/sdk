@@ -1,19 +1,19 @@
 import { validate as uuidValidate } from 'uuid';
+import { BasicAuth } from '../auth/types';
+import { ApiUrl, AppDetails } from '../shared';
+import { headersWithAuthToken, headersWithBasicAuth } from '../shared/headers/index';
+import { HttpClient } from '../shared/http/client';
+import { isHexString } from '../utils';
 import {
   BridgeUrl,
-  StartUploadResponse,
+  FinishMultipartUploadPayload,
+  FinishUploadPayload,
   FinishUploadResponse,
   GetDownloadLinksResponse,
   NetworkRequestConfig,
-  FinishUploadPayload,
-  FinishMultipartUploadPayload,
+  StartUploadPayload,
+  StartUploadResponse,
 } from './types';
-import { ApiUrl, AppDetails } from '../shared';
-import { HttpClient } from '../shared/http/client';
-import { headersWithAuthToken, headersWithBasicAuth } from '../shared/headers/index';
-import { BasicAuth } from '../auth/types';
-import { StartUploadPayload } from './types';
-import { isHexString } from '../utils';
 
 export * from './types';
 
@@ -238,6 +238,7 @@ export class Network {
     { client, appDetails, auth }: NetworkRequestConfig,
     token?: string,
   ) {
+    // ES ESTE EL QUE FALLA AL INTENTAR DESCARGAR UN FILE
     const headers = token
       ? Network.headersWithAuthToken(appDetails, token)
       : Network.headersWithBasicAuth(appDetails, auth);

@@ -1,8 +1,13 @@
-import { headersWithToken } from '../../shared/headers';
-import { AddItemsToTrashPayload, DeleteFilePayload, DeleteItemsPermanentlyPayload } from './types';
-import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
+import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
+import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
+import {
+  AddItemsToTrashPayload,
+  DeleteFilePayload,
+  DeleteItemsPermanentlyByUUIDPayload,
+  DeleteItemsPermanentlyPayload,
+} from './types';
 
 export * as TrashTypes from './types';
 
@@ -73,7 +78,7 @@ export class Trash {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(payload: AddItemsToTrashPayload) {
+  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {
@@ -101,10 +106,27 @@ export class Trash {
   }
 
   /**
+   * Deletes trashed items permanently by UUID.
+   *
+   * @param {DeleteItemsPermanentlyByUUIDPayload} payload - The payload containing the items to be deleted.
+   * @return {Promise<void>} A promise that resolves when the items are deleted permanently.
+   */
+  public deleteItemsPermanentlyByUUID(payload: DeleteItemsPermanentlyByUUIDPayload) {
+    return this.client.delete('/storage/trash', this.headers(), {
+      items: payload.items,
+    });
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      this.apiSecurity.workspaceToken,
+    );
   }
 }

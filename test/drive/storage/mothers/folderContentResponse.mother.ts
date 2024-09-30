@@ -1,4 +1,11 @@
-import { DriveFileData, FetchFolderContentResponse, FolderChild } from '../../../../src/drive/storage/types';
+import {
+  DriveFileData,
+  FetchFolderContentResponse,
+  FetchPaginatedFilesContent,
+  FetchPaginatedFoldersContent,
+  FileStatus,
+  FolderChild,
+} from '../../../../src/drive/storage/types';
 
 export function emptyFolderContentResponse() {
   const response: FetchFolderContentResponse = {
@@ -38,8 +45,10 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     updatedAt: '',
     userId: 0,
     user_id: 0,
+    uuid: '',
   };
   const file: DriveFileData = {
+    uuid: '',
     bucket: '',
     createdAt: '',
     created_at: '',
@@ -47,6 +56,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     deletedAt: null,
     encrypt_version: '',
     fileId: '',
+    folderUuid: '',
     folderId: 0,
     folder_id: 0,
     id: 0,
@@ -55,6 +65,7 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
     size: 0,
     type: '',
     updatedAt: '',
+    status: '',
     thumbnails: [],
     currentThumbnail: null,
   };
@@ -70,4 +81,59 @@ export function randomFolderContentResponse(folderCount: number, fileCount: numb
   }
 
   return response;
+}
+
+export function randomSubfilesResponse(fileCount: number) {
+  const responseFiles: FetchPaginatedFilesContent = { files: [] };
+
+  for (let i = 0; i < fileCount; i++) {
+    responseFiles.files.push({
+      id: i,
+      uuid: '',
+      fileId: '',
+      name: '',
+      type: '',
+      size: BigInt(0),
+      bucket: '',
+      folderId: 0,
+      folderUuid: '',
+      encryptVersion: '',
+      deleted: false,
+      deletedAt: null,
+      removed: false,
+      removedAt: null,
+      userId: 0,
+      modificationTime: new Date(),
+      plainName: '',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: FileStatus.EXISTS,
+    });
+  }
+  return responseFiles;
+}
+
+export function randomSubfoldersResponse(fileCount: number) {
+  const responseFolders: FetchPaginatedFoldersContent = { folders: [] };
+
+  for (let i = 0; i < fileCount; i++) {
+    responseFolders.folders.push({
+      id: i,
+      parentId: 0,
+      parentUuid: '',
+      name: '',
+      bucket: '',
+      userId: 0,
+      uuid: '',
+      plainName: '',
+      encryptVersion: '',
+      deleted: false,
+      removed: false,
+      deletedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      removedAt: null,
+    });
+  }
+  return responseFolders;
 }

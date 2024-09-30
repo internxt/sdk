@@ -1,3 +1,5 @@
+import { SharingMeta } from '../share/types';
+
 export interface DriveFolderData {
   id: number;
   bucket: string | null;
@@ -12,9 +14,11 @@ export interface DriveFolderData {
   plain_name: string;
   parentId: number | null;
   parent_id: number | null;
+  parentUuid: string;
   updatedAt: string;
   userId: number;
   user_id: number;
+  uuid: string;
 }
 
 export interface DriveFileData {
@@ -27,14 +31,20 @@ export interface DriveFileData {
   fileId: string;
   folderId: number;
   folder_id: number;
+  folderUuid: string;
   id: number;
   name: string;
-  plain_name: string;
+  plain_name: string | null;
+  plainName?: string | null;
   size: number;
   type: string;
   updatedAt: string;
+  status: string;
   thumbnails: Array<Thumbnail>;
   currentThumbnail: Thumbnail | null;
+  shares?: Array<ShareLink>;
+  sharings?: { type: string; id: string }[];
+  uuid: string;
 }
 
 export interface Thumbnail {
@@ -66,6 +76,8 @@ export interface FolderChild {
   updatedAt: string;
   userId: number;
   user_id: number;
+  uuid: string;
+  plainName?: string;
 }
 
 export interface FetchFolderContentResponse {
@@ -88,27 +100,47 @@ export interface FetchFolderContentResponse {
 
 export interface FileMeta {
   bucket: string;
-  createdAt: Date;
+  createdAt: string;
+  created_at: string;
   deleted: boolean;
-  deletedAt: Date | null;
-  encryptVersion: string;
+  deletedAt: null;
+  encrypt_version: string;
   fileId: string;
-  folder: string | null;
   folderId: number;
+  folder_id: number;
   folderUuid: string;
   id: number;
-  modificationTime: string;
   name: string;
-  plainName: string;
-  removed: boolean;
-  removedAt: Date | null;
-  size: string;
-  status: string;
+  plain_name: string | null;
+  plainName?: string | null;
+  size: number;
   type: string;
-  updatedAt: Date;
-  user: string | null;
-  userId: number;
+  updatedAt: string;
+  status: string;
+  thumbnails: Array<Thumbnail>;
+  currentThumbnail: Thumbnail | null;
+  shares?: Array<ShareLink>;
   uuid: string;
+}
+
+export interface ShareLink {
+  id: string;
+  token: string;
+  mnemonic: string;
+  user: any;
+  item: any;
+  encryptionKey: string;
+  bucket: string;
+  itemToken: string;
+  isFolder: boolean;
+  views: number;
+  timesValid: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  fileSize: number;
+  hashed_password: string | null;
+  code: string;
 }
 
 export interface FetchPaginatedFolderContentResponse {
@@ -130,6 +162,69 @@ export interface FetchPaginatedFolderContentResponse {
     user_id: number;
     type: string;
   }[];
+}
+
+export enum FileStatus {
+  EXISTS = 'EXISTS',
+  TRASHED = 'TRASHED',
+  DELETED = 'DELETED',
+}
+
+export interface FetchPaginatedFile {
+  id: number;
+  uuid: string;
+  fileId: string;
+  name: string;
+  type: string;
+  size: bigint;
+  bucket: string;
+  folderId: number;
+  folder?: any;
+  folderUuid: string;
+  encryptVersion: string;
+  deleted: boolean;
+  deletedAt: Date | null;
+  removed: boolean;
+  removedAt: Date | null;
+  userId: number;
+  user?: any;
+  modificationTime: Date;
+  plainName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  status: FileStatus;
+  shares?: ShareLink[];
+  thumbnails?: Thumbnail[];
+  sharings?: SharingMeta[];
+}
+
+export interface FetchPaginatedFolder {
+  id: number;
+  parentId: number;
+  parentUuid: string;
+  parent?: any;
+  name: string;
+  bucket: string;
+  userId: number;
+  uuid: string;
+  user?: any;
+  plainName: string;
+  encryptVersion: string;
+  deleted: boolean;
+  removed: boolean;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+  removedAt: Date | null;
+  sharings?: SharingMeta[];
+}
+
+export interface FetchPaginatedFilesContent {
+  files: FetchPaginatedFile[];
+}
+
+export interface FetchPaginatedFoldersContent {
+  folders: FetchPaginatedFolder[];
 }
 
 export interface FetchTrashContentResponse {
@@ -171,6 +266,17 @@ export interface FileEntry {
   encrypt_version: EncryptionVersion;
 }
 
+export interface FileEntryByUuid {
+  id: string;
+  type: string;
+  size: number;
+  name: string;
+  plain_name: string;
+  bucket: string;
+  folder_id: string;
+  encrypt_version: EncryptionVersion;
+}
+
 export interface ThumbnailEntry {
   file_id: number;
   max_width: number;
@@ -186,6 +292,10 @@ export interface CreateFolderPayload {
   parentFolderId: number;
   folderName: string;
 }
+export interface CreateFolderByUuidPayload {
+  plainName: string;
+  parentFolderUuid: string;
+}
 
 export interface CreateFolderResponse {
   bucket: string;
@@ -193,14 +303,21 @@ export interface CreateFolderResponse {
   name: string;
   plain_name: string;
   parentId: number;
+  parentUuid: string;
   createdAt: string;
   updatedAt: string;
   userId: number;
+  uuid: string;
 }
 
 export interface MoveFolderPayload {
   folderId: number;
   destinationFolderId: number;
+}
+
+export interface MoveFolderUuidPayload {
+  folderUuid: string;
+  destinationFolderUuid: string;
 }
 
 export interface MoveFolderResponse {
@@ -241,6 +358,11 @@ export interface MoveFilePayload {
   bucketId: string;
 }
 
+export interface MoveFileUuidPayload {
+  fileUuid: string;
+  destinationFolderUuid: string;
+}
+
 export interface MoveFileResponse {
   item: DriveFileData;
   destination: number;
@@ -258,5 +380,119 @@ export interface FetchLimitResponse {
 }
 
 export interface AddItemsToTrashPayload {
-  items: Array<{ id: string; type: string }>;
+  items: Array<{ id?: string; uuid?: string; type: string }>;
+}
+
+export interface SearchResult {
+  id: string;
+  itemId: string;
+  itemType: string;
+  name: string;
+  rank: number;
+  similarity: number;
+  userId: string;
+  item: {
+    id: number;
+    bucket?: string;
+    fileId?: string;
+    plainName?: string;
+    size?: string;
+    type?: string;
+  };
+}
+export interface SearchResultData {
+  data: [SearchResult];
+}
+
+export interface FolderAncestor {
+  bucket: null | string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: null | string;
+  encryptVersion: null | string;
+  id: number;
+  name: string;
+  parent: null | string;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: null | string;
+  size: number;
+  type: string;
+  updatedAt: string;
+  user: null | string;
+  userId: number;
+  uuid: string;
+}
+export interface FolderMeta {
+  bucket: null | string;
+  createdAt: string;
+  deleted: boolean;
+  deletedAt: null | string;
+  encryptVersion: null | string;
+  id: number;
+  name: string;
+  parent: null | string;
+  parentId: number;
+  plainName: string;
+  removed: boolean;
+  removedAt: null | string;
+  size: number;
+  type: string;
+  updatedAt: string;
+  user: null | string;
+  userId: number;
+  uuid: string;
+}
+
+export interface ReplaceFile {
+  fileId: string;
+  size: number;
+}
+
+export interface FolderTree {
+  id: number;
+  bucket: string | null;
+  children: FolderTree[];
+  encrypt_version: string;
+  files: DriveFileData[];
+  name: string;
+  plainName: string;
+  parentId: number;
+  userId: number;
+  uuid: string;
+  parentUuid: string;
+  createdAt: string;
+  updatedAt: string;
+  size: number;
+  type: string;
+  deleted: boolean;
+  removed: boolean;
+}
+
+export interface FolderTreeResponse {
+  tree: FolderTree;
+}
+
+export interface CheckDuplicatedFilesPayload {
+  folderUuid: string;
+  filesList: FileStructure[];
+}
+
+export interface FileStructure {
+  plainName: string;
+  type: string;
+}
+
+export interface CheckDuplicatedFilesResponse {
+  existentFiles: DriveFileData[];
+}
+
+export interface CheckDuplicatedFolderPayload {
+  folderUuid: string;
+  folderNamesList: string[];
+}
+
+export interface CheckDuplicatedFoldersResponse {
+  existentFolders: DriveFolderData[];
 }

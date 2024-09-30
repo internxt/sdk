@@ -4,9 +4,10 @@ import {
   Keys,
   LoginDetails,
   RegisterDetails,
-  UserAccessError,
   SecurityDetails,
   TwoFactorAuthQR,
+  RegisterPreCreatedUser,
+  RegisterPreCreatedUserResponse,
 } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -63,6 +64,59 @@ export class Auth {
   }
 
   /**
+   * Registers a precreated user
+   * @param registerDetails
+   * @returns {Promise<RegisterPreCreatedUserResponse>} Returns sign in token, user data and uuid.
+   */
+  public registerPreCreatedUser(registerDetails: RegisterPreCreatedUser): Promise<RegisterPreCreatedUserResponse> {
+    return this.client.post(
+      'users/pre-created-users/register',
+      {
+        name: registerDetails.name,
+        captcha: registerDetails.captcha,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
+        privateKey: registerDetails.keys.privateKeyEncrypted,
+        publicKey: registerDetails.keys.publicKey,
+        revocationKey: registerDetails.keys.revocationCertificate,
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
+        invitationId: registerDetails.invitationId,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Requests account unblock email
+   *
+   * @param {string} email - The email address associated with the account.
+   * @returns {Promise<void>} - Resolves when the email is sent.
+   */
+  public requestUnblockAccount(email: string): Promise<void> {
+    return this.client.post(
+      'users/unblock-account',
+      {
+        email,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Unblocks account with token
+   *
+   * @param {string} token - The token received via email to verify and unblock the account.
+   * @returns {Promise<void>} - Resolves successfuly when account is unblocked
+   */
+  public unblockAccount(token: string): Promise<void> {
+    return this.client.put('users/unblock-account', { token }, this.basicHeaders());
+  }
+
+  /**
    * Tries to log in a user given its login details
    * @param details
    * @param cryptoProvider
@@ -104,9 +158,6 @@ export class Auth {
         // @ts-ignore
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
-      })
-      .catch((error) => {
-        throw new UserAccessError(error.message);
       });
   }
 

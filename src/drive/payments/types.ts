@@ -1,3 +1,4 @@
+import { AppSumoDetails } from './../../shared/types/appsumo';
 export interface ProductData {
   id: string;
   name: string;
@@ -63,6 +64,29 @@ export enum ProductPriceType {
   OneTime = 'one_time',
 }
 
+export enum UserType {
+  Individual = 'individual',
+  Business = 'business',
+}
+
+export type StoragePlan = {
+  planId: string;
+  productId: string;
+  name: string;
+  simpleName: string;
+  paymentInterval: RenewalPeriod;
+  price: number;
+  monthlyPrice: number;
+  currency: string;
+  isTeam: boolean;
+  isLifetime: boolean;
+  renewalPeriod: RenewalPeriod;
+  storageLimit: number;
+  amountOfSeats: number;
+  isAppSumo?: boolean;
+  details?: AppSumoDetails;
+};
+
 export interface CreatePaymentSessionPayload {
   test?: boolean;
   lifetime_tier?: LifetimeTier;
@@ -72,8 +96,25 @@ export interface CreatePaymentSessionPayload {
   canceledUrl?: string;
 }
 
+export interface StripeAddress {
+  city: string | null;
+  country: string | null;
+  line1: string | null;
+  line2: string | null;
+  // TODO: Change this as camelCase
+  postal_code: string | null;
+  state: string | null;
+}
+
 export interface PaymentMethod {
   id: string;
+  // TODO: Change this as camelCase
+  billing_details?: {
+    address: StripeAddress | null;
+    email: string | null;
+    name: string | null;
+    phone: string | null;
+  };
   card: {
     brand: 'amex' | 'diners' | 'discover' | 'jcb' | 'mastercard' | 'unionpay' | 'visa' | 'unknown';
     exp_month: number;
@@ -88,18 +129,30 @@ export interface Invoice {
   created: number;
   bytesInPlan: number;
   pdf: string;
+  total: number;
+  currency: string;
+}
+
+export interface InvoicePayload {
+  subscriptionId: string;
+  startingAfter?: string;
+  limit?: number;
 }
 
 export type UserSubscription =
   | { type: 'free' | 'lifetime' }
   | {
       type: 'subscription';
+      subscriptionId: string;
       amount: number;
       currency: string;
       amountAfterCoupon?: number;
       interval: 'year' | 'month';
       nextPayment: number;
       priceId: string;
+      userType?: UserType;
+      planId?: string;
+      plan?: StoragePlan;
     };
 
 export interface DisplayPrice {
@@ -107,6 +160,8 @@ export interface DisplayPrice {
   bytes: number;
   interval: 'year' | 'month' | 'lifetime';
   amount: number;
+  currency: string;
+  userType: UserType;
 }
 
 export interface CreateCheckoutSessionPayload {
@@ -116,6 +171,7 @@ export interface CreateCheckoutSessionPayload {
   success_url: string;
   cancel_url: string;
   customer_email: string;
+  currency?: string;
 }
 
 export interface FreeTrialAvailable {
@@ -126,3 +182,20 @@ export interface RedeemCodePayload {
   code: string;
   provider: string;
 }
+
+export interface UpdateSubscriptionPaymentMethod {
+  userType: UserType;
+  paymentMethodId: string;
+}
+
+export interface CustomerBillingInfo {
+  address?: string;
+  phoneNumber?: string;
+}
+
+export type CreatedSubscriptionData = {
+  type: 'setup' | 'payment';
+  clientSecret: string;
+  subscriptionId?: string;
+  paymentIntentId?: string;
+};
