@@ -13,6 +13,14 @@ export interface ChangePasswordPayload {
   newEncryptedSalt: string;
   encryptedMnemonic: string;
   encryptedPrivateKey: string;
+}
+
+export interface ChangePasswordPayloadNew {
+  currentEncryptedPassword: string;
+  newEncryptedPassword: string;
+  newEncryptedSalt: string;
+  encryptedMnemonic: string;
+  encryptedPrivateKey: string;
   encryptVersion: string;
 }
 
@@ -26,7 +34,6 @@ export type PreCreateUserResponse = {
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
 export type UserPublicKeyResponse = { publicKey: string };
-
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
