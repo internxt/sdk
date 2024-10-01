@@ -4,6 +4,7 @@ import { HttpClient } from '../../shared/http/client';
 import { UserSettings } from '../../shared/types/userSettings';
 import {
   ChangePasswordPayload,
+  ChangePasswordPayloadNew,
   CheckChangeEmailExpirationResponse,
   FriendInvite,
   InitializeUserResponse,
@@ -95,12 +96,12 @@ export class Users {
   }
 
   /**
-   * Updates the authentication credentials and invalidates previous tokens
+   * Updates the authentication credentials and invalidates previous tokens (Legacy backend (drive-server))
    * @param payload
    *
    * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
    */
-  public changePassword(payload: ChangePasswordPayload): Promise<{ token: string; newToken: string }> {
+  public changePasswordLegacy(payload: ChangePasswordPayload): Promise<{ token: string; newToken: string }> {
     return this.client.patch(
       '/user/password',
       {
@@ -109,6 +110,27 @@ export class Users {
         newSalt: payload.newEncryptedSalt,
         mnemonic: payload.encryptedMnemonic,
         privateKey: payload.encryptedPrivateKey,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Updates the authentication credentials and invalidates previous tokens (New backend (drive-server-wip))
+   * @param payload
+   *
+   * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
+   */
+  public changePassword(payload: ChangePasswordPayloadNew): Promise<{ token: string; newToken: string }> {
+    return this.client.patch(
+      '/users/password',
+      {
+        currentPassword: payload.currentEncryptedPassword,
+        newPassword: payload.newEncryptedPassword,
+        newSalt: payload.newEncryptedSalt,
+        mnemonic: payload.encryptedMnemonic,
+        privateKey: payload.encryptedPrivateKey,
+        encryptVersion: payload.encryptVersion,
       },
       this.headers(),
     );

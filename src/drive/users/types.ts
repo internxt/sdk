@@ -15,6 +15,15 @@ export interface ChangePasswordPayload {
   encryptedPrivateKey: string;
 }
 
+export interface ChangePasswordPayloadNew {
+  currentEncryptedPassword: string;
+  newEncryptedPassword: string;
+  newEncryptedSalt: string;
+  encryptedMnemonic: string;
+  encryptedPrivateKey: string;
+  encryptVersion: string;
+}
+
 export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname'>>;
 
 export type PreCreateUserResponse = {
@@ -25,7 +34,6 @@ export type PreCreateUserResponse = {
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
 export type UserPublicKeyResponse = { publicKey: string };
-
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
