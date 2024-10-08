@@ -515,7 +515,7 @@ describe('# storage service tests', () => {
         const body = await client.getRecentFiles(5);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/recents?limit=5', headers]);
+        expect(callStub.firstCall.args).toEqual(['/files/recents?limit=5', headers]);
         expect(body).toEqual({
           files: [],
         });
