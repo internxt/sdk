@@ -605,10 +605,15 @@ export class Storage {
    *
    * @param {string} uuid - UUID of the folder.
    * @param {boolean} [isShared=false] - Whether the folder is a shared item or not.
+   * @param {boolean} [workspace=false] - Wether the folder is a workspace folder or not
    * @returns {Promise<FolderAncestor[]>} A promise that resolves with an array of ancestors of the given folder.
    */
-  public getFolderAncestors(uuid: string, isShared = false): Promise<FolderAncestor[]> {
-    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?isSharedItem=${isShared}`, this.headers());
+  public getFolderAncestors(uuid: string, workspace = false, isShared = false): Promise<FolderAncestor[]> {
+    const queryParams = new URLSearchParams();
+    queryParams.set('workspace', String(workspace));
+    queryParams.set('isSharedItem', String(isShared));
+
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?${queryParams}?${queryParams}`, this.headers());
   }
 
   /**
