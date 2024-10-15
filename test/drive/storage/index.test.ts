@@ -515,6 +515,25 @@ describe('# storage service tests', () => {
         const body = await client.getRecentFiles(5);
 
         // Assert
+        expect(callStub.firstCall.args).toEqual(['/storage/recents?limit=5', headers]);
+        expect(body).toEqual({
+          files: [],
+        });
+      });
+    });
+
+    describe('get recent files V2', () => {
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const callStub = sinon.stub(httpClient, 'get').resolves({
+          files: [],
+        });
+        const { client, headers } = clientAndHeaders();
+
+        // Act
+        const body = await client.getRecentFilesV2(5);
+
+        // Assert
         expect(callStub.firstCall.args).toEqual(['/files/recents?limit=5', headers]);
         expect(body).toEqual({
           files: [],
