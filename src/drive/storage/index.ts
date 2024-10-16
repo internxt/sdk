@@ -622,7 +622,7 @@ export class Storage {
     queryParams.set('workspace', String(workspace));
     queryParams.set('isSharedItem', String(isShared));
 
-    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?${queryParams}?${queryParams}`, this.headers());
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?${queryParams}`, this.headers());
   }
 
   /**
