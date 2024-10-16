@@ -519,9 +519,18 @@ export class Storage {
   /**
    * Returns a list of the n most recent files
    * @param limit
+   * @deprecated use `getRecentFilesV2` call instead.
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.client.get(`/storage/recents?limit=${limit}`, this.headers());
+  }
+
+  /**
+   * Returns a list of the n most recent files
+   * @param limit
+   */
+  public async getRecentFilesV2(limit: number): Promise<DriveFileData[]> {
+    return this.client.get<DriveFileData[]>(`/files/recents?limit=${limit}`, this.headers());
   }
 
   /**
