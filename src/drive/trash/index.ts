@@ -97,9 +97,9 @@ export class Trash {
   ): Promise<FetchTrashContentResponse> {
     const endpoint = '/storage/trash/paginated';
     const folderIdQuery = folderId !== undefined ? `folderId=${folderId}&` : '';
+    const params = `limit=${limit}&offset=${offset}&type=${type}&root=${root}&sort=${sort}&order=${order}`;
 
-    // eslint-disable-next-line max-len
-    const url = `${endpoint}?${folderIdQuery}limit=${limit}&offset=${offset}&type=${type}&root=${root}&sort=${sort}&order=${order}`;
+    const url = `${endpoint}?${folderIdQuery}${params}`;
 
     return this.client.get(url, this.headers());
   }
