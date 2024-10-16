@@ -209,6 +209,72 @@ describe('# storage service tests', () => {
       });
     });
 
+    describe('get ancestors from an item', () => {
+      const ROOT_FOLDER_UUID = '12345';
+      const IS_WORKSPACE = true;
+      const IS_SHARED = true;
+
+      it('Should call with correct params for a personal space', async () => {
+        // Arrange
+        const queryParams = new URLSearchParams();
+        queryParams.set('workspace', String(!IS_WORKSPACE));
+        queryParams.set('isSharedItem', String(!IS_SHARED));
+        const { folders } = randomSubfoldersResponse(2);
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(httpClient, 'get').returns(Promise.resolve(folders));
+
+        // Act
+        const body = await client.getFolderAncestors(ROOT_FOLDER_UUID);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `folders/${ROOT_FOLDER_UUID}/ancestors?${queryParams.toString()}`,
+          headers,
+        ]);
+        expect(body).toHaveLength(2);
+      });
+
+      it('Should call with correct params for a workspace', async () => {
+        // Arrange
+        const queryParams = new URLSearchParams();
+        queryParams.set('workspace', String(IS_WORKSPACE));
+        queryParams.set('isSharedItem', String(!IS_SHARED));
+        const { folders } = randomSubfoldersResponse(2);
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(httpClient, 'get').returns(Promise.resolve(folders));
+
+        // Act
+        const body = await client.getFolderAncestors(ROOT_FOLDER_UUID, IS_WORKSPACE);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `folders/${ROOT_FOLDER_UUID}/ancestors?${queryParams.toString()}`,
+          headers,
+        ]);
+        expect(body).toHaveLength(2);
+      });
+
+      it('Should call with correct params for a shared item', async () => {
+        // Arrange
+        const queryParams = new URLSearchParams();
+        queryParams.set('workspace', String(IS_WORKSPACE));
+        queryParams.set('isSharedItem', String(IS_SHARED));
+        const { folders } = randomSubfoldersResponse(2);
+        const { client, headers } = clientAndHeaders();
+        const callStub = sinon.stub(httpClient, 'get').returns(Promise.resolve(folders));
+
+        // Act
+        const body = await client.getFolderAncestors(ROOT_FOLDER_UUID, IS_WORKSPACE, IS_SHARED);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `folders/${ROOT_FOLDER_UUID}/ancestors?${queryParams.toString()}`,
+          headers,
+        ]);
+        expect(body).toHaveLength(2);
+      });
+    });
+
     describe('create folder entry', () => {
       it('Should call with correct params & return content', async () => {
         // Arrange
@@ -666,7 +732,7 @@ describe('# storage service tests', () => {
   });
 });
 
-function clientAndHeaders(
+export function clientAndHeaders(
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
