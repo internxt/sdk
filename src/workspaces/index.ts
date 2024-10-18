@@ -441,6 +441,11 @@ export class Workspaces {
     return this.client.get<{ uuid: string }>(`workspaces/invitations/${inviteId}/validate`, this.headers());
   }
 
+  /**
+   * Returns shared files in teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFilesV2` call instead.
+   */
   public getWorkspaceTeamSharedFiles(
     workspaceId: string,
     teamId: string,
@@ -450,6 +455,24 @@ export class Workspaces {
 
     const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
       `workspaces/${workspaceId}/teams/${teamId}/shared/files${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns shared files in teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFilesV2(
+    workspaceId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/shared/files${orderByQueryParam}`,
       this.headers(),
     );
 
