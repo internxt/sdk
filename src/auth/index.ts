@@ -307,6 +307,20 @@ export class Auth {
   }
 
   /**
+   * Upgrade hash in the database
+   * @param newHash
+   */
+  public upgradeHash(newHash: string): Promise<void> {
+    return this.client.post(
+      '/users/upgrade-hash',
+      {
+        newHash: newHash,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
    * Restore password with email link
    * @param token
    * @param password
