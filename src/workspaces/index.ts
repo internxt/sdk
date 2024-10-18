@@ -456,6 +456,11 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
+  /**
+   * Returns shared folders in teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFoldersV2` call instead.
+   */
   public getWorkspaceTeamSharedFolders(
     workspaceId: string,
     teamId: string,
@@ -470,6 +475,24 @@ export class Workspaces {
 
     return [promise, requestCanceler];
   }
+
+  /**
+   * Returns shared folders in teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFoldersV2(
+    workspaceId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/shared/folders${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
   public getWorkspaceTeamSharedFolderFiles(
     workspaceId: string,
     teamId: string,
