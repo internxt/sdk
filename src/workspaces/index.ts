@@ -516,6 +516,11 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
+  /**
+   * Returns files inside a shared folders with teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFolderFilesV2` call instead.
+   */
   public getWorkspaceTeamSharedFolderFiles(
     workspaceId: string,
     teamId: string,
@@ -531,6 +536,31 @@ export class Workspaces {
 
     const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
       `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/files${params}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns files inside a shared folders with teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFolderFilesV2(
+    workspaceId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    token?: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    let params = `?page=${page}&perPage=${perPage}`;
+    if (token) params = params + `&token=${token}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/shared/${sharedFolderUUID}/files${params}
       ${orderByQueryParam}`,
       this.headers(),
     );
