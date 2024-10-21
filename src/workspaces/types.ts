@@ -47,7 +47,7 @@ export type WorkspaceSetupInfo = {
   address: string;
   description: string;
   encryptedMnemonic: string;
-  hybridModeEnabled: boolean | false;
+  hybridModeEnabled: boolean;
 };
 
 export type PendingWorkspace = {
@@ -156,7 +156,7 @@ export type InviteMemberBody = {
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
   message: string;
-  hybridModeEnabled: boolean | false;
+  hybridModeEnabled: boolean;
 };
 
 interface Invite {
