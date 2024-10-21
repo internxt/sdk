@@ -20,6 +20,8 @@ export interface UserSettings {
   mnemonic: string;
   privateKey: string;
   publicKey: string;
+  privateKyberKey: string;
+  publicKyberKey: string;
   revocationKey: string;
   teams?: boolean;
   appSumoDetails: AppSumoDetails | null;
