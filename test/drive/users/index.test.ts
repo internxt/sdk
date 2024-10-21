@@ -1,8 +1,8 @@
 import sinon from 'sinon';
 import { Users } from '../../../src/drive';
-import { headersWithToken } from '../../../src/shared/headers';
-import { ChangePasswordPayload } from '../../../src/drive/users/types';
+import { ChangePasswordPayloadNew } from '../../../src/drive/users/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
+import { headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
 
 const httpClient = HttpClient.create('');
@@ -100,7 +100,7 @@ describe('# users service tests', () => {
       const email = 'test@test.com';
       const callStub = sinon.stub(httpClient, 'post').resolves({
         publicKey: 'publicKey',
-        user: { uuid: 'exampleUuid', email }
+        user: { uuid: 'exampleUuid', email },
       });
 
       // Act
@@ -110,7 +110,7 @@ describe('# users service tests', () => {
       expect(callStub.firstCall.args).toEqual(['/users/pre-create', { email }, headers]);
       expect(body).toEqual({
         publicKey: 'publicKey',
-        user: { uuid: 'exampleUuid', email }
+        user: { uuid: 'exampleUuid', email },
       });
     });
   });
@@ -120,12 +120,13 @@ describe('# users service tests', () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const callStub = sinon.stub(httpClient, 'patch').resolves({});
-      const payload: ChangePasswordPayload = {
+      const payload: ChangePasswordPayloadNew = {
         currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
         encryptedPrivateKey: '3',
         newEncryptedPassword: '4',
         newEncryptedSalt: '5',
+        encryptVersion: '6',
       };
 
       // Act
@@ -133,13 +134,14 @@ describe('# users service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/user/password',
+        '/users/password',
         {
           currentPassword: payload.currentEncryptedPassword,
           newPassword: payload.newEncryptedPassword,
           newSalt: payload.newEncryptedSalt,
           mnemonic: payload.encryptedMnemonic,
           privateKey: payload.encryptedPrivateKey,
+          encryptVersion: payload.encryptVersion,
         },
         headers,
       ]);

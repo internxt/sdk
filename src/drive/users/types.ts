@@ -15,6 +15,15 @@ export interface ChangePasswordPayload {
   encryptedPrivateKey: string;
 }
 
+export interface ChangePasswordPayloadNew {
+  currentEncryptedPassword: string;
+  newEncryptedPassword: string;
+  newEncryptedSalt: string;
+  encryptedMnemonic: string;
+  encryptedPrivateKey: string;
+  encryptVersion: string;
+}
+
 export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname'>>;
 
 export type PreCreateUserResponse = {

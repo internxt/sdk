@@ -519,9 +519,18 @@ export class Storage {
   /**
    * Returns a list of the n most recent files
    * @param limit
+   * @deprecated use `getRecentFilesV2` call instead.
    */
   public getRecentFiles(limit: number): Promise<DriveFileData[]> {
     return this.client.get(`/storage/recents?limit=${limit}`, this.headers());
+  }
+
+  /**
+   * Returns a list of the n most recent files
+   * @param limit
+   */
+  public async getRecentFilesV2(limit: number): Promise<DriveFileData[]> {
+    return this.client.get<DriveFileData[]>(`/files/recents?limit=${limit}`, this.headers());
   }
 
   /**
@@ -603,11 +612,12 @@ export class Storage {
   /**
    * Gets the ancestors of a given folder UUID
    *
-   * @param {string} folderUUID - UUID of the folder.
-   * @returns {Promise<FolderAncestor[]>}
+   * @param {string} uuid - UUID of the folder.
+   * @param {boolean} [isShared=false] - Whether the folder is a shared item or not.
+   * @returns {Promise<FolderAncestor[]>} A promise that resolves with an array of ancestors of the given folder.
    */
-  public getFolderAncestors(uuid: string): Promise<FolderAncestor[]> {
-    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors`, this.headers());
+  public getFolderAncestors(uuid: string, isShared = false): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?isSharedItem=${isShared}`, this.headers());
   }
 
   /**
