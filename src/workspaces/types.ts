@@ -150,7 +150,7 @@ export type WorkspaceTeamResponse = WorkspaceTeam[];
 export type InviteMemberBody = {
   workspaceId: string;
   invitedUserEmail: string;
-  spaceLimitBytes: number;
+  spaceLimitBytes?: number;
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
   message: string;
