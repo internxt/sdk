@@ -257,8 +257,14 @@ export class Workspaces {
     return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
   }
 
-  public changeMemberAssignedSpace(workspaceId: string, memberId: string): Promise<WorkspaceUser> {
-    return this.client.patch<WorkspaceUser>(`workspaces/${workspaceId}/members/${memberId}/usage`, {}, this.headers());
+  public modifyMemberUsage(workspaceId: string, memberId: string, spaceLimitBytes: number): Promise<WorkspaceUser> {
+    return this.client.patch<WorkspaceUser>(
+      `workspaces/${workspaceId}/members/${memberId}/usage`,
+      {
+        spaceLimit: spaceLimitBytes,
+      },
+      this.headers(),
+    );
   }
 
   public getMemberUsage(workspaceId: string): Promise<GetMemberUsageResponse> {
