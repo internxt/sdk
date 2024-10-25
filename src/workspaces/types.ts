@@ -40,6 +40,12 @@ export interface WorkspaceData {
   workspace: Workspace;
 }
 
+export interface WorkspaceUsage {
+  totalWorkspaceSpace: number;
+  spaceAssigned: number;
+  spaceUsed: number;
+}
+
 export type WorkspaceSetupInfo = {
   workspaceId: string;
   name: string;
@@ -150,7 +156,7 @@ export type WorkspaceTeamResponse = WorkspaceTeam[];
 export type InviteMemberBody = {
   workspaceId: string;
   invitedUserEmail: string;
-  spaceLimitBytes: number;
+  spaceLimitBytes?: number;
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
   message: string;
