@@ -370,7 +370,7 @@ describe('Workspaces service tests', () => {
         await client.changeUserRole(teamId, memberId, role);
 
         expect(patchCall.firstCall.args).toEqual([
-          `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
+          `/api/workspaces/teams/${teamId}/members/${memberId}/role`,
           { role },
           headers,
         ]);
