@@ -28,6 +28,7 @@ import {
   WorkspacesResponse,
   WorkspaceTeamResponse,
   TeamMembers,
+  WorkspaceUser,
 } from './types';
 
 export class Workspaces {
@@ -123,6 +124,12 @@ export class Workspaces {
     );
   }
 
+  public getWorkspaceUsage(
+    workspaceId: string,
+  ): Promise<{ totalWorkspaceSpace: number; spaceAssigned: number; spaceUsed: number }> {
+    return this.client.get(`workspaces/${workspaceId}/usage`, this.headers());
+  }
+
   public editWorkspace(
     workspaceId: string,
     details: { name?: string; description?: string; address?: string },
@@ -213,7 +220,7 @@ export class Workspaces {
 
   public changeUserRole(teamId: string, memberId: string, role: string): Promise<void> {
     return this.client.patch<void>(
-      `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
+      `/api/workspaces/teams/${teamId}/members/${memberId}/role`,
       {
         role,
       },
@@ -248,6 +255,10 @@ export class Workspaces {
 
   public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
     return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
+  public changeMemberAssignedSpace(workspaceId: string, memberId: string): Promise<WorkspaceUser> {
+    return this.client.patch<WorkspaceUser>(`workspaces/${workspaceId}/members/${memberId}/usage`, {}, this.headers());
   }
 
   public getMemberUsage(workspaceId: string): Promise<GetMemberUsageResponse> {
