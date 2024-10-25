@@ -29,6 +29,7 @@ import {
   WorkspaceTeamResponse,
   TeamMembers,
   WorkspaceUser,
+  WorkspaceUsage,
 } from './types';
 
 export class Workspaces {
@@ -124,10 +125,8 @@ export class Workspaces {
     );
   }
 
-  public getWorkspaceUsage(
-    workspaceId: string,
-  ): Promise<{ totalWorkspaceSpace: number; spaceAssigned: number; spaceUsed: number }> {
-    return this.client.get(`workspaces/${workspaceId}/usage`, this.headers());
+  public getWorkspaceUsage(workspaceId: string): Promise<WorkspaceUsage> {
+    return this.client.get<WorkspaceUsage>(`workspaces/${workspaceId}/usage`, this.headers());
   }
 
   public editWorkspace(

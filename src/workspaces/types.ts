@@ -40,6 +40,12 @@ export interface WorkspaceData {
   workspace: Workspace;
 }
 
+export interface WorkspaceUsage {
+  totalWorkspaceSpace: number;
+  spaceAssigned: number;
+  spaceUsed: number;
+}
+
 export type WorkspaceSetupInfo = {
   workspaceId: string;
   name: string;
