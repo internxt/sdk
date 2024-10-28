@@ -28,6 +28,7 @@ import {
   WorkspacesResponse,
   WorkspaceTeamResponse,
   TeamMembers,
+  UsersAndTeamsAnItemIsShareWidthResponse,
 } from './types';
 
 export class Workspaces {
@@ -614,6 +615,27 @@ export class Workspaces {
     const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
       `workspaces/${workspaceId}/shared/${sharedFolderUUID}/folders${params}
       ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns users and teams an item is shared with.
+   */
+
+  public getUsersAndTeamsAnItemIsShareWidth({
+    workspaceId,
+    itemType,
+    itemId,
+  }: {
+    workspaceId: string;
+    itemType: 'folder' | 'file';
+    itemId: string;
+  }): [Promise<UsersAndTeamsAnItemIsShareWidthResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<UsersAndTeamsAnItemIsShareWidthResponse>(
+      `workspaces/${workspaceId}/shared/${itemType}/${itemId}/shared-with`,
       this.headers(),
     );
 
