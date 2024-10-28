@@ -53,11 +53,22 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
-        privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
-        publicKyberKey: registerDetails.keys.publicKyberKey,
         revocationKey: registerDetails.keys.revocationCertificate,
+        keys: {
+          ecc: {
+            privateKey: registerDetails.keys.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.keys.ecc.publicKey,
+          },
+          kyber: {
+            privateKey: registerDetails.keys.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.keys.kyber.publicKey,
+          }
+        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       },
@@ -81,11 +92,22 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
-        privateKyberKey: registerDetails.keys.privateKyberKeyEncrypted,
-        publicKyberKey: registerDetails.keys.publicKyberKey,
         revocationKey: registerDetails.keys.revocationCertificate,
+        keys: {
+          ecc: {
+            privateKey: registerDetails.keys.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.keys.ecc.publicKey,
+          },
+          kyber: {
+            privateKey: registerDetails.keys.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.keys.kyber.publicKey,
+          }
+        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
         invitationId: registerDetails.invitationId,
@@ -151,11 +173,22 @@ export class Auth {
           email: details.email,
           password: encryptedPasswordHash,
           tfa: details.tfaCode,
+          /**
+          / @deprecated The individual fields for keys should not be used
+          */
           privateKey: keys.privateKeyEncrypted,
           publicKey: keys.publicKey,
           revocateKey: keys.revocationCertificate,
-          publicKyberKey: keys.publicKyberKey,
-          privateKyberKey: keys.privateKyberKeyEncrypted,
+          keys: {
+            ecc: {
+              privateKey: keys.keys.ecc.privateKeyEncrypted,
+              publicKey: keys.keys.ecc.publicKey,
+            },
+            kyber: {
+              privateKey: keys.keys.kyber.privateKeyEncrypted,
+              publicKey: keys.keys.kyber.publicKey,
+            }
+          },
         },
         this.basicHeaders(),
       )
@@ -176,11 +209,22 @@ export class Auth {
     return this.client.patch(
       '/user/keys',
       {
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
-        publicKyberKey: keys.publicKyberKey,
-        privateKyberKey: keys.privateKyberKeyEncrypted,
+        keys: {
+          ecc: {
+            privateKey: keys.keys.ecc.privateKeyEncrypted,
+            publicKey: keys.keys.ecc.publicKey,
+          },
+          kyber: {
+            privateKey: keys.keys.kyber.privateKeyEncrypted,
+            publicKey: keys.keys.kyber.publicKey,
+          }
+        },
       },
       this.headersWithToken(token),
     );

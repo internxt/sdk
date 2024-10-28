@@ -33,11 +33,22 @@ export interface RegisterPreCreatedUserResponse {
   uuid: UUID;
 }
 export interface Keys {
+  /**
+  / @deprecated The individual fields for keys should not be used
+  */
   privateKeyEncrypted: string;
   publicKey: string;
   revocationCertificate: string;
-  publicKyberKey: string;
-  privateKyberKeyEncrypted: string;
+  keys: {
+    ecc: {
+      privateKeyEncrypted: string;
+      publicKey: string;
+    };
+    kyber: {
+      publicKey: string;
+      privateKeyEncrypted: string;
+    };
+  };
 }
 
 export interface CryptoProvider {
