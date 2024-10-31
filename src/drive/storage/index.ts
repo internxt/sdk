@@ -589,7 +589,7 @@ export class Storage {
    */
   public getGlobalSearchItems(search: string, workspaceId?: string): [Promise<SearchResultData>, RequestCanceler] {
     const { promise, requestCanceler } = workspaceId
-      ? this.client.getCancellable<SearchResultData>(`${workspaceId}/fuzzy/${search}`, this.headers())
+      ? this.client.getCancellable<SearchResultData>(`workspaces/${workspaceId}/fuzzy/${search}`, this.headers())
       : this.client.getCancellable<SearchResultData>(`fuzzy/${search}`, this.headers());
 
     return [promise, requestCanceler];
