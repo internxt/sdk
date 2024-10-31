@@ -584,13 +584,13 @@ export class Storage {
    * Get global search items.
    *
    * @param {string} search - The name of the item.
+   * @param {string} workspaceId - The ID of the workspace (optional).
    * @returns {[Promise<SearchResultData>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
-  public getGlobalSearchItems(search: string): [Promise<SearchResultData>, RequestCanceler] {
-    const { promise, requestCanceler } = this.client.getCancellable<SearchResultData>(
-      `fuzzy/${search}`,
-      this.headers(),
-    );
+  public getGlobalSearchItems(search: string, workspaceId?: string): [Promise<SearchResultData>, RequestCanceler] {
+    const { promise, requestCanceler } = workspaceId
+      ? this.client.getCancellable<SearchResultData>(`${workspaceId}/fuzzy/${search}`, this.headers())
+      : this.client.getCancellable<SearchResultData>(`fuzzy/${search}`, this.headers());
 
     return [promise, requestCanceler];
   }
