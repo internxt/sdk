@@ -735,4 +735,14 @@ export class Storage {
   public getFolderByPath(folderPath: string): Promise<FolderMeta> {
     return this.client.get<FolderMeta>(`folders/meta?path=${folderPath}`, this.headers());
   }
+
+  /**
+   * Gets the file meta from a given path (e.g. "/folder1/folder2/file.png")
+   *
+   * @param {string} filePath - The path of the file.
+   * @returns {Promise<FileMeta>} A promise that resolves the file on that path.
+   */
+  public getFileByPath(filePath: string): Promise<FileMeta> {
+    return this.client.get<FileMeta>(`files/meta?path=${filePath}`, this.headers());
+  }
 }
