@@ -725,4 +725,14 @@ export class Storage {
       this.headers(),
     );
   }
+
+  /**
+   * Gets the folder meta from a given path (e.g. "/folder1/folder2")
+   *
+   * @param {string} folderPath - The path of the folder.
+   * @returns {Promise<FolderMeta>} A promise that resolves the folder on that path.
+   */
+  public getFolderByPath(folderPath: string): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/meta?path=${folderPath}`, this.headers());
+  }
 }
