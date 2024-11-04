@@ -425,24 +425,36 @@ export interface FolderAncestor {
   uuid: string;
 }
 export interface FolderMeta {
-  bucket: null | string;
-  createdAt: string;
-  deleted: boolean;
-  deletedAt: null | string;
-  encryptVersion: null | string;
   id: number;
+  uuid: string;
   name: string;
-  parent: null | string;
-  parentId: number;
+  plain_name: string;
   plainName: string;
+  bucket: string | null;
+  parent_id: number | null;
+  parentId: number | null;
+  parent_uuid:  string | null;
+  parentUuid:  string | null;
+  parent: string | null;
+  created_at: string;
+  createdAt: string;
+  updated_at: string;
+  updatedAt: string;
+  user: string | null;
+  user_id: number;
+  userId: number;
+  encrypt_version:  string | null;
+  encryptVersion:  string | null;
+  deleted: boolean;
+  deleted_at: string | null;
+  deletedAt: string | null;
   removed: boolean;
-  removedAt: null | string;
+  removed_at: string | null;
+  removedAt: string | null;
   size: number;
   type: string;
-  updatedAt: string;
-  user: null | string;
-  userId: number;
-  uuid: string;
+  creation_time:  string;
+  modification_time:  string;
 }
 
 export interface ReplaceFile {
