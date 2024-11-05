@@ -16,7 +16,6 @@ export interface ChangePasswordPayload {
 }
 
 export interface ChangePasswordPayloadNew {
-  currentEncryptedPassword: string;
   newEncryptedPassword: string;
   newEncryptedSalt: string;
   encryptedMnemonic: string;

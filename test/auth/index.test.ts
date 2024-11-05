@@ -386,17 +386,16 @@ describe('# auth service tests', () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'delete').resolves({});
       const { client, headers } = clientAndHeadersWithToken();
-      const pass = 'pass', code = 'code';
+      const code = 'code';
 
       // Act
-      const body = await client.disableTwoFactorAuth(pass, code);
+      const body = await client.disableTwoFactorAuth(code);
 
       // Assert
       await expect(callStub.firstCall.args).toEqual([
         '/tfa',
         headers,
         {
-          pass: pass,
           code: code,
         }
       ]);

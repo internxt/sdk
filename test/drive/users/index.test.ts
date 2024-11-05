@@ -121,7 +121,6 @@ describe('# users service tests', () => {
       const { client, headers } = clientAndHeaders();
       const callStub = sinon.stub(httpClient, 'patch').resolves({});
       const payload: ChangePasswordPayloadNew = {
-        currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
         encryptedPrivateKey: '3',
         newEncryptedPassword: '4',
@@ -136,7 +135,6 @@ describe('# users service tests', () => {
       expect(callStub.firstCall.args).toEqual([
         '/users/password',
         {
-          currentPassword: payload.currentEncryptedPassword,
           newPassword: payload.newEncryptedPassword,
           newSalt: payload.newEncryptedSalt,
           mnemonic: payload.encryptedMnemonic,

@@ -224,9 +224,8 @@ export class Auth {
    * @param pass
    * @param code
    */
-  public disableTwoFactorAuth(pass: string, code: string): Promise<void> {
+  public disableTwoFactorAuth(code: string): Promise<void> {
     return this.client.delete('/tfa', this.headersWithToken(<string>this.apiSecurity?.token), {
-      pass: pass,
       code: code,
     });
   }

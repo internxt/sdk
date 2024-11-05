@@ -125,7 +125,6 @@ export class Users {
     return this.client.patch(
       '/users/password',
       {
-        currentPassword: payload.currentEncryptedPassword,
         newPassword: payload.newEncryptedPassword,
         newSalt: payload.newEncryptedSalt,
         mnemonic: payload.encryptedMnemonic,
