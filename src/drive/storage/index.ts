@@ -202,8 +202,8 @@ export class Storage {
 
     const customHeaders = workspacesToken
       ? {
-          'x-internxt-workspace': workspacesToken,
-        }
+        'x-internxt-workspace': workspacesToken,
+      }
       : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       `/folders/content/${folderUuid}?${query}`,
@@ -223,8 +223,8 @@ export class Storage {
   public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
     const customHeaders = workspacesToken
       ? {
-          'x-internxt-workspace': workspacesToken,
-        }
+        'x-internxt-workspace': workspacesToken,
+      }
       : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
       `/files/${fileId}/meta`,
@@ -478,6 +478,28 @@ export class Storage {
   }
 
   /**
+   * Updates the name and the type from a given file UUID.
+   *
+   * @param {Object} payload - The payload containing the UUID and the new properties of the file.
+   * @param {string} payload.fileUuid - The UUID of the file.
+   * @param {string} payload.name - The new name of the file.
+   * @param {string} payload.type - The new type of the file.
+   * @param {string} [resourcesToken] - The token for accessing resources.
+   * @return {Promise<void>} - A Promise that resolves when the file name is successfully updated.
+   */
+  public updateFileMetaByUUID(
+    fileUuid: string,
+    payload: { plainName?: string; type?: string | null; },
+    resourcesToken?: Token
+  ): Promise<void> {
+    return this.client.put(
+      `/files/${fileUuid}/meta`,
+      payload,
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
    * Deletes a specific file entry
    * @param payload
    */
@@ -629,8 +651,8 @@ export class Storage {
   public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
     const customHeaders = workspacesToken
       ? {
-          'x-internxt-workspace': workspacesToken,
-        }
+        'x-internxt-workspace': workspacesToken,
+      }
       : undefined;
 
     return this.client.get<FolderMeta>(
@@ -724,5 +746,25 @@ export class Storage {
       },
       this.headers(),
     );
+  }
+
+  /**
+   * Gets the folder meta from a given path (e.g. "/folder1/folder2")
+   *
+   * @param {string} folderPath - The path of the folder.
+   * @returns {Promise<FolderMeta>} A promise that resolves the folder on that path.
+   */
+  public getFolderByPath(folderPath: string): Promise<FolderMeta> {
+    return this.client.get<FolderMeta>(`folders/meta?path=${folderPath}`, this.headers());
+  }
+
+  /**
+   * Gets the file meta from a given path (e.g. "/folder1/folder2/file.png")
+   *
+   * @param {string} filePath - The path of the file.
+   * @returns {Promise<FileMeta>} A promise that resolves the file on that path.
+   */
+  public getFileByPath(filePath: string): Promise<FileMeta> {
+    return this.client.get<FileMeta>(`files/meta?path=${filePath}`, this.headers());
   }
 }
