@@ -356,7 +356,7 @@ export class Auth {
    */
   public upgradeHash(newHash: string): Promise<void> {
     return this.client.patch(
-      '/users/password',
+      '/users/:id',
       {
         newPassword: newHash,
         newSalt:'',
