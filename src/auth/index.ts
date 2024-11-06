@@ -355,10 +355,11 @@ export class Auth {
    * @param newHash
    */
   public upgradeHash(newHash: string): Promise<void> {
-    return this.client.post(
-      '/users/upgrade-hash',
+    return this.client.patch(
+      '/users/password',
       {
-        newHash: newHash,
+        newPassword: newHash,
+        newSalt:'',
       },
       this.basicHeaders(),
     );
