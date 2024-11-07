@@ -10,6 +10,7 @@ export interface WorkspaceUser {
   isManager: boolean;
   isOwner: boolean;
   key: string;
+  hybridModeEnabled: boolean;
   member: Member;
   memberId: string;
   rootFolderId: string;
@@ -52,6 +53,7 @@ export type WorkspaceSetupInfo = {
   address: string;
   description: string;
   encryptedMnemonic: string;
+  hybridModeEnabled: boolean;
 };
 
 export type PendingWorkspace = {
@@ -160,6 +162,7 @@ export type InviteMemberBody = {
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
   message: string;
+  hybridModeEnabled: boolean;
 };
 
 interface Invite {

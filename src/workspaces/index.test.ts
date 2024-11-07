@@ -30,6 +30,7 @@ describe('Workspaces service tests', () => {
             id: '1',
             memberId: 'member1',
             key: 'user_key_1',
+            hybridModeEnabled: false,
             workspaceId: 'workspace1',
             spaceLimit: '10GB',
             driveUsage: '2GB',
@@ -88,6 +89,7 @@ describe('Workspaces service tests', () => {
             id: '2',
             memberId: 'member2',
             key: 'user_key_2',
+            hybridModeEnabled: false,
             workspaceId: 'workspace2',
             spaceLimit: '15GB',
             driveUsage: '5GB',
@@ -173,6 +175,7 @@ describe('Workspaces service tests', () => {
           address: 'Workspace Address',
           description: 'Workspace Description',
           encryptedMnemonic: 'encryptedMnemonic',
+          hybridModeEnabled: false,
         };
         const workspaceSetupInfo: WorkspaceSetupInfo = {
           workspaceId: 'workspaceId',
@@ -387,6 +390,7 @@ describe('Workspaces service tests', () => {
         const { client, headers } = clientAndHeaders();
         const postCall = sinon.stub(httpClient, 'post').resolves();
         const message = 'Test message';
+        const hybridModeEnabled = false;
 
         await client.inviteMemberToWorkspace({
           workspaceId,
@@ -395,6 +399,7 @@ describe('Workspaces service tests', () => {
           encryptedMnemonicInBase64,
           encryptionAlgorithm,
           message,
+          hybridModeEnabled: hybridModeEnabled,
         });
 
         expect(postCall.firstCall.args).toEqual([

@@ -28,12 +28,13 @@ export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname
 
 export type PreCreateUserResponse = {
   publicKey: string;
+  publicKyberKey: string;
   user: { uuid: UUID; email: string };
 };
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
-export type UserPublicKeyResponse = { publicKey: string };
+export type UserPublicKeyResponse = { publicKey: string; publicKyberKey: string };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
