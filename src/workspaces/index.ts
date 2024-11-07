@@ -28,6 +28,9 @@ import {
   WorkspacesResponse,
   WorkspaceTeamResponse,
   TeamMembers,
+  UsersAndTeamsAnItemIsShareWidthResponse,
+  WorkspaceUser,
+  WorkspaceUsage,
 } from './types';
 
 export class Workspaces {
@@ -123,6 +126,10 @@ export class Workspaces {
     );
   }
 
+  public getWorkspaceUsage(workspaceId: string): Promise<WorkspaceUsage> {
+    return this.client.get<WorkspaceUsage>(`workspaces/${workspaceId}/usage`, this.headers());
+  }
+
   public editWorkspace(
     workspaceId: string,
     details: { name?: string; description?: string; address?: string },
@@ -213,7 +220,7 @@ export class Workspaces {
 
   public changeUserRole(teamId: string, memberId: string, role: string): Promise<void> {
     return this.client.patch<void>(
-      `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
+      `/api/workspaces/teams/${teamId}/members/${memberId}/role`,
       {
         role,
       },
@@ -248,6 +255,16 @@ export class Workspaces {
 
   public getMemberDetails(workspaceId: string, memberId: string): Promise<GetMemberDetailsResponse> {
     return this.client.get<GetMemberDetailsResponse>(`workspaces/${workspaceId}/members/${memberId}`, this.headers());
+  }
+
+  public modifyMemberUsage(workspaceId: string, memberId: string, spaceLimitBytes: number): Promise<WorkspaceUser> {
+    return this.client.patch<WorkspaceUser>(
+      `workspaces/${workspaceId}/members/${memberId}/usage`,
+      {
+        spaceLimit: spaceLimitBytes,
+      },
+      this.headers(),
+    );
   }
 
   public getMemberUsage(workspaceId: string): Promise<GetMemberUsageResponse> {
@@ -441,6 +458,11 @@ export class Workspaces {
     return this.client.get<{ uuid: string }>(`workspaces/invitations/${inviteId}/validate`, this.headers());
   }
 
+  /**
+   * Returns shared files in teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFilesV2` call instead.
+   */
   public getWorkspaceTeamSharedFiles(
     workspaceId: string,
     teamId: string,
@@ -456,6 +478,29 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
+  /**
+   * Returns shared files in teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFilesV2(
+    workspaceId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/shared/files${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns shared folders in teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFoldersV2` call instead.
+   */
   public getWorkspaceTeamSharedFolders(
     workspaceId: string,
     teamId: string,
@@ -470,6 +515,29 @@ export class Workspaces {
 
     return [promise, requestCanceler];
   }
+
+  /**
+   * Returns shared folders in teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFoldersV2(
+    workspaceId: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListAllSharedFoldersResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `?orderBy=${orderBy}` : '';
+    const { promise, requestCanceler } = this.client.getCancellable<ListAllSharedFoldersResponse>(
+      `workspaces/${workspaceId}/shared/folders${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns files inside a shared folders with teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFolderFilesV2` call instead.
+   */
   public getWorkspaceTeamSharedFolderFiles(
     workspaceId: string,
     teamId: string,
@@ -492,6 +560,36 @@ export class Workspaces {
     return [promise, requestCanceler];
   }
 
+  /**
+   * Returns files inside a shared folders with teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFolderFilesV2(
+    workspaceId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    token?: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    let params = `?page=${page}&perPage=${perPage}`;
+    if (token) params = params + `&token=${token}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/shared/${sharedFolderUUID}/files${params}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns folders inside a shared folders with teams.
+   * @param orderBy
+   * @deprecated use `getWorkspaceTeamSharedFolderFoldersV2` call instead.
+   */
   public getWorkspaceTeamSharedFolderFolders(
     workspaceId: string,
     teamId: string,
@@ -508,6 +606,52 @@ export class Workspaces {
     const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
       `workspaces/${workspaceId}/teams/${teamId}/shared/${sharedFolderUUID}/folders${params}
       ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns folders inside a shared folders with teams.
+   * @param orderBy
+   */
+  public getWorkspaceTeamSharedFolderFoldersV2(
+    workspaceId: string,
+    sharedFolderUUID: string,
+    page = 0,
+    perPage = 50,
+    token?: string,
+    orderBy?: OrderByOptions,
+  ): [Promise<ListWorkspaceSharedItemsResponse>, RequestCanceler] {
+    const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    let params = `?page=${page}&perPage=${perPage}`;
+    if (token) params = params + `&token=${token}`;
+
+    const { promise, requestCanceler } = this.client.getCancellable<ListWorkspaceSharedItemsResponse>(
+      `workspaces/${workspaceId}/shared/${sharedFolderUUID}/folders${params}
+      ${orderByQueryParam}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Returns users and teams an item is shared with.
+   */
+
+  public getUsersAndTeamsAnItemIsShareWidth({
+    workspaceId,
+    itemType,
+    itemId,
+  }: {
+    workspaceId: string;
+    itemType: 'folder' | 'file';
+    itemId: string;
+  }): [Promise<UsersAndTeamsAnItemIsShareWidthResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<UsersAndTeamsAnItemIsShareWidthResponse>(
+      `workspaces/${workspaceId}/shared/${itemType}/${itemId}/shared-with`,
       this.headers(),
     );
 

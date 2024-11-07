@@ -41,6 +41,12 @@ export interface WorkspaceData {
   workspace: Workspace;
 }
 
+export interface WorkspaceUsage {
+  totalWorkspaceSpace: number;
+  spaceAssigned: number;
+  spaceUsed: number;
+}
+
 export type WorkspaceSetupInfo = {
   workspaceId: string;
   name: string;
@@ -152,7 +158,7 @@ export type WorkspaceTeamResponse = WorkspaceTeam[];
 export type InviteMemberBody = {
   workspaceId: string;
   invitedUserEmail: string;
-  spaceLimitBytes: number;
+  spaceLimitBytes?: number;
   encryptedMnemonicInBase64: string;
   encryptionAlgorithm: string;
   message: string;
@@ -272,6 +278,43 @@ export type ListWorkspaceSharedItemsResponse = {
 export type Parent = {
   uuid: string;
   name: string;
+};
+
+export type usersWithRoles = {
+  name: string;
+  lastname: string;
+  email: string;
+  sharingId: string | null;
+  avatar: string | null;
+  uuid: string;
+  role: {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type teamsWithRoles = {
+  id: string;
+  workspaceId: string;
+  managerId: string;
+  name: string | null;
+  createdAt: string;
+  updatedAt: string;
+  membersCount: number;
+  sharingId: string;
+  role: {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
+
+export type UsersAndTeamsAnItemIsShareWidthResponse = {
+  usersWithRoles: usersWithRoles[];
+  teamsWithRoles: teamsWithRoles[];
 };
 
 export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC';

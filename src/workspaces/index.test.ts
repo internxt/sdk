@@ -195,6 +195,26 @@ describe('Workspaces service tests', () => {
       });
     });
 
+    describe('getWorkspaceUsage', () => {
+      it('should return workspace usage when getWorkspaceUsage is called', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+
+        const usageResponse = {
+          totalWorkspaceSpace: 1024 * 1024 * 1024 * 2,
+          spaceAssigned: 1024 * 1024 * 1024 * 1.5,
+          spaceUsed: 1024 * 1024 * 1024 * 1,
+        };
+
+        const getCall = sinon.stub(httpClient, 'get').resolves(usageResponse);
+
+        const response = await client.getWorkspaceUsage(workspaceId);
+
+        expect(getCall.firstCall.args).toEqual([`workspaces/${workspaceId}/usage`, headers]);
+        expect(response).toEqual(usageResponse);
+      });
+    });
+
     describe('getWorkspacesTeams', () => {
       it('should return the teams of a workspace when getWorkspacesTeams is called', async () => {
         const workspaceId = 'workspaceId';
@@ -353,7 +373,7 @@ describe('Workspaces service tests', () => {
         await client.changeUserRole(teamId, memberId, role);
 
         expect(patchCall.firstCall.args).toEqual([
-          `/api/workspaces/{workspaceId}/teams/${teamId}/members/${memberId}/role`,
+          `/api/workspaces/teams/${teamId}/members/${memberId}/role`,
           { role },
           headers,
         ]);
@@ -393,6 +413,40 @@ describe('Workspaces service tests', () => {
           },
           headers,
         ]);
+      });
+    });
+
+    describe('modifyMemberUsage', () => {
+      it('should modify the member usage limit successfully', async () => {
+        const { client, headers } = clientAndHeaders();
+        const workspaceId = 'workspaceId';
+        const memberId = 'memberId';
+        const spaceLimitBytes = 1024 * 1024 * 1024;
+
+        const workspaceUserResponse = {
+          id: 'memberId',
+          spaceLimit: '1GB',
+          driveUsage: '500MB',
+          backupsUsage: '200MB',
+          deactivated: false,
+          member: {
+            id: 1,
+            name: 'MemberName',
+            lastname: 'MemberLastName',
+            email: 'email@email.com',
+          },
+        };
+
+        const patchCall = sinon.stub(httpClient, 'patch').resolves(workspaceUserResponse);
+
+        const response = await client.modifyMemberUsage(workspaceId, memberId, spaceLimitBytes);
+
+        expect(patchCall.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/members/${memberId}/usage`,
+          { spaceLimit: spaceLimitBytes },
+          headers,
+        ]);
+        expect(response).toEqual(workspaceUserResponse);
       });
     });
 
