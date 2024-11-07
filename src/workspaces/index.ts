@@ -118,10 +118,11 @@ export class Workspaces {
     address,
     description,
     encryptedMnemonic,
+    hybridModeEnabled,
   }: WorkspaceSetupInfo): Promise<void> {
     return this.client.patch<void>(
       `workspaces/${workspaceId}/setup`,
-      { name, address, description, encryptedMnemonic },
+      { name, address, description, encryptedMnemonic, hybridModeEnabled },
       this.headers(),
     );
   }
