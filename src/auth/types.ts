@@ -6,56 +6,69 @@ export type Email = string;
 export type Token = string;
 
 export interface LoginDetails {
-  email: Email,
-  password: Password,
-  tfaCode: string | undefined
+  email: Email;
+  password: Password;
+  tfaCode: string | undefined;
 }
 
 export interface RegisterDetails {
-  name: string,
-  lastname: string,
-  email: Email,
-  password: Password,
-  mnemonic: string,
-  salt: string,
-  keys: Keys,
-  captcha: string,
-  referrer?: string,
-  referral?: string,
+  name: string;
+  lastname: string;
+  email: Email;
+  password: Password;
+  mnemonic: string;
+  salt: string;
+  keys: Keys;
+  captcha: string;
+  referrer?: string;
+  referral?: string;
 }
 
 export interface RegisterPreCreatedUser extends RegisterDetails {
-  invitationId: string,
+  invitationId: string;
 }
 export interface RegisterPreCreatedUserResponse {
-  token: Token,
-  user: UserSettings & { referralCode: string },
-  uuid: UUID,
+  token: Token;
+  user: UserSettings & { referralCode: string };
+  uuid: UUID;
 }
 export interface Keys {
-  privateKeyEncrypted: string,
-  publicKey: string,
-  revocationCertificate: string
+  /**
+  / @deprecated The individual fields for keys should not be used
+  */
+  privateKeyEncrypted: string;
+  publicKey: string;
+  revocationCertificate: string;
+  keys: {
+    ecc: {
+      privateKeyEncrypted: string;
+      publicKey: string;
+    };
+    kyber: {
+      publicKey: string;
+      privateKeyEncrypted: string;
+    };
+  };
 }
 
 export interface CryptoProvider {
-  encryptPasswordHash: (password: Password, encryptedSalt: string) => string,
-  generateKeys: (password: Password) => Promise<Keys>,
+  encryptPasswordHash: (password: Password, encryptedSalt: string) => Promise<string>;
+  generateKeys: (password: Password) => Promise<Keys>;
 }
 
-export class UserAccessError extends Error { }
+export class UserAccessError extends Error {}
 
 export interface SecurityDetails {
-  encryptedSalt: string
-  tfaEnabled: boolean
+  encryptedSalt: string;
+  tfaEnabled: boolean;
 }
 
 export interface TwoFactorAuthQR {
-  qr: string
-  backupKey: string
+  qr: string;
+  backupKey: string;
 }
 
 export interface BasicAuth {
-  username: string
-  password: string
+  username: string;
+  password: string;
 }
