@@ -1,12 +1,12 @@
 {
   "name": "@internxt/sdk",
-  "version": "1.6.0",
+  "author": "Internxt <hello@internxt.com>",
+  "version": "1.6.1",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/internxt/sdk.git"
   },
-  "author": "",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/internxt/sdk/issues"
