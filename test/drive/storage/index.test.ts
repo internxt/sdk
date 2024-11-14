@@ -234,7 +234,6 @@ describe('# storage service tests', () => {
           encryptVersion: '03-aes',
           removed: false,
           removedAt: null,
-          size: 0,
         };
         const callStub = sinon.stub(httpClient, 'postCancellable').returns({
           promise: Promise.resolve(createFolderResponse),

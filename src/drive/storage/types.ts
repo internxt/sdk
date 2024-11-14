@@ -311,7 +311,6 @@ export interface CreateFolderResponse {
   updatedAt: Date;
   uuid: string;
   plainName: string;
-  size: number;
   removed: boolean;
   removedAt: Date | null;
   creationTime: Date;
