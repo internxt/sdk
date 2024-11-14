@@ -298,16 +298,24 @@ export interface CreateFolderByUuidPayload {
 }
 
 export interface CreateFolderResponse {
-  bucket: string;
   id: number;
-  name: string;
-  plain_name: string;
   parentId: number;
   parentUuid: string;
-  createdAt: string;
-  updatedAt: string;
+  name: string;
+  bucket: string | null;
   userId: number;
+  encryptVersion: string | null;
+  deleted: boolean;
+  deletedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
   uuid: string;
+  plainName: string;
+  size: number;
+  removed: boolean;
+  removedAt: Date | null;
+  creationTime: Date;
+  modificationTime: Date;
 }
 
 export interface MoveFolderPayload {
