@@ -6,7 +6,6 @@
     "type": "git",
     "url": "git+https://github.com/internxt/sdk.git"
   },
-  "author": "",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/internxt/sdk/issues"

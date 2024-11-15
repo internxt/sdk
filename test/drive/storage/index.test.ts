@@ -218,15 +218,22 @@ describe('# storage service tests', () => {
         };
         const createFolderResponse: CreateFolderResponse = {
           bucket: 'bucket',
-          createdAt: '',
+          createdAt: new Date(),
           id: 2,
           name: 'zero',
-          plain_name: 'ma-fol',
+          plainName: 'ma-fol',
           parentUuid: v4(),
           parentId: 0,
-          updatedAt: '',
+          updatedAt: new Date(),
           userId: 1,
           uuid: '1234-5678-1234-5678',
+          creationTime: new Date(),
+          modificationTime: new Date(),
+          deleted: false,
+          deletedAt: null,
+          encryptVersion: '03-aes',
+          removed: false,
+          removedAt: null,
         };
         const callStub = sinon.stub(httpClient, 'postCancellable').returns({
           promise: Promise.resolve(createFolderResponse),
