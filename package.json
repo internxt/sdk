@@ -1,5 +1,6 @@
 {
   "name": "@internxt/sdk",
+  "author": "Internxt <hello@internxt.com>",
   "version": "1.6.2",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
