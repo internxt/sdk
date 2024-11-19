@@ -187,6 +187,17 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode, userType }, this.headers());
   }
 
+  public updateWorkspaceMembers(subscriptionId: string, updatedSeats: number) {
+    return this.client.patch(
+      '/business/subscription',
+      {
+        subscriptionId,
+        workspaceUpdatedSeats: updatedSeats,
+      },
+      this.headers(),
+    );
+  }
+
   public cancelSubscription(userType?: UserType): Promise<void> {
     const query = new URLSearchParams();
     if (userType) query.set('userType', userType);
@@ -199,20 +210,6 @@ export class Payments {
 
   public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
     return this.client.patch('/billing', { ...payload }, this.headers());
-  }
-
-  public getPaypalSetupIntent({
-    priceId,
-    coupon,
-  }: {
-    priceId: string;
-    coupon?: string;
-  }): Promise<{ client_secret: string }> {
-    const query = new URLSearchParams();
-    if (priceId !== undefined) query.set('priceId', priceId);
-    if (coupon !== undefined) query.set('coupon', coupon);
-
-    return this.client.get(`/paypal-setup-intent?${query.toString()}`, this.headers());
   }
 
   /**

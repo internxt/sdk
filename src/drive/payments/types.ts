@@ -85,6 +85,10 @@ export type StoragePlan = {
   amountOfSeats: number;
   isAppSumo?: boolean;
   details?: AppSumoDetails;
+  seats?: {
+    minimumSeats: number;
+    maximumSeats: number;
+  };
 };
 
 export interface CreatePaymentSessionPayload {
