@@ -1,3 +1,4 @@
+import Stripe from 'stripe';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
@@ -187,10 +188,15 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode, userType }, this.headers());
   }
 
-  public updateWorkspaceMembers(subscriptionId: string, updatedSeats: number) {
+  public updateWorkspaceMembers(
+    workspaceId: string,
+    subscriptionId: string,
+    updatedSeats: number,
+  ): Promise<Stripe.Subscription> {
     return this.client.patch(
       '/business/subscription',
       {
+        workspaceId,
         subscriptionId,
         workspaceUpdatedSeats: updatedSeats,
       },
