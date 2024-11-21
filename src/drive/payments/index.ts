@@ -187,10 +187,11 @@ export class Payments {
     return this.client.put('/subscriptions', { price_id: priceId, couponCode: couponCode, userType }, this.headers());
   }
 
-  public updateWorkspaceMembers(subscriptionId: string, updatedSeats: number) {
+  public updateWorkspaceMembers(workspaceId: string, subscriptionId: string, updatedSeats: number) {
     return this.client.patch(
       '/business/subscription',
       {
+        workspaceId,
         subscriptionId,
         workspaceUpdatedSeats: updatedSeats,
       },
