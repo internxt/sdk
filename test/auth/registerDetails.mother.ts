@@ -5,15 +5,13 @@ export function emptyRegisterDetails(): RegisterDetails {
     privateKeyEncrypted: '',
     publicKey: '',
     revocationCertificate: '',
-    keys: {
-      ecc: {
-        publicKey: '',
-        privateKeyEncrypted: '',
-      },
-      kyber: {
-        publicKey: '',
-        privateKeyEncrypted: '',
-      },
+    ecc: {
+      publicKey: '',
+      privateKeyEncrypted: '',
+    },
+    kyber: {
+      publicKey: '',
+      privateKeyEncrypted: '',
     },
   };
   return {

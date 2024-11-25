@@ -61,12 +61,12 @@ export class Auth {
         revocationKey: registerDetails.keys.revocationCertificate,
         keys: {
           ecc: {
-            privateKey: registerDetails.keys.keys.ecc.privateKeyEncrypted,
-            publicKey: registerDetails.keys.keys.ecc.publicKey,
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.ecc.publicKey,
           },
           kyber: {
-            privateKey: registerDetails.keys.keys.kyber.privateKeyEncrypted,
-            publicKey: registerDetails.keys.keys.kyber.publicKey,
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.kyber.publicKey,
           }
         },
         referral: registerDetails.referral,
@@ -100,13 +100,13 @@ export class Auth {
         revocationKey: registerDetails.keys.revocationCertificate,
         keys: {
           ecc: {
-            privateKey: registerDetails.keys.keys.ecc.privateKeyEncrypted,
-            publicKey: registerDetails.keys.keys.ecc.publicKey,
-          },
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.ecc.publicKey,
+            },
           kyber: {
-            privateKey: registerDetails.keys.keys.kyber.privateKeyEncrypted,
-            publicKey: registerDetails.keys.keys.kyber.publicKey,
-          }
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.kyber.publicKey,
+          },
         },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
@@ -181,12 +181,12 @@ export class Auth {
           revocateKey: keys.revocationCertificate,
           keys: {
             ecc: {
-              privateKey: keys.keys.ecc.privateKeyEncrypted,
-              publicKey: keys.keys.ecc.publicKey,
+              privateKey: keys.ecc.privateKeyEncrypted,
+              publicKey: keys.ecc.publicKey,
             },
             kyber: {
-              privateKey: keys.keys.kyber.privateKeyEncrypted,
-              publicKey: keys.keys.kyber.publicKey,
+              privateKey: keys.kyber.privateKeyEncrypted,
+              publicKey: keys.kyber.publicKey,
             }
           },
         },
@@ -217,12 +217,12 @@ export class Auth {
         revocationKey: keys.revocationCertificate,
         keys: {
           ecc: {
-            privateKey: keys.keys.ecc.privateKeyEncrypted,
-            publicKey: keys.keys.ecc.publicKey,
+            privateKey: keys.ecc.privateKeyEncrypted,
+            publicKey: keys.ecc.publicKey,
           },
           kyber: {
-            privateKey: keys.keys.kyber.privateKeyEncrypted,
-            publicKey: keys.keys.kyber.publicKey,
+            privateKey: keys.kyber.privateKeyEncrypted,
+            publicKey: keys.kyber.publicKey,
           }
         },
       },

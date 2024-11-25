@@ -39,15 +39,13 @@ export interface Keys {
   privateKeyEncrypted: string;
   publicKey: string;
   revocationCertificate: string;
-  keys: {
-    ecc: {
-      privateKeyEncrypted: string;
-      publicKey: string;
-    };
-    kyber: {
-      publicKey: string;
-      privateKeyEncrypted: string;
-    };
+  ecc: {
+    privateKeyEncrypted: string;
+    publicKey: string;
+  };
+  kyber: {
+    publicKey: string | null;
+    privateKeyEncrypted: string | null;
   };
 }
 
