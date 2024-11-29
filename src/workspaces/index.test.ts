@@ -82,6 +82,7 @@ describe('Workspaces service tests', () => {
             avatar: null,
             rootFolderId: 'asflaksfoau0su0fewnlsd',
             phoneNumber: null,
+            email: null,
           },
         },
         {
@@ -141,6 +142,7 @@ describe('Workspaces service tests', () => {
             avatar: null,
             rootFolderId: 'asflaksfoau0su0fewnlsd',
             phoneNumber: null,
+            email: null,
           },
         },
       ],
@@ -477,6 +479,7 @@ describe('Workspaces service tests', () => {
               avatar: null,
               rootFolderId: 'asdf-123-asdf',
               phoneNumber: null,
+              email: null,
             },
           },
         ];

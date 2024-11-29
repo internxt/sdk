@@ -34,6 +34,7 @@ export interface Workspace {
   avatar: null | string;
   rootFolderId: string;
   phoneNumber: null | string;
+  email: null | string;
 }
 
 export interface WorkspaceData {
@@ -184,6 +185,8 @@ export type EditWorkspaceDetailsBody = {
   workspaceId: string;
   name?: string;
   description?: string;
+  phoneNumber?: string;
+  email?: string;
 };
 
 export type GetMemberDetailsResponse = {

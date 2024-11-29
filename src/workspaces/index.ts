@@ -133,7 +133,13 @@ export class Workspaces {
 
   public editWorkspace(
     workspaceId: string,
-    details: { name?: string; description?: string; address?: string },
+    details: {
+      name?: string;
+      description?: string;
+      address?: string;
+      phoneNumber?: string | null;
+      email?: string | null
+    },
   ): Promise<void> {
     return this.client.patch<void>(`workspaces/${workspaceId}`, details, this.headers());
   }
