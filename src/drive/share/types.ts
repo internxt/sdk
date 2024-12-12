@@ -168,7 +168,6 @@ export type ShareFolderWithUserPayload = {
   encryptionAlgorithm?: string;
   roleId: string;
   persistPreviousSharing?: boolean;
-  hybridModeEnabled: boolean;
 };
 
 export type CreateSharingPayload = {

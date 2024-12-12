@@ -351,22 +351,6 @@ export class Auth {
   }
 
   /**
-   * Upgrade hash and salt in the database
-   * @param newHash
-   * @param newSalt
-   */
-  public upgradeHash(newHash: string, newSalt: string): Promise<void> {
-    return this.client.patch(
-      '/users/:id',
-      {
-        newPassword: newHash,
-        newSalt: newSalt,
-      },
-      this.basicHeaders(),
-    );
-  }
-
-  /**
    * Restore password with email link
    * @param token
    * @param password
