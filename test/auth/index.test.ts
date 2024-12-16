@@ -147,7 +147,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => '',
+        encryptPasswordHash: () => Promise.resolve(''),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
@@ -175,7 +175,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => '',
+        encryptPasswordHash: () => Promise.resolve(''),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
@@ -210,7 +210,7 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        encryptPasswordHash: (password, encryptedSalt) => Promise.resolve(password + '-' + encryptedSalt),
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: 'priv',

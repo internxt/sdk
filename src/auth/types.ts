@@ -42,7 +42,7 @@ export interface Keys {
 }
 
 export interface CryptoProvider {
-  encryptPasswordHash: (password: Password, encryptedSalt: string) => string;
+  encryptPasswordHash: (password: Password, encryptedSalt: string) => Promise<string>;
   generateKeys: (password: Password) => Promise<Keys>;
 }
 
