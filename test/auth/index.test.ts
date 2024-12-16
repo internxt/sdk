@@ -26,12 +26,8 @@ describe('# auth service tests', () => {
       registerDetails.password = '4';
       registerDetails.mnemonic = '5';
       registerDetails.salt = '6';
-      registerDetails.keys.ecc.privateKeyEncrypted = '7';
-      registerDetails.keys.ecc.publicKey = '8';
-      registerDetails.keys.kyber.privateKeyEncrypted = '9';
-      registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.keys.revocationCertificate = '7';
+      registerDetails.captcha = '8';
 
       const postCall = sinon.stub(httpClient, 'post').resolves({});
       const { client, headers } = clientAndHeaders();
@@ -52,16 +48,6 @@ describe('# auth service tests', () => {
           privateKey: registerDetails.keys.privateKeyEncrypted,
           publicKey: registerDetails.keys.publicKey,
           revocationKey: registerDetails.keys.revocationCertificate,
-          keys: {
-            ecc: {
-              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
-              publicKey: registerDetails.keys.ecc.publicKey,
-            },
-            kyber: {
-              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
-              publicKey: registerDetails.keys.kyber.publicKey,
-            },
-          },
           referral: registerDetails.referral,
           referrer: registerDetails.referrer,
           captcha: registerDetails.captcha,
@@ -98,12 +84,8 @@ describe('# auth service tests', () => {
       registerDetails.password = '4';
       registerDetails.mnemonic = '5';
       registerDetails.salt = '6';
-      registerDetails.keys.ecc.privateKeyEncrypted = '7';
-      registerDetails.keys.ecc.publicKey = '8';
-      registerDetails.keys.kyber.privateKeyEncrypted = '9';
-      registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.keys.revocationCertificate = '7';
+      registerDetails.captcha = '8';
 
       const mockInvitatioId = 'invitationId';
 
@@ -126,16 +108,6 @@ describe('# auth service tests', () => {
           privateKey: registerDetails.keys.privateKeyEncrypted,
           publicKey: registerDetails.keys.publicKey,
           revocationKey: registerDetails.keys.revocationCertificate,
-          keys: {
-            ecc: {
-              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
-              publicKey: registerDetails.keys.ecc.publicKey,
-            },
-            kyber: {
-              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
-              publicKey: registerDetails.keys.kyber.publicKey,
-            },
-          },
           referral: registerDetails.referral,
           referrer: registerDetails.referrer,
           captcha: registerDetails.captcha,
@@ -175,20 +147,12 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => Promise.resolve(''),
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
             revocationCertificate: '',
-            ecc: {
-              privateKeyEncrypted: '',
-              publicKey: '',
-            },
-            kyber: {
-              publicKey: '',
-              privateKeyEncrypted: '',
-            },
           };
           return Promise.resolve(keys);
         },
@@ -211,20 +175,12 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: () => Promise.resolve(''),
+        encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: '',
             publicKey: '',
             revocationCertificate: '',
-            ecc: {
-              privateKeyEncrypted: '',
-              publicKey: '',
-            },
-            kyber: {
-              publicKey: '',
-              privateKeyEncrypted: '',
-            },
           };
           return Promise.resolve(keys);
         },
@@ -254,20 +210,12 @@ describe('# auth service tests', () => {
         tfaCode: undefined,
       };
       const cryptoProvider: CryptoProvider = {
-        encryptPasswordHash: (password, encryptedSalt) => Promise.resolve(password + '-' + encryptedSalt),
+        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
         generateKeys: (password: Password) => {
           const keys: Keys = {
             privateKeyEncrypted: 'priv',
             publicKey: 'pub',
             revocationCertificate: 'rev',
-            ecc: {
-              privateKeyEncrypted: 'priv',
-              publicKey: 'pub',
-            },
-            kyber: {
-              publicKey: 'pubKyber',
-              privateKeyEncrypted: 'privKyber',
-            },
           };
           return Promise.resolve(keys);
         },
@@ -305,16 +253,6 @@ describe('# auth service tests', () => {
           privateKey: 'priv',
           publicKey: 'pub',
           revocateKey: 'rev',
-          keys: {
-            ecc: {
-              privateKey: 'priv',
-              publicKey: 'pub',
-            },
-            kyber: {
-              publicKey: 'pubKyber',
-              privateKey: 'privKyber',
-            },
-          },
         },
         headers,
       ]);
@@ -336,14 +274,6 @@ describe('# auth service tests', () => {
         privateKeyEncrypted: 'prik',
         publicKey: 'pubk',
         revocationCertificate: 'crt',
-        ecc: {
-          privateKeyEncrypted: 'prik',
-          publicKey: 'pubk',
-        },
-        kyber: {
-          publicKey: 'pubKyber',
-          privateKeyEncrypted: 'privKyber',
-        },
       };
       const axiosStub = sinon.stub(httpClient, 'patch').resolves({});
 
@@ -357,16 +287,6 @@ describe('# auth service tests', () => {
           publicKey: 'pubk',
           privateKey: 'prik',
           revocationKey: 'crt',
-          keys: {
-            ecc: {
-              publicKey: 'pubk',
-              privateKey: 'prik',
-            },
-            kyber: {
-              publicKey: 'pubKyber',
-              privateKey: 'privKyber',
-            },
-          },
         },
         headers,
       ]);

@@ -18,23 +18,9 @@ export interface UserSettings {
   sharedWorkspace: boolean;
   credit: number;
   mnemonic: string;
-  /**
-  / @deprecated The individual fields for keys should not be used
-  */
   privateKey: string;
   publicKey: string;
   revocationKey: string;
-  keys: {
-    ecc: {
-      privateKey: string;
-      publicKey: string;
-      revocationKey: string;
-    }
-    kyber: {
-      privateKyberKey: string;
-      publicKyberKey: string;
-    }
-  }
   teams?: boolean;
   appSumoDetails: AppSumoDetails | null;
   registerCompleted: boolean;

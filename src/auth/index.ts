@@ -53,22 +53,9 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
         revocationKey: registerDetails.keys.revocationCertificate,
-        keys: {
-          ecc: {
-            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
-            publicKey: registerDetails.keys.ecc.publicKey,
-          },
-          kyber: {
-            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
-            publicKey: registerDetails.keys.kyber.publicKey,
-          }
-        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       },
@@ -92,22 +79,9 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
         revocationKey: registerDetails.keys.revocationCertificate,
-        keys: {
-          ecc: {
-            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
-            publicKey: registerDetails.keys.ecc.publicKey,
-            },
-          kyber: {
-            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
-            publicKey: registerDetails.keys.kyber.publicKey,
-          },
-        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
         invitationId: registerDetails.invitationId,
@@ -158,7 +132,7 @@ export class Auth {
   }> {
     const securityDetails = await this.securityDetails(details.email);
     const encryptedSalt = securityDetails.encryptedSalt;
-    const encryptedPasswordHash = await cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.client
@@ -173,22 +147,9 @@ export class Auth {
           email: details.email,
           password: encryptedPasswordHash,
           tfa: details.tfaCode,
-          /**
-          / @deprecated The individual fields for keys should not be used
-          */
           privateKey: keys.privateKeyEncrypted,
           publicKey: keys.publicKey,
           revocateKey: keys.revocationCertificate,
-          keys: {
-            ecc: {
-              privateKey: keys.ecc.privateKeyEncrypted,
-              publicKey: keys.ecc.publicKey,
-            },
-            kyber: {
-              privateKey: keys.kyber.privateKeyEncrypted,
-              publicKey: keys.kyber.publicKey,
-            }
-          },
         },
         this.basicHeaders(),
       )
@@ -208,23 +169,10 @@ export class Auth {
   public updateKeys(keys: Keys, token: Token) {
     return this.client.patch(
       '/user/keys',
-      {
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
+      {   
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
-        keys: {
-          ecc: {
-            privateKey: keys.ecc.privateKeyEncrypted,
-            publicKey: keys.ecc.publicKey,
-          },
-          kyber: {
-            privateKey: keys.kyber.privateKeyEncrypted,
-            publicKey: keys.kyber.publicKey,
-          }
-        },
       },
       this.headersWithToken(token),
     );
@@ -345,22 +293,6 @@ export class Auth {
       '/users/recover-account',
       {
         email: email,
-      },
-      this.basicHeaders(),
-    );
-  }
-
-  /**
-   * Upgrade hash and salt in the database
-   * @param newHash
-   * @param newSalt
-   */
-  public upgradeHash(newHash: string, newSalt: string): Promise<void> {
-    return this.client.patch(
-      '/users/:id',
-      {
-        newPassword: newHash,
-        newSalt: newSalt,
       },
       this.basicHeaders(),
     );
