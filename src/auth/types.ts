@@ -37,8 +37,8 @@ export interface Keys {
   publicKey: string;
   revocationCertificate: string;
   ecc: {
-    privateKeyEncrypted: string;
     publicKey: string;
+    privateKeyEncrypted: string;
   };
   kyber: {
     publicKey: string | null;

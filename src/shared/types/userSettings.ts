@@ -23,12 +23,12 @@ export interface UserSettings {
   revocationKey: string;
   keys: {
     ecc: {
-      privateKey: string;
       publicKey: string;
+      privateKeyEncrypted: string;
     }
     kyber: {
-      privateKey: string;
       publicKey: string;
+      privateKeyEncrypted: string;
     }
   }
   teams?: boolean;

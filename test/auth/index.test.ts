@@ -54,12 +54,12 @@ describe('# auth service tests', () => {
           revocationKey: registerDetails.keys.revocationCertificate,
           keys: {
             ecc: {
-              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
               publicKey: registerDetails.keys.ecc.publicKey,
+              privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,
             },
             kyber: {
-              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
               publicKey: registerDetails.keys.kyber.publicKey,
+              privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
             },
           },
           referral: registerDetails.referral,
@@ -128,12 +128,12 @@ describe('# auth service tests', () => {
           revocationKey: registerDetails.keys.revocationCertificate,
           keys: {
             ecc: {
-              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
               publicKey: registerDetails.keys.ecc.publicKey,
+              privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,   
             },
             kyber: {
-              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
               publicKey: registerDetails.keys.kyber.publicKey,
+              privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
             },
           },
           referral: registerDetails.referral,
@@ -182,8 +182,8 @@ describe('# auth service tests', () => {
             publicKey: '',
             revocationCertificate: '',
             ecc: {
-              privateKeyEncrypted: '',
               publicKey: '',
+              privateKeyEncrypted: '',
             },
             kyber: {
               publicKey: '',
@@ -218,8 +218,8 @@ describe('# auth service tests', () => {
             publicKey: '',
             revocationCertificate: '',
             ecc: {
-              privateKeyEncrypted: '',
               publicKey: '',
+              privateKeyEncrypted: '',
             },
             kyber: {
               publicKey: '',
@@ -261,8 +261,8 @@ describe('# auth service tests', () => {
             publicKey: 'pub',
             revocationCertificate: 'rev',
             ecc: {
-              privateKeyEncrypted: 'priv',
               publicKey: 'pub',
+              privateKeyEncrypted: 'priv',
             },
             kyber: {
               publicKey: 'pubKyber',
@@ -307,12 +307,12 @@ describe('# auth service tests', () => {
           revocateKey: 'rev',
           keys: {
             ecc: {
-              privateKey: 'priv',
               publicKey: 'pub',
+              privateKeyEncrypted: 'priv',
             },
             kyber: {
               publicKey: 'pubKyber',
-              privateKey: 'privKyber',
+              privateKeyEncrypted: 'privKyber',
             },
           },
         },
@@ -337,8 +337,8 @@ describe('# auth service tests', () => {
         publicKey: 'pubk',
         revocationCertificate: 'crt',
         ecc: {
-          privateKeyEncrypted: 'priv',
           publicKey: 'pub',
+          privateKeyEncrypted: 'priv',
         },
         kyber: {
           publicKey: 'pubKyber',
@@ -359,11 +359,11 @@ describe('# auth service tests', () => {
           revocationKey: 'crt',
           ecc: {
             publicKey: 'pub',
-            privateKey: 'priv',
+            privateKeyEncrypted: 'priv',
           },
           kyber: {
             publicKey: 'pubKyber',
-            privateKey: 'privKyber',
+            privateKeyEncrypted: 'privKyber',
           },
         },
         headers,
