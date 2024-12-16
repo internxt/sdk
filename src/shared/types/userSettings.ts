@@ -24,6 +24,16 @@ export interface UserSettings {
   privateKey: string;
   publicKey: string;
   revocationKey: string;
+  keys: {
+    ecc: {
+      privateKey: string;
+      publicKey: string;
+    }
+    kyber: {
+      privateKey: string;
+      publicKey: string;
+    }
+  }
   teams?: boolean;
   appSumoDetails: AppSumoDetails | null;
   registerCompleted: boolean;

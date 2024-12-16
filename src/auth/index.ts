@@ -53,9 +53,22 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
         revocationKey: registerDetails.keys.revocationCertificate,
+        keys: {
+          ecc: {
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.ecc.publicKey,
+          },
+          kyber: {
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.kyber.publicKey,
+          }
+        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
       },
@@ -79,9 +92,22 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         privateKey: registerDetails.keys.privateKeyEncrypted,
         publicKey: registerDetails.keys.publicKey,
         revocationKey: registerDetails.keys.revocationCertificate,
+        keys: {
+          ecc: {
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
+            publicKey: registerDetails.keys.ecc.publicKey,
+            },
+          kyber: {
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
+            publicKey: registerDetails.keys.kyber.publicKey,
+          },
+        },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
         invitationId: registerDetails.invitationId,
@@ -147,9 +173,22 @@ export class Auth {
           email: details.email,
           password: encryptedPasswordHash,
           tfa: details.tfaCode,
+          /**
+          / @deprecated The individual fields for keys should not be used
+          */
           privateKey: keys.privateKeyEncrypted,
           publicKey: keys.publicKey,
           revocateKey: keys.revocationCertificate,
+          keys: {
+            ecc: {
+              privateKey: keys.ecc.privateKeyEncrypted,
+              publicKey: keys.ecc.publicKey,
+            },
+            kyber: {
+              privateKey: keys.kyber.privateKeyEncrypted,
+              publicKey: keys.kyber.publicKey,
+            }
+          },
         },
         this.basicHeaders(),
       )
@@ -169,10 +208,21 @@ export class Auth {
   public updateKeys(keys: Keys, token: Token) {
     return this.client.patch(
       '/user/keys',
-      {   
+      {
+        /**
+        / @deprecated The individual fields for keys should not be used
+        */
         publicKey: keys.publicKey,
         privateKey: keys.privateKeyEncrypted,
         revocationKey: keys.revocationCertificate,
+        ecc: {
+          privateKey: keys.ecc.privateKeyEncrypted,
+          publicKey: keys.ecc.publicKey,
+        },
+        kyber: {
+          privateKey: keys.kyber.privateKeyEncrypted,
+          publicKey: keys.kyber.publicKey,
+        }
       },
       this.headersWithToken(token),
     );
