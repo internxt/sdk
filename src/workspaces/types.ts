@@ -322,20 +322,25 @@ export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'cre
 export type GetMemberUsageResponse = { backupsUsage: number; driveUsage: number; spaceLimit: number };
 
 export enum WorkspaceLogType {
-  LOGIN = 'LOGIN',
-  CHANGED_PASSWORD = 'CHANGED_PASSWORD',
-  LOGOUT = 'LOGOUT',
-  SHARE_FILE = 'SHARE_FILE',
-  SHARE_FOLDER = 'SHARE_FOLDER',
-  DELETE_FILE = 'DELETE_FILE',
-  DELETE_FOLDER = 'DELETE_FOLDER',
+  Login = 'login',
+  ChangedPassword = 'changed-password',
+  Logout = 'logout',
+  ShareFile = 'share-file',
+  ShareFolder = 'share-folder',
+  DeleteFile = 'delete-file',
+  DeleteFolder = 'delete-folder',
+}
+
+export enum WorkspaceLogActionType {
+  Share = 'share',
+  Delete = 'delete',
+  DeleteAll = 'delete-all',
 }
 
 export enum WorkspaceLogPlatform {
-  WEB = 'WEB',
-  MOBILE = 'MOBILE',
-  DESKTOP = 'DESKTOP',
-  UNSPECIFIED = 'UNSPECIFIED',
+  Web = 'web',
+  Mobile = 'mobile',
+  Desktop = 'desktop',
 }
 
 export interface WorkspaceLogUser {

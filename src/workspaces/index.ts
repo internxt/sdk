@@ -673,6 +673,7 @@ export class Workspaces {
     member?: string,
     activity?: WorkspaceLogType[],
     lastDays?: number,
+    summary?: boolean,
     orderBy?: WorkspaceLogOrderBy,
   ): Promise<WorkspaceLogResponse[]> {
     const params = new URLSearchParams();
@@ -690,6 +691,9 @@ export class Workspaces {
     }
     if (lastDays) {
       params.append('lastDays', String(lastDays));
+    }
+    if (summary) {
+      params.append('summary', String(summary));
     }
     if (orderBy) {
       params.append('orderBy', String(orderBy));
