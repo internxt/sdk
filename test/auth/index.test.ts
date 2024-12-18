@@ -1,9 +1,9 @@
-import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
 import sinon from 'sinon';
 import { emptyRegisterDetails } from './registerDetails.mother';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
+import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
 
 const httpClient = HttpClient.create('');
 
@@ -238,14 +238,14 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(postStub.firstCall.args).toEqual([
-        '/login',
+        '/auth/login',
         {
           email: loginDetails.email,
         },
         headers,
       ]);
       expect(postStub.secondCall.args).toEqual([
-        '/access',
+        '/auth/login/access',
         {
           email: loginDetails.email,
           password: 'password-encrypted_salt',
@@ -309,7 +309,7 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(postStub.firstCall.args).toEqual([
-        '/login',
+        '/auth/login',
         {
           email: email,
         },
@@ -355,7 +355,7 @@ describe('# auth service tests', () => {
       const body = await client.generateTwoFactorAuthQR();
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual(['/tfa', headers]);
+      await expect(callStub.firstCall.args).toEqual(['/auth/tfa', headers]);
       expect(body).toEqual({
         qr: 'qr',
         backupKey: 'code',
@@ -376,7 +376,7 @@ describe('# auth service tests', () => {
 
       // Assert
       await expect(callStub.firstCall.args).toEqual([
-        '/tfa',
+        '/auth/tfa',
         headers,
         {
           pass: pass,
@@ -400,7 +400,7 @@ describe('# auth service tests', () => {
 
       // Assert
       await expect(callStub.firstCall.args).toEqual([
-        '/tfa',
+        '/auth/tfa',
         {
           key: backupKey,
           code: code,

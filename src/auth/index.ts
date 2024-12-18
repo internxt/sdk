@@ -142,7 +142,7 @@ export class Auth {
         user: UserSettings;
         userTeam: TeamsSettings | null;
       }>(
-        '/access',
+        '/auth/login/access',
         {
           email: details.email,
           password: encryptedPasswordHash,
@@ -188,7 +188,7 @@ export class Auth {
         sKey: string;
         tfa: boolean | null;
       }>(
-        '/login',
+        '/auth/login',
         {
           email: email,
         },
@@ -203,14 +203,21 @@ export class Auth {
   }
 
   /**
+   * Logout
+   */
+  public logout(token?: Token): Promise<void> {
+    return this.client.get('/auth/logout', this.headersWithToken(token ?? <string>this.apiSecurity?.token));
+  }
+
+  /**
    * Generates a new TwoFactorAuth code
    */
-  public generateTwoFactorAuthQR(): Promise<TwoFactorAuthQR> {
+  public generateTwoFactorAuthQR(token?: Token): Promise<TwoFactorAuthQR> {
     return this.client
       .get<{
         qr: string;
         code: string;
-      }>('/tfa', this.headersWithToken(<string>this.apiSecurity?.token))
+      }>('/auth/tfa', this.headersWithToken(token ?? <string>this.apiSecurity?.token))
       .then((data) => {
         return {
           qr: data.qr,
@@ -224,8 +231,8 @@ export class Auth {
    * @param pass
    * @param code
    */
-  public disableTwoFactorAuth(pass: string, code: string): Promise<void> {
-    return this.client.delete('/tfa', this.headersWithToken(<string>this.apiSecurity?.token), {
+  public disableTwoFactorAuth(pass: string, code: string, token?: Token): Promise<void> {
+    return this.client.delete('/auth/tfa', this.headersWithToken(token ?? <string>this.apiSecurity?.token), {
       pass: pass,
       code: code,
     });
@@ -236,14 +243,14 @@ export class Auth {
    * @param backupKey
    * @param code
    */
-  public storeTwoFactorAuthKey(backupKey: string, code: string): Promise<void> {
+  public storeTwoFactorAuthKey(backupKey: string, code: string, token?: Token): Promise<void> {
     return this.client.put(
-      '/tfa',
+      '/auth/tfa',
       {
         key: backupKey,
         code: code,
       },
-      this.headersWithToken(<string>this.apiSecurity?.token),
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
     );
   }
 
