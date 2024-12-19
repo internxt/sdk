@@ -317,3 +317,85 @@ export type UsersAndTeamsAnItemIsShareWidthResponse = {
 export type OrderByOptions = 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC';
 
 export type GetMemberUsageResponse = { backupsUsage: number; driveUsage: number; spaceLimit: number };
+
+export enum WorkspaceLogType {
+  Login = 'login',
+  ChangedPassword = 'changed-password',
+  Logout = 'logout',
+  ShareFile = 'share-file',
+  ShareFolder = 'share-folder',
+  DeleteFile = 'delete-file',
+  DeleteFolder = 'delete-folder',
+}
+
+export enum WorkspaceLogActionType {
+  Share = 'share',
+  Delete = 'delete',
+  DeleteAll = 'delete-all',
+}
+
+export enum WorkspaceLogPlatform {
+  Web = 'web',
+  Mobile = 'mobile',
+  Desktop = 'desktop',
+}
+
+export interface WorkspaceLogUser {
+  id: number;
+  name: string;
+  lastname: string;
+  email: string;
+  username: string;
+  bridgeUser?: string;
+  rootFolderId?: number;
+  uuid: string;
+  sharedWorkspace?: boolean;
+  avatar?: string;
+  lastPasswordChangedAt?: Date;
+}
+
+export interface WorkspaceLog {
+  id: string;
+  workspaceId: string;
+  creator: string;
+  type: WorkspaceLogType;
+  platform: WorkspaceLogPlatform;
+  entityId?: string;
+  user: WorkspaceLogUser;
+  workspace: Workspace;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface WorkspaceLogResponse {
+  id: string;
+  workspaceId: string;
+  creator: string;
+  type: WorkspaceLogType;
+  platform: WorkspaceLogPlatform;
+  entityId?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  user: WorkspaceLogUser;
+  workspace: Workspace;
+  file?: {
+    uuid: string;
+    plainName: string;
+    folderUuid: string;
+    type: string;
+  };
+  folder?: {
+    uuid: string;
+    plainName: string;
+    parentId: string;
+    parentUuid?: string;
+  };
+}
+
+export type WorkspaceLogOrderBy =
+  | 'createdAt:ASC'
+  | 'createdAt:DESC'
+  | 'platform:ASC'
+  | 'platform:DESC'
+  | 'type:ASC'
+  | 'type:DESC';
