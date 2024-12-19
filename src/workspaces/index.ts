@@ -31,6 +31,10 @@ import {
   UsersAndTeamsAnItemIsShareWidthResponse,
   WorkspaceUser,
   WorkspaceUsage,
+  ItemType,
+  WorkspaceLogOrderBy,
+  WorkspaceLogType,
+  WorkspaceLogResponse,
 } from './types';
 
 export class Workspaces {
@@ -203,7 +207,7 @@ export class Workspaces {
 
   public getPersonalTrash(
     workspaceId: string,
-    type: 'file' | 'folder',
+    type: ItemType,
     offset = 0,
     limit = 50,
   ): Promise<FetchTrashContentResponse> {
@@ -647,7 +651,7 @@ export class Workspaces {
     itemId,
   }: {
     workspaceId: string;
-    itemType: 'folder' | 'file';
+    itemType: ItemType;
     itemId: string;
   }): [Promise<UsersAndTeamsAnItemIsShareWidthResponse>, RequestCanceler] {
     const { promise, requestCanceler } = this.client.getCancellable<UsersAndTeamsAnItemIsShareWidthResponse>(
@@ -660,6 +664,43 @@ export class Workspaces {
 
   public getWorkspace(workspaceId: string): Promise<Workspace> {
     return this.client.get<Workspace>(`workspaces/${workspaceId}`, this.headers());
+  }
+
+  public getWorkspaceLogs(
+    workspaceId: string,
+    limit = 50,
+    offset = 0,
+    member?: string,
+    activity?: WorkspaceLogType[],
+    lastDays?: number,
+    summary = true,
+    orderBy?: WorkspaceLogOrderBy,
+  ): Promise<WorkspaceLogResponse[]> {
+    const params = new URLSearchParams();
+
+    params.append('limit', String(limit));
+    params.append('offset', String(offset));
+    params.append('summary', String(summary));
+
+    if (member) {
+      params.append('member', member);
+    }
+    if (activity && activity.length > 0) {
+      activity.forEach((act, index) => {
+        params.append(`activity[${index}]`, act);
+      });
+    }
+    if (lastDays) {
+      params.append('lastDays', String(lastDays));
+    }
+    if (orderBy) {
+      params.append('orderBy', String(orderBy));
+    }
+
+    return this.client.get<WorkspaceLogResponse[]>(
+      `workspaces/${workspaceId}/access/logs?${params.toString()}`,
+      this.headers(),
+    );
   }
 }
 
