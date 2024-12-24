@@ -3,6 +3,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
+import { ItemType } from './../../workspaces/types';
 import {
   AddItemsToTrashPayload,
   CheckDuplicatedFilesPayload,
@@ -640,6 +641,20 @@ export class Storage {
    */
   public getFolderAncestors(uuid: string, isShared = false): Promise<FolderAncestor[]> {
     return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?isSharedItem=${isShared}`, this.headers());
+  }
+
+  /**
+   * Gets the ancestors of a given UUID and type
+   *
+   * @param {string} uuid - UUID of the item.
+   * @param {string} itemType - itemType to know if the item is file or folder
+   * @returns {Promise<FolderAncestor[]>} A promise that resolves with an array of ancestors of the given folder.
+   */
+  public getFolderAncestorsV2(uuid: string, itemType: ItemType, resourcesToken?: string): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(
+      `folders/${itemType}/${uuid}/ancestors`,
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
   }
 
   /**
