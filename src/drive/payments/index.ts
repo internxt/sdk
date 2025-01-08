@@ -123,10 +123,16 @@ export class Payments {
     return this.client.get(`/default-payment-method?${query.toString()}`, this.headers());
   }
 
-  public getInvoices({ subscriptionId, startingAfter, limit }: InvoicePayload): Promise<Invoice[]> {
+  public getInvoices({
+    subscriptionId,
+    userType = UserType.Individual,
+    startingAfter,
+    limit,
+  }: InvoicePayload): Promise<Invoice[]> {
     const query = new URLSearchParams();
-    if (subscriptionId) query.set('subscription', subscriptionId);
+    if (subscriptionId !== undefined) query.set('subscription', subscriptionId);
     if (startingAfter !== undefined) query.set('starting_after', startingAfter);
+    if (userType !== undefined) query.set('userType', userType);
     if (limit !== undefined) query.set('limit', limit.toString());
 
     return this.client.get(`/invoices?${query.toString()}`, this.headers());
