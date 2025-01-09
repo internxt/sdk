@@ -138,8 +138,9 @@ export interface Invoice {
 }
 
 export interface InvoicePayload {
-  subscriptionId: string;
+  subscriptionId?: string;
   startingAfter?: string;
+  userType?: UserType;
   limit?: number;
 }
 
