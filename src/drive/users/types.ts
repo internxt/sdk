@@ -20,6 +20,9 @@ export interface ChangePasswordPayloadNew {
   newEncryptedPassword: string;
   newEncryptedSalt: string;
   encryptedMnemonic: string;
+  /**
+  * @deprecated encryptedPrivateKey field is depercated, use keys.encryptedPrivateKey instead
+  */
   encryptedPrivateKey: string;
   keys: {
     encryptedPrivateKey: string;
