@@ -126,9 +126,13 @@ describe('# users service tests', () => {
         currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
         encryptedPrivateKey: '3',
-        newEncryptedPassword: '4',
-        newEncryptedSalt: '5',
-        encryptVersion: '6',
+        keys: {
+          encryptedPrivateKey: '3',
+          encryptedPrivateKyberKey: '4',
+        },
+        newEncryptedPassword: '5',
+        newEncryptedSalt: '6',
+        encryptVersion: '7',
       };
 
       // Act
@@ -142,7 +146,8 @@ describe('# users service tests', () => {
           newPassword: payload.newEncryptedPassword,
           newSalt: payload.newEncryptedSalt,
           mnemonic: payload.encryptedMnemonic,
-          privateKey: payload.encryptedPrivateKey,
+          privateKey: payload.keys.encryptedPrivateKey,
+          privateKyberKey: payload.keys.encryptedPrivateKyberKey,
           encryptVersion: payload.encryptVersion,
         },
         headers,

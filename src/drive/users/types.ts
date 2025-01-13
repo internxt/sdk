@@ -21,6 +21,10 @@ export interface ChangePasswordPayloadNew {
   newEncryptedSalt: string;
   encryptedMnemonic: string;
   encryptedPrivateKey: string;
+  keys: {
+    encryptedPrivateKey: string;
+    encryptedPrivateKyberKey: string;
+  }
   encryptVersion: string;
 }
 
