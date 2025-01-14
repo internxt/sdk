@@ -24,11 +24,11 @@ export interface UserSettings {
   keys: {
     ecc: {
       publicKey: string;
-      privateKeyEncrypted: string;
+      privateKey: string;
     }
     kyber: {
       publicKey: string;
-      privateKeyEncrypted: string;
+      privateKey: string;
     }
   }
   teams?: boolean;

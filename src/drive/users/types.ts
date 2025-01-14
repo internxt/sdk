@@ -20,7 +20,14 @@ export interface ChangePasswordPayloadNew {
   newEncryptedPassword: string;
   newEncryptedSalt: string;
   encryptedMnemonic: string;
+  /**
+  * @deprecated encryptedPrivateKey field is depercated, use keys.encryptedPrivateKey instead
+  */
   encryptedPrivateKey: string;
+  keys: {
+    encryptedPrivateKey: string;
+    encryptedPrivateKyberKey: string;
+  }
   encryptVersion: string;
 }
 
@@ -28,12 +35,13 @@ export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname
 
 export type PreCreateUserResponse = {
   publicKey: string;
+  publicKyberKey?: string;
   user: { uuid: UUID; email: string };
 };
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
-export type UserPublicKeyResponse = { publicKey: string };
+export type UserPublicKeyResponse = { publicKey: string, publicKyberKey?: string };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
