@@ -31,6 +31,7 @@ import {
   UpdateUserRolePayload,
   UpdateUserRoleResponse,
 } from './types';
+import { ItemType } from 'src/workspaces';
 
 export * as ShareTypes from './types';
 
@@ -363,13 +364,7 @@ export class Share {
    * @returns {Promise<{ data: SharingInvite[] }>} A promise containing the private folder data.
    */
 
-  public getSharedFolderInvitations({
-    itemId,
-    itemType,
-  }: {
-    itemId: string;
-    itemType: 'folder' | 'file';
-  }): Promise<any[]> {
+  public getSharedFolderInvitations({ itemId, itemType }: { itemId: string; itemType: ItemType }): Promise<any[]> {
     return this.client.get(`sharings/${itemType}/${itemId}/invites`, this.headers());
   }
 

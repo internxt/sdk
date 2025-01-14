@@ -3,6 +3,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
+import { ItemType } from './../../workspaces/types';
 import {
   AddItemsToTrashPayload,
   CheckDuplicatedFilesPayload,
@@ -202,8 +203,8 @@ export class Storage {
 
     const customHeaders = workspacesToken
       ? {
-        'x-internxt-workspace': workspacesToken,
-      }
+          'x-internxt-workspace': workspacesToken,
+        }
       : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FetchFolderContentResponse>(
       `/folders/content/${folderUuid}?${query}`,
@@ -223,8 +224,8 @@ export class Storage {
   public getFile(fileId: string, workspacesToken?: string): [Promise<FileMeta>, RequestCanceler] {
     const customHeaders = workspacesToken
       ? {
-        'x-internxt-workspace': workspacesToken,
-      }
+          'x-internxt-workspace': workspacesToken,
+        }
       : undefined;
     const { promise, requestCanceler } = this.client.getCancellable<FileMeta>(
       `/files/${fileId}/meta`,
@@ -635,11 +636,26 @@ export class Storage {
    * Gets the ancestors of a given folder UUID
    *
    * @param {string} uuid - UUID of the folder.
-   * @param {boolean} [isShared=false] - Whether the folder is a shared item or not.
    * @returns {Promise<FolderAncestor[]>} A promise that resolves with an array of ancestors of the given folder.
    */
-  public getFolderAncestors(uuid: string, isShared = false): Promise<FolderAncestor[]> {
-    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors?isSharedItem=${isShared}`, this.headers());
+  public getFolderAncestors(uuid: string): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(`folders/${uuid}/ancestors`, this.headers());
+  }
+
+  /**
+   * Gets the ancestors of an item with the given UUID and type in a Workspace
+   *
+   * @param {string} workspaceId - UUID of the workspace.
+   * @param {string} itemType - itemType to know if the item is file or folder
+   * @param {string} uuid - UUID of the item.
+   * @returns {Promise<FolderAncestor[]>} A promise that resolves with an array of ancestors of the given folder.
+   */
+  public getFolderAncestorsInWorkspace(
+    workspaceId: string,
+    itemType: ItemType,
+    uuid: string,
+  ): Promise<FolderAncestor[]> {
+    return this.client.get<FolderAncestor[]>(`workspaces/${workspaceId}/${itemType}/${uuid}/ancestors`, this.headers());
   }
 
   /**
@@ -651,8 +667,8 @@ export class Storage {
   public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
     const customHeaders = workspacesToken
       ? {
-        'x-internxt-workspace': workspacesToken,
-      }
+          'x-internxt-workspace': workspacesToken,
+        }
       : undefined;
 
     return this.client.get<FolderMeta>(

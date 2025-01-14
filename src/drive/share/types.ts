@@ -1,4 +1,5 @@
 import { FolderChild } from '../storage/types';
+import { ItemType } from './../../workspaces/types';
 
 export interface GenerateShareLinkPayload {
   itemId: string;
@@ -78,6 +79,21 @@ export interface ShareDomainsResponse {
   list: string[];
 }
 
+export interface WorkspaceItemUser {
+  id: string;
+  itemId: string;
+  itemType: ItemType;
+  workspaceId: string;
+  createdAt: string | null;
+  updatedAt: string | null;
+  creator: {
+    uuid: string;
+    name: string;
+    lastname: string;
+    email: string;
+  };
+}
+
 export type ListShareLinksItem = Pick<
   ShareLink,
   'id' | 'token' | 'views' | 'timesValid' | 'active' | 'isFolder' | 'createdAt' | 'updatedAt' | 'fileSize'
@@ -113,6 +129,7 @@ export type SharedFolders = {
   type: string;
   updatedAt: string;
   user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
+  workspaceItemUser: WorkspaceItemUser;
   userId: number;
   uuid: string;
 };
@@ -139,6 +156,7 @@ export type SharedFiles = {
   thumbnails: [];
   type: string;
   updatedAt: string;
+  workspaceItemUser: WorkspaceItemUser;
   userId: number;
   uuid: string;
 };
@@ -160,7 +178,7 @@ export type ListAllSharedFoldersResponse = {
 
 export type ShareFolderWithUserPayload = {
   itemId: string;
-  itemType: 'folder' | 'file';
+  itemType: ItemType;
   notifyUser: boolean;
   notificationMessage?: string;
   sharedWith: string;
@@ -172,7 +190,7 @@ export type ShareFolderWithUserPayload = {
 
 export type CreateSharingPayload = {
   itemId: string;
-  itemType: 'folder' | 'file';
+  itemType: ItemType;
   encryptionKey: string;
   encryptionAlgorithm: string;
   encryptedCode: string;
@@ -312,7 +330,7 @@ export type SharingInvitation = {
 export type SharingInvite = {
   id: string;
   itemId: string;
-  itemType: 'file' | 'folder';
+  itemType: ItemType;
   sharedWith: string;
   encryptionKey: string;
   encryptionAlgorithm: string;
@@ -325,7 +343,7 @@ export type SharingInvite = {
 export type SharingMeta = {
   id: string;
   itemId: string;
-  itemType: 'file' | 'folder';
+  itemType: ItemType;
   ownerId: string;
   sharedWith: string;
   encryptionKey: string;
