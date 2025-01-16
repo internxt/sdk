@@ -1,5 +1,7 @@
 import { UUID, UserSettings } from '../../shared/types/userSettings';
 
+export type Token = string;
+
 export interface InitializeUserResponse {
   email: string;
   bucket: string;
@@ -21,13 +23,13 @@ export interface ChangePasswordPayloadNew {
   newEncryptedSalt: string;
   encryptedMnemonic: string;
   /**
-  * @deprecated encryptedPrivateKey field is depercated, use keys.encryptedPrivateKey instead
-  */
+   * @deprecated encryptedPrivateKey field is depercated, use keys.encryptedPrivateKey instead
+   */
   encryptedPrivateKey: string;
   keys: {
     encryptedPrivateKey: string;
     encryptedPrivateKyberKey: string;
-  }
+  };
   encryptVersion: string;
 }
 
@@ -41,7 +43,7 @@ export type PreCreateUserResponse = {
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
-export type UserPublicKeyResponse = { publicKey: string, publicKyberKey?: string };
+export type UserPublicKeyResponse = { publicKey: string; publicKyberKey?: string };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;

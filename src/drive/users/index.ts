@@ -9,6 +9,7 @@ import {
   FriendInvite,
   InitializeUserResponse,
   PreCreateUserResponse,
+  Token,
   UpdateProfilePayload,
   UserPublicKeyResponse,
   VerifyEmailChangeResponse,
@@ -187,15 +188,19 @@ export class Users {
   /**
    * Sends verification email
    */
-  public sendVerificationEmail() {
-    return this.client.post<void>('/user/sendVerificationEmail', {}, this.headers());
+  public sendVerificationEmail(token?: Token) {
+    return this.client.post<void>(
+      '/users/email-verification/send',
+      {},
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
   }
 
   /**
    * Verifies user email
    */
   public verifyEmail(payload: { verificationToken: string }) {
-    return this.client.post<void>('/user/verifyEmail', payload, this.headers());
+    return this.client.post<void>('/users/email-verification', payload, this.headers());
   }
 
   /**
@@ -251,5 +256,9 @@ export class Users {
 
   private headers() {
     return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+  }
+
+  private headersWithToken(token: Token) {
+    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, token);
   }
 }
