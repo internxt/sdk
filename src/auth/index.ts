@@ -67,7 +67,7 @@ export class Auth {
           kyber: {
             publicKey: registerDetails.keys.kyber.publicKey,
             privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
-          }
+          },
         },
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
@@ -102,7 +102,7 @@ export class Auth {
           ecc: {
             publicKey: registerDetails.keys.ecc.publicKey,
             privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,
-            },
+          },
           kyber: {
             publicKey: registerDetails.keys.kyber.publicKey,
             privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
@@ -187,7 +187,7 @@ export class Auth {
             kyber: {
               publicKey: keys.kyber.publicKey,
               privateKeyEncrypted: keys.kyber.privateKeyEncrypted,
-            }
+            },
           },
         },
         this.basicHeaders(),
@@ -222,7 +222,7 @@ export class Auth {
         kyber: {
           publicKey: keys.kyber.publicKey,
           privateKeyEncrypted: keys.kyber.privateKeyEncrypted,
-        }
+        },
       },
       this.headersWithToken(token),
     );
@@ -321,24 +321,25 @@ export class Auth {
   }
 
   /**
-   * Checks if the password is correct for this email
-   * @param email
+   * Check credentials
    * @param hashedPassword
    * @returns
    */
 
-  public areCredentialsCorrect(email: string, hashedPassword: string): Promise<boolean> {
-    // Uses fetch instead of httpClient since a 401 response
-    // would log out the user
-    return fetch(`${this.apiUrl}/are-credentials-correct?email=${email}&hashedPassword=${hashedPassword}`, {
-      headers: this.headersWithToken(this.apiSecurity?.token as string),
-    }).then((res) => {
-      if (res.ok) {
-        return true;
-      } else if (res.status === 401) {
-        return false;
-      } else throw new Error(`Request failed with error ${res.status}`);
-    });
+  public areCredentialsCorrect(hashedPassword: string, token?: Token): Promise<boolean> {
+    const url = '/auth/are-credentials-correct';
+
+    return this.client
+      .getWithParams<boolean>(url, { hashedPassword }, this.headersWithToken(token ?? <string>this.apiSecurity?.token))
+      .then((res) => {
+        return res;
+      })
+      .catch((error) => {
+        if (error.response?.status === 401) {
+          return false;
+        }
+        throw new Error(`Request failed with status ${error.response?.status}: ${error.response?.data}`);
+      });
   }
 
   /**
