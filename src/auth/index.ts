@@ -62,11 +62,11 @@ export class Auth {
         keys: {
           ecc: {
             publicKey: registerDetails.keys.ecc.publicKey,
-            privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
           },
           kyber: {
             publicKey: registerDetails.keys.kyber.publicKey,
-            privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
           },
         },
         referral: registerDetails.referral,
@@ -101,11 +101,11 @@ export class Auth {
         keys: {
           ecc: {
             publicKey: registerDetails.keys.ecc.publicKey,
-            privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,
+            privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
           },
           kyber: {
             publicKey: registerDetails.keys.kyber.publicKey,
-            privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
+            privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
           },
         },
         referral: registerDetails.referral,
@@ -182,11 +182,11 @@ export class Auth {
           keys: {
             ecc: {
               publicKey: keys.ecc.publicKey,
-              privateKeyEncrypted: keys.ecc.privateKeyEncrypted,
+              privateKey: keys.ecc.privateKeyEncrypted,
             },
             kyber: {
               publicKey: keys.kyber.publicKey,
-              privateKeyEncrypted: keys.kyber.privateKeyEncrypted,
+              privateKey: keys.kyber.privateKeyEncrypted,
             },
           },
         },
@@ -217,11 +217,11 @@ export class Auth {
         revocationKey: keys.revocationCertificate,
         ecc: {
           publicKey: keys.ecc.publicKey,
-          privateKeyEncrypted: keys.ecc.privateKeyEncrypted,
+          privateKey: keys.ecc.privateKeyEncrypted,
         },
         kyber: {
           publicKey: keys.kyber.publicKey,
-          privateKeyEncrypted: keys.kyber.privateKeyEncrypted,
+          privateKey: keys.kyber.privateKeyEncrypted,
         },
       },
       this.headersWithToken(token),
