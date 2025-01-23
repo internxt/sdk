@@ -55,11 +55,11 @@ describe('# auth service tests', () => {
           keys: {
             ecc: {
               publicKey: registerDetails.keys.ecc.publicKey,
-              privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,
+              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,
             },
             kyber: {
               publicKey: registerDetails.keys.kyber.publicKey,
-              privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
+              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
             },
           },
           referral: registerDetails.referral,
@@ -129,11 +129,11 @@ describe('# auth service tests', () => {
           keys: {
             ecc: {
               publicKey: registerDetails.keys.ecc.publicKey,
-              privateKeyEncrypted: registerDetails.keys.ecc.privateKeyEncrypted,   
+              privateKey: registerDetails.keys.ecc.privateKeyEncrypted,   
             },
             kyber: {
               publicKey: registerDetails.keys.kyber.publicKey,
-              privateKeyEncrypted: registerDetails.keys.kyber.privateKeyEncrypted,
+              privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
             },
           },
           referral: registerDetails.referral,
@@ -308,11 +308,11 @@ describe('# auth service tests', () => {
           keys: {
             ecc: {
               publicKey: 'pub',
-              privateKeyEncrypted: 'priv',
+              privateKey: 'priv',
             },
             kyber: {
               publicKey: 'pubKyber',
-              privateKeyEncrypted: 'privKyber',
+              privateKey: 'privKyber',
             },
           },
         },
@@ -359,11 +359,11 @@ describe('# auth service tests', () => {
           revocationKey: 'crt',
           ecc: {
             publicKey: 'pub',
-            privateKeyEncrypted: 'priv',
+            privateKey: 'priv',
           },
           kyber: {
             publicKey: 'pubKyber',
-            privateKeyEncrypted: 'privKyber',
+            privateKey: 'privKyber',
           },
         },
         headers,
