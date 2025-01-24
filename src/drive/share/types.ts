@@ -129,7 +129,6 @@ export type SharedFolders = {
   type: string;
   updatedAt: string;
   user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
-  workspaceItemUser: WorkspaceItemUser;
   userId: number;
   uuid: string;
 };
@@ -156,7 +155,7 @@ export type SharedFiles = {
   thumbnails: [];
   type: string;
   updatedAt: string;
-  workspaceItemUser: WorkspaceItemUser;
+  user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
   userId: number;
   uuid: string;
 };

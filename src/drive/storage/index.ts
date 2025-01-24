@@ -24,6 +24,7 @@ import {
   FileEntryByUuid,
   FileMeta,
   FolderAncestor,
+  FolderAncestorWorkspace,
   FolderMeta,
   FolderTreeResponse,
   MoveFilePayload,
@@ -490,8 +491,8 @@ export class Storage {
    */
   public updateFileMetaByUUID(
     fileUuid: string,
-    payload: { plainName?: string; type?: string | null; },
-    resourcesToken?: Token
+    payload: { plainName?: string; type?: string | null },
+    resourcesToken?: Token,
   ): Promise<void> {
     return this.client.put(
       `/files/${fileUuid}/meta`,
@@ -654,8 +655,12 @@ export class Storage {
     workspaceId: string,
     itemType: ItemType,
     uuid: string,
-  ): Promise<FolderAncestor[]> {
-    return this.client.get<FolderAncestor[]>(`workspaces/${workspaceId}/${itemType}/${uuid}/ancestors`, this.headers());
+    resourcesToken?: Token,
+  ): Promise<FolderAncestorWorkspace[]> {
+    return this.client.get<FolderAncestorWorkspace[]>(
+      `workspaces/${workspaceId}/${itemType}/${uuid}/ancestors`,
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
   }
 
   /**

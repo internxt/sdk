@@ -1,4 +1,5 @@
 import { SharingMeta } from '../share/types';
+import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
   id: number;
@@ -19,6 +20,7 @@ export interface DriveFolderData {
   userId: number;
   user_id: number;
   uuid: string;
+  user?: UserResumeData;
 }
 
 export interface DriveFileData {
@@ -45,6 +47,7 @@ export interface DriveFileData {
   shares?: Array<ShareLink>;
   sharings?: { type: string; id: string }[];
   uuid: string;
+  user?: UserResumeData;
 }
 
 export interface Thumbnail {
@@ -430,6 +433,10 @@ export interface FolderAncestor {
   user: null | string;
   userId: number;
   uuid: string;
+}
+export interface FolderAncestorWorkspace {
+  uuid: string;
+  plainName: string;
 }
 export interface FolderMeta {
   id: number;
