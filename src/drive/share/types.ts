@@ -131,6 +131,7 @@ export type SharedFolders = {
   user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
   userId: number;
   uuid: string;
+  token: string | null;
 };
 
 export type SharedFiles = {
@@ -158,6 +159,7 @@ export type SharedFiles = {
   user: { avatar: string | null; email: string; lastname: string; name: string; uuid: string };
   userId: number;
   uuid: string;
+  token: string | null;
 };
 
 export type ListSharedItemsResponse = {
