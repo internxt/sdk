@@ -1,5 +1,13 @@
 import { UUID, UserSettings } from '../../shared/types/userSettings';
 
+export interface UserResumeData {
+  avatar: string | null;
+  email: string;
+  lastname: string | null;
+  name: string;
+  uuid: string;
+}
+
 export type Token = string;
 
 export interface InitializeUserResponse {
