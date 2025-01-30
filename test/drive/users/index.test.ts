@@ -100,7 +100,10 @@ describe('# users service tests', () => {
       const email = 'test@test.com';
       const callStub = sinon.stub(httpClient, 'post').resolves({
         publicKey: 'publicKey',
-        publicKyberKey: 'publicKeyberKey',
+        keys: {
+          kyber: 'publicKeyberKey',
+          ecc: 'publicKey',
+        },
         user: { uuid: 'exampleUuid', email },
       });
 
@@ -111,7 +114,10 @@ describe('# users service tests', () => {
       expect(callStub.firstCall.args).toEqual(['/users/pre-create', { email }, headers]);
       expect(body).toEqual({
         publicKey: 'publicKey',
-        publicKyberKey: 'publicKeyberKey',
+        keys: {
+          kyber: 'publicKeyberKey',
+          ecc: 'publicKey',
+        },
         user: { uuid: 'exampleUuid', email },
       });
     });
