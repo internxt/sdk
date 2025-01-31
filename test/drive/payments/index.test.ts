@@ -8,7 +8,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 const httpClient = HttpClient.create('');
 
 describe('payments service', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -18,11 +17,10 @@ describe('payments service', () => {
   });
 
   describe('get products', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        content: 'true'
+        content: 'true',
       });
       const { client, headers } = clientAndHeadersWithToken();
 
@@ -30,23 +28,38 @@ describe('payments service', () => {
       const body = await client.getProducts();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/v3/stripe/products',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/v3/stripe/products', headers]);
       expect(body).toEqual({
-        content: 'true'
+        content: 'true',
       });
     });
+  });
 
+  describe('check if product is available', () => {
+    it('should call with right params & return data', async () => {
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        featuresPerService: {
+          antivirus: false,
+        },
+      });
+      const { client, headers } = clientAndHeadersWithToken();
+
+      const body = await client.checkProductsUserAvailable();
+
+      expect(callStub.firstCall.args).toEqual(['/products', headers]);
+      expect(body).toEqual({
+        featuresPerService: {
+          antivirus: false,
+        },
+      });
+    });
   });
 
   describe('create payment session', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
       const callStub = sinon.stub(httpClient, 'post').resolves({
-        id: 'ident'
+        id: 'ident',
       });
       const { client, headers } = clientAndHeadersWithToken();
       const payload: CreatePaymentSessionPayload = {
@@ -55,7 +68,7 @@ describe('payments service', () => {
         mode: StripeSessionMode.Payment,
         priceId: '',
         successUrl: '',
-        test: false
+        test: false,
       };
 
       // Act
@@ -72,26 +85,23 @@ describe('payments service', () => {
           successUrl: payload.successUrl,
           canceledUrl: payload.canceledUrl,
         },
-        headers
+        headers,
       ]);
       expect(body).toEqual({
-        id: 'ident'
+        id: 'ident',
       });
     });
-
   });
-
 });
-
 
 function clientAndHeadersWithToken(
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
-  token = 'token'
+  token = 'token',
 ): {
-  client: Payments,
-  headers: object
+  client: Payments;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
