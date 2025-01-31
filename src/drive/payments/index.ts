@@ -220,7 +220,11 @@ export class Payments {
     return this.client.patch('/billing', { ...payload }, this.headers());
   }
 
-  public checkProductsUserAvailable(): Promise<AvailableProducts> {
+  /**
+   * Gets the available products from the user
+   * @returns an object containing available products
+   */
+  public checkUserAvailableProducts(): Promise<AvailableProducts> {
     return this.client.get('/products', this.headers());
   }
 

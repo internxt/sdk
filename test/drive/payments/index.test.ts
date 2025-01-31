@@ -99,7 +99,7 @@ describe('payments service', () => {
       });
       const { client, headers } = clientAndHeadersWithToken();
 
-      const body = await client.checkProductsUserAvailable();
+      const body = await client.checkUserAvailableProducts();
 
       expect(callStub.firstCall.args).toEqual(['/products', headers]);
       expect(body).toEqual({
