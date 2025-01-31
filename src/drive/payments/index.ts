@@ -3,6 +3,7 @@ import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
 import {
+  AvailableProducts,
   CreateCheckoutSessionPayload,
   CreatedSubscriptionData,
   CreatePaymentSessionPayload,
@@ -217,6 +218,10 @@ export class Payments {
 
   public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
     return this.client.patch('/billing', { ...payload }, this.headers());
+  }
+
+  public checkProductsUserAvailable(): Promise<AvailableProducts> {
+    return this.client.get('/products', this.headers());
   }
 
   /**

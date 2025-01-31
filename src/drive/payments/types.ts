@@ -204,3 +204,9 @@ export type CreatedSubscriptionData = {
   subscriptionId?: string;
   paymentIntentId?: string;
 };
+
+export type AvailableProducts = {
+  featuresPerService: {
+    antivirus: boolean;
+  };
+};
