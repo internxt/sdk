@@ -8,12 +8,14 @@ import {
   DriveFolderData,
   EncryptionVersion,
   FetchPaginatedFolderContentResponse,
+  FileMeta,
+  FolderAncestorWorkspace,
   MoveFolderPayload,
   MoveFolderResponse,
   UpdateFilePayload,
 } from '../../../src/drive/storage/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
-import { headersWithToken } from '../../../src/shared/headers';
+import { CustomHeaders, headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
 import { randomFileData } from './mothers/fileData.mother';
 import {
@@ -41,7 +43,7 @@ describe('# storage service tests', () => {
       it('Should return the expected elements, when getFolderContent is called', async () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
-        const { client } = clientAndHeaders();
+        const { client } = clientAndHeaders({});
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
@@ -69,7 +71,7 @@ describe('# storage service tests', () => {
             { ...subFolder2, type: 'folder' },
           ],
         };
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
@@ -102,7 +104,7 @@ describe('# storage service tests', () => {
             { ...subFolder2, type: 'file' },
           ],
         };
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
@@ -128,7 +130,7 @@ describe('# storage service tests', () => {
         // Arrange
         const responseSubfiles = randomSubfilesResponse(3);
         const randomUUID = v4();
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(responseSubfiles),
           requestCanceler: {
@@ -153,7 +155,7 @@ describe('# storage service tests', () => {
         // Arrange
         const randomUUID = v4();
         const responseSubfolders = randomSubfoldersResponse(4);
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(responseSubfolders),
@@ -177,7 +179,7 @@ describe('# storage service tests', () => {
 
       it('Should cancel the request', async () => {
         // Arrange
-        const { client } = clientAndHeaders();
+        const { client } = clientAndHeaders({});
 
         // Act
         const [promise, requestCanceler] = client.getFolderContent(1);
@@ -190,7 +192,7 @@ describe('# storage service tests', () => {
       it('Should return the expected elements with trash', async () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const callStub = sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
@@ -241,7 +243,7 @@ describe('# storage service tests', () => {
             cancel: () => null,
           },
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const [promise, requestCanceler] = client.createFolder(createFolderPayload);
@@ -265,7 +267,7 @@ describe('# storage service tests', () => {
           folderName: 'ma-fol',
           parentFolderId: 34,
         };
-        const { client } = clientAndHeaders();
+        const { client } = clientAndHeaders({});
 
         // Act
         const [promise, requestCanceler] = client.createFolder(createFolderPayload);
@@ -301,7 +303,7 @@ describe('# storage service tests', () => {
           moved: false,
         };
         const callStub = sinon.stub(httpClient, 'post').resolves(moveFolderResponse);
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.moveFolder(payload);
@@ -323,7 +325,7 @@ describe('# storage service tests', () => {
       it('Should call with right params & return correct response', async () => {
         // Arrange
         const payload = randomUpdateFolderMetadataPayload();
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const callStub = sinon.stub(httpClient, 'post').resolves({});
 
         // Act
@@ -350,7 +352,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'delete').resolves({
           valid: true,
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.deleteFolder(2);
@@ -369,7 +371,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'get').resolves({
           size: 10,
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.getFolderSize(2);
@@ -379,6 +381,84 @@ describe('# storage service tests', () => {
         expect(body).toEqual(10);
       });
     });
+
+    describe('getFolderAncestorsInWorkspace', () => {
+      it('When resourceToken is provided then should call with right arguments & return content', async () => {
+        // Arrange
+        const workspaceId = v4();
+        const itemType = 'folder';
+        const itemUuid = v4()
+        const resourceToken = 'resource-token-workspace';
+        const mockResponse: FolderAncestorWorkspace[] = [
+          {
+            uuid: v4(),
+            plainName: 'mi-folder1',
+          },
+          {
+            uuid: v4(),
+            plainName: 'mi-folder2',
+          },
+          {
+            uuid: v4(),
+            plainName: 'mi-folder3',
+          },
+        ];
+        const callStub = sinon.stub(httpClient, 'get').resolves(mockResponse);
+        const { client, headers } = clientAndHeaders({
+          customHeaders: {
+            'internxt-resources-token': resourceToken,
+          },
+        });
+
+        // Act
+        const body = await client.getFolderAncestorsInWorkspace(
+          workspaceId,
+          itemType,
+          itemUuid,
+          resourceToken,
+        );
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`,
+          headers,
+        ]);
+        expect(body).toEqual(mockResponse);
+      });
+
+      it('When resourceToken is NOT provided then it should call the client.get method without the resourcesToken in headers', async () => {
+        // Arrange
+        const workspaceId = v4();
+        const itemType = 'folder';
+        const itemUuid = v4();
+        const mockResponse: FolderAncestorWorkspace[] = [
+          {
+            uuid: v4(),
+            plainName: 'mi-folder1',
+          },
+          {
+            uuid: v4(),
+            plainName: 'mi-folder2',
+          },
+          {
+            uuid: v4(),
+            plainName: 'mi-folder3',
+          },
+        ];
+        const callStub = sinon.stub(httpClient, 'get').resolves(mockResponse);
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.getFolderAncestorsInWorkspace(workspaceId, itemType, itemUuid);
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([
+          `workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`,
+          headers,
+        ]);
+        expect(body).toEqual(mockResponse);
+      });
+    });
   });
 
   describe('-> files', () => {
@@ -386,7 +466,7 @@ describe('# storage service tests', () => {
       it('Should have all the correct params on call', async () => {
         // Arrange
         const callStub = sinon.stub(httpClient, 'post').resolves({});
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const fileEntry: StorageTypes.FileEntry = {
           id: '1',
           type: 'type',
@@ -435,7 +515,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'post').resolves({
           valid: true,
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.updateFile(payload);
@@ -464,7 +544,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'delete').resolves({
           valid: true,
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const payload: DeleteFilePayload = {
           fileId: 5,
           folderId: 2,
@@ -488,7 +568,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'post').resolves({
           content: 'test',
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.moveFile(payload);
@@ -516,7 +596,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'get').resolves({
           files: [],
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.getRecentFiles(5);
@@ -535,7 +615,7 @@ describe('# storage service tests', () => {
         const callStub = sinon.stub(httpClient, 'get').resolves({
           files: [],
         });
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.getRecentFilesV2(5);
@@ -556,7 +636,7 @@ describe('# storage service tests', () => {
         const fileUUID = v4();
         const response = randomFileData();
         const callStub = sinon.stub(httpClient, 'put').resolves(response);
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.replaceFile(fileUUID, {
@@ -576,13 +656,59 @@ describe('# storage service tests', () => {
         expect(body).toEqual(response);
       });
     });
+
+    describe('getFile',() => {
+      it('When a fileId is provided without a workspaceToken then it should call getCancellable with the correct URL and headers', async  () => {
+        // Arrange
+        const fileUUID = v4();
+        const response = randomFileData() as FileMeta;
+        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const workspaceToken = undefined;
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const [promise, _] = client.getFile(fileUUID, workspaceToken);
+        const body = await promise;
+        
+        // Assert
+        expect(callStub.firstCall.args).toEqual([`/files/${fileUUID}/meta`, headers]);
+        expect(body).toEqual(response);
+      });
+
+      it('When a fileId is provided with a workspaceToken then it should call getCancellable with the correct URL and custom headers', async() => {
+        // Arrange
+        const fileUUID = v4();
+        const response = randomFileData() as FileMeta;
+        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const workspaceToken = 'workspace-token';
+        const { client, headers } = clientAndHeaders({ workspaceToken });
+
+        // Act
+        const [promise, _] = client.getFile(fileUUID, workspaceToken);
+        const body = await promise;
+
+        // Assert
+        expect(callStub.firstCall.args).toEqual([`/files/${fileUUID}/meta`, headers]);
+        expect(body).toEqual(response);
+      });
+    });
   });
 
   describe('-> quotas', () => {
     describe('space usage', () => {
       it('should call with right params & return response', async () => {
         // Arrange
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const callStub = sinon.stub(httpClient, 'get').resolves({
           total: 10,
         });
@@ -601,7 +727,7 @@ describe('# storage service tests', () => {
     describe('space limit', () => {
       it('should call with right params & return response', async () => {
         // Arrange
-        const { client, headers } = clientAndHeaders();
+        const { client, headers } = clientAndHeaders({});
         const callStub = sinon.stub(httpClient, 'get').resolves({
           total: 10,
         });
@@ -622,7 +748,7 @@ describe('# storage service tests', () => {
         it('Should return the expected elements', async () => {
           // Arrange
           const response = randomFolderContentResponse(2, 2);
-          const { client } = clientAndHeaders();
+          const { client } = clientAndHeaders({});
           sinon.stub(httpClient, 'getCancellable').returns({
             promise: Promise.resolve(response),
             requestCanceler: {
@@ -641,7 +767,7 @@ describe('# storage service tests', () => {
 
         it('Should cancel the request', async () => {
           // Arrange
-          const { client } = clientAndHeaders();
+          const { client } = clientAndHeaders({});
 
           // Act
           const [promise, requestCanceler] = client.getTrash();
@@ -654,7 +780,7 @@ describe('# storage service tests', () => {
 
       describe('Add Items into trash', () => {
         it('should call with right params & return 200', async () => {
-          const { client, headers } = clientAndHeaders();
+          const { client, headers } = clientAndHeaders({});
           const callStub = sinon.stub(httpClient, 'post').resolves(true);
           const itemsToTrash = [
             { id: 'id1', type: 'file' },
@@ -673,13 +799,23 @@ describe('# storage service tests', () => {
   });
 });
 
-function clientAndHeaders(
+function clientAndHeaders({
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'my-token',
   mnemonic = 'nemo',
-): {
+  workspaceToken = undefined,
+  customHeaders = undefined,
+}: {
+  apiUrl?: string;
+  clientName?: string;
+  clientVersion?: string;
+  token?: string;
+  mnemonic?: string;
+  workspaceToken?: string;
+  customHeaders?: CustomHeaders;
+}): {
   client: Storage;
   headers: object;
 } {
@@ -691,6 +827,6 @@ function clientAndHeaders(
     token: token,
   };
   const client = Storage.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token, workspaceToken, customHeaders);
   return { client, headers };
 }

@@ -1,5 +1,13 @@
 import { UUID, UserSettings } from '../../shared/types/userSettings';
 
+export interface UserResumeData {
+  avatar: string | null;
+  email: string;
+  lastname: string | null;
+  name: string;
+  uuid: string;
+}
+
 export type Token = string;
 
 export interface InitializeUserResponse {
@@ -37,13 +45,17 @@ export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname
 
 export type PreCreateUserResponse = {
   publicKey: string;
-  publicKyberKey?: string;
+  keys?: 
+  {
+    ecc: string;
+    kyber: string;
+  };
   user: { uuid: UUID; email: string };
 };
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
-export type UserPublicKeyResponse = { publicKey: string; publicKyberKey?: string };
+export type UserPublicKeyResponse = { publicKey: string; keys?: { ecc:string; kyber: string}; };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
