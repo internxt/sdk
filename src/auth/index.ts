@@ -158,7 +158,7 @@ export class Auth {
   }> {
     const securityDetails = await this.securityDetails(details.email);
     const encryptedSalt = securityDetails.encryptedSalt;
-    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+    const encryptedPasswordHash = await cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
     return this.client
