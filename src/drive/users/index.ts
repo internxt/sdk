@@ -154,11 +154,24 @@ export class Users {
   }
 
   /**
+   * @deprecated Use `updateUserProfile` instead.
    * Updates a user profile
    * @param payload
    */
   public updateProfile(payload: UpdateProfilePayload) {
     return this.client.patch<void>('/user/profile', payload, this.headers());
+  }
+
+  /**
+   * Updates a user profile
+   * @param payload
+   */
+  public updateUserProfile(payload: UpdateProfilePayload, token?: Token) {
+    return this.client.patch<void>(
+      '/users/profile',
+      payload,
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
   }
 
   /**
