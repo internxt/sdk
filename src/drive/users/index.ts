@@ -154,6 +154,7 @@ export class Users {
   }
 
   /**
+   * @deprecated Use `updateUserProfile` instead.
    * Updates a user profile
    * @param payload
    */
@@ -162,6 +163,19 @@ export class Users {
   }
 
   /**
+   * Updates a user profile
+   * @param payload
+   */
+  public updateUserProfile(payload: UpdateProfilePayload, token?: Token) {
+    return this.client.patch<void>(
+      '/users/profile',
+      payload,
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
+  }
+
+  /**
+   * @deprecated Use `updateUserAvatar` instead.
    * Updates a user avatar
    * @param payload
    */
@@ -173,11 +187,35 @@ export class Users {
   }
 
   /**
+   * Updates a user avatar
+   * @param payload
+   */
+  public updateUserAvatar(payload: { avatar: Blob }, token?: Token) {
+    const formData = new FormData();
+    formData.set('avatar', payload.avatar);
+
+    return this.client.put<{ avatar: string }>(
+      '/users/avatar',
+      formData,
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
+  }
+
+  /**
+   * @deprecated Use `deleteUserAvatar` instead.
    * Delete current user avatar
    */
   public deleteAvatar() {
     return this.client.delete<void>('/user/avatar', this.headers());
   }
+
+  /**
+   * Delete current user avatar
+   */
+  public deleteUserAvatar(token?: Token) {
+    return this.client.delete<void>('/users/avatar', this.headersWithToken(token ?? <string>this.apiSecurity?.token));
+  }
+
   /**
    * Gets all friend invites created by this user
    */
