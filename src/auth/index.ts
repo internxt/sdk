@@ -305,6 +305,7 @@ export class Auth {
   }
 
   /**
+   * @deprecated Use `sendUserDeactivationEmail` instead.
    * Sends request to send the email to delete the account
    * @param email
    */
@@ -313,11 +314,37 @@ export class Auth {
   }
 
   /**
+   * Sends request to send the email to delete the account
+   */
+  public sendUserDeactivationEmail(token?: Token): Promise<void> {
+    return this.client.post(
+      '/users/deactivation/send',
+      {},
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
+  }
+
+  /**
+   * @deprecated Use `confirmUserDeactivation` instead.
    * Confirms the account deactivation
    * @param token
    */
   public confirmDeactivation(token: string): Promise<void> {
     return this.client.get(`/confirmDeactivation/${token}`, this.basicHeaders());
+  }
+
+  /**
+   * Confirms the account deactivation
+   * @param token
+   */
+  public confirmUserDeactivation(deactivationToken: string, token?: string): Promise<void> {
+    return this.client.post(
+      '/users/deactivation/confirm',
+      {
+        token: deactivationToken,
+      },
+      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+    );
   }
 
   /**
