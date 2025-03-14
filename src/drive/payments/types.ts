@@ -145,7 +145,8 @@ export interface InvoicePayload {
 }
 
 export type UserSubscription =
-  | { type: 'free' | 'lifetime' }
+  | { type: 'free' }
+  | { type: 'lifetime'; productId?: string }
   | {
       type: 'subscription';
       subscriptionId: string;
@@ -155,13 +156,14 @@ export type UserSubscription =
       interval: 'year' | 'month';
       nextPayment: number;
       priceId: string;
+      productId?: string;
       userType?: UserType;
-      planId?: string;
       plan?: StoragePlan;
     };
 
 export interface DisplayPrice {
   id: string;
+  productId?: string;
   bytes: number;
   interval: 'year' | 'month' | 'lifetime';
   amount: number;
