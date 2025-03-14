@@ -210,5 +210,6 @@ export type CreatedSubscriptionData = {
 export type AvailableProducts = {
   featuresPerService: {
     antivirus: boolean;
+    backups: boolean;
   };
 };
