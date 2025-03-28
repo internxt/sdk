@@ -8,6 +8,7 @@ import {
   TwoFactorAuthQR,
   RegisterPreCreatedUser,
   RegisterPreCreatedUserResponse,
+  PrivateKeys,
 } from './types';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import { TeamsSettings } from '../shared/types/teams';
@@ -389,12 +390,14 @@ export class Auth {
    * @param password
    * @param salt
    * @param mnemonic
+   * @param keys
    */
   public changePasswordWithLink(
     token: string | undefined,
     password: string,
     salt: string,
     mnemonic: string,
+    keys?: PrivateKeys,
   ): Promise<void> {
     return this.client.put(
       `/users/recover-account?token=${token}&reset=false`,
@@ -402,6 +405,7 @@ export class Auth {
         password: password,
         salt: salt,
         mnemonic: mnemonic,
+        privateKeys: keys,
       },
       this.basicHeaders(),
     );
