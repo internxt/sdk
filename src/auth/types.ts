@@ -67,3 +67,8 @@ export interface BasicAuth {
   username: string;
   password: string;
 }
+
+export interface PrivateKeys {
+  ecc?: string;
+  kyber?: string;
+}
