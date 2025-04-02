@@ -50,24 +50,6 @@ export class ObjectStorage {
     );
   }
 
-  public getPaymentIntentForObjectStorage(
-    customerId: string,
-    plan: ObjectStoragePlan,
-    token: string,
-  ): Promise<{ clientSecret: string }> {
-    const query = new URLSearchParams();
-    query.set('customerId', customerId);
-    query.set('planId', plan.id);
-    query.set('token', token);
-    query.set('currency', plan.currency);
-    query.set('amount', plan.amount.toString());
-    return this.client.get(
-      `/payment-intent-for-object-storage?${query.toString()}`,
-
-      this.headers(),
-    );
-  }
-
   public createObjectStorageSubscription(
     customerId: string,
     plan: ObjectStoragePlan,
