@@ -15,7 +15,7 @@ describe('Object Storage service', () => {
     sinon.restore();
   });
 
-  describe('get object storage plan by id', () => {
+  describe('Get object storage plan by id', () => {
     it('When get object storage plan by id is requested, then it should call with right params & return data', async () => {
       const callStub = sinon.stub(httpClient, 'get').resolves({
         id: 'plan_123',
@@ -29,7 +29,7 @@ describe('Object Storage service', () => {
     });
   });
 
-  describe('create customer for object storage', () => {
+  describe('Create customer for object storage', () => {
     it('When create customer is requested, then it should call with right params & return data', async () => {
       const callStub = sinon.stub(httpClient, 'post').resolves({
         customerId: 'cus_123',
