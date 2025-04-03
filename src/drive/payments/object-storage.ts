@@ -32,12 +32,17 @@ export class ObjectStorage {
     return this.client.get(`/object-storage-plan-by-id?${query.toString()}`, this.headers());
   }
 
-  public createCustomerForObjectStorage(
-    name: string,
-    email: string,
-    country?: string,
-    companyVatId?: string,
-  ): Promise<{ customerId: string; token: string }> {
+  public createCustomerForObjectStorage({
+    name,
+    email,
+    country,
+    companyVatId,
+  }: {
+    name: string;
+    email: string;
+    country?: string;
+    companyVatId?: string;
+  }): Promise<{ customerId: string; token: string }> {
     return this.client.post(
       '/create-customer-for-object-storage',
       {
@@ -50,14 +55,21 @@ export class ObjectStorage {
     );
   }
 
-  public createObjectStorageSubscription(
-    customerId: string,
-    plan: ObjectStoragePlan,
-    token: string,
-    companyName: string,
-    vatId: string,
-    promoCodeId?: string,
-  ): Promise<CreatedSubscriptionData> {
+  public createObjectStorageSubscription({
+    customerId,
+    plan,
+    token,
+    companyName,
+    vatId,
+    promoCodeId,
+  }: {
+    customerId: string;
+    plan: ObjectStoragePlan;
+    token: string;
+    companyName: string;
+    vatId: string;
+    promoCodeId?: string;
+  }): Promise<CreatedSubscriptionData> {
     const { id: priceId, currency } = plan;
 
     return this.client.post(

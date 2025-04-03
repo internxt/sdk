@@ -36,7 +36,12 @@ describe('Object Storage service', () => {
       });
       const { client, headers } = basicHeadersAndClient();
 
-      const body = await client.createCustomerForObjectStorage('test', 'test@test.com', 'US', '1234567890');
+      const body = await client.createCustomerForObjectStorage({
+        name: 'test',
+        email: 'test@test.com',
+        country: 'US',
+        companyVatId: '1234567890',
+      });
 
       expect(callStub.firstCall.args).toEqual([
         '/create-customer-for-object-storage',
@@ -55,14 +60,14 @@ describe('Object Storage service', () => {
 
       const { client, headers } = basicHeadersAndClient();
 
-      await client.createObjectStorageSubscription(
-        'cus_123',
-        { id: 'plan_123', bytes: 1000, interval: 'month', amount: 1000, currency: 'eur', decimalAmount: 10.0 },
-        'token',
-        'test',
-        '1234567890',
-        'promo_123',
-      );
+      await client.createObjectStorageSubscription({
+        customerId: 'cus_123',
+        plan: { id: 'plan_123', bytes: 1000, interval: 'month', amount: 1000, currency: 'eur', decimalAmount: 10.0 },
+        token: 'token',
+        companyName: 'test',
+        vatId: '1234567890',
+        promoCodeId: 'promo_123',
+      });
 
       expect(callStub.firstCall.args).toEqual([
         '/create-subscription-for-object-storage',
