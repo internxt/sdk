@@ -80,6 +80,7 @@ export function headersWithBasicAuth(
   clientVersion: string,
   auth: BasicAuth,
   workspaceToken?: Token,
+  customHeaders?: CustomHeaders,
 ): InternxtHeaders {
   const headers = basicHeaders(clientName, clientVersion);
   const token = `${auth.username}:${auth.password}`;
@@ -93,6 +94,7 @@ export function headersWithBasicAuth(
   return {
     ...headers,
     ...extra,
+    ...customHeaders,
   };
 }
 
@@ -101,6 +103,7 @@ export function headersWithAuthToken(
   clientVersion: string,
   token: Token,
   workspaceToken?: Token,
+  customHeaders?: CustomHeaders,
 ): InternxtHeaders {
   const headers = basicHeaders(clientName, clientVersion);
   const extra: ExtraHeaders = {};
@@ -112,6 +115,7 @@ export function headersWithAuthToken(
     ...headers,
     'x-token': token,
     ...extra,
+    ...customHeaders,
   };
 }
 
