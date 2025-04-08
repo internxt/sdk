@@ -10,6 +10,7 @@ const httpClient = HttpClient.create('');
 describe('payments service', () => {
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
+    jest.resetAllMocks();
   });
 
   afterEach(() => {
@@ -22,7 +23,8 @@ describe('payments service', () => {
       const callStub = sinon.stub(httpClient, 'get').resolves({
         content: 'true',
       });
-      const { client, headers } = clientAndHeadersWithToken();
+
+      const { client, headers } = clientAndHeadersWithToken({});
 
       // Act
       const body = await client.getProducts();
@@ -46,7 +48,7 @@ describe('payments service', () => {
         { id: 'invoice_456', amount: 2000 },
       ]);
 
-      const { client, headers } = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken({});
 
       const params = {
         subscriptionId: 'sub_789',
@@ -75,7 +77,7 @@ describe('payments service', () => {
     it('should handle missing optional parameters correctly', async () => {
       const callStub = sinon.stub(httpClient, 'get').resolves([]);
 
-      const { client, headers } = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken({});
 
       const params = {};
 
@@ -97,7 +99,7 @@ describe('payments service', () => {
           antivirus: false,
         },
       });
-      const { client, headers } = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken({ desktopHeader: 'desk-header' });
 
       const body = await client.checkUserAvailableProducts();
 
@@ -116,7 +118,7 @@ describe('payments service', () => {
       const callStub = sinon.stub(httpClient, 'post').resolves({
         id: 'ident',
       });
-      const { client, headers } = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken({});
       const payload: CreatePaymentSessionPayload = {
         canceledUrl: '',
         lifetime_tier: undefined,
@@ -149,23 +151,37 @@ describe('payments service', () => {
   });
 });
 
-function clientAndHeadersWithToken(
+function clientAndHeadersWithToken({
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'token',
-): {
+  desktopHeader,
+}: {
+  apiUrl?: string;
+  clientName?: string;
+  clientVersion?: string;
+  token?: string;
+  desktopHeader?: string;
+}): {
   client: Payments;
   headers: object;
 } {
+  const additionalHeaders: Record<string, string> = {};
   const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
+    desktopHeader: desktopHeader,
   };
   const apiSecurity: ApiSecurity = {
     token: token,
   };
+
+  if (desktopHeader) {
+    additionalHeaders['x-internxt-desktop-header'] = desktopHeader;
+  }
+
   const client = Payments.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken(clientName, clientVersion, token, undefined, additionalHeaders);
   return { client, headers };
 }

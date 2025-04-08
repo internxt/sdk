@@ -233,6 +233,18 @@ export class Payments {
    * @private
    */
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    const additionalHeaders: Record<string, string> = {};
+
+    if (this.appDetails.desktopHeader) {
+      additionalHeaders['x-internxt-desktop-header'] = this.appDetails.desktopHeader;
+    }
+
+    return headersWithToken(
+      this.appDetails.clientName,
+      this.appDetails.clientVersion,
+      this.apiSecurity.token,
+      undefined,
+      additionalHeaders,
+    );
   }
 }
