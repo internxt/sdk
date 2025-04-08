@@ -265,10 +265,20 @@ export class Network {
    * @param auth
    */
   private static headersWithBasicAuth(appDetails: AppDetails, auth: BasicAuth) {
-    return headersWithBasicAuth(appDetails.clientName, appDetails.clientVersion, auth);
+    const additionalHeaders = this.mapAdditionalHeaders(appDetails);
+    return headersWithBasicAuth(appDetails.clientName, appDetails.clientVersion, auth, undefined, additionalHeaders);
   }
 
   private static headersWithAuthToken(appDetails: AppDetails, token: string) {
-    return headersWithAuthToken(appDetails.clientName, appDetails.clientVersion, token);
+    const additionalHeaders = this.mapAdditionalHeaders(appDetails);
+    return headersWithAuthToken(appDetails.clientName, appDetails.clientVersion, token, undefined, additionalHeaders);
+  }
+
+  private static mapAdditionalHeaders(appDetails: AppDetails): Record<string, string> {
+    const additionalHeaders: Record<string, string> = {};
+    if (appDetails.desktopHeader) {
+      additionalHeaders['x-internxt-desktop-header'] = appDetails.desktopHeader;
+    }
+    return additionalHeaders;
   }
 }

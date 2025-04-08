@@ -7,7 +7,7 @@ import {
   InvalidFileIndexError,
   InvalidUploadIndexError,
   InvalidUploadSizeError,
-  Network
+  Network,
 } from '../../src/network/index';
 import { headersWithBasicAuth } from '../../src/shared/headers/index';
 import {
@@ -269,6 +269,7 @@ function clientAndHeadersWithBasicAuth(
     bridgeUser: 'user',
     userId: 'password',
   },
+  desktopHeader = 'desktop-header',
 ): {
   client: Network;
   headers: object;
@@ -276,11 +277,18 @@ function clientAndHeadersWithBasicAuth(
   const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
+    desktopHeader,
   };
   const client = Network.client(apiUrl, appDetails, auth);
-  const headers = headersWithBasicAuth(clientName, clientVersion, {
-    username: auth.bridgeUser,
-    password: auth.userId,
-  });
+  const headers = headersWithBasicAuth(
+    clientName,
+    clientVersion,
+    {
+      username: auth.bridgeUser,
+      password: auth.userId,
+    },
+    undefined,
+    { 'x-internxt-desktop-header': desktopHeader},
+  );
   return { client, headers };
 }
