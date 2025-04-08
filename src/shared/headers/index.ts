@@ -47,6 +47,7 @@ export function headersWithToken(
   const extra: ExtraHeaders = {
     Authorization: 'Bearer ' + token,
   };
+
   if (workspaceToken !== undefined) {
     extra['x-internxt-workspace'] = workspaceToken;
   }

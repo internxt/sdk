@@ -6,6 +6,7 @@ export type ApiUrl = string;
 export interface AppDetails {
   clientName: string;
   clientVersion: string;
+  desktopHeader?: string;
 }
 
 export interface ApiSecurity {
