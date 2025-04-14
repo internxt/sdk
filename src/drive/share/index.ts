@@ -31,7 +31,7 @@ import {
   UpdateUserRolePayload,
   UpdateUserRoleResponse,
 } from './types';
-import { ItemType } from 'src/workspaces';
+import { ItemType } from '../../workspaces';
 
 export * as ShareTypes from './types';
 
