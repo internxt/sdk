@@ -1,7 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreateCallResponse } from './types';
+import { CreateCallResponse, JoinCallPayload, JoinCallResponse, UsersInCallResponse } from './types';
 
 export class Meet {
   private readonly client: HttpClient;
@@ -18,8 +18,16 @@ export class Meet {
     return new Meet(apiUrl, appDetails, apiSecurity);
   }
 
-  async createMeetCall(): Promise<CreateCallResponse> {
+  async createCall(): Promise<CreateCallResponse> {
     return this.client.post<CreateCallResponse>('call', {}, this.headers());
+  }
+
+  async joinCall(callId: string, payload: JoinCallPayload): Promise<JoinCallResponse> {
+    return this.client.post<JoinCallResponse>(`call/${callId}/users/join`, { ...payload }, this.headers());
+  }
+
+  getCurrentUsersInCall(callId: string): Promise<UsersInCallResponse[]> {
+    return this.client.get(`call/${callId}/users`, this.headers());
   }
 
   private headers() {
