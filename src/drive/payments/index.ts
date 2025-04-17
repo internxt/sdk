@@ -2,6 +2,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
+import { Tier } from './Tier';
 import {
   AvailableProducts,
   CreateCheckoutSessionPayload,
@@ -226,6 +227,12 @@ export class Payments {
    */
   public checkUserAvailableProducts(): Promise<AvailableProducts> {
     return this.client.get('/products', this.headers());
+  }
+
+  public getUserTier(tierType?: UserType): Promise<Tier> {
+    const query = new URLSearchParams();
+    if (tierType !== undefined) query.set('tierType', tierType);
+    return this.client.get<Tier>(`/products/tier?${query.toString()}`, this.headers());
   }
 
   /**
