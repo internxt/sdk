@@ -1,7 +1,7 @@
 import { ApiUrl, AppDetails } from '../../shared';
 import { basicHeaders } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
-import { CreatedSubscriptionData } from './types';
+import { CreatedSubscriptionData } from './types/types';
 
 interface ObjectStoragePlan {
   id: string;

@@ -2,7 +2,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
-import { Tier } from './Tier';
+import { Tier } from './types/tiers';
 import {
   AvailableProducts,
   CreateCheckoutSessionPayload,
@@ -19,7 +19,7 @@ import {
   UpdateSubscriptionPaymentMethod,
   UserSubscription,
   UserType,
-} from './types';
+} from './types/types';
 
 export class Payments {
   private readonly client: HttpClient;
