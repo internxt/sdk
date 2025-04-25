@@ -229,9 +229,9 @@ export class Payments {
     return this.client.get('/products', this.headers());
   }
 
-  public getUserTier(tierType?: UserType): Promise<Tier> {
+  public getUserTier(userType?: UserType): Promise<Tier> {
     const query = new URLSearchParams();
-    if (tierType !== undefined) query.set('tierType', tierType);
+    if (userType !== undefined) query.set('tierType', userType);
     return this.client.get<Tier>(`/products/tier?${query.toString()}`, this.headers());
   }
 
