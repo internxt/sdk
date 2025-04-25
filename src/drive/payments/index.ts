@@ -229,6 +229,22 @@ export class Payments {
     return this.client.get('/products', this.headers());
   }
 
+  /**
+   * Gets product information based on the user's subscription tier.
+   *
+   * @param {UserType} [userType] - The type of user for which to query product information.
+   *                               If not specified, UserType.Individual will be used by default.
+   * @returns {Promise<Tier>} A promise that resolves with the product information
+   *                         available for the specified tier.
+   *
+   * @example
+   * // Get products for an individual user tier (default)
+   * const individualProducts = await getUserTier();
+   *
+   * @example
+   * // Get products for a business user tier
+   * const businessProducts = await getUserTier(UserType.Business);
+   */
   public getUserTier(userType?: UserType): Promise<Tier> {
     const query = new URLSearchParams();
     if (userType !== undefined) query.set('tierType', userType);
