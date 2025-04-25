@@ -1,8 +1,8 @@
 import sinon from 'sinon';
+import { Payments } from '../../../src/drive';
+import { CreatePaymentSessionPayload, StripeSessionMode, UserType } from '../../../src/drive/payments/types/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
-import { Payments } from '../../../src/drive';
-import { CreatePaymentSessionPayload, StripeSessionMode, UserType } from '../../../src/drive/payments/types';
 import { HttpClient } from '../../../src/shared/http/client';
 
 const httpClient = HttpClient.create('');

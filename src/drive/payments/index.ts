@@ -2,6 +2,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
+import { Tier } from './types/tiers';
 import {
   AvailableProducts,
   CreateCheckoutSessionPayload,
@@ -18,7 +19,7 @@ import {
   UpdateSubscriptionPaymentMethod,
   UserSubscription,
   UserType,
-} from './types';
+} from './types/types';
 
 export class Payments {
   private readonly client: HttpClient;
@@ -226,6 +227,28 @@ export class Payments {
    */
   public checkUserAvailableProducts(): Promise<AvailableProducts> {
     return this.client.get('/products', this.headers());
+  }
+
+  /**
+   * Gets product information based on the user's subscription tier.
+   *
+   * @param {UserType} [userType] - The type of user for which to query product information.
+   *                               If not specified, UserType.Individual will be used by default.
+   * @returns {Promise<Tier>} A promise that resolves with the product information
+   *                         available for the specified tier.
+   *
+   * @example
+   * // Get products for an individual user tier (default)
+   * const individualProducts = await getUserTier();
+   *
+   * @example
+   * // Get products for a business user tier
+   * const businessProducts = await getUserTier(UserType.Business);
+   */
+  public getUserTier(userType?: UserType): Promise<Tier> {
+    const query = new URLSearchParams();
+    if (userType !== undefined) query.set('tierType', userType);
+    return this.client.get<Tier>(`/products/tier?${query.toString()}`, this.headers());
   }
 
   /**

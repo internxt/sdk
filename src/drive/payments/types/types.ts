@@ -1,4 +1,4 @@
-import { AppSumoDetails } from './../../shared/types/appsumo';
+import { AppSumoDetails } from '../../../shared/types/appsumo';
 export interface ProductData {
   id: string;
   name: string;
