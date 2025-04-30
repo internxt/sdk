@@ -602,6 +602,53 @@ describe('# auth service tests', () => {
       ]);
     });
   });
+  describe('Legacy recover account', () => {
+    it('Should call with right params & return values', async () => {
+      // Arrange
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+
+      const payload = {
+        token: 'recovery-token',
+        encryptedPassword: 'encrypted-password',
+        encryptedSalt: 'encrypted-salt',
+        encryptedMnemonic: 'encrypted-mnemonic',
+        eccEncryptedMnemonic: 'ecc-encrypted-mnemonic',
+        kyberEncryptedMnemonic: 'kyber-encrypted-mnemonic',
+        keys: {
+          ecc: {
+            public: 'ecc-public-key',
+            private: 'ecc-private-key',
+            revocationKey: 'ecc-revocation-key',
+          },
+          kyber: {
+            public: 'kyber-public-key',
+            private: 'kyber-private-key',
+          },
+        },
+      };
+
+      // Act
+      const result = await client.legacyRecoverAccount(payload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/users/legacy-recover-account?token=${payload.token}`,
+        {
+          password: payload.encryptedPassword,
+          salt: payload.encryptedSalt,
+          mnemonic: payload.encryptedMnemonic,
+          asymmetricEncryptedMnemonic: {
+            ecc: payload.eccEncryptedMnemonic,
+            hybrid: payload.kyberEncryptedMnemonic,
+          },
+          keys: payload.keys,
+        },
+        headers,
+      ]);
+      expect(result).toEqual({});
+    });
+  });
 });
 
 function clientAndHeaders(
