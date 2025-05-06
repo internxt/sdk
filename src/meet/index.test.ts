@@ -134,6 +134,36 @@ describe('Meet service tests', () => {
       expect(response).toEqual(usersInCallResponse);
     });
   });
+
+  describe('leaveCall method', () => {
+    const callId = 'call-123';
+
+    it('should leave a call successfully with token', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeadersWithToken();
+      const postCall = sinon.stub(httpClient, 'post').resolves();
+
+      // Act
+      await client.leaveCall(callId);
+
+      // Assert
+      expect(postCall.firstCall.args).toEqual([`call/${callId}/users/leave`, {}, headers]);
+    });
+
+    it('should leave a call successfully without token', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeadersWithoutToken();
+      const postCall = sinon.stub(httpClient, 'post').resolves();
+
+      // Act
+      await client.leaveCall(callId);
+
+      // Assert
+      expect(postCall.firstCall.args[0]).toEqual(`call/${callId}/users/leave`);
+      expect(postCall.firstCall.args[1]).toEqual({});
+      expect(postCall.firstCall.args[2]).toEqual(headers);
+    });
+  });
 });
 
 function clientAndHeadersWithToken(
