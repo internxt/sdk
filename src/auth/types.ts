@@ -72,3 +72,25 @@ export interface PrivateKeys {
   ecc?: string;
   kyber?: string;
 }
+
+export interface PrivateKeysExtended {
+  ecc: {
+    public: string;
+    private: string;
+    revocationKey: string;
+  };
+  kyber: {
+    public: string;
+    private: string;
+  };
+}
+
+export interface ChangePasswordWithLinkPayload {
+  token: string;
+  encryptedPassword: string;
+  encryptedSalt: string;
+  encryptedMnemonic: string;
+  eccEncryptedMnemonic?: string;
+  kyberEncryptedMnemonic?: string;
+  keys: PrivateKeysExtended;
+}
