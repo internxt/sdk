@@ -387,7 +387,7 @@ describe('# storage service tests', () => {
         // Arrange
         const workspaceId = v4();
         const itemType = 'folder';
-        const itemUuid = v4()
+        const itemUuid = v4();
         const resourceToken = 'resource-token-workspace';
         const mockResponse: FolderAncestorWorkspace[] = [
           {
@@ -411,12 +411,7 @@ describe('# storage service tests', () => {
         });
 
         // Act
-        const body = await client.getFolderAncestorsInWorkspace(
-          workspaceId,
-          itemType,
-          itemUuid,
-          resourceToken,
-        );
+        const body = await client.getFolderAncestorsInWorkspace(workspaceId, itemType, itemUuid, resourceToken);
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -657,8 +652,8 @@ describe('# storage service tests', () => {
       });
     });
 
-    describe('getFile',() => {
-      it('When a fileId is provided without a workspaceToken then it should call getCancellable with the correct URL and headers', async  () => {
+    describe('getFile', () => {
+      it('When a fileId is provided without a workspaceToken then it should call getCancellable with the correct URL and headers', async () => {
         // Arrange
         const fileUUID = v4();
         const response = randomFileData() as FileMeta;
@@ -674,13 +669,13 @@ describe('# storage service tests', () => {
         // Act
         const [promise, _] = client.getFile(fileUUID, workspaceToken);
         const body = await promise;
-        
+
         // Assert
         expect(callStub.firstCall.args).toEqual([`/files/${fileUUID}/meta`, headers]);
         expect(body).toEqual(response);
       });
 
-      it('When a fileId is provided with a workspaceToken then it should call getCancellable with the correct URL and custom headers', async() => {
+      it('When a fileId is provided with a workspaceToken then it should call getCancellable with the correct URL and custom headers', async () => {
         // Arrange
         const fileUUID = v4();
         const response = randomFileData() as FileMeta;
@@ -794,6 +789,56 @@ describe('# storage service tests', () => {
           expect(callStub.firstCall.args).toEqual(['/storage/trash/add', { items: itemsToTrash }, headers]);
           expect(body).toEqual(true);
         });
+      });
+    });
+  });
+
+  describe('-> thumbnails', () => {
+    describe('createThumbnailEntryWithUUID', () => {
+      it('Should create a thumbnail entry with UUID and handle resourcesToken', async () => {
+        const thumbnailEntryPayload: StorageTypes.CreateThumbnailEntryPayload = {
+          fileId: 123,
+          fileUuid: v4(),
+          type: 'image/jpeg',
+          size: 1024,
+          maxWidth: 200,
+          maxHeight: 200,
+          bucketId: 'bucket123',
+          bucketFile: 'file123',
+          encryptVersion: StorageTypes.EncryptionVersion.Aes03,
+        };
+
+        const resourcesToken = 'resources-token-123';
+
+        const expectedResponse: StorageTypes.Thumbnail = {
+          id: 456,
+          file_id: 123,
+          max_width: 200,
+          max_height: 200,
+          type: 'image/jpeg',
+          size: 1024,
+          bucket_id: 'bucket123',
+          bucket_file: 'file123',
+          encrypt_version: StorageTypes.EncryptionVersion.Aes03,
+        };
+
+        const { client, headers } = clientAndHeaders({});
+        const headersWithResourceToken = {
+          ...headers,
+          'internxt-resources-token': resourcesToken,
+        };
+
+        const postStub = sinon.stub(httpClient, 'post').resolves(expectedResponse);
+
+        const response = await client.createThumbnailEntryWithUUID(thumbnailEntryPayload, resourcesToken);
+
+        expect(postStub.calledOnce).toBeTruthy();
+        expect(postStub.firstCall.args[0]).toEqual('/files/thumbnail');
+        expect(postStub.firstCall.args[1]).toEqual({
+          ...thumbnailEntryPayload,
+        });
+        expect(postStub.firstCall.args[2]).toEqual(headersWithResourceToken);
+        expect(response).toEqual(expectedResponse);
       });
     });
   });

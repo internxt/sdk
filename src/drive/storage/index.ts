@@ -13,6 +13,7 @@ import {
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
+  CreateThumbnailEntryPayload,
   DeleteFilePayload,
   DriveFileData,
   FetchFolderContentResponse,
@@ -438,6 +439,23 @@ export class Storage {
       '/storage/thumbnail',
       {
         thumbnail: thumbnailEntry,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
+   * Creates a new thumbnail entry using drive-server-wip
+   * @param CreateThumbnailEntryPayload
+   */
+  public createThumbnailEntryWithUUID(
+    thumbnailEntry: CreateThumbnailEntryPayload,
+    resourcesToken?: string,
+  ): Promise<Thumbnail> {
+    return this.client.post(
+      '/files/thumbnail',
+      {
+        ...thumbnailEntry,
       },
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
