@@ -1,8 +1,8 @@
-import { CreatedSubscriptionData } from 'src/drive/payments/types/types';
-import { ApiSecurity, ApiUrl, AppDetails } from 'src/shared';
-import { basicHeaders, headersWithToken } from 'src/shared/headers';
-import { HttpClient } from 'src/shared/http/client';
-import { Price } from './types';
+import { CreatedSubscriptionData } from '../drive/payments/types/types';
+import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
+import { basicHeaders, headersWithToken } from '../shared/headers';
+import { HttpClient } from '../shared/http/client';
+import { CreatePaymentIntentPayload, CreateSubscriptionPayload, GetPriceByIdPayload, Price } from './types';
 
 export class Checkout {
   private readonly client: HttpClient;
@@ -21,16 +21,26 @@ export class Checkout {
 
   /**
    * @description Creates a customer or gets the existing one if it already exists
-   * @param country - The country of the customer (optional)
+   * @param country - The country of the customer
+   * @param postalCode - The postal code of the customer
    * @param companyVatId - The VAT ID of the company (optional)
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
-  public createCustomer({ country, companyVatId }: { country?: string; companyVatId?: string }): Promise<{
+  public getCustomerId({
+    country,
+    postalCode,
+    companyVatId,
+  }: {
+    country: string;
+    postalCode: string;
+    companyVatId?: string;
+  }): Promise<{
     customerId: string;
     token: string;
   }> {
     const query = new URLSearchParams();
-    if (country !== undefined) query.set('country', country);
+    query.set('country', country);
+    query.set('postalCode', postalCode);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
     return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
   }
@@ -56,14 +66,7 @@ export class Checkout {
     currency,
     promoCodeId,
     quantity,
-  }: {
-    customerId: string;
-    priceId: string;
-    token: string;
-    currency?: string;
-    promoCodeId?: string;
-    quantity?: number;
-  }): Promise<CreatedSubscriptionData> {
+  }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/checkout/subscription',
       {
@@ -78,15 +81,37 @@ export class Checkout {
     );
   }
 
+  public createPaymentIntent({
+    customerId,
+    priceId,
+    token,
+    currency,
+    promoCodeId,
+  }: CreatePaymentIntentPayload): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
+    return this.client.post(
+      '/checkout/payment-intent',
+      {
+        customerId,
+        priceId,
+        token,
+        currency,
+        promoCodeId,
+      },
+      this.authHeaders(),
+    );
+  }
+
   /**
    * @description Fetch a requested price by its ID and its tax rate
    * @param priceId - The ID of the price
+   * @param promoCodeName - The name of the promo code (optional)
    * @param currency - The currency of the price (optional)
    * @returns The price object containing the details of the requested price
    */
-  public getPriceById({ priceId, currency }: { priceId: string; currency?: string }): Promise<Price> {
+  public getPriceById({ priceId, promoCodeName, currency }: GetPriceByIdPayload): Promise<Price> {
     const query = new URLSearchParams();
     query.set('priceId', priceId);
+    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     if (currency !== undefined) query.set('currency', currency);
     return this.client.get<Price>(`/checkout/price-by-id?${query.toString()}`, this.headers());
   }
@@ -116,6 +141,9 @@ export class Checkout {
    * @private
    */
   private headers() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    const additionalHeaders: Record<string, string> = {
+      ...(this.appDetails.customHeaders ?? {}),
+    };
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion, additionalHeaders);
   }
 }
