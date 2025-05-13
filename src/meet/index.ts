@@ -28,6 +28,12 @@ export class Meet {
     return this.client.post<JoinCallResponse>(`call/${callId}/users/join`, { ...payload }, headers);
   }
 
+  async leaveCall(callId: string): Promise<void> {
+    const headers = this.apiSecurity?.token ? this.headersWithToken() : this.basicHeaders();
+
+    return this.client.post<void>(`call/${callId}/users/leave`, {}, headers);
+  }
+
   async getCurrentUsersInCall(callId: string): Promise<UsersInCallResponse[]> {
     const headers = this.apiSecurity?.token ? this.headersWithToken() : this.basicHeaders();
 
