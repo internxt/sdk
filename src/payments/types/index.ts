@@ -25,7 +25,7 @@ export interface GetPriceByIdPayload {
   country?: string;
 }
 
-type Price = {
+export type Price = {
   id: string;
   currency: string;
   amount: number;
@@ -40,7 +40,7 @@ type Price = {
   };
 };
 
-type Taxes = {
+export type Taxes = {
   tax: number;
   decimalTax: number;
   amountWithTax: number;
