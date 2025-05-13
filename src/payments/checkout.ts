@@ -81,6 +81,18 @@ export class Checkout {
     );
   }
 
+  /**
+   * @description Creates a payment intent for a given customer
+   * @param customerId - The ID of the customer
+   * @param priceId - The ID of the price
+   * @param token - The token used to authenticate the customer
+   * @param currency - The currency of the payment intent (optional)
+   * @param promoCodeId - The ID of the promo code (optional)
+   * @returns The created invoice data:
+   * - `clientSecret`: The client secret for the invoice to be used with Stripe Elements
+   * - `id`: The ID of the invoice
+   * - `invoiceStatus`: The status of the invoice (only when the status is 'paid')
+   */
   public createPaymentIntent({
     customerId,
     priceId,
@@ -108,11 +120,13 @@ export class Checkout {
    * @param currency - The currency of the price (optional)
    * @returns The price object containing the details of the requested price
    */
-  public getPriceById({ priceId, promoCodeName, currency }: GetPriceByIdPayload): Promise<Price> {
+  public getPriceById({ priceId, promoCodeName, currency, postalCode, country }: GetPriceByIdPayload): Promise<Price> {
     const query = new URLSearchParams();
     query.set('priceId', priceId);
     if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     if (currency !== undefined) query.set('currency', currency);
+    if (postalCode !== undefined) query.set('postalCode', postalCode);
+    if (country !== undefined) query.set('country', country);
     return this.client.get<Price>(`/checkout/price-by-id?${query.toString()}`, this.headers());
   }
 

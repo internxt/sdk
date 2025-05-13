@@ -21,6 +21,8 @@ export interface GetPriceByIdPayload {
   priceId: string;
   promoCodeName?: string;
   currency?: string;
+  postalCode?: string;
+  country?: string;
 }
 
 export interface Price {
