@@ -25,21 +25,29 @@ export interface GetPriceByIdPayload {
   country?: string;
 }
 
-export interface Price {
+type Price = {
   id: string;
   currency: string;
   amount: number;
   bytes: number;
-  interval: 'year' | 'lifetime';
+  interval: 'lifetime' | 'year';
   decimalAmount: number;
   type: UserType;
-  tax: number;
-  decimalTax: number;
-  amountWithTax: number;
-  decimalAmountWithTax: number;
   product: string;
   businessSeats?: {
     minimumSeats: number;
     maximumSeats: number;
   };
-}
+};
+
+type Taxes = {
+  tax: number;
+  decimalTax: number;
+  amountWithTax: number;
+  decimalAmountWithTax: number;
+};
+
+export type PriceWithTax = {
+  price: Price;
+  taxes: Taxes;
+};

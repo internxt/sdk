@@ -2,7 +2,7 @@ import { CreatedSubscriptionData } from '../drive/payments/types/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreatePaymentIntentPayload, CreateSubscriptionPayload, GetPriceByIdPayload, Price } from './types';
+import { CreatePaymentIntentPayload, CreateSubscriptionPayload, GetPriceByIdPayload, PriceWithTax } from './types';
 
 export class Checkout {
   private readonly client: HttpClient;
@@ -120,14 +120,20 @@ export class Checkout {
    * @param currency - The currency of the price (optional)
    * @returns The price object containing the details of the requested price
    */
-  public getPriceById({ priceId, promoCodeName, currency, postalCode, country }: GetPriceByIdPayload): Promise<Price> {
+  public getPriceById({
+    priceId,
+    promoCodeName,
+    currency,
+    postalCode,
+    country,
+  }: GetPriceByIdPayload): Promise<PriceWithTax> {
     const query = new URLSearchParams();
     query.set('priceId', priceId);
     if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
     if (currency !== undefined) query.set('currency', currency);
     if (postalCode !== undefined) query.set('postalCode', postalCode);
     if (country !== undefined) query.set('country', country);
-    return this.client.get<Price>(`/checkout/price-by-id?${query.toString()}`, this.headers());
+    return this.client.get<PriceWithTax>(`/checkout/price-by-id?${query.toString()}`, this.headers());
   }
 
   /**
