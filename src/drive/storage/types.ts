@@ -292,7 +292,6 @@ export interface ThumbnailEntry {
 }
 
 export interface CreateThumbnailEntryPayload {
-  fileId: number;
   fileUuid: string;
   type: string;
   size: number;
