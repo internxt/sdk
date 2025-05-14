@@ -615,11 +615,19 @@ export class Storage {
     return this.client.get('/usage', this.headers());
   }
 
+  public spaceUsageV2(): Promise<UsageResponse> {
+    return this.client.get('/users/usage', this.headers());
+  }
+
   /**
    * Returns the current space limit for the user
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
     return this.client.get('/limit', this.headers());
+  }
+
+  public spaceLimitV2(): Promise<FetchLimitResponse> {
+    return this.client.get('/users/limit', this.headers());
   }
 
   /**
