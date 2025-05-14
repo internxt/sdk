@@ -396,6 +396,12 @@ export type UsageResponse = {
   [k in 'drive' | 'backups' | 'total']: number;
 };
 
+export type UsageResponseV2 = {
+  drive: number;
+  backups: number;
+  total: number;
+};
+
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
 }

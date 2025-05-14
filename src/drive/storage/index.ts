@@ -41,6 +41,7 @@ import {
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
   UsageResponse,
+  UsageResponseV2,
 } from './types';
 
 export * as StorageTypes from './types';
@@ -615,7 +616,7 @@ export class Storage {
     return this.client.get('/usage', this.headers());
   }
 
-  public spaceUsageV2(): Promise<UsageResponse> {
+  public spaceUsageV2(): Promise<UsageResponseV2> {
     return this.client.get('/users/usage', this.headers());
   }
 
