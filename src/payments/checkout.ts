@@ -30,10 +30,12 @@ export class Checkout {
     country,
     postalCode,
     companyVatId,
+    companyName,
   }: {
     country: string;
     postalCode: string;
     companyVatId?: string;
+    companyName?: string;
   }): Promise<{
     customerId: string;
     token: string;
@@ -42,6 +44,7 @@ export class Checkout {
     query.set('country', country);
     query.set('postalCode', postalCode);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
+    if (companyName !== undefined) query.set('companyName', companyName);
     return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
   }
 
