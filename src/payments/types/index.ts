@@ -34,10 +34,8 @@ export type Price = {
   decimalAmount: number;
   type: UserType;
   product: string;
-  businessSeats?: {
-    minimumSeats: number;
-    maximumSeats: number;
-  };
+  minimumSeats?: number;
+  maximumSeats?: number;
 };
 
 export type Taxes = {
