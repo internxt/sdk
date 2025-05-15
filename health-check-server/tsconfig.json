@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "../dist/health-check-server",
+    "rootDir": "../",
+    "baseUrl": "../",
+    "paths": {
+      "@sdk/*": ["src/*"]
+    }
+  },
+  "include": ["src", "health-check-server"]
+}
