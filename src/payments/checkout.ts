@@ -1,4 +1,4 @@
-import { CreatedSubscriptionData } from '../drive/payments/types/types';
+import { CreatedPaymentIntent, CreatedSubscriptionData } from '../drive/payments/types/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
@@ -27,24 +27,24 @@ export class Checkout {
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
   public getCustomerId({
-    country,
+    customerName,
     postalCode,
+    country,
     companyVatId,
-    companyName,
   }: {
-    country: string;
+    customerName: string;
     postalCode: string;
+    country: string;
     companyVatId?: string;
-    companyName?: string;
   }): Promise<{
     customerId: string;
     token: string;
   }> {
     const query = new URLSearchParams();
+    query.set('customerName', customerName);
     query.set('country', country);
     query.set('postalCode', postalCode);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
-    if (companyName !== undefined) query.set('companyName', companyName);
     return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
   }
 
@@ -102,7 +102,7 @@ export class Checkout {
     token,
     currency,
     promoCodeId,
-  }: CreatePaymentIntentPayload): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
+  }: CreatePaymentIntentPayload): Promise<CreatedPaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
       {
