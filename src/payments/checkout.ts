@@ -27,24 +27,24 @@ export class Checkout {
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
   public getCustomerId({
-    country,
+    name,
     postalCode,
+    country,
     companyVatId,
-    companyName,
   }: {
-    country: string;
+    name: string;
     postalCode: string;
+    country: string;
     companyVatId?: string;
-    companyName?: string;
   }): Promise<{
     customerId: string;
     token: string;
   }> {
     const query = new URLSearchParams();
+    query.set('name', name);
     query.set('country', country);
     query.set('postalCode', postalCode);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
-    if (companyName !== undefined) query.set('companyName', companyName);
     return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
   }
 
