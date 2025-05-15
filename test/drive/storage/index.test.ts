@@ -719,6 +719,22 @@ describe('# storage service tests', () => {
       });
     });
 
+    describe('space usage v2', () => {
+      it('should call with right params & return response', async () => {
+        const { client, headers } = clientAndHeaders({});
+        const callStub = sinon.stub(httpClient, 'get').resolves({
+          drive: 10,
+        });
+
+        const body = await client.spaceUsageV2();
+
+        expect(callStub.firstCall.args).toEqual(['/users/usage', headers]);
+        expect(body).toEqual({
+          drive: 10,
+        });
+      });
+    });
+
     describe('space limit', () => {
       it('should call with right params & return response', async () => {
         // Arrange
@@ -734,6 +750,22 @@ describe('# storage service tests', () => {
         expect(callStub.firstCall.args).toEqual(['/limit', headers]);
         expect(body).toEqual({
           total: 10,
+        });
+      });
+    });
+
+    describe('space limit v2', () => {
+      it('should call with right params & return response', async () => {
+        const { client, headers } = clientAndHeaders({});
+        const callStub = sinon.stub(httpClient, 'get').resolves({
+          maxSpaceBytes: 10,
+        });
+
+        const body = await client.spaceLimitV2();
+
+        expect(callStub.firstCall.args).toEqual(['/users/limit', headers]);
+        expect(body).toEqual({
+          maxSpaceBytes: 10,
         });
       });
     });
@@ -797,7 +829,6 @@ describe('# storage service tests', () => {
     describe('createThumbnailEntryWithUUID', () => {
       it('Should create a thumbnail entry with UUID and handle resourcesToken', async () => {
         const thumbnailEntryPayload: StorageTypes.CreateThumbnailEntryPayload = {
-          fileId: 123,
           fileUuid: v4(),
           type: 'image/jpeg',
           size: 1024,
