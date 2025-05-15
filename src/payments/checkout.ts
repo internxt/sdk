@@ -1,4 +1,4 @@
-import { CreatedSubscriptionData } from '../drive/payments/types/types';
+import { CreatedPaymentIntent, CreatedSubscriptionData } from '../drive/payments/types/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
@@ -102,7 +102,7 @@ export class Checkout {
     token,
     currency,
     promoCodeId,
-  }: CreatePaymentIntentPayload): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
+  }: CreatePaymentIntentPayload): Promise<CreatedPaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
       {

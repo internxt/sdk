@@ -207,6 +207,8 @@ export type CreatedSubscriptionData = {
   paymentIntentId?: string;
 };
 
+export type CreatedPaymentIntent = { clientSecret: string; id: string; invoiceStatus?: string };
+
 export type AvailableProducts = {
   featuresPerService: {
     antivirus: boolean;
