@@ -6,4 +6,4 @@ export * as Shared from './shared';
 export * as Workspaces from './workspaces';
 export * from './meet';
 export * as Payments from './payments';
-export * from './various';
+export * from './misc';
