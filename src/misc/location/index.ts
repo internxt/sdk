@@ -7,7 +7,5 @@ export interface UserLocation {
 
 export const getUserLocation = async (apiUrl: string): Promise<UserLocation> => {
   const client = HttpClient.create(apiUrl);
-  return client.get<UserLocation>(`${apiUrl}`, {
-    method: 'GET',
-  });
+  return client.get<UserLocation>(`${apiUrl}`, {});
 };

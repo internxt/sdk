@@ -27,12 +27,12 @@ export class Checkout {
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
   public getCustomerId({
-    name,
+    customerName,
     postalCode,
     country,
     companyVatId,
   }: {
-    name: string;
+    customerName: string;
     postalCode: string;
     country: string;
     companyVatId?: string;
@@ -41,7 +41,7 @@ export class Checkout {
     token: string;
   }> {
     const query = new URLSearchParams();
-    query.set('name', name);
+    query.set('customerName', customerName);
     query.set('country', country);
     query.set('postalCode', postalCode);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
