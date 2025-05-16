@@ -292,7 +292,6 @@ export interface ThumbnailEntry {
 }
 
 export interface CreateThumbnailEntryPayload {
-  fileId: number;
   fileUuid: string;
   type: string;
   size: number;
@@ -395,6 +394,12 @@ export type UsageResponse = {
   _id: string;
 } & {
   [k in 'drive' | 'backups' | 'total']: number;
+};
+
+export type UsageResponseV2 = {
+  drive: number;
+  backups: number;
+  total: number;
 };
 
 export interface FetchLimitResponse {
