@@ -126,6 +126,7 @@ export class Checkout {
   public getPriceById({
     priceId,
     promoCodeName,
+    userAddress,
     currency,
     postalCode,
     country,
@@ -133,6 +134,7 @@ export class Checkout {
     const query = new URLSearchParams();
     query.set('priceId', priceId);
     if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
+    if (userAddress !== undefined) query.set('userAddress', userAddress);
     if (currency !== undefined) query.set('currency', currency);
     if (postalCode !== undefined) query.set('postalCode', postalCode);
     if (country !== undefined) query.set('country', country);

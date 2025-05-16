@@ -20,6 +20,7 @@ export interface CreatePaymentIntentPayload {
 export interface GetPriceByIdPayload {
   priceId: string;
   promoCodeName?: string;
+  userAddress?: string;
   currency?: string;
   postalCode?: string;
   country?: string;
