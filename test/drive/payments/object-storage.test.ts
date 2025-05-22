@@ -31,7 +31,7 @@ describe('Object Storage service', () => {
 
   describe('Create customer for object storage', () => {
     it('When create customer is requested, then it should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = sinon.stub(httpClient, 'get').resolves({
         customerId: 'cus_123',
       });
       const { client, headers } = basicHeadersAndClient();
@@ -44,17 +44,20 @@ describe('Object Storage service', () => {
         companyVatId: '1234567890',
       });
 
-      expect(callStub.firstCall.args).toEqual([
-        '/object-storage/customer',
-        {
-          customerName: 'test',
-          postalCode: '123456',
-          email: 'test@test.com',
-          country: 'US',
-          companyVatId: '1234567890',
-        },
-        headers,
-      ]);
+      const customerName = 'test';
+      const postalCode = '123456';
+      const email = 'test@test.com';
+      const country = 'US';
+      const companyVatId = '1234567890';
+
+      const query = new URLSearchParams();
+      query.set('customerName', customerName);
+      query.set('email', email);
+      query.set('postalCode', postalCode);
+      query.set('country', country);
+      query.set('companyVatId', companyVatId);
+
+      expect(callStub.firstCall.args).toEqual([`/object-storage/customer?${query.toString()}`, headers]);
       expect(body).toEqual({ customerId: 'cus_123' });
     });
   });

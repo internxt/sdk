@@ -45,15 +45,16 @@ export class ObjectStorage {
     postalCode: string;
     companyVatId?: string;
   }): Promise<{ customerId: string; token: string }> {
-    return this.client.post(
-      '/object-storage/customer',
-      {
-        customerName,
-        email,
-        postalCode,
-        country,
-        companyVatId,
-      },
+    const query = new URLSearchParams();
+    query.set('customerName', customerName);
+    query.set('email', email);
+    query.set('postalCode', postalCode);
+    query.set('country', country);
+    companyVatId !== undefined && query.set('companyVatId', companyVatId);
+
+    return this.client.get(
+      `/object-storage/customer?${query.toString()}`,
+
       this.headers(),
     );
   }
