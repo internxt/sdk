@@ -36,7 +36,7 @@ describe('Object Storage service', () => {
       });
       const { client, headers } = basicHeadersAndClient();
 
-      const body = await client.createCustomerForObjectStorage({
+      const body = await client.getObjectStorageCustomerId({
         customerName: 'test',
         postalCode: '123456',
         email: 'test@test.com',

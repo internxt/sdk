@@ -32,7 +32,7 @@ export class ObjectStorage {
     return this.client.get(`/object-storage/price?${query.toString()}`, this.headers());
   }
 
-  public createCustomerForObjectStorage({
+  public getObjectStorageCustomerId({
     customerName,
     email,
     country,
