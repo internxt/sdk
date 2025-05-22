@@ -1,3 +1,4 @@
+import { PaymentMethodVerification, PaymentMethodVerificationPayload } from 'src/payments/types';
 import { ApiUrl, AppDetails } from '../../shared';
 import { basicHeaders } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
@@ -27,7 +28,7 @@ export class ObjectStorage {
 
   public getObjectStoragePlanById(priceId: string, currency?: string): Promise<ObjectStoragePlan> {
     const query = new URLSearchParams();
-    priceId !== undefined && query.set('planId', priceId);
+    query.set('planId', priceId);
     currency !== undefined && query.set('currency', currency);
     return this.client.get(`/object-storage/price?${query.toString()}`, this.headers());
   }
@@ -64,6 +65,7 @@ export class ObjectStorage {
     priceId,
     currency,
     token,
+
     promoCodeId,
   }: {
     customerId: string;
@@ -83,6 +85,33 @@ export class ObjectStorage {
       },
       this.headers(),
     );
+  }
+
+  public paymentMethodVerification({
+    customerId,
+    token,
+    currency = 'eur',
+    paymentMethod,
+  }: PaymentMethodVerificationPayload): Promise<PaymentMethodVerification> {
+    return this.client.post(
+      '/payment-method-verification',
+      {
+        customerId,
+        token,
+        currency,
+        paymentMethod,
+      },
+      this.headers(),
+    );
+  }
+
+  public getPaymentIntent(paymentIntentId: string): Promise<{
+    customerId: string;
+    paymentMethodId: string;
+  }> {
+    const query = new URLSearchParams();
+    query.set('paymentIntentId', paymentIntentId);
+    return this.client.get(`/payment-intent-info?${query.toString()}`, this.headers());
   }
 
   private headers() {

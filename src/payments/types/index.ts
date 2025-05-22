@@ -17,6 +17,19 @@ export interface CreatePaymentIntentPayload {
   promoCodeId?: string;
 }
 
+export interface PaymentMethodVerificationPayload {
+  customerId: string;
+  token: string;
+  paymentMethod: string;
+  currency?: string;
+}
+
+export interface PaymentMethodVerification {
+  intentId: string;
+  verified: boolean;
+  clientSecret?: string;
+}
+
 export interface GetPriceByIdPayload {
   priceId: string;
   promoCodeName?: string;
