@@ -24,7 +24,7 @@ describe('Object Storage service', () => {
 
       const body = await client.getObjectStoragePlanById('plan_123', 'eur');
 
-      expect(callStub.firstCall.args).toEqual(['/object-storage-plan-by-id?planId=plan_123&currency=eur', headers]);
+      expect(callStub.firstCall.args).toEqual(['/object-storage/price?planId=plan_123&currency=eur', headers]);
       expect(body).toEqual({ id: 'plan_123' });
     });
   });
@@ -37,15 +37,22 @@ describe('Object Storage service', () => {
       const { client, headers } = basicHeadersAndClient();
 
       const body = await client.createCustomerForObjectStorage({
-        name: 'test',
+        customerName: 'test',
+        postalCode: '123456',
         email: 'test@test.com',
         country: 'US',
         companyVatId: '1234567890',
       });
 
       expect(callStub.firstCall.args).toEqual([
-        '/create-customer-for-object-storage',
-        { name: 'test', email: 'test@test.com', country: 'US', companyVatId: '1234567890' },
+        '/object-storage/customer',
+        {
+          customerName: 'test',
+          postalCode: '123456',
+          email: 'test@test.com',
+          country: 'US',
+          companyVatId: '1234567890',
+        },
         headers,
       ]);
       expect(body).toEqual({ customerId: 'cus_123' });
@@ -62,22 +69,19 @@ describe('Object Storage service', () => {
 
       await client.createObjectStorageSubscription({
         customerId: 'cus_123',
-        plan: { id: 'plan_123', bytes: 1000, interval: 'month', amount: 1000, currency: 'eur', decimalAmount: 10.0 },
+        priceId: 'price_id',
+        currency: 'eur',
         token: 'token',
-        companyName: 'test',
-        vatId: '1234567890',
         promoCodeId: 'promo_123',
       });
 
       expect(callStub.firstCall.args).toEqual([
-        '/create-subscription-for-object-storage',
+        '/object-storage/subscription',
         {
           customerId: 'cus_123',
-          priceId: 'plan_123',
+          priceId: 'price_id',
           token: 'token',
           currency: 'eur',
-          companyName: 'test',
-          companyVatId: '1234567890',
           promoCodeId: 'promo_123',
         },
         headers,
