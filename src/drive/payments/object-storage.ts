@@ -105,15 +105,6 @@ export class ObjectStorage {
     );
   }
 
-  public getPaymentIntent(paymentIntentId: string): Promise<{
-    customerId: string;
-    paymentMethodId: string;
-  }> {
-    const query = new URLSearchParams();
-    query.set('paymentIntentId', paymentIntentId);
-    return this.client.get(`/payment-intent-info?${query.toString()}`, this.headers());
-  }
-
   private headers() {
     return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }
