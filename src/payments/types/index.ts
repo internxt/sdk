@@ -21,6 +21,7 @@ export interface PaymentMethodVerificationPayload {
   customerId: string;
   token: string;
   paymentMethod: string;
+  priceId: string;
   currency?: string;
 }
 

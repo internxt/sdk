@@ -91,6 +91,7 @@ export class ObjectStorage {
     customerId,
     token,
     currency = 'eur',
+    priceId,
     paymentMethod,
   }: PaymentMethodVerificationPayload): Promise<PaymentMethodVerification> {
     return this.client.post(
@@ -99,6 +100,7 @@ export class ObjectStorage {
         customerId,
         token,
         currency,
+        priceId,
         paymentMethod,
       },
       this.headers(),
