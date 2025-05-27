@@ -20,8 +20,8 @@ export class Backups {
   }
 
   /**
-   * @deprecated Use 'getBackupDevices' instead. 
-   * This method uses the old drive backend, while 'getBackupDevices' uses the new drive backend.
+   * @deprecated Use `getBackupDevices` instead. 
+   * This method uses the old drive backend, while `getBackupDevices` uses the new drive backend.
    */
   public getAllDevices(): Promise<Device[]> {
     return this.client
@@ -90,8 +90,8 @@ export class Backups {
   }
 
   /**
-   * @deprecated Use 'deleteBackupDevice' instead.
-   * This method uses the old drive backend, while 'deleteBackupDevice' uses the new drive backend.
+   * @deprecated Use `deleteBackupDevice` instead.
+   * This method uses the old drive backend, while `deleteBackupDevice` uses the new drive backend.
    */
   public deleteDevice(deviceId: number): Promise<void> {
     return this.client
