@@ -2,6 +2,7 @@ import { HttpClient } from '../../shared/http/client';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { Device, DeviceBackup } from './types';
 import { headersWithToken } from '../../shared/headers';
+import { DriveFolderData } from '../storage/types';
 
 export class Backups {
   private readonly client: HttpClient;
@@ -21,7 +22,15 @@ export class Backups {
   public getAllDevices(): Promise<Device[]> {
     return this.client
       .get(
-        '/backup/device',
+        '/backup/devices',
+        this.headers()
+      );
+  }
+
+  public getAllDevicesAsFolder(): Promise<DriveFolderData[]> {
+    return this.client
+      .get(
+        '/backup/deviceAsFolder',
         this.headers()
       );
   }
@@ -45,7 +54,7 @@ export class Backups {
   public deleteDevice(deviceId: number): Promise<void> {
     return this.client
       .delete(
-        `/backup/device/${deviceId}`,
+        `/backup/devices/${deviceId}`,
         this.headers()
       );
   }
