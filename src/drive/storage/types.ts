@@ -13,6 +13,7 @@ export interface DriveFolderData {
   icon_id: number | null;
   name: string;
   plain_name: string;
+  plainName?: string | null;
   parentId: number | null;
   parent_id: number | null;
   parentUuid: string;
