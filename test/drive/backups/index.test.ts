@@ -30,7 +30,7 @@ describe('backups service', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        '/backup/devices',
+        '/backup/device',
         headers
       ]);
       expect(body).toEqual({
@@ -105,7 +105,7 @@ describe('backups service', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/backup/devices/${deviceId}`,
+        `/backup/device/${deviceId}`,
         headers
       ]);
       expect(body).toEqual({
