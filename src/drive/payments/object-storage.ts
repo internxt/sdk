@@ -29,58 +29,56 @@ export class ObjectStorage {
     const query = new URLSearchParams();
     priceId !== undefined && query.set('planId', priceId);
     currency !== undefined && query.set('currency', currency);
-    return this.client.get(`/object-storage-plan-by-id?${query.toString()}`, this.headers());
+    return this.client.get(`/object-storage/price?${query.toString()}`, this.headers());
   }
 
-  public createCustomerForObjectStorage({
-    name,
+  public getObjectStorageCustomerId({
+    customerName,
     email,
     country,
+    postalCode,
     companyVatId,
   }: {
-    name: string;
+    customerName: string;
     email: string;
-    country?: string;
+    country: string;
+    postalCode: string;
     companyVatId?: string;
   }): Promise<{ customerId: string; token: string }> {
-    return this.client.post(
-      '/create-customer-for-object-storage',
-      {
-        name,
-        email,
-        country,
-        companyVatId,
-      },
+    const query = new URLSearchParams();
+    query.set('customerName', customerName);
+    query.set('email', email);
+    query.set('postalCode', postalCode);
+    query.set('country', country);
+    companyVatId !== undefined && query.set('companyVatId', companyVatId);
+
+    return this.client.get(
+      `/object-storage/customer?${query.toString()}`,
+
       this.headers(),
     );
   }
 
   public createObjectStorageSubscription({
     customerId,
-    plan,
+    priceId,
+    currency,
     token,
-    companyName,
-    vatId,
     promoCodeId,
   }: {
     customerId: string;
-    plan: ObjectStoragePlan;
+    priceId: string;
+    currency: string;
     token: string;
-    companyName: string;
-    vatId: string;
     promoCodeId?: string;
   }): Promise<CreatedSubscriptionData> {
-    const { id: priceId, currency } = plan;
-
     return this.client.post(
-      '/create-subscription-for-object-storage',
+      '/object-storage/subscription',
       {
         customerId,
         priceId,
-        token,
         currency,
-        companyName,
-        companyVatId: vatId,
+        token,
         promoCodeId,
       },
       this.headers(),

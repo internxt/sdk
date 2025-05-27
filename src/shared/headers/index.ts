@@ -14,11 +14,16 @@ type InternxtHeaders = {
   'internxt-resources-token'?: string;
 };
 
-export function basicHeaders(clientName: string, clientVersion: string): InternxtHeaders {
+export function basicHeaders(
+  clientName: string,
+  clientVersion: string,
+  customHeaders?: Record<string, string>,
+): InternxtHeaders {
   return {
     'content-type': 'application/json; charset=utf-8',
     'internxt-version': clientVersion,
     'internxt-client': clientName,
+    ...customHeaders,
   };
 }
 

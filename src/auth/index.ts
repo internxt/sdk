@@ -79,6 +79,29 @@ export class Auth {
   }
 
   /**
+   * Tries to register a new user without sending keys
+   * @param registerDetails
+   */
+  public registerWithoutKeys(registerDetails: Omit<RegisterDetails, 'keys'>): Promise<{
+    token: Token;
+    user: Omit<UserSettings, 'bucket'> & { referralCode: string };
+    uuid: UUID;
+  }> {
+    const body = {
+      name: registerDetails.name,
+      captcha: registerDetails.captcha,
+      lastname: registerDetails.lastname,
+      email: registerDetails.email,
+      password: registerDetails.password,
+      mnemonic: registerDetails.mnemonic,
+      salt: registerDetails.salt,
+      referral: registerDetails.referral,
+      referrer: registerDetails.referrer,
+    };
+    return this.client.post('/users', body, this.basicHeaders());
+  }
+
+  /**
    * Registers a precreated user
    * @param registerDetails
    * @returns {Promise<RegisterPreCreatedUserResponse>} Returns sign in token, user data and uuid.
@@ -110,6 +133,32 @@ export class Auth {
             privateKey: registerDetails.keys.kyber.privateKeyEncrypted,
           },
         },
+        referral: registerDetails.referral,
+        referrer: registerDetails.referrer,
+        invitationId: registerDetails.invitationId,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Registers a precreated user without sending keys
+   * @param registerDetails
+   * @returns {Promise<RegisterPreCreatedUserResponse>} Returns sign in token, user data and uuid.
+   */
+  public registerPreCreatedUserWithoutKeys(
+    registerDetails: RegisterPreCreatedUser,
+  ): Promise<RegisterPreCreatedUserResponse> {
+    return this.client.post(
+      'users/pre-created-users/register',
+      {
+        name: registerDetails.name,
+        captcha: registerDetails.captcha,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        password: registerDetails.password,
+        mnemonic: registerDetails.mnemonic,
+        salt: registerDetails.salt,
         referral: registerDetails.referral,
         referrer: registerDetails.referrer,
         invitationId: registerDetails.invitationId,
@@ -191,6 +240,47 @@ export class Auth {
               privateKey: keys.kyber.privateKeyEncrypted,
             },
           },
+        },
+        this.basicHeaders(),
+      )
+      .then((data) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
+        return data;
+      });
+  }
+
+  /**
+   * Tries to log in a user given its login details without sending keys
+   * @param details
+   * @param cryptoProvider
+   */
+  public async loginWithoutKeys(
+    details: LoginDetails,
+    cryptoProvider: CryptoProvider,
+  ): Promise<{
+    token: Token;
+    newToken: Token;
+    user: UserSettings;
+    userTeam: TeamsSettings | null;
+  }> {
+    const securityDetails = await this.securityDetails(details.email);
+    const encryptedSalt = securityDetails.encryptedSalt;
+    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+
+    return this.client
+      .post<{
+        token: Token;
+        newToken: Token;
+        user: UserSettings;
+        userTeam: TeamsSettings | null;
+      }>(
+        '/auth/login/access',
+        {
+          email: details.email,
+          password: encryptedPasswordHash,
+          tfa: details.tfaCode,
         },
         this.basicHeaders(),
       )

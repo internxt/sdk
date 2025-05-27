@@ -13,6 +13,7 @@ import {
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
+  CreateThumbnailEntryPayload,
   DeleteFilePayload,
   DriveFileData,
   FetchFolderContentResponse,
@@ -40,6 +41,7 @@ import {
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
   UsageResponse,
+  UsageResponseV2,
 } from './types';
 
 export * as StorageTypes from './types';
@@ -444,6 +446,23 @@ export class Storage {
   }
 
   /**
+   * Creates a new thumbnail entry using drive-server-wip
+   * @param CreateThumbnailEntryPayload
+   */
+  public createThumbnailEntryWithUUID(
+    thumbnailEntry: CreateThumbnailEntryPayload,
+    resourcesToken?: string,
+  ): Promise<Thumbnail> {
+    return this.client.post(
+      '/files/thumbnail',
+      {
+        ...thumbnailEntry,
+      },
+      addResourcesTokenToHeaders(this.headers(), resourcesToken),
+    );
+  }
+
+  /**
    * Updates the details of a file entry
    * @param payload
    */
@@ -592,16 +611,32 @@ export class Storage {
 
   /**
    * Returns the current space usage of the user
+   * @deprecated use `spaceUsageV2` call instead.
    */
   public spaceUsage(): Promise<UsageResponse> {
     return this.client.get('/usage', this.headers());
   }
 
   /**
+   * Returns the current space usage of the user
+   */
+  public spaceUsageV2(): Promise<UsageResponseV2> {
+    return this.client.get('/users/usage', this.headers());
+  }
+
+  /**
    * Returns the current space limit for the user
+   * @deprecated use `spaceLimitV2` call instead.
    */
   public spaceLimit(): Promise<FetchLimitResponse> {
     return this.client.get('/limit', this.headers());
+  }
+
+  /**
+   * Returns the current space limit for the user
+   */
+  public spaceLimitV2(): Promise<FetchLimitResponse> {
+    return this.client.get('/users/limit', this.headers());
   }
 
   /**

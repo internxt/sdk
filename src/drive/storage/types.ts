@@ -291,6 +291,17 @@ export interface ThumbnailEntry {
   encrypt_version: EncryptionVersion;
 }
 
+export interface CreateThumbnailEntryPayload {
+  fileUuid: string;
+  type: string;
+  size: number;
+  maxWidth: number;
+  maxHeight: number;
+  bucketId: string;
+  bucketFile: string;
+  encryptVersion: EncryptionVersion;
+}
+
 export interface CreateFolderPayload {
   parentFolderId: number;
   folderName: string;
@@ -385,6 +396,12 @@ export type UsageResponse = {
   [k in 'drive' | 'backups' | 'total']: number;
 };
 
+export type UsageResponseV2 = {
+  drive: number;
+  backups: number;
+  total: number;
+};
+
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
 }
@@ -447,8 +464,8 @@ export interface FolderMeta {
   bucket: string | null;
   parent_id: number | null;
   parentId: number | null;
-  parent_uuid:  string | null;
-  parentUuid:  string | null;
+  parent_uuid: string | null;
+  parentUuid: string | null;
   parent: string | null;
   created_at: string;
   createdAt: string;
@@ -457,8 +474,8 @@ export interface FolderMeta {
   user: string | null;
   user_id: number;
   userId: number;
-  encrypt_version:  string | null;
-  encryptVersion:  string | null;
+  encrypt_version: string | null;
+  encryptVersion: string | null;
   deleted: boolean;
   deleted_at: string | null;
   deletedAt: string | null;
@@ -467,8 +484,8 @@ export interface FolderMeta {
   removedAt: string | null;
   size: number;
   type: string;
-  creation_time:  string;
-  modification_time:  string;
+  creation_time: string;
+  modification_time: string;
 }
 
 export interface ReplaceFile {

@@ -88,6 +88,65 @@ describe('# auth service tests', () => {
     });
   });
 
+  describe('-> registerWithoutKeys use case', () => {
+    it('Should have all the correct params on call without including keys', async () => {
+      // Arrange
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+      registerDetails.name = '1';
+      registerDetails.lastname = '2';
+      registerDetails.email = '3';
+      registerDetails.password = '4';
+      registerDetails.mnemonic = '5';
+      registerDetails.salt = '6';
+      registerDetails.keys.ecc.privateKeyEncrypted = '7';
+      registerDetails.keys.ecc.publicKey = '8';
+      registerDetails.keys.kyber.privateKeyEncrypted = '9';
+      registerDetails.keys.kyber.publicKey = '10';
+      registerDetails.keys.revocationCertificate = '11';
+      registerDetails.captcha = '12';
+
+      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      await client.registerWithoutKeys(registerDetails);
+
+      // Assert
+      expect(postCall.firstCall.args).toEqual([
+        '/users',
+        {
+          name: registerDetails.name,
+          lastname: registerDetails.lastname,
+          email: registerDetails.email,
+          password: registerDetails.password,
+          mnemonic: registerDetails.mnemonic,
+          salt: registerDetails.salt,
+          referral: registerDetails.referral,
+          referrer: registerDetails.referrer,
+          captcha: registerDetails.captcha,
+        },
+        headers,
+      ]);
+    });
+
+    it('Should resolve valid on valid response', async () => {
+      // Arrange
+      sinon.stub(httpClient, 'post').resolves({
+        valid: true,
+      });
+      const { client } = clientAndHeaders();
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+
+      // Act
+      const body = await client.registerWithoutKeys(registerDetails);
+
+      // Assert
+      expect(body).toEqual({
+        valid: true,
+      });
+    });
+  });
+
   describe('-> pre-register use case', () => {
     it('Should have all the correct params on call', async () => {
       // Arrange
@@ -155,6 +214,72 @@ describe('# auth service tests', () => {
 
       // Act
       const body = await client.register(registerDetails);
+
+      // Assert
+      expect(body).toEqual({
+        valid: true,
+      });
+    });
+  });
+
+  describe('-> registerPreCreatedUserWithoutKeys use case', () => {
+    it('Should have all the correct params on call without including keys', async () => {
+      // Arrange
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+      registerDetails.name = '1';
+      registerDetails.lastname = '2';
+      registerDetails.email = '3';
+      registerDetails.password = '4';
+      registerDetails.mnemonic = '5';
+      registerDetails.salt = '6';
+      registerDetails.keys.ecc.privateKeyEncrypted = '7';
+      registerDetails.keys.ecc.publicKey = '8';
+      registerDetails.keys.kyber.privateKeyEncrypted = '9';
+      registerDetails.keys.kyber.publicKey = '10';
+      registerDetails.keys.revocationCertificate = '11';
+      registerDetails.captcha = '12';
+
+      const mockInvitatioId = 'invitationId';
+
+      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const { client, headers } = clientAndHeaders();
+
+      // Act
+      await client.registerPreCreatedUserWithoutKeys({ ...registerDetails, invitationId: mockInvitatioId });
+
+      // Assert
+      expect(postCall.firstCall.args).toEqual([
+        'users/pre-created-users/register',
+        {
+          name: registerDetails.name,
+          lastname: registerDetails.lastname,
+          email: registerDetails.email,
+          password: registerDetails.password,
+          mnemonic: registerDetails.mnemonic,
+          salt: registerDetails.salt,
+          referral: registerDetails.referral,
+          referrer: registerDetails.referrer,
+          captcha: registerDetails.captcha,
+          invitationId: mockInvitatioId,
+        },
+        headers,
+      ]);
+    });
+
+    it('Should resolve valid on valid response', async () => {
+      // Arrange
+      sinon.stub(httpClient, 'post').resolves({
+        valid: true,
+      });
+      const { client } = clientAndHeaders();
+      const registerDetails: RegisterDetails = emptyRegisterDetails();
+      const mockInvitatioId = 'invitationId';
+
+      // Act
+      const body = await client.registerPreCreatedUserWithoutKeys({
+        ...registerDetails,
+        invitationId: mockInvitatioId,
+      });
 
       // Assert
       expect(body).toEqual({
@@ -324,6 +449,113 @@ describe('# auth service tests', () => {
           revocationKey: 'key',
         },
       });
+    });
+  });
+
+  describe('-> loginWithoutKeys use case', () => {
+    it('Should call access with correct parameters without keys', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const loginDetails: LoginDetails = {
+        email: 'my_email',
+        password: 'password',
+        tfaCode: undefined,
+      };
+      const cryptoProvider: CryptoProvider = {
+        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        generateKeys: (password: Password) => {
+          const keys: Keys = {
+            privateKeyEncrypted: 'priv',
+            publicKey: 'pub',
+            revocationCertificate: 'rev',
+            ecc: {
+              publicKey: 'pub',
+              privateKeyEncrypted: 'priv',
+            },
+            kyber: {
+              publicKey: 'pubKyber',
+              privateKeyEncrypted: 'privKyber',
+            },
+          };
+          return Promise.resolve(keys);
+        },
+      };
+      const postStub = sinon.stub(httpClient, 'post');
+      postStub
+        .onFirstCall()
+        .resolves({
+          sKey: 'encrypted_salt',
+        })
+        .onSecondCall()
+        .resolves({
+          user: {
+            revocateKey: 'key',
+          },
+        });
+
+      // Act
+      const body = await client.loginWithoutKeys(loginDetails, cryptoProvider);
+
+      // Assert
+      expect(postStub.firstCall.args).toEqual([
+        '/auth/login',
+        {
+          email: loginDetails.email,
+        },
+        headers,
+      ]);
+      expect(postStub.secondCall.args).toEqual([
+        '/auth/login/access',
+        {
+          email: loginDetails.email,
+          password: 'password-encrypted_salt',
+          tfa: loginDetails.tfaCode,
+        },
+        headers,
+      ]);
+      expect(body).toEqual({
+        user: {
+          revocateKey: 'key',
+          revocationKey: 'key',
+        },
+      });
+    });
+
+    it('Should bubble up the error on first call failure', async () => {
+      // Arrange
+      const error = new Error('Network error');
+      sinon.stub(httpClient, 'post').rejects(error);
+      const { client } = clientAndHeaders();
+      const loginDetails: LoginDetails = {
+        email: '',
+        password: '',
+        tfaCode: undefined,
+      };
+      const cryptoProvider: CryptoProvider = {
+        encryptPasswordHash: () => '',
+        generateKeys: (password: Password) => {
+          const keys: Keys = {
+            privateKeyEncrypted: '',
+            publicKey: '',
+            revocationCertificate: '',
+            ecc: {
+              publicKey: '',
+              privateKeyEncrypted: '',
+            },
+            kyber: {
+              publicKey: '',
+              privateKeyEncrypted: '',
+            },
+          };
+          return Promise.resolve(keys);
+        },
+      };
+
+      // Act
+      const call = client.loginWithoutKeys(loginDetails, cryptoProvider);
+
+      // Assert
+      await expect(call).rejects.toEqual(error);
     });
   });
 
