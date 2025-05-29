@@ -4,6 +4,7 @@ import { HttpClient } from '../shared/http/client';
 import { TeamsSettings } from '../shared/types/teams';
 import { UserSettings, UUID } from '../shared/types/userSettings';
 import {
+  ChangePasswordWithLinkPayload,
   CryptoProvider,
   Keys,
   LoginDetails,
@@ -499,6 +500,29 @@ export class Auth {
       },
       this.basicHeaders(),
     );
+  }
+
+  public legacyRecoverAccount({
+    token,
+    encryptedPassword,
+    encryptedSalt,
+    encryptedMnemonic,
+    eccEncryptedMnemonic,
+    kyberEncryptedMnemonic,
+    keys,
+  }: ChangePasswordWithLinkPayload): Promise<void> {
+    const accountRecoverPayload = {
+      password: encryptedPassword,
+      salt: encryptedSalt,
+      mnemonic: encryptedMnemonic,
+      asymmetricEncryptedMnemonic: {
+        ecc: eccEncryptedMnemonic,
+        hybrid: kyberEncryptedMnemonic,
+      },
+      keys,
+    };
+
+    return this.client.put(`/users/legacy-recover-account?token=${token}`, accountRecoverPayload, this.basicHeaders());
   }
 
   /**
