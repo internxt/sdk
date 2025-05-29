@@ -85,21 +85,30 @@ export interface FolderChild {
 }
 
 export interface FetchFolderContentResponse {
-  bucket: string;
-  children: FolderChild[];
-  color: string;
-  createdAt: string;
-  encrypt_version: string;
-  files: DriveFileData[];
-  icon: string;
+  type: string;
   id: number;
+  parentId: number | null;
+  parentUuid: string | null;
   name: string;
-  plain_name: string;
-  parentId: number;
-  parent_id: number;
-  updatedAt: string;
+  parent: string | null;
+  bucket: string;
   userId: number;
-  user_id: number;
+  user: any | null;
+  encryptVersion: string;
+  deleted: boolean;
+  deletedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  uuid: string;
+  plainName: string | null;
+  size: number;
+  removed: boolean;
+  removedAt: string | null;
+  creationTime: string;
+  modificationTime: string;
+  status: string;
+  children: FolderChild[];
+  files: DriveFileData[];
 }
 
 export interface FileMeta {
