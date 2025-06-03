@@ -368,9 +368,20 @@ export class Storage {
   /**
    * Removes a specific folder from the centralized persistence
    * @param folderId
+   * @deprecated Use `deleteFolderByUuid` instead.
    */
   public deleteFolder(folderId: number): Promise<unknown> {
     return this.client.delete(`/storage/folder/${folderId}`, this.headers());
+  }
+
+  /**
+   * Deletes a folder from the storage system using its unique identifier (UUID).
+   *
+   * @param folderId - The UUID of the folder to be deleted.
+   * @returns A promise that resolves with the response of the delete operation.
+   */
+  public deleteFolderByUuid(folderId: string): Promise<void> {
+    return this.client.delete(`/folders/${folderId}`, this.headers());
   }
 
   /**
@@ -523,9 +534,20 @@ export class Storage {
   /**
    * Deletes a specific file entry
    * @param payload
+   * @deprecated Use `deleteFileByUuid` instead.
    */
   public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
     return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
+  }
+
+  /**
+   * Deletes a file from the storage system using its unique identifier (UUID).
+   *
+   * @param fileId - The UUID of the file to be deleted.
+   * @returns A promise that resolves with the response of the delete operation.
+   */
+  public deleteFileByUuid(fileId: string): Promise<{ deleted: boolean }> {
+    return this.client.delete(`/files/${fileId}`, this.headers());
   }
 
   /**
