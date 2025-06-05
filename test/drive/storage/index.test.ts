@@ -67,8 +67,28 @@ describe('# storage service tests', () => {
         const subFolder2 = randomFolderContentResponse(3, 1);
         const response: FetchPaginatedFolderContentResponse = {
           result: [
-            { ...subFolder1, type: 'folder' },
-            { ...subFolder2, type: 'folder' },
+            {
+              ...subFolder1,
+              type: 'folder',
+              color: '',
+              encrypt_version: subFolder1.encryptVersion,
+              icon: '',
+              plain_name: subFolder1.plainName || '',
+              parentId: subFolder1.parentId || 0,
+              parent_id: subFolder1.parentId || 0,
+              user_id: subFolder1.userId,
+            },
+            {
+              ...subFolder2,
+              type: 'folder',
+              color: '',
+              encrypt_version: subFolder2.encryptVersion,
+              icon: '',
+              plain_name: subFolder2.plainName || '',
+              parentId: subFolder2.parentId || 0,
+              parent_id: subFolder2.parentId || 0,
+              user_id: subFolder2.userId,
+            },
           ],
         };
         const { client, headers } = clientAndHeaders({});
@@ -100,8 +120,28 @@ describe('# storage service tests', () => {
         const subFolder2 = randomFolderContentResponse(6, 8);
         const response: FetchPaginatedFolderContentResponse = {
           result: [
-            { ...subFolder1, type: 'file' },
-            { ...subFolder2, type: 'file' },
+            {
+              ...subFolder1,
+              type: 'file',
+              color: '',
+              encrypt_version: subFolder1.encryptVersion,
+              icon: '',
+              plain_name: subFolder1.plainName || '',
+              parentId: subFolder1.parentId || 0,
+              parent_id: subFolder1.parentId || 0,
+              user_id: subFolder1.userId,
+            },
+            {
+              ...subFolder2,
+              type: 'file',
+              color: '',
+              encrypt_version: subFolder2.encryptVersion,
+              icon: '',
+              plain_name: subFolder2.plainName || '',
+              parentId: subFolder2.parentId || 0,
+              parent_id: subFolder2.parentId || 0,
+              user_id: subFolder2.userId,
+            },
           ],
         };
         const { client, headers } = clientAndHeaders({});

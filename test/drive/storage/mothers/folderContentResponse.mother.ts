@@ -7,23 +7,32 @@ import {
   FolderChild,
 } from '../../../../src/drive/storage/types';
 
-export function emptyFolderContentResponse() {
+export function emptyFolderContentResponse(): FetchFolderContentResponse {
   const response: FetchFolderContentResponse = {
-    bucket: '',
-    children: [],
-    color: '',
-    createdAt: '',
-    encrypt_version: '',
-    files: [],
-    icon: '',
+    type: 'folder',
     id: 0,
+    parentId: null,
+    parentUuid: null,
     name: '',
-    plain_name: '',
-    parentId: 0,
-    parent_id: 0,
-    updatedAt: '',
+    parent: null,
+    bucket: '',
     userId: 0,
-    user_id: 0,
+    user: null,
+    encryptVersion: '',
+    deleted: false,
+    deletedAt: null,
+    createdAt: '',
+    updatedAt: '',
+    uuid: '',
+    plainName: null,
+    size: 0,
+    removed: false,
+    removedAt: null,
+    creationTime: '',
+    modificationTime: '',
+    status: 'EXISTS',
+    children: [],
+    files: [],
   };
   return response;
 }

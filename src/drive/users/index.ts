@@ -1,5 +1,5 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { headersWithToken } from '../../shared/headers';
+import { basicHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import { UserSettings } from '../../shared/types/userSettings';
 import {
@@ -290,6 +290,17 @@ export class Users {
    */
   public getPublicKeyByEmail({ email }: { email: string }): Promise<UserPublicKeyResponse> {
     return this.client.get<UserPublicKeyResponse>(`/users/public-key/${email}`, this.headers());
+  }
+
+  /**
+   * Generate mnemonic
+   */
+  public generateMnemonic(): Promise<{ mnemonic: string }> {
+    return this.client.get<{ mnemonic: string }>('/users/generate-mnemonic', this.basicHeaders());
+  }
+
+  private basicHeaders() {
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
   }
 
   private headers() {
