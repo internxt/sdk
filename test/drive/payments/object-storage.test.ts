@@ -91,6 +91,71 @@ describe('Object Storage service', () => {
       ]);
     });
   });
+
+  describe('Verifying the user payment method', () => {
+    it("When the user wants to verify the payment method and it's verified, then an object indicating so is returned", async () => {
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        intentId: 'intent_id',
+        verified: true,
+      });
+
+      const { client, headers } = basicHeadersAndClient();
+
+      const result = await client.paymentMethodVerification({
+        customerId: 'cus_123',
+        priceId: 'price_id',
+        currency: 'eur',
+        token: 'token',
+        paymentMethod: 'pm123',
+      });
+
+      expect(callStub.firstCall.args).toEqual([
+        '/payment-method-verification',
+        {
+          customerId: 'cus_123',
+          priceId: 'price_id',
+          currency: 'eur',
+          token: 'token',
+          paymentMethod: 'pm123',
+        },
+        headers,
+      ]);
+
+      expect(result).toEqual({ intentId: 'intent_id', verified: true });
+    });
+
+    it("When the user wants to verify the payment method and it's not verified, then an object indicating so is returned", async () => {
+      const callStub = sinon.stub(httpClient, 'post').resolves({
+        intentId: '',
+        verified: false,
+        clientSecret: 'client_secret',
+      });
+
+      const { client, headers } = basicHeadersAndClient();
+
+      const result = await client.paymentMethodVerification({
+        customerId: 'cus_123',
+        priceId: 'price_id',
+        currency: 'eur',
+        token: 'token',
+        paymentMethod: 'pm123',
+      });
+
+      expect(callStub.firstCall.args).toEqual([
+        '/payment-method-verification',
+        {
+          customerId: 'cus_123',
+          priceId: 'price_id',
+          currency: 'eur',
+          token: 'token',
+          paymentMethod: 'pm123',
+        },
+        headers,
+      ]);
+
+      expect(result).toEqual({ intentId: '', verified: false, clientSecret: 'client_secret' });
+    });
+  });
 });
 
 function basicHeadersAndClient(
