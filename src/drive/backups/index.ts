@@ -116,6 +116,20 @@ export class Backups {
   }
 
   /**
+   * Deletes a backup device by its folder ID.
+   *
+   * @param folderId - The unique identifier of the folder to be deleted.
+   * @returns A promise that resolves when the device is successfully deleted.
+   */
+  public deleteBackupDeviceAsFolder(folderId: string): Promise<void> {
+    return this.client
+      .delete(
+        `/backup/deviceAsFolder/${folderId}`,
+        this.headers()
+      );
+  }
+
+  /**
    * Returns the needed headers for the module requests
    * @private
    */
