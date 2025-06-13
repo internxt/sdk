@@ -25,6 +25,7 @@ import {
   SharedFolderSize,
   SharedFolderUser,
   SharedFoldersInvitationsAsInvitedUserResponse,
+  SharingInfo,
   SharingInvite,
   SharingMeta,
   UpdateShareLinkPayload,
@@ -567,6 +568,12 @@ export class Share {
     const headers = this.headers();
 
     return this.client.get(`sharings/${itemType}/${itemId}/type`, headers);
+  }
+
+  public getSharingInfo({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingInfo> {
+    const headers = this.headers();
+
+    return this.client.get(`sharings/${itemType}/${itemId}/info`, headers);
   }
 
   public declineSharedFolderInvite(invitationId: string, token?: string): Promise<void> {
