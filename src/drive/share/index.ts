@@ -570,6 +570,12 @@ export class Share {
     return this.client.get(`sharings/${itemType}/${itemId}/type`, headers);
   }
 
+  /**
+   * Get Sharing information
+   * @param {string} options.itemType - folder | file
+   * @param {string} options.itemId - id of folder or file
+   * @returns {Promise<SharingInfo>} A promise that returns information about the shared item.
+   */
   public getSharingInfo({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingInfo> {
     const headers = this.headers();
 
