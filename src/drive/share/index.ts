@@ -563,7 +563,6 @@ export class Share {
    * @param {string} options.itemId - id of folder or file
    * @returns {Promise<SharingMeta>} A promise that returns the sharing data.
    */
-
   public getSharingType({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingMeta> {
     const headers = this.headers();
 
@@ -571,7 +570,7 @@ export class Share {
   }
 
   /**
-   * Get Sharing information
+   * Obtains detailed sharing information for a given file or folder
    * @param {string} options.itemType - folder | file
    * @param {string} options.itemId - id of folder or file
    * @returns {Promise<SharingInfo>} A promise that returns information about the shared item.
