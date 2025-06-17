@@ -3,6 +3,7 @@ import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
   SharedFiles,
+  SharingInfo,
   SharingMeta,
 } from '../../../src/drive/share/types';
 import { Share } from '../../../src/drive';
@@ -392,6 +393,31 @@ describe('# share service tests', () => {
       expect(body).toEqual({
         size: 30,
       });
+    });
+  });
+
+  describe('Get sharing info', () => {
+    it('When the sharing info is requested, then the right data should be returned', async () => {
+      const mockedResponse: SharingInfo = {
+        invitationsCount: 0,
+        publicSharing: {
+          encryptedCode: 'encrypted-code',
+          id: 'sharing-id',
+          isPasswordProtected: false,
+        },
+        type: 'public',
+      };
+      const callStub = sinon.stub(httpClient, 'get').resolves(mockedResponse);
+      const { client, headers } = clientAndHeadersWithToken();
+      const mockId = 'item-id';
+      const mockedItemType = 'item-type';
+
+      // Act
+      const body = await client.getSharingInfo({ itemId: mockId, itemType: mockedItemType });
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([`sharings/${mockedItemType}/${mockId}/info`, headers]);
+      expect(body).toStrictEqual(mockedResponse);
     });
   });
 

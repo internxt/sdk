@@ -358,6 +358,16 @@ export type SharingMeta = {
   itemToken: string;
 };
 
+export type SharingInfo = {
+  type: 'public' | 'private';
+  publicSharing: {
+    id: string;
+    isPasswordProtected: boolean;
+    encryptedCode: string;
+  };
+  invitationsCount: number;
+};
+
 export type Sharing = { type: string; id: string };
 
 export type SharedFolderSize = { size: number };

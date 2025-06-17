@@ -25,6 +25,7 @@ import {
   SharedFolderSize,
   SharedFolderUser,
   SharedFoldersInvitationsAsInvitedUserResponse,
+  SharingInfo,
   SharingInvite,
   SharingMeta,
   UpdateShareLinkPayload,
@@ -562,11 +563,22 @@ export class Share {
    * @param {string} options.itemId - id of folder or file
    * @returns {Promise<SharingMeta>} A promise that returns the sharing data.
    */
-
   public getSharingType({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingMeta> {
     const headers = this.headers();
 
     return this.client.get(`sharings/${itemType}/${itemId}/type`, headers);
+  }
+
+  /**
+   * Obtains detailed sharing information for a given file or folder
+   * @param {string} options.itemType - folder | file
+   * @param {string} options.itemId - id of folder or file
+   * @returns {Promise<SharingInfo>} A promise that returns information about the shared item.
+   */
+  public getSharingInfo({ itemId, itemType }: { itemId: string; itemType: string }): Promise<SharingInfo> {
+    const headers = this.headers();
+
+    return this.client.get(`sharings/${itemType}/${itemId}/info`, headers);
   }
 
   public declineSharedFolderInvite(invitationId: string, token?: string): Promise<void> {
