@@ -149,6 +149,19 @@ describe('payments service', () => {
       });
     });
   });
+
+  describe('Get user used promotional codes', () => {
+    it('When requesting a user redeemed promo codes, it returns the correct data with the right parameters', async () => {
+      const response = { usedCoupons: ['PROMO_CODE', 'PROMO_CODE_1'] };
+      const callStub = sinon.stub(httpClient, 'get').resolves(response);
+      const { client, headers } = clientAndHeadersWithToken({});
+
+      const body = await client.getPromoCodesUsedByUser();
+
+      expect(callStub.firstCall.args).toEqual(['/customer/redeemed-promotion-codes', headers]);
+      expect(body).toEqual(response);
+    });
+  });
 });
 
 function clientAndHeadersWithToken({

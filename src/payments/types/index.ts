@@ -1,4 +1,4 @@
-import { UserType } from 'src/drive/payments/types/types';
+import { UserType } from '../../drive/payments/types/types';
 
 export interface CreateSubscriptionPayload {
   customerId: string;
