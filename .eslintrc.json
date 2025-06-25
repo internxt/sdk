@@ -3,6 +3,12 @@
   "ignorePatterns": "dist",
   "rules": {
     "linebreak-style": "off",
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": ["src/*", "@/*"]
+      }
+    ]
   }
 }
