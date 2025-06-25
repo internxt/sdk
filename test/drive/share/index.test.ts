@@ -42,7 +42,7 @@ describe('# share service tests', () => {
       // Assert
       expect(() => {
         client.createShareLink(payload);
-      }).toThrowError('Invalid type');
+      }).toThrow('Invalid type');
     });
 
     it('Should be called with right arguments & return content of file', async () => {

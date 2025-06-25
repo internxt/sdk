@@ -1,16 +1,13 @@
 import sinon from 'sinon';
-import axios, { Axios, AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { Axios, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { HttpClient } from '../../../src/shared/http/client';
 
-
 describe('HttpClient', () => {
-
   afterEach(() => {
     sinon.restore();
   });
 
   describe('construction', () => {
-
     it('should set the a given base URL', () => {
       // Arrange
       const createSpy = sinon.spy(axios, 'create');
@@ -19,17 +16,16 @@ describe('HttpClient', () => {
       HttpClient.create('my-url');
 
       // Assert
-      expect(createSpy.calledOnceWith({
-        baseURL: 'my-url'
-      })).toBeTruthy();
+      expect(
+        createSpy.calledOnceWith({
+          baseURL: 'my-url',
+        }),
+      ).toBeTruthy();
     });
-
   });
 
   describe('requests', () => {
-
     describe('interceptors without callback', () => {
-
       const myAxios = axios.create();
 
       beforeEach(() => {
@@ -41,8 +37,8 @@ describe('HttpClient', () => {
         HttpClient.create('');
         const responseFake = {
           data: {
-            content: 'something-here'
-          }
+            content: 'something-here',
+          },
         };
 
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -54,7 +50,7 @@ describe('HttpClient', () => {
 
         // Assert
         expect(result).toEqual({
-          content: 'something-here'
+          content: 'something-here',
         });
       });
 
@@ -62,67 +58,46 @@ describe('HttpClient', () => {
         const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: {
-            error: 'here-my-message'
-          }
+            error: 'here-my-message',
+          },
         };
-        assertMessageOnOutputError(
-          myAxios,
-          error,
-          'here-my-message'
-        );
+        assertMessageOnOutputError(myAxios, error, 'here-my-message');
       });
 
       it('should return the received data when no error message on valid response', () => {
         const error = getAxiosError();
         error.response = <AxiosResponse>{
-          data: 'at-least-this'
+          data: 'at-least-this',
         };
-        assertMessageOnOutputError(
-          myAxios,
-          error,
-          'at-least-this'
-        );
+        assertMessageOnOutputError(myAxios, error, 'at-least-this');
       });
 
       it('should return generic message when request failed', () => {
         const error = getAxiosError();
         error.response = undefined;
         error.request = true;
-        assertMessageOnOutputError(
-          myAxios,
-          error,
-          'Server unavailable'
-        );
+        assertMessageOnOutputError(myAxios, error, 'Server unavailable');
       });
 
       it('should return reason error message when setting request failed', () => {
         const error = getAxiosError();
         error.message = 'wat-did-u-do?';
-        assertMessageOnOutputError(
-          myAxios,
-          error,
-          'wat-did-u-do?'
-        );
+        assertMessageOnOutputError(myAxios, error, 'wat-did-u-do?');
       });
 
       it('should return unauthorized message if unauthorized callback is not present', () => {
         const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: {
-            error: 'not authorized'
+            error: 'not authorized',
           },
-          status: 401
+          status: 401,
         };
-        assertMessageOnOutputError(
-          myAxios,
-          error,
-          'not authorized'
-        );
+        assertMessageOnOutputError(myAxios, error, 'not authorized');
       });
     });
 
     describe('interceptor with callback', () => {
-
       const myAxios = axios.create();
 
       beforeEach(() => {
@@ -134,9 +109,9 @@ describe('HttpClient', () => {
         const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: {
-            error: 'not authorized'
+            error: 'not authorized',
           },
-          status: 401
+          status: 401,
         };
         const unauthorizedSpy = sinon.spy();
         HttpClient.create('', unauthorizedSpy);
@@ -157,7 +132,6 @@ describe('HttpClient', () => {
     });
 
     describe('calls', () => {
-
       const myAxios = axios.create();
 
       beforeEach(() => {
@@ -171,7 +145,7 @@ describe('HttpClient', () => {
 
         // Act
         await client.get('/some-path?with=arguments', {
-          some: 'header'
+          some: 'header',
         });
 
         // Assert
@@ -179,9 +153,9 @@ describe('HttpClient', () => {
           '/some-path?with=arguments',
           {
             headers: {
-              some: 'header'
-            }
-          }
+              some: 'header',
+            },
+          },
         ]);
       });
 
@@ -194,13 +168,13 @@ describe('HttpClient', () => {
         requestCanceler.cancel('my-cancel-message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('my-cancel-message');
+        await expect(promise).rejects.toThrow('my-cancel-message');
       });
 
       it('should be able to complete a cancellable GET request', async () => {
         // Arrange
         sinon.stub(myAxios, 'get').resolves({
-          some: true
+          some: true,
         });
         const client = HttpClient.create('');
 
@@ -209,7 +183,7 @@ describe('HttpClient', () => {
 
         // Assert
         await expect(promise).resolves.toEqual({
-          some: true
+          some: true,
         });
       });
 
@@ -219,12 +193,16 @@ describe('HttpClient', () => {
         const client = HttpClient.create('');
 
         // Act
-        await client.post('/some-path', {
-          something: 'here',
-          else: 'there',
-        }, {
-          some: 'header'
-        });
+        await client.post(
+          '/some-path',
+          {
+            something: 'here',
+            else: 'there',
+          },
+          {
+            some: 'header',
+          },
+        );
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -235,9 +213,9 @@ describe('HttpClient', () => {
           },
           {
             headers: {
-              some: 'header'
-            }
-          }
+              some: 'header',
+            },
+          },
         ]);
       });
 
@@ -250,13 +228,13 @@ describe('HttpClient', () => {
         requestCanceler.cancel('my-cancel-message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('my-cancel-message');
+        await expect(promise).rejects.toThrow('my-cancel-message');
       });
 
       it('should be able to complete a cancellable a POST request', async () => {
         // Arrange
         sinon.stub(myAxios, 'post').resolves({
-          some: true
+          some: true,
         });
         const client = HttpClient.create('');
 
@@ -265,7 +243,7 @@ describe('HttpClient', () => {
 
         // Assert
         await expect(promise).resolves.toEqual({
-          some: true
+          some: true,
         });
       });
 
@@ -275,12 +253,16 @@ describe('HttpClient', () => {
         const client = HttpClient.create('');
 
         // Act
-        await client.put('/some-path', {
-          something: 'here',
-          else: 'there',
-        }, {
-          some: 'header'
-        });
+        await client.put(
+          '/some-path',
+          {
+            something: 'here',
+            else: 'there',
+          },
+          {
+            some: 'header',
+          },
+        );
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -291,9 +273,9 @@ describe('HttpClient', () => {
           },
           {
             headers: {
-              some: 'header'
-            }
-          }
+              some: 'header',
+            },
+          },
         ]);
       });
 
@@ -303,12 +285,16 @@ describe('HttpClient', () => {
         const client = HttpClient.create('');
 
         // Act
-        await client.patch('/some-path', {
-          something: 'here',
-          else: 'there',
-        }, {
-          some: 'header'
-        });
+        await client.patch(
+          '/some-path',
+          {
+            something: 'here',
+            else: 'there',
+          },
+          {
+            some: 'header',
+          },
+        );
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -319,9 +305,9 @@ describe('HttpClient', () => {
           },
           {
             headers: {
-              some: 'header'
-            }
-          }
+              some: 'header',
+            },
+          },
         ]);
       });
 
@@ -331,12 +317,16 @@ describe('HttpClient', () => {
         const client = HttpClient.create('');
 
         // Act
-        await client.delete('/some-path', {
-          some: 'header'
-        }, {
-          something: 'here',
-          else: 'there',
-        });
+        await client.delete(
+          '/some-path',
+          {
+            some: 'header',
+          },
+          {
+            something: 'here',
+            else: 'there',
+          },
+        );
 
         // Assert
         expect(callStub.firstCall.args).toEqual([
@@ -347,22 +337,18 @@ describe('HttpClient', () => {
               else: 'there',
             },
             headers: {
-              some: 'header'
-            }
-          }
+              some: 'header',
+            },
+          },
         ]);
       });
-
     });
-
   });
-
 });
-
 
 function getAxiosError(): AxiosError {
   return {
-    config: <AxiosRequestConfig>{},
+    config: <InternalAxiosRequestConfig>{},
     isAxiosError: false,
     message: '',
     name: '',
@@ -371,7 +357,7 @@ function getAxiosError(): AxiosError {
     stack: '',
     toJSON(): object {
       return {};
-    }
+    },
   };
 }
 
@@ -386,5 +372,5 @@ function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: st
   // Act & Assert
   expect(() => {
     rejected(error);
-  }).toThrowError(message);
+  }).toThrow(message);
 }

@@ -17,15 +17,19 @@ const crypto: Crypto = {
   generateFileKey: async (mnemonic) => {
     return Buffer.from(mnemonic);
   },
-  randomBytes
+  randomBytes,
 };
-const network = Network.client('fake.com', {
-  clientName: 'sdk',
-  clientVersion: '1.0',
-}, {
-  bridgeUser: '',
-  userId: ''
-});
+const network = Network.client(
+  'fake.com',
+  {
+    clientName: 'sdk',
+    clientVersion: '1.0',
+  },
+  {
+    bridgeUser: '',
+    userId: '',
+  },
+);
 
 afterEach(() => {
   sinon.restore();
@@ -51,12 +55,14 @@ describe('network/upload', () => {
       const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
       const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
       const startUploadStub = sinon.stub(network, 'startUpload').resolves({
-        uploads: [{
-          url: fakeUrl,
-          uuid: fakeUuid,
-          index: 0,
-          urls: null,
-        }]
+        uploads: [
+          {
+            url: fakeUrl,
+            uuid: fakeUuid,
+            index: 0,
+            urls: null,
+          },
+        ],
       });
       const finishUploadStub = sinon.stub(network, 'finishUpload').resolves({
         bucket: '',
@@ -64,7 +70,7 @@ describe('network/upload', () => {
         id: fileId,
         index,
         mimetype: 'application/octet-stream',
-        name: fakeFilename
+        name: fakeFilename,
       });
 
       const encryptFileMock = jest.fn();
@@ -78,7 +84,7 @@ describe('network/upload', () => {
           mnemonic,
           fileSize,
           encryptFileMock,
-          uploadFileMock
+          uploadFileMock,
         );
 
         expect(validateMnemonicStub.calledOnce).toBeTruthy();
@@ -91,31 +97,37 @@ describe('network/upload', () => {
         expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
 
         expect(startUploadStub.calledOnce).toBeTruthy();
-        expect(startUploadStub.firstCall.args).toStrictEqual([bucketId, {
-          uploads: [{
-            index: 0,
-            size: fileSize
-          }]
-        }]);
+        expect(startUploadStub.firstCall.args).toStrictEqual([
+          bucketId,
+          {
+            uploads: [
+              {
+                index: 0,
+                size: fileSize,
+              },
+            ],
+          },
+        ]);
 
-        expect(encryptFileMock).toBeCalledTimes(1);
-        expect(encryptFileMock).toHaveBeenCalledWith(
-          ALGORITHMS.AES256CTR.type,
-          key,
-          bufferizedIndex.slice(0, 16)
-        );
+        expect(encryptFileMock).toHaveBeenCalledTimes(1);
+        expect(encryptFileMock).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.type, key, bufferizedIndex.slice(0, 16));
 
-        expect(uploadFileMock).toBeCalledTimes(1);
+        expect(uploadFileMock).toHaveBeenCalledTimes(1);
         expect(uploadFileMock).toHaveBeenCalledWith(fakeUrl);
 
         expect(finishUploadStub.calledOnce).toBeTruthy();
-        expect(finishUploadStub.firstCall.args).toStrictEqual([bucketId, {
-          index,
-          shards: [{
-            hash: fakeHash,
-            uuid: fakeUuid
-          }]
-        }]);
+        expect(finishUploadStub.firstCall.args).toStrictEqual([
+          bucketId,
+          {
+            index,
+            shards: [
+              {
+                hash: fakeHash,
+                uuid: fakeUuid,
+              },
+            ],
+          },
+        ]);
 
         expect(receivedFileId).toEqual(fileId);
       } catch (err) {
@@ -132,15 +144,7 @@ describe('network/upload', () => {
       const randomBytes = sinon.stub(crypto, 'randomBytes').returns(Buffer.from(''));
 
       try {
-        await uploadFile(
-          network,
-          crypto,
-          bucketId,
-          mnemonic,
-          fileSize,
-          jest.fn(),
-          jest.fn()
-        );
+        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, jest.fn(), jest.fn());
 
         expect(true).toBeFalsy();
       } catch (err) {

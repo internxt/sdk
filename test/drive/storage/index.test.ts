@@ -226,7 +226,7 @@ describe('# storage service tests', () => {
         requestCanceler.cancel('My cancel message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('My cancel message');
+        await expect(promise).rejects.toThrow('My cancel message');
       });
 
       it('Should return the expected elements with trash', async () => {
@@ -314,7 +314,7 @@ describe('# storage service tests', () => {
         requestCanceler.cancel('My cancel message');
 
         // Assert
-        await expect(promise).rejects.toThrowError('My cancel message');
+        await expect(promise).rejects.toThrow('My cancel message');
       });
     });
 
@@ -841,7 +841,7 @@ describe('# storage service tests', () => {
           requestCanceler.cancel('My cancel message');
 
           // Assert
-          await expect(promise).rejects.toThrowError('My cancel message');
+          await expect(promise).rejects.toThrow('My cancel message');
         });
       });
 

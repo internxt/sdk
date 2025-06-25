@@ -29,7 +29,9 @@ export class ObjectStorage {
   public getObjectStoragePlanById(priceId: string, currency?: string): Promise<ObjectStoragePlan> {
     const query = new URLSearchParams();
     query.set('planId', priceId);
-    currency !== undefined && query.set('currency', currency);
+    if (currency !== undefined) {
+      query.set('currency', currency);
+    }
     return this.client.get(`/object-storage/price?${query.toString()}`, this.headers());
   }
 
@@ -51,13 +53,11 @@ export class ObjectStorage {
     query.set('email', email);
     query.set('postalCode', postalCode);
     query.set('country', country);
-    companyVatId !== undefined && query.set('companyVatId', companyVatId);
+    if (companyVatId !== undefined) {
+      query.set('companyVatId', companyVatId);
+    }
 
-    return this.client.get(
-      `/object-storage/customer?${query.toString()}`,
-
-      this.headers(),
-    );
+    return this.client.get(`/object-storage/customer?${query.toString()}`, this.headers());
   }
 
   public createObjectStorageSubscription({
