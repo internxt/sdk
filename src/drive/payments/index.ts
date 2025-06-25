@@ -149,6 +149,10 @@ export class Payments {
     return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
   }
 
+  public getPromoCodesUsedByUser(): Promise<{ usedCoupons: string[] }> {
+    return this.client.get('/customer/redeemed-promotion-codes', this.headers());
+  }
+
   public getUserSubscription(userType?: UserType): Promise<UserSubscription> {
     const query = new URLSearchParams();
     if (userType) query.set('userType', userType);

@@ -1,4 +1,4 @@
-import { PaymentMethodVerification, PaymentMethodVerificationPayload } from 'src/payments/types';
+import { PaymentMethodVerification, PaymentMethodVerificationPayload } from '../../payments/types';
 import { ApiUrl, AppDetails } from '../../shared';
 import { basicHeaders } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
