@@ -1,13 +1,7 @@
 import sinon from 'sinon';
 import { randomBytes } from 'crypto';
 
-import {
-  ALGORITHMS,
-  BinaryDataEncoding,
-  Crypto,
-  DownloadableShard,
-  Network
-} from '../../src/network';
+import { ALGORITHMS, BinaryDataEncoding, Crypto, DownloadableShard, Network } from '../../src/network';
 import { downloadFile, FileVersionOneError } from '../../src/network/download';
 import { DownloadInvalidMnemonicError } from '../../src/network/errors';
 
@@ -23,16 +17,20 @@ const crypto: Crypto = {
   generateFileKey: async (mnemonic) => {
     return Buffer.from(mnemonic);
   },
-  randomBytes
+  randomBytes,
 };
 
-const network = Network.client('fake.com', {
-  clientName: 'sdk',
-  clientVersion: '1.0',
-}, {
-  bridgeUser: '',
-  userId: ''
-});
+const network = Network.client(
+  'fake.com',
+  {
+    clientName: 'sdk',
+    clientVersion: '1.0',
+  },
+  {
+    bridgeUser: '',
+    userId: '',
+  },
+);
 
 afterEach(() => {
   sinon.restore();
@@ -54,14 +52,14 @@ describe('network/download', () => {
             index: 0,
             hash: fakeHash,
             size: 1,
-            url: 'https://fake.com'
+            url: 'https://fake.com',
           },
           {
             index: 1,
             hash: fakeHash,
             size: 1,
-            url: 'https://fake.com'
-          }
+            url: 'https://fake.com',
+          },
         ];
 
         const fileSize = shards.reduce((a, s) => a + s.size, 0);
@@ -73,7 +71,7 @@ describe('network/download', () => {
           version: 2,
           bucket: bucketId,
           created: new Date(),
-          size: fileSize
+          size: fileSize,
         });
 
         const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
@@ -89,7 +87,7 @@ describe('network/download', () => {
             crypto,
             toBinaryDataMock,
             downloadFileMock,
-            decryptFileMock
+            decryptFileMock,
           );
 
           expect(validateMnemonicStub.calledOnce).toBeTruthy();
@@ -98,22 +96,22 @@ describe('network/download', () => {
           expect(getDownloadLinksStub.calledOnce).toBeTruthy();
           expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, undefined]);
 
-          expect(toBinaryDataMock).toBeCalledTimes(2);
+          expect(toBinaryDataMock).toHaveBeenCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
 
           expect(generateFileKeyStub.calledOnce).toBeTruthy();
           expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
 
-          expect(downloadFileMock).toBeCalledTimes(1);
+          expect(downloadFileMock).toHaveBeenCalledTimes(1);
           expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
 
-          expect(decryptFileMock).toBeCalledTimes(1);
+          expect(decryptFileMock).toHaveBeenCalledTimes(1);
           expect(decryptFileMock).toHaveBeenCalledWith(
             crypto.algorithm.type,
             key,
             bufferizedIndex.slice(0, 16),
-            fileSize
+            fileSize,
           );
         } catch (err) {
           console.log(err);
@@ -135,14 +133,14 @@ describe('network/download', () => {
             index: 0,
             hash: fakeHash,
             size: 1,
-            url: 'https://fake.com'
+            url: 'https://fake.com',
           },
           {
             index: 1,
             hash: fakeHash,
             size: 1,
-            url: 'https://fake.com'
-          }
+            url: 'https://fake.com',
+          },
         ];
 
         const fileSize = shards.reduce((a, s) => a + s.size, 0);
@@ -154,7 +152,7 @@ describe('network/download', () => {
           version: 2,
           bucket: bucketId,
           created: new Date(),
-          size: fileSize
+          size: fileSize,
         });
 
         const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
@@ -171,7 +169,7 @@ describe('network/download', () => {
             toBinaryDataMock,
             downloadFileMock,
             decryptFileMock,
-            { token }
+            { token },
           );
 
           expect(validateMnemonicStub.callCount).toBe(0);
@@ -179,22 +177,22 @@ describe('network/download', () => {
           expect(getDownloadLinksStub.calledOnce).toBeTruthy();
           expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, token]);
 
-          expect(toBinaryDataMock).toBeCalledTimes(2);
+          expect(toBinaryDataMock).toHaveBeenCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
 
           expect(generateFileKeyStub.calledOnce).toBeTruthy();
           expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
 
-          expect(downloadFileMock).toBeCalledTimes(1);
+          expect(downloadFileMock).toHaveBeenCalledTimes(1);
           expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
 
-          expect(decryptFileMock).toBeCalledTimes(1);
+          expect(decryptFileMock).toHaveBeenCalledTimes(1);
           expect(decryptFileMock).toHaveBeenCalledWith(
             crypto.algorithm.type,
             key,
             bufferizedIndex.slice(0, 16),
-            fileSize
+            fileSize,
           );
         } catch (err) {
           expect(true).toBeFalsy();
@@ -208,19 +206,10 @@ describe('network/download', () => {
         shards: [],
         bucket: '',
         created: new Date(),
-        size: 1000
+        size: 1000,
       });
       try {
-        await downloadFile(
-          fakeFileId,
-          fakeBucketId,
-          fakeMnemonic,
-          network,
-          crypto,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
-        );
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(FileVersionOneError);
@@ -234,19 +223,10 @@ describe('network/download', () => {
         bucket: '',
         version: 1,
         created: new Date(),
-        size: 1000
+        size: 1000,
       });
       try {
-        await downloadFile(
-          fakeFileId,
-          fakeBucketId,
-          fakeMnemonic,
-          network,
-          crypto,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
-        );
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(FileVersionOneError);
@@ -258,16 +238,7 @@ describe('network/download', () => {
       const downloadLinksStub = sinon.stub(network, 'getDownloadLinks');
 
       try {
-        await downloadFile(
-          fakeFileId,
-          fakeBucketId,
-          fakeMnemonic,
-          network,
-          crypto,
-          jest.fn(),
-          jest.fn(),
-          jest.fn()
-        );
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(DownloadInvalidMnemonicError);
