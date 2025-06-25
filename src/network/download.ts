@@ -26,7 +26,7 @@ export async function downloadFile(
   toBinaryData: ToBinaryDataFunction,
   downloadFile: DownloadFileFunction,
   decryptFile: DecryptFileFunction,
-  opts?: { token: string }
+  opts?: { token: string },
 ): Promise<void> {
   let iv: BinaryData;
   let indexHex: BinaryData;
@@ -54,22 +54,22 @@ export async function downloadFile(
     await downloadFile(downloadables, size);
     await decryptFile(crypto.algorithm.type, key, iv, size);
   } catch (err) {
-    const context = getNetworkErrorContext({
-      bucketId,
-      fileId,
-      user: network.credentials.username,
-      pass: network.credentials.password,
-      token: opts?.token || 'none',
-      crypto: {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        index: indexHex! ? indexHex.toString('hex') : 'none',
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        iv: iv! ? iv.toString('hex') : 'none',
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        key: key! ? key.toString('hex') : 'none',
-        mnemonic
-      }
-    }, err as Error);
+    const context = getNetworkErrorContext(
+      {
+        bucketId,
+        fileId,
+        user: network.credentials.username,
+        pass: network.credentials.password,
+        token: opts?.token || 'none',
+        crypto: {
+          index: indexHex! ? indexHex.toString('hex') : 'none',
+          iv: iv! ? iv.toString('hex') : 'none',
+          key: key! ? key.toString('hex') : 'none',
+          mnemonic,
+        },
+      },
+      err as Error,
+    );
 
     (err as ErrorWithContext).context = context;
 
