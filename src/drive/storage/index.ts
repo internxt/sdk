@@ -624,6 +624,13 @@ export class Storage {
   }
 
   /**
+   * @returns whether the user has uploaded any files
+   */
+  public hasUploadedFiles(): Promise<{ hasUploadedFiles: boolean }> {
+    return this.client.get('/users/me/upload-status', this.headers());
+  }
+
+  /**
    * Returns a list of the n most recent files
    * @param limit
    */
