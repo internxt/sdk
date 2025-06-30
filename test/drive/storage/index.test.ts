@@ -775,6 +775,22 @@ describe('# storage service tests', () => {
       });
     });
 
+    describe('The user already uploaded any file', () => {
+      it('it should return a boolean indicating if the user already uploaded any file or not', async () => {
+        const { client, headers } = clientAndHeaders({});
+        const callStub = sinon.stub(httpClient, 'get').resolves({
+          hasUploadedFiles: true,
+        });
+
+        const body = await client.hasUploadedFiles();
+
+        expect(callStub.firstCall.args).toEqual(['/users/me/upload-status', headers]);
+        expect(body).toEqual({
+          hasUploadedFiles: true,
+        });
+      });
+    });
+
     describe('space limit', () => {
       it('should call with right params & return response', async () => {
         // Arrange
