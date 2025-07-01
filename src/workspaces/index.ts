@@ -103,13 +103,13 @@ export class Workspaces {
    * @returns The response from the server.
    */
   public uploadWorkspaceAvatar(workspaceId: string, avatar: Blob) {
-    const formData = new FormData();
-    formData.append('file', avatar);
-
-    return this.client.post<void>(`workspaces/${workspaceId}/avatar`, formData, {
-      ...this.headers(),
-      'content-type': 'multipart/form-data',
-    });
+    return this.client.postForm<void>(
+      `workspaces/${workspaceId}/avatar`,
+      {
+        avatar: avatar,
+      },
+      this.headers(),
+    );
   }
 
   public deleteWorkspaceAvatar(workspaceId: string): Promise<void> {
@@ -142,10 +142,13 @@ export class Workspaces {
   }
 
   public updateAvatar(workspaceId: string, payload: { avatar: Blob }) {
-    const formData = new FormData();
-    formData.set('file', payload.avatar);
-
-    return this.client.post<{ avatar: string }>(`workspaces/${workspaceId}/avatar`, formData, this.headers());
+    return this.client.postForm<{ avatar: string }>(
+      `workspaces/${workspaceId}/avatar`,
+      {
+        file: payload.avatar,
+      },
+      this.headers(),
+    );
   }
 
   public deleteAvatar(workspaceId: string) {
