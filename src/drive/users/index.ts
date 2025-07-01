@@ -180,24 +180,26 @@ export class Users {
    * @param payload
    */
   public updateAvatar(payload: { avatar: Blob }) {
-    const formData = new FormData();
-    formData.set('avatar', payload.avatar);
-
-    return this.client.put<{ avatar: string }>('/user/avatar', formData, this.headers());
+    return this.client.putForm<{ avatar: string }>(
+      '/user/avatar',
+      {
+        avatar: payload.avatar,
+      },
+      this.headers(),
+    );
   }
 
   /**
    * Updates a user avatar
    * @param payload
    */
-  public updateUserAvatar(payload: { avatar: Blob }, token?: Token) {
-    const formData = new FormData();
-    formData.set('avatar', payload.avatar);
-
-    return this.client.put<{ avatar: string }>(
+  public async updateUserAvatar(payload: { avatar: Blob }, token?: Token) {
+    return this.client.putForm<{ avatar: string }>(
       '/users/avatar',
-      formData,
-      this.headersWithToken(token ?? <string>this.apiSecurity?.token),
+      {
+        avatar: payload.avatar,
+      },
+      this.headersWithToken(token ?? this.apiSecurity?.token),
     );
   }
 
