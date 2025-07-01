@@ -106,7 +106,7 @@ export class Workspaces {
     return this.client.postForm<void>(
       `workspaces/${workspaceId}/avatar`,
       {
-        avatar: avatar,
+        file: avatar,
       },
       this.headers(),
     );
