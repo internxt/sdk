@@ -86,6 +86,18 @@ export class HttpClient {
   }
 
   /**
+   * Requests a POST FORM
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return this.axios.postForm(url, params, {
+      headers: headers,
+    });
+  }
+
+  /**
    * Requests a POST with option to cancel
    * @param url
    * @param params
@@ -133,6 +145,18 @@ export class HttpClient {
    */
   public put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
     return this.axios.put(url, params, {
+      headers: headers,
+    });
+  }
+
+  /**
+   * Requests a PUT FORM
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return this.axios.putForm(url, params, {
       headers: headers,
     });
   }
