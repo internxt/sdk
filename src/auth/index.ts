@@ -550,7 +550,7 @@ export class Auth {
   }
 
   private basicHeaders() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion, this.appDetails.customHeaders);
   }
 
   private headersWithToken(token: Token) {
