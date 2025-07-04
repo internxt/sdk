@@ -12,6 +12,7 @@ import {
   Token,
   UpdateProfilePayload,
   UserPublicKeyResponse,
+  UserPublicKeyWithCreationResponse,
   VerifyEmailChangeResponse,
 } from './types';
 
@@ -292,6 +293,16 @@ export class Users {
    */
   public getPublicKeyByEmail({ email }: { email: string }): Promise<UserPublicKeyResponse> {
     return this.client.get<UserPublicKeyResponse>(`/users/public-key/${email}`, this.headers());
+  }
+
+  /**
+   * Get public key of given email, if not exists it pre-create user with this email
+   * and returns public key
+   * @param email
+   * @returns {Promise<UserPublicKeyWithCreationResponse>} A promise that returns the public keys of given user
+   */
+  public getPublicKeyWithPrecreation({ email }: { email: string }): Promise<UserPublicKeyWithCreationResponse> {
+    return this.client.put<UserPublicKeyWithCreationResponse>(`/users/public-key/${email}`, {}, this.headers());
   }
 
   /**
