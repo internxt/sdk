@@ -834,6 +834,55 @@ describe('# auth service tests', () => {
       ]);
     });
   });
+  describe('-> change password with link v2', () => {
+    it('Should call with right params without private keys', async () => {
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+      const password = 'newPassword';
+      const salt = 'newSalt';
+      const mnemonic = 'newMnemonic';
+
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic);
+
+      expect(callStub.firstCall.args).toEqual([
+        `/users/recover-account-v2?token=${token}&reset=false`,
+        {
+          password,
+          salt,
+          mnemonic,
+        },
+        headers,
+      ]);
+    });
+
+    it('Should call with right params including private keys', async () => {
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+      const password = 'newPassword';
+      const salt = 'newSalt';
+      const mnemonic = 'newMnemonic';
+      const privateKeys = {
+        ecc: 'newEccKey',
+        kyber: 'newKyberKey',
+      };
+
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, privateKeys);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/users/recover-account-v2?token=${token}&reset=false`,
+        {
+          password,
+          salt,
+          mnemonic,
+          privateKeys,
+        },
+        headers,
+      ]);
+    });
+  });
   describe('Legacy recover account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
