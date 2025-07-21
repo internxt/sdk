@@ -502,6 +502,33 @@ export class Auth {
     );
   }
 
+  /**
+   * Restore password with email link
+   * @param token
+   * @param password
+   * @param salt
+   * @param mnemonic
+   * @param keys
+   */
+  public changePasswordWithLinkV2(
+    token: string | undefined,
+    password: string,
+    salt: string,
+    mnemonic: string,
+    keys?: PrivateKeys,
+  ): Promise<void> {
+    return this.client.put(
+      `/users/recover-account-v2?token=${token}&reset=false`,
+      {
+        password: password,
+        salt: salt,
+        mnemonic: mnemonic,
+        privateKeys: keys,
+      },
+      this.basicHeaders(),
+    );
+  }
+
   public legacyRecoverAccount({
     token,
     encryptedPassword,

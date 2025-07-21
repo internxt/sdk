@@ -45,8 +45,7 @@ export type UpdateProfilePayload = Partial<Pick<UserSettings, 'name' | 'lastname
 
 export type PreCreateUserResponse = {
   publicKey: string;
-  keys?: 
-  {
+  keys?: {
     ecc: string;
     kyber: string;
   };
@@ -55,7 +54,9 @@ export type PreCreateUserResponse = {
 
 export type FriendInvite = { guestEmail: string; host: number; accepted: boolean; id: number };
 
-export type UserPublicKeyResponse = { publicKey: string; keys?: { ecc:string; kyber: string}; };
+export type UserPublicKeyResponse = { publicKey: string; keys?: { ecc: string; kyber: string } };
+
+export type UserPublicKeyWithCreationResponse = { publicKey: string; publicKyberKey: string | undefined };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
