@@ -539,6 +539,7 @@ export class Auth {
     keys,
   }: ChangePasswordWithLinkPayload): Promise<void> {
     const accountRecoverPayload = {
+      token,
       password: encryptedPassword,
       salt: encryptedSalt,
       mnemonic: encryptedMnemonic,
@@ -549,7 +550,7 @@ export class Auth {
       keys,
     };
 
-    return this.client.put(`/users/legacy-recover-account?token=${token}`, accountRecoverPayload, this.basicHeaders());
+    return this.client.put('/users/legacy-recover-account', accountRecoverPayload, this.basicHeaders());
   }
 
   /**
