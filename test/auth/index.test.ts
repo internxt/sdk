@@ -914,8 +914,9 @@ describe('# auth service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
-        `/users/legacy-recover-account?token=${payload.token}`,
+        '/users/legacy-recover-account',
         {
+          token: payload.token,
           password: payload.encryptedPassword,
           salt: payload.encryptedSalt,
           mnemonic: payload.encryptedMnemonic,
