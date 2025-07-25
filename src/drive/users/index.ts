@@ -80,6 +80,15 @@ export class Users {
   }
 
   /**
+   * Returns fresh avatar URL of the user
+   */
+  public refreshAvatarUser(): Promise<{
+    avatar: UserSettings['avatar'];
+  }> {
+    return this.client.get('/user/avatar/refresh', this.headers());
+  }
+
+  /**
    * Retrieves the user data for a specific user identified by the uuid.
    *
    * @param {string} params.userUuid - The UUID of the user.

@@ -93,6 +93,26 @@ describe('# users service tests', () => {
     });
   });
 
+  describe('refresh user avatar', () => {
+    it('should call with right params & return response', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const mockedAvatarUrl = 'https://example.avatar.com/avatar.jpg';
+      const callStub = sinon.stub(httpClient, 'get').resolves({
+        avatar: mockedAvatarUrl,
+      });
+
+      // Act
+      const body = await client.refreshAvatarUser();
+
+      // Assert
+      expect(callStub.firstCall.args).toStrictEqual(['/user/avatar/refresh', headers]);
+      expect(body).toStrictEqual({
+        avatar: mockedAvatarUrl,
+      });
+    });
+  });
+
   describe('pre register user', () => {
     it('should pre create user', async () => {
       // Arrange
