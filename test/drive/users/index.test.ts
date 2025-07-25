@@ -106,7 +106,7 @@ describe('# users service tests', () => {
       const body = await client.refreshAvatarUser();
 
       // Assert
-      expect(callStub.firstCall.args).toStrictEqual(['/user/avatar/refresh', headers]);
+      expect(callStub.firstCall.args).toStrictEqual(['/users/avatar/refresh', headers]);
       expect(body).toStrictEqual({
         avatar: mockedAvatarUrl,
       });
