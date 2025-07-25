@@ -28,7 +28,7 @@ export class Users {
   }
 
   private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    this.client = HttpClient.create(apiUrl, apiSecurity.unauthorizedCallback);
+    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }
@@ -77,6 +77,15 @@ export class Users {
     token: string;
   }> {
     return this.client.get('/user/refresh', this.headers());
+  }
+
+  /**
+   * Returns fresh avatar URL of the user
+   */
+  public refreshAvatarUser(): Promise<{
+    avatar: UserSettings['avatar'];
+  }> {
+    return this.client.get('/user/avatar/refresh', this.headers());
   }
 
   /**
