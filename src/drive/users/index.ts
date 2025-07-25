@@ -85,7 +85,7 @@ export class Users {
   public refreshAvatarUser(): Promise<{
     avatar: UserSettings['avatar'];
   }> {
-    return this.client.get('/user/avatar/refresh', this.headers());
+    return this.client.get('/users/avatar/refresh', this.headers());
   }
 
   /**
