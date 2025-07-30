@@ -65,13 +65,6 @@ export async function uploadFile(
         bucketId,
         fileSize,
         user: network.credentials.username,
-        pass: network.credentials.password,
-        crypto: {
-          index: index! ? index.toString('hex') : 'none',
-          iv: iv! ? iv.toString('hex') : 'none',
-          key: key! ? key.toString('hex') : 'none',
-          mnemonic,
-        },
       },
       err as Error,
     );

@@ -59,14 +59,6 @@ export async function downloadFile(
         bucketId,
         fileId,
         user: network.credentials.username,
-        pass: network.credentials.password,
-        token: opts?.token || 'none',
-        crypto: {
-          index: indexHex! ? indexHex.toString('hex') : 'none',
-          iv: iv! ? iv.toString('hex') : 'none',
-          key: key! ? key.toString('hex') : 'none',
-          mnemonic,
-        },
       },
       err as Error,
     );
