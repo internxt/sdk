@@ -1,7 +1,3 @@
-import { DownloadInvalidMnemonicError } from './download';
-import { UploadInvalidMnemonicError } from './upload';
-
-type NetworkError = UploadInvalidMnemonicError | DownloadInvalidMnemonicError | Error;
 export type NetworkUploadContext = {
   bucketId: string;
   fileSize: number;
@@ -21,7 +17,7 @@ export class ErrorWithContext extends Error {
   }
 }
 
-export function getNetworkErrorContext(input: NetworkContext, err: NetworkError): Partial<NetworkContext> {
+export function getNetworkErrorContext(input: NetworkContext): Partial<NetworkContext> {
   const output = Object.assign({}, input);
 
   return output;

@@ -29,7 +29,6 @@ export async function downloadFile(
   opts?: { token: string },
 ): Promise<void> {
   let iv: BinaryData;
-  let indexHex: BinaryData;
   let key: BinaryData;
 
   try {
@@ -54,14 +53,11 @@ export async function downloadFile(
     await downloadFile(downloadables, size);
     await decryptFile(crypto.algorithm.type, key, iv, size);
   } catch (err) {
-    const context = getNetworkErrorContext(
-      {
-        bucketId,
-        fileId,
-        user: network.credentials.username,
-      },
-      err as Error,
-    );
+    const context = getNetworkErrorContext({
+      bucketId,
+      fileId,
+      user: network.credentials.username,
+    });
 
     (err as ErrorWithContext).context = context;
 
