@@ -843,7 +843,7 @@ describe('# auth service tests', () => {
       const salt = 'newSalt';
       const mnemonic = 'newMnemonic';
 
-      await client.changePasswordWithLinkV2(token, password, salt, mnemonic);
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, 'uuid');
 
       expect(callStub.firstCall.args).toEqual([
         `/users/recover-account-v2?token=${token}&reset=false`,
@@ -851,6 +851,7 @@ describe('# auth service tests', () => {
           password,
           salt,
           mnemonic,
+          uuid: 'uuid',
         },
         headers,
       ]);
@@ -868,7 +869,7 @@ describe('# auth service tests', () => {
         kyber: 'newKyberKey',
       };
 
-      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, privateKeys);
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, 'uuid', privateKeys);
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
@@ -878,6 +879,7 @@ describe('# auth service tests', () => {
           salt,
           mnemonic,
           privateKeys,
+          uuid: 'uuid',
         },
         headers,
       ]);
