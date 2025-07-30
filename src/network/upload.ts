@@ -4,7 +4,6 @@ import {
   UploadInvalidMnemonicError,
   UrlsNotReceivedFromNetworkError,
   ErrorWithContext,
-  getNetworkErrorContext,
   UrlNotReceivedFromNetworkError,
 } from './errors';
 import { BinaryData, Crypto, EncryptFileFunction, UploadFileFunction, UploadFileMultipartFunction } from './types';
@@ -60,13 +59,11 @@ export async function uploadFile(
 
     return finishUploadResponse.id;
   } catch (err) {
-    const context = getNetworkErrorContext({
+    (err as ErrorWithContext).context = {
       bucketId,
       fileSize,
       user: network.credentials.username,
-    });
-
-    (err as ErrorWithContext).context = context;
+    };
 
     throw err;
   }
