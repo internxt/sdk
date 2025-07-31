@@ -1,5 +1,5 @@
 import { Network } from '.';
-import { DownloadInvalidMnemonicError, ErrorWithContext } from './errors';
+import { DownloadInvalidMnemonicError, ErrorWithContext, getNetworkErrorContext } from './errors';
 import {
   Crypto,
   BinaryDataEncoding,
@@ -53,11 +53,13 @@ export async function downloadFile(
     await downloadFile(downloadables, size);
     await decryptFile(crypto.algorithm.type, key, iv, size);
   } catch (err) {
-    (err as ErrorWithContext).context = {
+    const context = getNetworkErrorContext({
       bucketId,
       fileId,
       user: network.credentials.username,
-    };
+    });
+
+    (err as ErrorWithContext).context = context;
 
     throw err;
   }

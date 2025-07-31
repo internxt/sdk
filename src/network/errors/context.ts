@@ -16,3 +16,9 @@ export class ErrorWithContext extends Error {
     super();
   }
 }
+
+export function getNetworkErrorContext(input: NetworkContext): Partial<NetworkContext> {
+  const output = Object.assign({}, input);
+
+  return output;
+}
