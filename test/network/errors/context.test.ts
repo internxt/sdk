@@ -10,13 +10,9 @@ function getNetworkUploadContext(merge?: Partial<NetworkUploadContext>): Network
   const defaultContext: NetworkUploadContext = {
     bucketId: '',
     crypto: {
-      index: 'index',
-      iv: 'iv',
-      key: 'key',
       mnemonic: 'mnemonic'
     },
     fileSize: 10,
-    pass: 'pass',
     user: 'user'
   };
 
@@ -27,14 +23,9 @@ function getNetworkDownloadContext(merge?: Partial<NetworkUploadContext>): Netwo
   const defaultContext: NetworkDownloadContext = {
     bucketId: '',
     crypto: {
-      index: 'index',
-      iv: 'iv',
-      key: 'key',
       mnemonic: 'mnemonic'
     },
     fileId: 'fileId',
-    token: 'token',
-    pass: 'pass',
     user: 'user'
   };
 
