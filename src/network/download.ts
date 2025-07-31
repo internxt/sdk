@@ -53,11 +53,17 @@ export async function downloadFile(
     await downloadFile(downloadables, size);
     await decryptFile(crypto.algorithm.type, key, iv, size);
   } catch (err) {
-    const context = getNetworkErrorContext({
-      bucketId,
-      fileId,
-      user: network.credentials.username,
-    });
+    const context = getNetworkErrorContext(
+      {
+        bucketId,
+        fileId,
+        user: network.credentials.username,
+        crypto: {
+          mnemonic,
+        },
+      },
+      err,
+    );
 
     (err as ErrorWithContext).context = context;
 

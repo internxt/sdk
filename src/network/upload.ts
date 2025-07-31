@@ -60,11 +60,17 @@ export async function uploadFile(
 
     return finishUploadResponse.id;
   } catch (err) {
-    const context = getNetworkErrorContext({
-      bucketId,
-      fileSize,
-      user: network.credentials.username,
-    });
+    const context = getNetworkErrorContext(
+      {
+        bucketId,
+        fileSize,
+        user: network.credentials.username,
+        crypto: {
+          mnemonic,
+        },
+      },
+      err,
+    );
 
     (err as ErrorWithContext).context = context;
 
