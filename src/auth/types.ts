@@ -29,6 +29,7 @@ export interface RegisterPreCreatedUser extends RegisterDetails {
 }
 export interface RegisterPreCreatedUserResponse {
   token: Token;
+  newToken: Token;
   user: UserSettings & { referralCode: string };
   uuid: UUID;
 }
