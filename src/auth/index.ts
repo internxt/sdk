@@ -517,6 +517,7 @@ export class Auth {
     password: string,
     salt: string,
     mnemonic: string,
+    uuid: string,
     keys?: PrivateKeys,
   ): Promise<void> {
     return this.client.put(
@@ -526,6 +527,7 @@ export class Auth {
         salt: salt,
         mnemonic: mnemonic,
         privateKeys: keys,
+        uuid: uuid,
       },
       this.basicHeaders(),
     );
