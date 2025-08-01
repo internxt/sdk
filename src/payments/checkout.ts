@@ -1,8 +1,15 @@
-import { CreatedPaymentIntent, CreatedSubscriptionData } from '../drive/payments/types/types';
+import { CreatedSubscriptionData } from '../drive/payments/types/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreatePaymentIntentPayload, CreateSubscriptionPayload, GetPriceByIdPayload, PriceWithTax } from './types';
+import {
+  CreatePaymentIntentPayload,
+  CreateSubscriptionPayload,
+  CryptoCurrency,
+  GetPriceByIdPayload,
+  PaymentIntent,
+  PriceWithTax,
+} from './types';
 
 export class Checkout {
   private readonly client: HttpClient;
@@ -102,7 +109,7 @@ export class Checkout {
     token,
     currency,
     promoCodeId,
-  }: CreatePaymentIntentPayload): Promise<CreatedPaymentIntent> {
+  }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
       {
@@ -139,6 +146,10 @@ export class Checkout {
     if (postalCode !== undefined) query.set('postalCode', postalCode);
     if (country !== undefined) query.set('country', country);
     return this.client.get<PriceWithTax>(`/checkout/price-by-id?${query.toString()}`, this.headers());
+  }
+
+  public getAvailableCryptoCurrencies(): Promise<CryptoCurrency[]> {
+    return this.client.get<CryptoCurrency[]>('/checkout/currencies/crypto', this.headers());
   }
 
   /**
