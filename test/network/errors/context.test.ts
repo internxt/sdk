@@ -3,21 +3,17 @@ import {
   NetworkDownloadContext,
   getNetworkErrorContext,
   DownloadInvalidMnemonicError,
-  UploadInvalidMnemonicError
+  UploadInvalidMnemonicError,
 } from '../../../src/network/errors';
 
 function getNetworkUploadContext(merge?: Partial<NetworkUploadContext>): NetworkUploadContext {
   const defaultContext: NetworkUploadContext = {
     bucketId: '',
     crypto: {
-      index: 'index',
-      iv: 'iv',
-      key: 'key',
-      mnemonic: 'mnemonic'
+      mnemonic: 'mnemonic',
     },
     fileSize: 10,
-    pass: 'pass',
-    user: 'user'
+    user: 'user',
   };
 
   return { ...defaultContext, ...merge };
@@ -27,15 +23,10 @@ function getNetworkDownloadContext(merge?: Partial<NetworkUploadContext>): Netwo
   const defaultContext: NetworkDownloadContext = {
     bucketId: '',
     crypto: {
-      index: 'index',
-      iv: 'iv',
-      key: 'key',
-      mnemonic: 'mnemonic'
+      mnemonic: 'mnemonic',
     },
     fileId: 'fileId',
-    token: 'token',
-    pass: 'pass',
-    user: 'user'
+    user: 'user',
   };
 
   return { ...defaultContext, ...merge };

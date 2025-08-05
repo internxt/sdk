@@ -42,6 +42,7 @@ export class Auth {
    */
   public register(registerDetails: RegisterDetails): Promise<{
     token: Token;
+    newToken: Token;
     user: Omit<UserSettings, 'bucket'> & { referralCode: string };
     uuid: UUID;
   }> {
@@ -84,6 +85,7 @@ export class Auth {
    */
   public registerWithoutKeys(registerDetails: Omit<RegisterDetails, 'keys'>): Promise<{
     token: Token;
+    newToken: Token;
     user: Omit<UserSettings, 'bucket'> & { referralCode: string };
     uuid: UUID;
   }> {
