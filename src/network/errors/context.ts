@@ -7,16 +7,16 @@ export type NetworkUploadContext = {
   user: string;
   crypto: {
     mnemonic?: string;
-  }
-}
+  };
+};
 export type NetworkDownloadContext = {
   bucketId: string;
   fileId: string;
   user: string;
   crypto: {
     mnemonic?: string;
-  }
-}
+  };
+};
 
 export type NetworkContext = NetworkUploadContext | NetworkDownloadContext;
 
