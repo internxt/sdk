@@ -2,7 +2,13 @@ import { CreatedPaymentIntent, CreatedSubscriptionData } from '../drive/payments
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreatePaymentIntentPayload, CreateSubscriptionPayload, GetPriceByIdPayload, PriceWithTax } from './types';
+import {
+  CreatePaymentIntentPayload,
+  CreateSubscriptionPayload,
+  CryptoCurrency,
+  GetPriceByIdPayload,
+  PriceWithTax,
+} from './types';
 
 export class Checkout {
   private readonly client: HttpClient;
@@ -139,6 +145,10 @@ export class Checkout {
     if (postalCode !== undefined) query.set('postalCode', postalCode);
     if (country !== undefined) query.set('country', country);
     return this.client.get<PriceWithTax>(`/checkout/price-by-id?${query.toString()}`, this.headers());
+  }
+
+  public getAvailableCryptoCurrencies(): Promise<CryptoCurrency[]> {
+    return this.client.get<CryptoCurrency[]>('/checkout/currencies/crypto', this.headers());
   }
 
   /**
