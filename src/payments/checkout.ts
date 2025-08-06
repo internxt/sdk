@@ -1,4 +1,4 @@
-import { CreatedPaymentIntent, CreatedSubscriptionData } from '../drive/payments/types/types';
+import { CreatedSubscriptionData } from '../drive/payments/types/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
@@ -7,6 +7,7 @@ import {
   CreateSubscriptionPayload,
   CryptoCurrency,
   GetPriceByIdPayload,
+  PaymentIntent,
   PriceWithTax,
 } from './types';
 
@@ -101,6 +102,11 @@ export class Checkout {
    * - `clientSecret`: The client secret for the invoice to be used with Stripe Elements
    * - `id`: The ID of the invoice
    * - `invoiceStatus`: The status of the invoice (only when the status is 'paid')
+   * - `type`: The type of the currency - 'fiat' or 'crypto'
+   * - `payload`: The payload of the invoice if the type is 'crypto' containing { paymentRequestUri, url, qrUrl }
+   * - `payload.paymentRequestUri`: The payment request URI for the invoice
+   * - `payload.url`: The URL of the invoice
+   * - `payload.qrUrl`: The QR code URL of the invoice
    */
   public createPaymentIntent({
     customerId,
@@ -108,7 +114,7 @@ export class Checkout {
     token,
     currency,
     promoCodeId,
-  }: CreatePaymentIntentPayload): Promise<CreatedPaymentIntent> {
+  }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
       {

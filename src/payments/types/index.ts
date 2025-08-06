@@ -73,3 +73,24 @@ export interface CryptoCurrency {
   networks: { platformId: string; name: string }[];
   imageUrl: string;
 }
+
+export interface PaymentIntentCrypto {
+  id: string;
+  type: 'crypto';
+  payload: {
+    paymentRequestUri: string;
+    payAmount: number;
+    payCurrency: string;
+    url: string;
+    qrUrl: string;
+  };
+}
+
+export interface PaymentIntentFiat {
+  id: string;
+  type: 'fiat';
+  clientSecret: string | null;
+  invoiceStatus?: string;
+}
+
+export type PaymentIntent = PaymentIntentCrypto | PaymentIntentFiat;
