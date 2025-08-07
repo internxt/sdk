@@ -81,6 +81,8 @@ export interface PaymentIntentCrypto {
     paymentRequestUri: string;
     payAmount: number;
     payCurrency: string;
+    paymentAddress: string;
+    invoiceId: string;
     url: string;
     qrUrl: string;
   };
