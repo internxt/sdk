@@ -154,7 +154,11 @@ export class Checkout {
   }
 
   public getAvailableCryptoCurrencies(): Promise<CryptoCurrency[]> {
-    return this.client.get<CryptoCurrency[]>('/checkout/currencies/crypto', this.headers());
+    return this.client.get<CryptoCurrency[]>('/checkout/crypto/currencies', this.headers());
+  }
+
+  public verifyCryptoPayment(invoiceId: string): Promise<boolean> {
+    return this.client.get<boolean>(`/checkout/crypto/verify/${invoiceId}`, this.headers());
   }
 
   /**
