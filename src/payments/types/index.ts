@@ -13,7 +13,7 @@ export interface CreatePaymentIntentPayload {
   customerId: string;
   priceId: string;
   token: string;
-  currency?: string;
+  currency: string;
   promoCodeId?: string;
 }
 
