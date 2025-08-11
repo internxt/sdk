@@ -153,10 +153,19 @@ export class Checkout {
     return this.client.get<PriceWithTax>(`/checkout/price-by-id?${query.toString()}`, this.headers());
   }
 
+  /**
+   * @description Fetches all available cryptocurrencies for the checkout module
+   * @returns A promise which resolves to an array of available cryptocurrencies
+   */
   public getAvailableCryptoCurrencies(): Promise<CryptoCurrency[]> {
     return this.client.get<CryptoCurrency[]>('/checkout/crypto/currencies', this.headers());
   }
 
+  /**
+   * @description Verifies a cryptocurrency payment using the provided invoice ID
+   * @param invoiceId - The ID of the invoice to verify
+   * @returns A promise that resolves to a boolean indicating whether the payment is verified
+   */
   public verifyCryptoPayment(invoiceId: string): Promise<boolean> {
     return this.client.get<boolean>(`/checkout/crypto/verify/${invoiceId}`, this.headers());
   }
