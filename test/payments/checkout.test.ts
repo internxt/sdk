@@ -41,8 +41,25 @@ describe('Checkout service tests', () => {
       const body = await client.getAvailableCryptoCurrencies();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/checkout/currencies/crypto', headers]);
+      expect(callStub.firstCall.args).toEqual(['/checkout/crypto/currencies', headers]);
       expect(body).toStrictEqual([mockedCryptoCurrency]);
+    });
+  });
+
+  describe('Verify crypto payments', () => {
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const mockedInvoiceId = 'encoded-invoice-id';
+      const callStub = sinon.stub(httpClient, 'post').resolves(true);
+
+      const { client, headers } = clientAndHeadersWithToken({});
+
+      // Act
+      const body = await client.verifyCryptoPayment(mockedInvoiceId);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual(['/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers]);
+      expect(body).toStrictEqual(true);
     });
   });
 });

@@ -13,7 +13,7 @@ export interface CreatePaymentIntentPayload {
   customerId: string;
   priceId: string;
   token: string;
-  currency?: string;
+  currency: string;
   promoCodeId?: string;
 }
 
@@ -73,3 +73,26 @@ export interface CryptoCurrency {
   networks: { platformId: string; name: string }[];
   imageUrl: string;
 }
+
+export interface PaymentIntentCrypto {
+  id: string;
+  type: 'crypto';
+  token: string;
+  payload: {
+    paymentRequestUri: string;
+    payAmount: number;
+    payCurrency: string;
+    paymentAddress: string;
+    url: string;
+    qrUrl: string;
+  };
+}
+
+export interface PaymentIntentFiat {
+  id: string;
+  type: 'fiat';
+  clientSecret: string | null;
+  invoiceStatus?: string;
+}
+
+export type PaymentIntent = PaymentIntentCrypto | PaymentIntentFiat;
