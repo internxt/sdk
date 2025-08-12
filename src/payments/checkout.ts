@@ -162,12 +162,18 @@ export class Checkout {
   }
 
   /**
-   * @description Verifies a cryptocurrency payment using the provided invoice ID
-   * @param invoiceId - The ID of the invoice to verify
+   * @description Verifies a cryptocurrency payment
+   * @param token - The encoded token we need to verify the payment
    * @returns A promise that resolves to a boolean indicating whether the payment is verified
    */
-  public verifyCryptoPayment(invoiceId: string): Promise<boolean> {
-    return this.client.get<boolean>(`/checkout/crypto/verify/${invoiceId}`, this.headers());
+  public verifyCryptoPayment(token: string): Promise<boolean> {
+    return this.client.post<boolean>(
+      '/checkout/crypto/verify/payment',
+      {
+        token,
+      },
+      this.headers(),
+    );
   }
 
   /**

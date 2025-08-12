@@ -49,8 +49,8 @@ describe('Checkout service tests', () => {
   describe('Verify crypto payments', () => {
     it('should call with right params & return data', async () => {
       // Arrange
-      const mockedInvoiceId = 'invoice_id';
-      const callStub = sinon.stub(httpClient, 'get').resolves(true);
+      const mockedInvoiceId = 'encoded-invoice-id';
+      const callStub = sinon.stub(httpClient, 'post').resolves(true);
 
       const { client, headers } = clientAndHeadersWithToken({});
 
@@ -58,7 +58,7 @@ describe('Checkout service tests', () => {
       const body = await client.verifyCryptoPayment(mockedInvoiceId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`/checkout/crypto/verify/${mockedInvoiceId}`, headers]);
+      expect(callStub.firstCall.args).toEqual(['/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers]);
       expect(body).toStrictEqual(true);
     });
   });

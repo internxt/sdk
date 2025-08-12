@@ -77,12 +77,12 @@ export interface CryptoCurrency {
 export interface PaymentIntentCrypto {
   id: string;
   type: 'crypto';
+  token: string;
   payload: {
     paymentRequestUri: string;
     payAmount: number;
     payCurrency: string;
     paymentAddress: string;
-    invoiceId: string;
     url: string;
     qrUrl: string;
   };
