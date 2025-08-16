@@ -45,7 +45,7 @@ export type Price = {
   currency: string;
   amount: number;
   bytes: number;
-  interval: 'lifetime' | 'year';
+  interval: 'month' | 'year' | 'lifetime';
   decimalAmount: number;
   type: UserType;
   product: string;
