@@ -172,7 +172,7 @@ export class Checkout {
       {
         token,
       },
-      this.headers(),
+      this.authHeaders(),
     );
   }
 
