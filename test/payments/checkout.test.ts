@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import { HttpClient } from '../../src/shared/http/client';
 import { Checkout } from '../../src/payments';
 import { ApiSecurity, AppDetails } from '../../src/shared';
-import { basicHeaders } from '../../src/shared/headers';
+import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { CryptoCurrency } from '../../src/payments/types';
 
 const httpClient = HttpClient.create('');
@@ -52,7 +52,7 @@ describe('Checkout service tests', () => {
       const mockedInvoiceId = 'encoded-invoice-id';
       const callStub = sinon.stub(httpClient, 'post').resolves(true);
 
-      const { client, headers } = clientAndHeadersWithToken({});
+      const { client, headers } = clientAndHeadersWithAuthToken({});
 
       // Act
       const body = await client.verifyCryptoPayment(mockedInvoiceId);
@@ -96,5 +96,40 @@ function clientAndHeadersWithToken({
 
   const client = Checkout.client(apiUrl, appDetails, apiSecurity);
   const headers = basicHeaders(clientName, clientVersion);
+  return { client, headers };
+}
+
+function clientAndHeadersWithAuthToken({
+  apiUrl = '',
+  clientName = 'c-name',
+  clientVersion = '0.1',
+  token = 'token',
+  desktopHeader,
+}: {
+  apiUrl?: string;
+  clientName?: string;
+  clientVersion?: string;
+  token?: string;
+  desktopHeader?: string;
+}): {
+  client: Checkout;
+  headers: object;
+} {
+  const additionalHeaders: Record<string, string> = {};
+  const appDetails: AppDetails = {
+    clientName: clientName,
+    clientVersion: clientVersion,
+    desktopHeader: desktopHeader,
+  };
+  const apiSecurity: ApiSecurity = {
+    token: token,
+  };
+
+  if (desktopHeader) {
+    additionalHeaders['x-internxt-desktop-header'] = desktopHeader;
+  }
+
+  const client = Checkout.client(apiUrl, appDetails, apiSecurity);
+  const headers = headersWithToken(clientName, clientVersion, token, undefined, additionalHeaders);
   return { client, headers };
 }
