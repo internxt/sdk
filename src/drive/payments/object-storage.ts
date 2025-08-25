@@ -108,6 +108,11 @@ export class ObjectStorage {
   }
 
   private headers() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 }

@@ -181,19 +181,13 @@ export class Checkout {
    * @private
    */
   private authHeaders() {
-    const additionalHeaders: Record<string, string> = {};
-
-    if (this.appDetails.desktopHeader) {
-      additionalHeaders['x-internxt-desktop-header'] = this.appDetails.desktopHeader;
-    }
-
-    return headersWithToken(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      undefined,
-      additionalHeaders,
-    );
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+    });
   }
 
   /**
@@ -201,9 +195,13 @@ export class Checkout {
    * @private
    */
   private headers() {
-    const additionalHeaders: Record<string, string> = {
+    const customHeaders: Record<string, string> = {
       ...(this.appDetails.customHeaders ?? {}),
     };
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion, additionalHeaders);
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      customHeaders,
+    });
   }
 }

@@ -57,12 +57,14 @@ export class Workspaces {
    * @private
    */
   private headers() {
-    return headersWithToken(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.workspaceToken,
-    );
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   private getRequestHeaders(token?: string) {

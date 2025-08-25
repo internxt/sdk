@@ -699,13 +699,24 @@ export class Storage {
    * @private
    */
   private headers(customHeaders?: CustomHeaders) {
-    return headersWithToken(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity?.workspaceToken,
-      customHeaders,
-    );
+    let customExtraHeaders: CustomHeaders = {};
+    if (customHeaders) {
+      customExtraHeaders = customHeaders;
+    }
+    if (this.appDetails.customHeaders) {
+      customExtraHeaders = {
+        ...customExtraHeaders,
+        ...this.appDetails.customHeaders,
+      };
+    }
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: customExtraHeaders,
+    });
   }
 
   /**

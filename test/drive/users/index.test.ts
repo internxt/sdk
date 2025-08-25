@@ -201,6 +201,6 @@ function clientAndHeaders(
     token: token,
   };
   const client = Users.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken({ clientName, clientVersion, token });
   return { client, headers };
 }

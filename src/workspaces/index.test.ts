@@ -717,6 +717,6 @@ function clientAndHeaders(
     workspaceToken,
   };
   const client = Workspaces.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token, workspaceToken);
+  const headers = headersWithToken({ clientName, clientVersion, token, workspaceToken });
   return { client, headers };
 }

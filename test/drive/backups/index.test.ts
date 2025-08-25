@@ -7,7 +7,6 @@ import { Backups } from '../../../src/drive/backups';
 const httpClient = HttpClient.create('');
 
 describe('backups service', () => {
-
   beforeEach(() => {
     sinon.stub(HttpClient, 'create').returns(httpClient);
   });
@@ -17,36 +16,30 @@ describe('backups service', () => {
   });
 
   describe('get all devices', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
-      const {client, headers} = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken();
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        devices: 'some'
+        devices: 'some',
       });
 
       // Act
       const body = await client.getAllDevices();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        '/backup/device',
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual(['/backup/device', headers]);
       expect(body).toEqual({
-        devices: 'some'
+        devices: 'some',
       });
     });
-
   });
 
   describe('get all backups', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
-      const {client, headers} = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken();
       const callStub = sinon.stub(httpClient, 'get').resolves({
-        backups: 'some'
+        backups: 'some',
       });
       const mac = 'lololo';
 
@@ -54,24 +47,19 @@ describe('backups service', () => {
       const body = await client.getAllBackups(mac);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        `/backup/${mac}`,
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual([`/backup/${mac}`, headers]);
       expect(body).toEqual({
-        backups: 'some'
+        backups: 'some',
       });
     });
-
   });
 
   describe('delete backup', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
-      const {client, headers} = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken();
       const callStub = sinon.stub(httpClient, 'delete').resolves({
-        done: true
+        done: true,
       });
       const backupId = 1;
 
@@ -79,24 +67,19 @@ describe('backups service', () => {
       const body = await client.deleteBackup(backupId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        `/backup/${backupId}`,
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual([`/backup/${backupId}`, headers]);
       expect(body).toEqual({
-        done: true
+        done: true,
       });
     });
-
   });
 
   describe('delete device', () => {
-
     it('should call with right params & return data', async () => {
       // Arrange
-      const {client, headers} = clientAndHeadersWithToken();
+      const { client, headers } = clientAndHeadersWithToken();
       const callStub = sinon.stub(httpClient, 'delete').resolves({
-        done: true
+        done: true,
       });
       const deviceId = 1;
 
@@ -104,27 +87,22 @@ describe('backups service', () => {
       const body = await client.deleteDevice(deviceId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
-        `/backup/device/${deviceId}`,
-        headers
-      ]);
+      expect(callStub.firstCall.args).toEqual([`/backup/device/${deviceId}`, headers]);
       expect(body).toEqual({
-        done: true
+        done: true,
       });
     });
-
   });
-
 });
 
 function clientAndHeadersWithToken(
   apiUrl = '',
   clientName = 'c-name',
   clientVersion = '0.1',
-  token = 'token'
+  token = 'token',
 ): {
-  client: Backups,
-  headers: object
+  client: Backups;
+  headers: object;
 } {
   const appDetails: AppDetails = {
     clientName: clientName,
@@ -134,6 +112,6 @@ function clientAndHeadersWithToken(
     token: token,
   };
   const client = Backups.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken({ clientName, clientVersion, token });
   return { client, headers };
 }

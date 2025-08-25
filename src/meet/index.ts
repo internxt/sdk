@@ -44,10 +44,22 @@ export class Meet {
     if (!this.apiSecurity?.token) {
       throw new Error('Token is required for Meet operations');
     }
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   private basicHeaders() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 }

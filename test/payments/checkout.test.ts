@@ -80,7 +80,6 @@ function clientAndHeadersWithToken({
   client: Checkout;
   headers: object;
 } {
-  const additionalHeaders: Record<string, string> = {};
   const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
@@ -90,12 +89,8 @@ function clientAndHeadersWithToken({
     token: token,
   };
 
-  if (desktopHeader) {
-    additionalHeaders['x-internxt-desktop-header'] = desktopHeader;
-  }
-
   const client = Checkout.client(apiUrl, appDetails, apiSecurity);
-  const headers = basicHeaders(clientName, clientVersion);
+  const headers = basicHeaders({ clientName, clientVersion, desktopToken: desktopHeader });
   return { client, headers };
 }
 
@@ -115,7 +110,6 @@ function clientAndHeadersWithAuthToken({
   client: Checkout;
   headers: object;
 } {
-  const additionalHeaders: Record<string, string> = {};
   const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
@@ -125,11 +119,7 @@ function clientAndHeadersWithAuthToken({
     token: token,
   };
 
-  if (desktopHeader) {
-    additionalHeaders['x-internxt-desktop-header'] = desktopHeader;
-  }
-
   const client = Checkout.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token, undefined, additionalHeaders);
+  const headers = headersWithToken({ clientName, clientVersion, token, desktopToken: desktopHeader });
   return { client, headers };
 }
