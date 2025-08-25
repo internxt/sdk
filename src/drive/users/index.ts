@@ -322,14 +322,33 @@ export class Users {
   }
 
   private basicHeaders() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   private headers() {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, this.apiSecurity.token);
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   private headersWithToken(token: Token) {
-    return headersWithToken(this.appDetails.clientName, this.appDetails.clientVersion, token);
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 }

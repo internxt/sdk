@@ -959,6 +959,6 @@ function clientAndHeaders({
     token: token,
   };
   const client = Storage.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token, workspaceToken, customHeaders);
+  const headers = headersWithToken({ clientName, clientVersion, token, workspaceToken, customHeaders });
   return { client, headers };
 }

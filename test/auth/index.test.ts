@@ -946,7 +946,7 @@ function clientAndHeaders(
     clientVersion: clientVersion,
   };
   const client = Auth.client(apiUrl, appDetails);
-  const headers = basicHeaders(clientName, clientVersion);
+  const headers = basicHeaders({ clientName, clientVersion });
   return { client, headers };
 }
 
@@ -967,6 +967,6 @@ function clientAndHeadersWithToken(
     token: token,
   };
   const client = Auth.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken({ clientName, clientVersion, token });
   return { client, headers };
 }

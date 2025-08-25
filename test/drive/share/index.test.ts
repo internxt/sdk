@@ -438,7 +438,7 @@ describe('# share service tests', () => {
       token: token,
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = headersWithToken(clientName, clientVersion, token);
+    const headers = headersWithToken({ clientName, clientVersion, token });
     return { client, headers };
   }
 
@@ -458,7 +458,7 @@ describe('# share service tests', () => {
       token: '',
     };
     const client = Share.client(apiUrl, appDetails, apiSecurity);
-    const headers = basicHeaders(clientName, clientVersion);
+    const headers = basicHeaders({ clientName, clientVersion });
     return { client, headers };
   }
 });

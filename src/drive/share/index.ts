@@ -621,16 +621,24 @@ export class Share {
    * @private
    */
   private headers(password?: string) {
-    const args: [string, string, string, string | undefined] = [
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token,
-      this.apiSecurity.workspaceToken,
-    ];
     if (password) {
-      return headersWithTokenAndPassword(...args, password);
+      return headersWithTokenAndPassword({
+        clientName: this.appDetails.clientName,
+        clientVersion: this.appDetails.clientVersion,
+        token: this.apiSecurity.token,
+        workspaceToken: this.apiSecurity.workspaceToken,
+        desktopToken: this.appDetails.desktopHeader,
+        password,
+      });
     }
-    return headersWithToken(...args);
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   /**
@@ -638,7 +646,12 @@ export class Share {
    * @private
    */
   private basicHeaders() {
-    return basicHeaders(this.appDetails.clientName, this.appDetails.clientVersion);
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 
   /**
@@ -646,7 +659,12 @@ export class Share {
    * @private
    */
   private basicHeadersWithPassword(password: string) {
-    return basicHeadersWithPassword(this.appDetails.clientName, this.appDetails.clientVersion, password);
+    return basicHeadersWithPassword({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      desktopToken: this.appDetails.desktopHeader,
+      password,
+    });
   }
 
   /**

@@ -265,20 +265,22 @@ export class Network {
    * @param auth
    */
   private static headersWithBasicAuth(appDetails: AppDetails, auth: BasicAuth) {
-    const additionalHeaders = this.mapAdditionalHeaders(appDetails);
-    return headersWithBasicAuth(appDetails.clientName, appDetails.clientVersion, auth, undefined, additionalHeaders);
+    return headersWithBasicAuth({
+      clientName: appDetails.clientName,
+      clientVersion: appDetails.clientVersion,
+      auth,
+      desktopToken: appDetails.desktopHeader,
+      customHeaders: appDetails.customHeaders,
+    });
   }
 
   private static headersWithAuthToken(appDetails: AppDetails, token: string) {
-    const additionalHeaders = this.mapAdditionalHeaders(appDetails);
-    return headersWithAuthToken(appDetails.clientName, appDetails.clientVersion, token, undefined, additionalHeaders);
-  }
-
-  private static mapAdditionalHeaders(appDetails: AppDetails): Record<string, string> {
-    const additionalHeaders: Record<string, string> = {};
-    if (appDetails.desktopHeader) {
-      additionalHeaders['x-internxt-desktop-header'] = appDetails.desktopHeader;
-    }
-    return additionalHeaders;
+    return headersWithAuthToken({
+      clientName: appDetails.clientName,
+      clientVersion: appDetails.clientVersion,
+      token,
+      desktopToken: appDetails.desktopHeader,
+      customHeaders: appDetails.customHeaders,
+    });
   }
 }
