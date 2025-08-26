@@ -32,6 +32,10 @@ export interface VpnFeatures {
   featureId: string;
 }
 
+export interface CleanerFeatures {
+  enabled: boolean;
+}
+
 export enum Service {
   Drive = 'drive',
   Backups = 'backups',
@@ -39,6 +43,7 @@ export enum Service {
   Meet = 'meet',
   Mail = 'mail',
   Vpn = 'vpn',
+  Cleaner = 'cleaner',
 }
 
 export interface Tier {
@@ -53,5 +58,6 @@ export interface Tier {
     [Service.Meet]: MeetFeatures;
     [Service.Mail]: MailFeatures;
     [Service.Vpn]: VpnFeatures;
+    [Service.Cleaner]: CleanerFeatures;
   };
 }
