@@ -172,6 +172,6 @@ function basicHeadersAndClient(
   };
 
   const client = ObjectStorage.client(apiUrl, appDetails);
-  const headers = basicHeaders(clientName, clientVersion);
+  const headers = basicHeaders({ clientName, clientVersion });
   return { client, headers };
 }

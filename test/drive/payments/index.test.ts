@@ -169,18 +169,19 @@ function clientAndHeadersWithToken({
   clientName = 'c-name',
   clientVersion = '0.1',
   token = 'token',
+  workspaceToken,
   desktopHeader,
 }: {
   apiUrl?: string;
   clientName?: string;
   clientVersion?: string;
   token?: string;
+  workspaceToken?: string;
   desktopHeader?: string;
 }): {
   client: Payments;
   headers: object;
 } {
-  const additionalHeaders: Record<string, string> = {};
   const appDetails: AppDetails = {
     clientName: clientName,
     clientVersion: clientVersion,
@@ -188,13 +189,17 @@ function clientAndHeadersWithToken({
   };
   const apiSecurity: ApiSecurity = {
     token: token,
+    workspaceToken: workspaceToken,
   };
 
-  if (desktopHeader) {
-    additionalHeaders['x-internxt-desktop-header'] = desktopHeader;
-  }
-
   const client = Payments.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token, undefined, additionalHeaders);
+  const headers = headersWithToken({
+    clientName: appDetails.clientName,
+    clientVersion: appDetails.clientVersion,
+    token: apiSecurity.token,
+    workspaceToken: apiSecurity.workspaceToken,
+    desktopToken: appDetails.desktopHeader,
+    customHeaders: appDetails.customHeaders,
+  });
   return { client, headers };
 }

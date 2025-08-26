@@ -183,7 +183,7 @@ function clientAndHeadersWithToken(
     token,
   };
   const client = Meet.client(apiUrl, appDetails, apiSecurity);
-  const headers = headersWithToken(clientName, clientVersion, token);
+  const headers = headersWithToken({ clientName, clientVersion, token });
   return { client, headers };
 }
 
@@ -200,6 +200,6 @@ function clientAndHeadersWithoutToken(
     clientVersion,
   };
   const client = Meet.client(apiUrl, appDetails);
-  const headers = basicHeaders(clientName, clientVersion);
+  const headers = basicHeaders({ clientName, clientVersion });
   return { client, headers };
 }

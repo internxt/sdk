@@ -20,15 +20,11 @@ export class Backups {
   }
 
   /**
-   * @deprecated Use `getBackupDevices` instead. 
+   * @deprecated Use `getBackupDevices` instead.
    * This method uses the old drive backend, while `getBackupDevices` uses the new drive backend.
    */
   public getAllDevices(): Promise<Device[]> {
-    return this.client
-      .get(
-        '/backup/device',
-        this.headers()
-      );
+    return this.client.get('/backup/device', this.headers());
   }
 
   /**
@@ -37,11 +33,7 @@ export class Backups {
    * @returns {Promise<Device[]>} A promise that resolves to an array of Devices.
    */
   public getBackupDevices(): Promise<Device[]> {
-    return this.client
-      .get(
-        '/backup/devices',
-        this.headers()
-      );
+    return this.client.get('/backup/devices', this.headers());
   }
 
   /**
@@ -54,11 +46,7 @@ export class Backups {
    * @returns {Promise<DriveFolderData[]>} A promise that resolves to an array of DriveFolderData.
    */
   public getAllDevicesAsFolder(): Promise<DriveFolderData[]> {
-    return this.client
-      .get(
-        '/backup/deviceAsFolder',
-        this.headers()
-      );
+    return this.client.get('/backup/deviceAsFolder', this.headers());
   }
 
   /**
@@ -68,11 +56,7 @@ export class Backups {
    * @returns A promise that resolves to an array of DeviceBackups.
    */
   public getAllBackups(mac: string): Promise<DeviceBackup[]> {
-    return this.client
-      .get(
-        `/backup/${mac}`,
-        this.headers()
-      );
+    return this.client.get(`/backup/${mac}`, this.headers());
   }
 
   /**
@@ -82,11 +66,7 @@ export class Backups {
    * @returns A promise that resolves when the backup is successfully deleted.
    */
   public deleteBackup(backupId: number): Promise<void> {
-    return this.client
-      .delete(
-        `/backup/${backupId}`,
-        this.headers()
-      );
+    return this.client.delete(`/backup/${backupId}`, this.headers());
   }
 
   /**
@@ -94,11 +74,7 @@ export class Backups {
    * This method uses the old drive backend, while `deleteBackupDevice` uses the new drive backend.
    */
   public deleteDevice(deviceId: number): Promise<void> {
-    return this.client
-      .delete(
-        `/backup/device/${deviceId}`,
-        this.headers()
-      );
+    return this.client.delete(`/backup/device/${deviceId}`, this.headers());
   }
 
   /**
@@ -108,11 +84,7 @@ export class Backups {
    * @returns A promise that resolves when the device is successfully deleted.
    */
   public deleteBackupDevice(deviceId: number): Promise<void> {
-    return this.client
-      .delete(
-        `/backup/devices/${deviceId}`,
-        this.headers()
-      );
+    return this.client.delete(`/backup/devices/${deviceId}`, this.headers());
   }
 
   /**
@@ -122,11 +94,7 @@ export class Backups {
    * @returns A promise that resolves when the device is successfully deleted.
    */
   public deleteBackupDeviceAsFolder(folderId: string): Promise<void> {
-    return this.client
-      .delete(
-        `/backup/deviceAsFolder/${folderId}`,
-        this.headers()
-      );
+    return this.client.delete(`/backup/deviceAsFolder/${folderId}`, this.headers());
   }
 
   /**
@@ -134,11 +102,13 @@ export class Backups {
    * @private
    */
   private headers() {
-    return headersWithToken(
-      this.appDetails.clientName,
-      this.appDetails.clientVersion,
-      this.apiSecurity.token
-    );
+    return headersWithToken({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
+      token: this.apiSecurity.token,
+      workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
   }
 }
-

@@ -74,7 +74,10 @@ describe('network ', () => {
 
       try {
         await client.startUpload(idBucket, {
-          uploads: [{ index: validIndex, size: validSize }, { index: validIndex, size: validSize }],
+          uploads: [
+            { index: validIndex, size: validSize },
+            { index: validIndex, size: validSize },
+          ],
         });
         expect(true).toBeFalsy();
       } catch (err) {
@@ -87,11 +90,11 @@ describe('network ', () => {
       const idBucket = 'id-bucket';
       const uploads = [
         { index: validIndex, size: validSize },
-        { index: validIndex + 1, size: validSize }
+        { index: validIndex + 1, size: validSize },
       ];
 
       const expected = {
-        uploads: uploads.map(u => ({
+        uploads: uploads.map((u) => ({
           index: u.index,
           uuid: validUUID,
           url,
@@ -238,7 +241,7 @@ describe('network ', () => {
       expect(staticGetDownloadLinks).toHaveBeenCalled();
       expect(callStub.firstCall.args).toEqual([
         `/buckets/${idBucket}/files/${file}/info`,
-        { ...headers, 'x-api-version': '2' }
+        { ...headers, 'x-api-version': '2' },
       ]);
     });
 
@@ -280,15 +283,14 @@ function clientAndHeadersWithBasicAuth(
     desktopHeader,
   };
   const client = Network.client(apiUrl, appDetails, auth);
-  const headers = headersWithBasicAuth(
+  const headers = headersWithBasicAuth({
     clientName,
     clientVersion,
-    {
+    auth: {
       username: auth.bridgeUser,
       password: auth.userId,
     },
-    undefined,
-    { 'x-internxt-desktop-header': desktopHeader},
-  );
+    desktopToken: desktopHeader,
+  });
   return { client, headers };
 }

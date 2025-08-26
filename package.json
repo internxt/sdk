@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.10.13",
+  "version": "1.11.0",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -26,22 +26,22 @@
     "format": "prettier src/**/*.ts"
   },
   "devDependencies": {
-    "@internxt/eslint-config-internxt": "2.0.0",
+    "@internxt/eslint-config-internxt": "2.0.1",
     "@internxt/prettier-config": "1.0.2",
     "@types/jest": "30.0.0",
     "@types/sinon": "17.0.4",
     "@types/uuid": "10.0.0",
-    "eslint": "9.29.0",
+    "eslint": "9.34.0",
     "husky": "9.1.7",
-    "jest": "30.0.3",
-    "lint-staged": "16.1.2",
-    "prettier": "3.6.1",
+    "jest": "30.0.5",
+    "lint-staged": "16.1.5",
+    "prettier": "3.6.2",
     "sinon": "21.0.0",
-    "ts-jest": "29.4.0",
-    "typescript": "5.8.3"
+    "ts-jest": "29.4.1",
+    "typescript": "5.9.2"
   },
   "dependencies": {
-    "axios": "1.10.0",
+    "axios": "1.11.0",
     "uuid": "11.1.0"
   },
   "lint-staged": {
