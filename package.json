@@ -23,7 +23,7 @@
     "test:cov": "jest --coverage",
     "build": "tsc",
     "lint": "eslint ./src",
-    "format": "prettier src/**/*.ts",
+    "format": "prettier src/**/*.ts --write",
     "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.d.ts && prettier ./src/schema.d.ts --write"
   },
   "devDependencies": {
@@ -48,7 +48,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,tsx,ts}": [
-      "prettier --write"
+      "yarn format"
     ]
   }
 }
