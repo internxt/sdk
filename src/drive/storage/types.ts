@@ -416,10 +416,6 @@ export interface FetchLimitResponse {
   maxSpaceBytes: number;
 }
 
-export interface AddItemsToTrashPayload {
-  items: Array<{ id?: string; uuid?: string; type: string }>;
-}
-
 export interface SearchResult {
   id: string;
   itemId: string;
