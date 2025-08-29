@@ -1,3 +1,4 @@
+import { paths } from '../../schema';
 import { Token } from '../../auth';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { CustomHeaders, addResourcesTokenToHeaders, headersWithToken } from '../../shared/headers';
@@ -5,7 +6,6 @@ import { HttpClient, RequestCanceler } from '../../shared/http/client';
 import { UUID } from '../../shared/types/userSettings';
 import { ItemType } from './../../workspaces/types';
 import {
-  AddItemsToTrashPayload,
   CheckDuplicatedFilesPayload,
   CheckDuplicatedFilesResponse,
   CheckDuplicatedFolderPayload,
@@ -613,7 +613,9 @@ export class Storage {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
+  public addItemsToTrash(
+    payload: paths['/storage/trash/add']['post']['requestBody']['content']['application/json'],
+  ): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {

@@ -866,8 +866,8 @@ describe('# storage service tests', () => {
           const { client, headers } = clientAndHeaders({});
           const callStub = sinon.stub(httpClient, 'post').resolves(true);
           const itemsToTrash = [
-            { id: 'id1', type: 'file' },
-            { id: 'id2', type: 'folder' },
+            { id: 'id1', uuid: 'uuid1', type: 'file' as const },
+            { id: 'id2', uuid: 'uuid2', type: 'folder' as const },
           ];
 
           // Act

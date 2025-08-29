@@ -1,7 +1,3 @@
-export interface AddItemsToTrashPayload {
-  items: Array<{ id?: string; uuid?: string; type: string }>;
-}
-
 export interface DeleteFilePayload {
   fileId: number;
   folderId: number;

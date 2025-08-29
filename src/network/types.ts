@@ -81,29 +81,28 @@ export type DownloadFileFunction = (downloadables: DownloadableShard[], fileSize
 export type BinaryData = {
   slice: (from: number, to: number) => BinaryData;
   toString(encoding: 'hex'): string;
-}
+};
 
 export enum BinaryDataEncoding {
-  HEX = 'hex'
+  HEX = 'hex',
 }
 
 export type ToBinaryDataFunction = (input: string, encoding: BinaryDataEncoding) => BinaryData;
 
-
 export enum SymmetricCryptoAlgorithm {
-  AES256CTR = 'AES256CTR'
+  AES256CTR = 'AES256CTR',
 }
 
 export type Algorithm = {
-  type: SymmetricCryptoAlgorithm
-  ivSize: number
+  type: SymmetricCryptoAlgorithm;
+  ivSize: number;
 };
 
 export const ALGORITHMS: Record<SymmetricCryptoAlgorithm, Algorithm> = {
   [SymmetricCryptoAlgorithm.AES256CTR]: {
     type: SymmetricCryptoAlgorithm.AES256CTR,
-    ivSize: 32
-  }
+    ivSize: 32,
+  },
 };
 
 export type Crypto = {
@@ -111,17 +110,17 @@ export type Crypto = {
   validateMnemonic: (mnemonic: string) => boolean;
   randomBytes: (bytesLength: number) => BinaryData;
   generateFileKey: (mnemonic: string, bucketId: string, index: BinaryData | string) => Promise<BinaryData>;
-}
+};
 
 export type EncryptFileFunction = (
   algorithm: SymmetricCryptoAlgorithm,
   key: BinaryData,
-  iv: BinaryData
+  iv: BinaryData,
 ) => Promise<void>;
 
 export type DecryptFileFunction = (
   algorithm: SymmetricCryptoAlgorithm,
   key: BinaryData,
   iv: BinaryData,
-  fileSize: number
+  fileSize: number,
 ) => Promise<void>;

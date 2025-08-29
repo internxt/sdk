@@ -23,7 +23,8 @@
     "test:cov": "jest --coverage",
     "build": "tsc",
     "lint": "eslint ./src",
-    "format": "prettier src/**/*.ts"
+    "format": "prettier src/**/*.ts --write",
+    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.d.ts && prettier ./src/schema.d.ts --write"
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.0.1",
@@ -35,6 +36,7 @@
     "husky": "9.1.7",
     "jest": "30.0.5",
     "lint-staged": "16.1.5",
+    "openapi-typescript": "^7.9.1",
     "prettier": "3.6.2",
     "sinon": "21.0.0",
     "ts-jest": "29.4.1",
@@ -46,7 +48,7 @@
   },
   "lint-staged": {
     "*.{js,jsx,tsx,ts}": [
-      "prettier --write"
+      "yarn format"
     ]
   }
 }
