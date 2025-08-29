@@ -1,4 +1,4 @@
-import { paths } from 'src/schema';
+import { paths } from '../../schema';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
