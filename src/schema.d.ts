@@ -3387,7 +3387,7 @@ export interface components {
       itemId: Record<string, never>;
       /**
        * @description The type of the resource to share
-       * @example file | folder
+       * @example file |folder
        */
       itemType: Record<string, never>;
       /**
