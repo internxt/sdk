@@ -25,12 +25,12 @@ export interface UserSettings {
     ecc: {
       publicKey: string;
       privateKey: string;
-    }
+    };
     kyber: {
       publicKey: string;
       privateKey: string;
-    }
-  }
+    };
+  };
   teams?: boolean;
   appSumoDetails: AppSumoDetails | null;
   registerCompleted: boolean;

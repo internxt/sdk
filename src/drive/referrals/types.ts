@@ -14,10 +14,10 @@ export enum ReferralKey {
 }
 
 export interface UserReferral {
-  key: ReferralKey
-  steps: number
-  completedSteps: number
-  isCompleted: boolean
-  credit: number
-  type: ReferralType
+  key: ReferralKey;
+  steps: number;
+  completedSteps: number;
+  isCompleted: boolean;
+  credit: number;
+  type: ReferralType;
 }
