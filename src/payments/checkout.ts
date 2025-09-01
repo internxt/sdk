@@ -37,11 +37,13 @@ export class Checkout {
     customerName,
     postalCode,
     country,
+    captchaToken,
     companyVatId,
   }: {
     customerName: string;
     postalCode: string;
     country: string;
+    captchaToken: string;
     companyVatId?: string;
   }): Promise<{
     customerId: string;
@@ -51,6 +53,7 @@ export class Checkout {
     query.set('customerName', customerName);
     query.set('country', country);
     query.set('postalCode', postalCode);
+    query.set('captchaToken', captchaToken);
     if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
     return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
   }
