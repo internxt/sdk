@@ -77,6 +77,7 @@ export class Checkout {
     priceId,
     token,
     currency,
+    captchaToken,
     promoCodeId,
     quantity,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
@@ -87,6 +88,7 @@ export class Checkout {
         priceId,
         token,
         currency,
+        captchaToken,
         promoCodeId,
         quantity,
       },
@@ -116,6 +118,7 @@ export class Checkout {
     priceId,
     token,
     currency,
+    captchaToken,
     promoCodeId,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
@@ -125,6 +128,7 @@ export class Checkout {
         priceId,
         token,
         currency,
+        captchaToken,
         promoCodeId,
       },
       this.authHeaders(),

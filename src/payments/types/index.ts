@@ -4,6 +4,7 @@ export interface CreateSubscriptionPayload {
   customerId: string;
   priceId: string;
   token: string;
+  captchaToken: string;
   currency?: string;
   promoCodeId?: string;
   quantity?: number;
@@ -14,6 +15,7 @@ export interface CreatePaymentIntentPayload {
   priceId: string;
   token: string;
   currency: string;
+  captchaToken: string;
   promoCodeId?: string;
 }
 
