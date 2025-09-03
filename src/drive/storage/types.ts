@@ -1,3 +1,4 @@
+import { paths } from '../../schema';
 import { SharingMeta } from '../share/types';
 import { UserResumeData } from '../users/types';
 
@@ -415,6 +416,8 @@ export type UsageResponseV2 = {
 export interface FetchLimitResponse {
   maxSpaceBytes: number;
 }
+
+export type AddItemsToTrashPayload = paths['/storage/trash/add']['post']['requestBody']['content']['application/json'];
 
 export interface SearchResult {
   id: string;
