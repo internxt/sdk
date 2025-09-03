@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.11.2",
+  "version": "1.11.3",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "prepare": "husky",
     "test": "jest --detectOpenHandles test/",
     "test:cov": "jest --coverage",
-    "build": "tsc",
+    "build": "tsc && cp ./src/schema.d.ts ./dist/",
     "lint": "eslint ./src",
     "format": "prettier src/**/*.ts --write",
     "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.d.ts && prettier ./src/schema.d.ts --write"

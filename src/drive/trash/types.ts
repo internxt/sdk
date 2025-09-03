@@ -1,3 +1,7 @@
+import { paths } from '../../schema';
+
+export type AddItemsToTrashPayload = paths['/storage/trash/add']['post']['requestBody']['content']['application/json'];
+
 export interface DeleteFilePayload {
   fileId: number;
   folderId: number;

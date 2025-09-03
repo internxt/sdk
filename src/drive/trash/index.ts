@@ -1,9 +1,13 @@
-import { paths } from '../../schema';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
-import { DeleteFilePayload, DeleteItemsPermanentlyByUUIDPayload, DeleteItemsPermanentlyPayload } from './types';
+import {
+  AddItemsToTrashPayload,
+  DeleteFilePayload,
+  DeleteItemsPermanentlyByUUIDPayload,
+  DeleteItemsPermanentlyPayload,
+} from './types';
 
 export * as TrashTypes from './types';
 
@@ -104,9 +108,7 @@ export class Trash {
    * Add Items to Trash
    * @param payload
    */
-  public addItemsToTrash(
-    payload: paths['/storage/trash/add']['post']['requestBody']['content']['application/json'],
-  ): Promise<void> {
+  public addItemsToTrash(payload: AddItemsToTrashPayload): Promise<void> {
     return this.client.post(
       '/storage/trash/add',
       {
