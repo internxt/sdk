@@ -23,6 +23,7 @@ describe('Meet service tests', () => {
         token: 'call-token',
         room: 'room-id',
         paxPerCall: 10,
+        appId: 'app-id',
       };
 
       const { client, headers } = clientAndHeadersWithToken();
@@ -57,6 +58,7 @@ describe('Meet service tests', () => {
       token: 'join-token',
       room: 'room-id',
       userId: 'user-123',
+      appId: 'app-id',
     };
 
     it('should join a call successfully with token', async () => {
