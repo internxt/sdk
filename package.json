@@ -21,10 +21,10 @@
     "prepare": "husky",
     "test": "jest --detectOpenHandles test/",
     "test:cov": "jest --coverage",
-    "build": "tsc && cp ./src/schema.d.ts ./dist/",
+    "build": "tsc",
     "lint": "eslint ./src",
     "format": "prettier src/**/*.ts --write",
-    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.d.ts && prettier ./src/schema.d.ts --write"
+    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && prettier ./src/schema.ts --write"
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.0.1",
