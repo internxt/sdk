@@ -98,6 +98,7 @@ export class Storage {
   /**
    * Moves a specific folder to a new location
    * @param payload
+   * @deprecated Use `moveFolderByUuid` instead.
    */
   public async moveFolder(payload: MoveFolderPayload): Promise<MoveFolderResponse> {
     return this.client.post(
@@ -114,14 +115,8 @@ export class Storage {
    * Moves a specific folder to a new location
    * @param payload
    */
-  public async moveFolderByUuid(payload: MoveFolderUuidPayload): Promise<FolderMeta> {
-    return this.client.patch(
-      `/folders/${payload.folderUuid}`,
-      {
-        destinationFolder: payload.destinationFolderUuid,
-      },
-      this.headers(),
-    );
+  public async moveFolderByUuid(uuid: string, payload: MoveFolderUuidPayload): Promise<FolderMeta> {
+    return this.client.patch(`/folders/${uuid}`, payload, this.headers());
   }
 
   /**
@@ -553,6 +548,7 @@ export class Storage {
   /**
    * Updates the persisted path of a file entry
    * @param payload
+   * @deprecated Use `moveFileByUuid` instead.
    */
   public moveFile(payload: MoveFilePayload): Promise<MoveFileResponse> {
     return this.client.post(
@@ -571,14 +567,8 @@ export class Storage {
    * Moves a specific file to a new location
    * @param payload
    */
-  public async moveFileByUuid(payload: MoveFileUuidPayload): Promise<FileMeta> {
-    return this.client.patch(
-      `/files/${payload.fileUuid}`,
-      {
-        destinationFolder: payload.destinationFolderUuid,
-      },
-      this.headers(),
-    );
+  public async moveFileByUuid(uuid: string, payload: MoveFileUuidPayload): Promise<FileMeta> {
+    return this.client.patch(`/files/${uuid}`, payload, this.headers());
   }
 
   /**

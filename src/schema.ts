@@ -2420,6 +2420,50 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get user notifications
+     * @description Retrieves all notifications for the authenticated user. Notifications will be retrieved just once.
+     */
+    get: operations['NotificationsController_getUserNotifications'];
+    put?: never;
+    /**
+     * Create a new notification
+     * @description Creates a new notification
+     */
+    post: operations['NotificationsController_createNotification'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/{id}/expire': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Mark notification as expired
+     * @description Marks a notification as expired by setting its expiration date to now
+     */
+    patch: operations['NotificationsController_markNotificationAsExpired'];
+    trace?: never;
+  };
   '/storage/trash/paginated': {
     parameters: {
       query?: never;
@@ -2918,6 +2962,16 @@ export interface components {
        * @example 366be646-6d67-436e-8cb6-4b275dfe1729
        */
       destinationFolder: string;
+      /**
+       * @description New file name (optional). Specify it to rename the file when moving, or send it empty to remove the current name.
+       * @example newName
+       */
+      name?: string;
+      /**
+       * @description New file extension (optional). Specify it to change the extension when moving the file, or send it empty to remove the extension.
+       * @example pdf
+       */
+      type?: string;
     };
     CreateThumbnailDto: {
       /**
@@ -3103,6 +3157,11 @@ export interface components {
        * @example 366be646-6d67-436e-8cb6-4b275dfe1729
        */
       destinationFolder: string;
+      /**
+       * @description New folder name (optional). Specify it to rename the folder when moving
+       * @example newName
+       */
+      name?: string;
     };
     SetSharingPasswordDto: {
       /**
@@ -4274,6 +4333,103 @@ export interface components {
     };
     CreateDeviceAsFolderDto: {
       deviceName: string;
+    };
+    NotificationWithStatusDto: {
+      /**
+       * @description Unique identifier for the notification
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description URL link for the notification
+       * @example https://internxt.com/promotions/black-friday
+       */
+      link: string;
+      /**
+       * @description Notification message content
+       * @example Black Friday Sale - 50% off all plans!
+       */
+      message: string;
+      /**
+       * Format: date-time
+       * @description Optional expiration date for the notification
+       * @example 2024-12-31T23:59:59.000Z
+       */
+      expiresAt: string | null;
+      /**
+       * Format: date-time
+       * @description Creation timestamp
+       * @example 2024-01-01T00:00:00.000Z
+       */
+      createdAt: string;
+      /**
+       * @description Whether the notification has been read by the user
+       * @example true
+       */
+      isRead: boolean;
+      /**
+       * Format: date-time
+       * @description When the notification was delivered to the user
+       * @example 2024-01-01T00:00:00.000Z
+       */
+      deliveredAt: string;
+      /**
+       * Format: date-time
+       * @description When the notification was read by the user
+       * @example 2024-01-01T12:00:00.000Z
+       */
+      readAt: string | null;
+    };
+    CreateNotificationDto: {
+      /**
+       * @description URL link for the notification
+       * @example https://internxt.com/promotions/black-friday
+       */
+      link: string;
+      /**
+       * @description Notification message content
+       * @example Black Friday Sale - 50% off all plans!
+       */
+      message: string;
+      /**
+       * @description Target user email, if missing, notification is sent to everyone
+       * @example test@interxt.com
+       */
+      email?: string;
+      /**
+       * @description Optional expiration date for the notification
+       * @example 2024-12-31T23:59:59Z
+       */
+      expiresAt?: string;
+    };
+    NotificationResponseDto: {
+      /**
+       * @description Unique identifier for the notification
+       * @example 123e4567-e89b-12d3-a456-426614174000
+       */
+      id: string;
+      /**
+       * @description URL link for the notification
+       * @example https://internxt.com/promotions/black-friday
+       */
+      link: string;
+      /**
+       * @description Notification message content
+       * @example Black Friday Sale - 50% off all plans!
+       */
+      message: string;
+      /**
+       * Format: date-time
+       * @description Optional expiration date for the notification
+       * @example 2024-12-31T23:59:59.000Z
+       */
+      expiresAt: string | null;
+      /**
+       * Format: date-time
+       * @description Creation timestamp
+       * @example 2024-01-01T00:00:00.000Z
+       */
+      createdAt: string;
     };
     ItemToTrashDto: {
       /**
@@ -8348,6 +8504,72 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  NotificationsController_getUserNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User notifications retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationWithStatusDto'][];
+        };
+      };
+    };
+  };
+  NotificationsController_createNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateNotificationDto'];
+      };
+    };
+    responses: {
+      /** @description Notification created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationResponseDto'];
+        };
+      };
+    };
+  };
+  NotificationsController_markNotificationAsExpired: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification marked as expired successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationResponseDto'];
+        };
       };
     };
   };

@@ -347,10 +347,7 @@ export interface MoveFolderPayload {
   destinationFolderId: number;
 }
 
-export interface MoveFolderUuidPayload {
-  folderUuid: string;
-  destinationFolderUuid: string;
-}
+export type MoveFolderUuidPayload = paths['/folders/{uuid}']['patch']['requestBody']['content']['application/json'];
 
 export interface MoveFolderResponse {
   item: DriveFolderData;
@@ -390,10 +387,7 @@ export interface MoveFilePayload {
   bucketId: string;
 }
 
-export interface MoveFileUuidPayload {
-  fileUuid: string;
-  destinationFolderUuid: string;
-}
+export type MoveFileUuidPayload = paths['/files/{uuid}']['patch']['requestBody']['content']['application/json'];
 
 export interface MoveFileResponse {
   item: DriveFileData;
