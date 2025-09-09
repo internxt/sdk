@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.11.5",
+  "version": "1.11.6",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -24,7 +24,7 @@
     "build": "tsc",
     "lint": "eslint ./src",
     "format": "prettier src/**/*.ts --write",
-    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && prettier ./src/schema.ts --write"
+    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format"
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.0.1",

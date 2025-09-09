@@ -280,16 +280,7 @@ export interface FileEntry {
   encrypt_version: EncryptionVersion;
 }
 
-export interface FileEntryByUuid {
-  id: string;
-  type: string;
-  size: number;
-  name: string;
-  plain_name: string;
-  bucket: string;
-  folder_id: string;
-  encrypt_version: EncryptionVersion;
-}
+export type FileEntryByUuid = paths['/files']['post']['requestBody']['content']['application/json'];
 
 export interface ThumbnailEntry {
   file_id: number;
