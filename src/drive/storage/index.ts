@@ -396,6 +396,7 @@ export class Storage {
   /**
    * Creates a new file entry
    * @param fileEntry
+   * @deprecated Use `createFileEntryByUuid` instead.
    */
   public createFileEntry(fileEntry: FileEntry, resourcesToken?: Token): Promise<DriveFileData> {
     return this.client.post(
@@ -421,20 +422,7 @@ export class Storage {
    * @param fileEntry
    */
   public createFileEntryByUuid(fileEntry: FileEntryByUuid, resourcesToken?: string): Promise<DriveFileData> {
-    return this.client.post(
-      '/files',
-      {
-        name: fileEntry.name,
-        bucket: fileEntry.bucket,
-        fileId: fileEntry.id,
-        encryptVersion: fileEntry.encrypt_version,
-        folderUuid: fileEntry.folder_id,
-        size: fileEntry.size,
-        plainName: fileEntry.plain_name,
-        type: fileEntry.type,
-      },
-      addResourcesTokenToHeaders(this.headers(), resourcesToken),
-    );
+    return this.client.post('/files', fileEntry, addResourcesTokenToHeaders(this.headers(), resourcesToken));
   }
 
   /**
