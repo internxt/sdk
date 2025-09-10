@@ -1,5 +1,4 @@
 import { paths } from '../../schema';
-import { SharingMeta } from '../share/types';
 import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
@@ -163,62 +162,17 @@ export enum FileStatus {
   DELETED = 'DELETED',
 }
 
-export interface FetchPaginatedFile {
-  id: number;
-  uuid: string;
-  fileId: string;
-  name: string;
-  type: string;
-  size: bigint;
-  bucket: string;
-  folderId: number;
-  folder?: any;
-  folderUuid: string;
-  encryptVersion: string;
-  deleted: boolean;
-  deletedAt: Date | null;
-  removed: boolean;
-  removedAt: Date | null;
-  userId: number;
-  user?: any;
-  modificationTime: Date;
-  plainName: string;
-  createdAt: Date;
-  updatedAt: Date;
-  status: FileStatus;
-  shares?: ShareLink[];
-  thumbnails?: Thumbnail[];
-  sharings?: SharingMeta[];
-}
+export type FetchPaginatedFile =
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json']['files'][0];
 
-export interface FetchPaginatedFolder {
-  id: number;
-  parentId: number;
-  parentUuid: string;
-  parent?: any;
-  name: string;
-  bucket: string;
-  userId: number;
-  uuid: string;
-  user?: any;
-  plainName: string;
-  encryptVersion: string;
-  deleted: boolean;
-  removed: boolean;
-  deletedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
-  removedAt: Date | null;
-  sharings?: SharingMeta[];
-}
+export type FetchPaginatedFolder =
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json']['folders'][0];
 
-export interface FetchPaginatedFilesContent {
-  files: FetchPaginatedFile[];
-}
+export type FetchPaginatedFilesContent =
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json'];
 
-export interface FetchPaginatedFoldersContent {
-  folders: FetchPaginatedFolder[];
-}
+export type FetchPaginatedFoldersContent =
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'];
 
 export interface FetchTrashContentResponse {
   result: {
