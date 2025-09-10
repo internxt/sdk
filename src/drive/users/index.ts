@@ -1,3 +1,4 @@
+import { paths } from '../../schema';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { basicHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
@@ -72,10 +73,7 @@ export class Users {
   /**
    * Returns fresh data of the user
    */
-  public refreshUser(): Promise<{
-    user: UserSettings;
-    token: string;
-  }> {
+  public refreshUser(): Promise<paths['/users/refresh']['get']['responses']['200']['content']['application/json']> {
     return this.client.get('/user/refresh', this.headers());
   }
 
