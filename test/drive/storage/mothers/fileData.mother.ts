@@ -1,4 +1,4 @@
-import { DriveFileData } from '../../../../src/drive/storage/types';
+import { DriveFileData, FileMeta } from '../../../../src/drive/storage/types';
 
 export function randomFileData(): DriveFileData {
   return <DriveFileData>{
@@ -15,6 +15,28 @@ export function randomFileData(): DriveFileData {
     name: '',
     size: 0,
     type: '',
-    updatedAt: ''
+    updatedAt: '',
+  };
+}
+
+export function randomFileMetaData(): FileMeta {
+  return {
+    bucket: '',
+    createdAt: '',
+    creationTime: '',
+    encryptVersion: '',
+    fileId: '',
+    folderId: 0,
+    folderUuid: '',
+    id: 0,
+    modificationTime: '',
+    name: '',
+    plainName: '',
+    size: '',
+    status: 'EXISTS',
+    type: '',
+    updatedAt: '',
+    uuid: '',
+    userId: 0,
   };
 }

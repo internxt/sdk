@@ -50,6 +50,8 @@ export interface DriveFileData {
   sharings?: { type: string; id: string }[];
   uuid: string;
   user?: UserResumeData;
+  creationTime?: string;
+  modificationTime?: string;
 }
 
 export interface Thumbnail {
@@ -112,30 +114,7 @@ export interface FetchFolderContentResponse {
   files: DriveFileData[];
 }
 
-export interface FileMeta {
-  bucket: string;
-  createdAt: string;
-  created_at: string;
-  deleted: boolean;
-  deletedAt: null;
-  encrypt_version: string;
-  fileId: string;
-  folderId: number;
-  folder_id: number;
-  folderUuid: string;
-  id: number;
-  name: string;
-  plain_name: string | null;
-  plainName?: string | null;
-  size: number;
-  type: string;
-  updatedAt: string;
-  status: string;
-  thumbnails: Array<Thumbnail>;
-  currentThumbnail: Thumbnail | null;
-  shares?: Array<ShareLink>;
-  uuid: string;
-}
+export type FileMeta = paths['/files/{uuid}/meta']['get']['responses']['200']['content']['application/json'];
 
 export interface ShareLink {
   id: string;

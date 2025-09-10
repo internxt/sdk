@@ -8,7 +8,6 @@ import {
   DriveFolderData,
   EncryptionVersion,
   FetchPaginatedFolderContentResponse,
-  FileMeta,
   FolderAncestorWorkspace,
   MoveFolderPayload,
   MoveFolderResponse,
@@ -17,7 +16,7 @@ import {
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { CustomHeaders, headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
-import { randomFileData } from './mothers/fileData.mother';
+import { randomFileData, randomFileMetaData } from './mothers/fileData.mother';
 import {
   randomFolderContentResponse,
   randomSubfilesResponse,
@@ -696,7 +695,7 @@ describe('# storage service tests', () => {
       it('When a fileId is provided without a workspaceToken then it should call getCancellable with the correct URL and headers', async () => {
         // Arrange
         const fileUUID = v4();
-        const response = randomFileData() as FileMeta;
+        const response = randomFileMetaData();
         const callStub = sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
@@ -718,7 +717,7 @@ describe('# storage service tests', () => {
       it('When a fileId is provided with a workspaceToken then it should call getCancellable with the correct URL and custom headers', async () => {
         // Arrange
         const fileUUID = v4();
-        const response = randomFileData() as FileMeta;
+        const response = randomFileMetaData();
         const callStub = sinon.stub(httpClient, 'getCancellable').returns({
           promise: Promise.resolve(response),
           requestCanceler: {
