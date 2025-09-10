@@ -85,7 +85,7 @@ describe('# users service tests', () => {
       const body = await client.refreshUser();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/user/refresh', headers]);
+      expect(callStub.firstCall.args).toEqual(['/users/refresh', headers]);
       expect(body).toEqual({
         user: {},
         token: 't',

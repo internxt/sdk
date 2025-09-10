@@ -74,7 +74,7 @@ export class Users {
    * Returns fresh data of the user
    */
   public refreshUser(): Promise<paths['/users/refresh']['get']['responses']['200']['content']['application/json']> {
-    return this.client.get('/user/refresh', this.headers());
+    return this.client.get('/users/refresh', this.headers());
   }
 
   /**
