@@ -8,7 +8,8 @@ export interface CreateCallResponse {
 export interface JoinCallPayload {
   name: string;
   lastname: string;
-  anonymous: boolean;
+  anonymous?: boolean;
+  anonymousId?: string;
 }
 
 export interface JoinCallResponse {
