@@ -1,8 +1,8 @@
-interface AntivirusFeatures {
+export interface AntivirusFeatures {
   enabled: boolean;
 }
 
-interface BackupsFeatures {
+export interface BackupsFeatures {
   enabled: boolean;
 }
 
@@ -15,14 +15,20 @@ export interface DriveFeatures {
     maximumSeats: number;
     maxSpaceBytesPerSeat: number;
   };
+  passwordProtectedSharing: {
+    enabled: boolean;
+  };
+  restrictedItemsSharing: {
+    enabled: boolean;
+  };
 }
 
-interface MeetFeatures {
+export interface MeetFeatures {
   enabled: boolean;
   paxPerCall: number;
 }
 
-interface MailFeatures {
+export interface MailFeatures {
   enabled: boolean;
   addressesPerUser: number;
 }
@@ -36,6 +42,10 @@ export interface CleanerFeatures {
   enabled: boolean;
 }
 
+export interface DarkMonitorFeatures {
+  enabled: boolean;
+}
+
 export enum Service {
   Drive = 'drive',
   Backups = 'backups',
@@ -44,6 +54,7 @@ export enum Service {
   Mail = 'mail',
   Vpn = 'vpn',
   Cleaner = 'cleaner',
+  darkMonitor = 'darkMonitor',
 }
 
 export interface Tier {
@@ -59,5 +70,6 @@ export interface Tier {
     [Service.Mail]: MailFeatures;
     [Service.Vpn]: VpnFeatures;
     [Service.Cleaner]: CleanerFeatures;
+    [Service.darkMonitor]: DarkMonitorFeatures;
   };
 }
