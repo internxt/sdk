@@ -15,6 +15,12 @@ export interface DriveFeatures {
     maximumSeats: number;
     maxSpaceBytesPerSeat: number;
   };
+  passwordProtectedSharing: {
+    enabled: boolean;
+  };
+  restrictedItemsSharing: {
+    enabled: boolean;
+  };
 }
 
 interface MeetFeatures {
@@ -32,7 +38,11 @@ export interface VpnFeatures {
   featureId: string;
 }
 
-export interface CleanerFeatures {
+interface CleanerFeatures {
+  enabled: boolean;
+}
+
+interface DarkMonitorFeatures {
   enabled: boolean;
 }
 
@@ -44,6 +54,7 @@ export enum Service {
   Mail = 'mail',
   Vpn = 'vpn',
   Cleaner = 'cleaner',
+  darkMonitor = 'darkMonitor',
 }
 
 export interface Tier {
@@ -59,5 +70,6 @@ export interface Tier {
     [Service.Mail]: MailFeatures;
     [Service.Vpn]: VpnFeatures;
     [Service.Cleaner]: CleanerFeatures;
+    [Service.darkMonitor]: DarkMonitorFeatures;
   };
 }
