@@ -1,8 +1,8 @@
-interface AntivirusFeatures {
+export interface AntivirusFeatures {
   enabled: boolean;
 }
 
-interface BackupsFeatures {
+export interface BackupsFeatures {
   enabled: boolean;
 }
 
@@ -23,12 +23,12 @@ export interface DriveFeatures {
   };
 }
 
-interface MeetFeatures {
+export interface MeetFeatures {
   enabled: boolean;
   paxPerCall: number;
 }
 
-interface MailFeatures {
+export interface MailFeatures {
   enabled: boolean;
   addressesPerUser: number;
 }
@@ -38,11 +38,11 @@ export interface VpnFeatures {
   featureId: string;
 }
 
-interface CleanerFeatures {
+export interface CleanerFeatures {
   enabled: boolean;
 }
 
-interface DarkMonitorFeatures {
+export interface DarkMonitorFeatures {
   enabled: boolean;
 }
 
