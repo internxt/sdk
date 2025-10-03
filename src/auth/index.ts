@@ -16,6 +16,7 @@ import {
   Token,
   TwoFactorAuthQR,
 } from './types';
+import { paths } from '../schema';
 
 export * from './types';
 
@@ -251,6 +252,41 @@ export class Auth {
         data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
         return data;
       });
+  }
+
+  /**
+   * Tries to log in a user given its cli login details
+   * @param details
+   * @param cryptoProvider
+   */
+  public async loginAccess(
+    details: LoginDetails,
+    cryptoProvider: CryptoProvider,
+  ): Promise<paths['/auth/cli/login/access']['post']['responses']['200']['content']['application/json']> {
+    const securityDetails = await this.securityDetails(details.email);
+    const encryptedSalt = securityDetails.encryptedSalt;
+    const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
+    const keys = await cryptoProvider.generateKeys(details.password);
+
+    return this.client.post(
+      '/auth/cli/login/access',
+      {
+        email: details.email,
+        password: encryptedPasswordHash,
+        tfa: details.tfaCode,
+        keys: {
+          ecc: {
+            publicKey: keys.ecc.publicKey,
+            privateKey: keys.ecc.privateKeyEncrypted,
+          },
+          kyber: {
+            publicKey: keys.kyber.publicKey,
+            privateKey: keys.kyber.privateKeyEncrypted,
+          },
+        },
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
