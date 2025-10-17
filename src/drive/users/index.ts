@@ -17,6 +17,7 @@ import {
   VerifyEmailChangeResponse,
 } from './types';
 
+import { UserKeys } from '../../auth/types';
 export * as UserTypes from './types';
 
 export class Users {
@@ -146,6 +147,41 @@ export class Users {
     );
   }
 
+  /**
+   * Updates the authentication credentials and invalidates previous tokens (New backend (drive-server-wip))
+   * @param payload
+   *
+   * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
+   */
+  public changePwdOpaqueStart(hmac: string, registrationRequest: string): Promise<{ registrationResponse: string }> {
+    return this.client.patch(
+      '/users/password-opaque/start',
+      {
+        hmac,
+        registrationRequest,
+      },
+      this.headers(),
+    );
+  }
+  public changePwdOpaqueFinish(
+    hmac: string,
+    registrationRecord: string,
+    mnemonic: string,
+    keys: UserKeys,
+    startLoginRequest: string,
+  ): Promise<{ loginResponse: string }> {
+    return this.client.patch(
+      '/users/password-opaque/finish',
+      {
+        hmac,
+        keys,
+        mnemonic,
+        registrationRecord,
+        startLoginRequest,
+      },
+      this.headers(),
+    );
+  }
   /**
    * Pre registers an email
    * @param email

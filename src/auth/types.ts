@@ -12,19 +12,25 @@ export interface LoginDetails {
 }
 
 export type UserKeys = {
-  privateKey: string;
-  publicKey: string;
-  privateKyberKey: string;
-  publicKyberKey: string;
+  ecc: {
+    publicKey: string;
+    privateKey: string;
+  };
+  kyber: {
+    publicKey: string;
+    privateKey: string;
+  };
 };
 
 export interface RegisterOpaqueDetails {
   name: string;
   lastname: string;
   email: Email;
-  encMnemonic: string;
-  encKeys: UserKeys;
+  mnemonic: string;
+  keys: UserKeys;
   captcha: string;
+  referrer?: string;
+  referral?: string;
 }
 
 export interface RegisterDetails {

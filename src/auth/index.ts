@@ -43,21 +43,17 @@ export class Auth {
    * @param registrationRecord
    * @param registerDetails
    */
-  public signupOpaqueStart(
+  public registerOpaqueStart(
     email: string,
     registrationRequest: string,
-    referrer?: string,
-    referral?: string,
   ): Promise<{
     signUpResponse: string;
   }> {
     return this.client.post(
-      '/signup-opaque/start',
+      '/register-opaque/start',
       {
         email,
         registrationRequest,
-        referral,
-        referrer,
       },
       this.basicHeaders(),
     );
@@ -68,33 +64,31 @@ export class Auth {
    * @param registrationRecord
    * @param registerDetails
    */
-  public signupOpaqueFinish(
+  public registerOpaqueFinish(
     registrationRecord: string,
     registerDetails: RegisterOpaqueDetails,
+    startLoginRequest: string,
   ): Promise<{
-    token: Token;
-    newToken: Token;
-    user: UserSettings;
-    uuid: UUID;
+    loginResponse: string;
   }> {
     return this.client.post(
-      '/signup-opaque/finish',
+      '/register-opaque/finish',
       {
         name: registerDetails.name,
-        captcha: registerDetails.captcha,
         lastname: registerDetails.lastname,
         email: registerDetails.email,
         registrationRecord,
         keys: {
           ecc: {
-            privateKey: registerDetails.encKeys.privateKey,
-            publicKey: registerDetails.encKeys.publicKey,
+            publicKey: registerDetails.keys.ecc.publicKey,
+            privateKey: registerDetails.keys.ecc.privateKey,
           },
           kyber: {
-            publicKey: registerDetails.encKeys.publicKyberKey,
-            privateKey: registerDetails.encKeys.privateKyberKey,
+            publicKey: registerDetails.keys.kyber.publicKey,
+            privateKey: registerDetails.keys.kyber.privateKey,
           },
         },
+        startLoginRequest,
       },
       this.basicHeaders(),
     );
@@ -295,13 +289,11 @@ export class Auth {
     finishLoginRequest: string,
   ): Promise<{
     token: Token;
-    newToken: Token;
     user: UserSettings;
     userTeam: TeamsSettings | null;
   }> {
     return this.client.post<{
       token: Token;
-      newToken: Token;
       user: UserSettings;
       userTeam: TeamsSettings | null;
     }>(
