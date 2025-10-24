@@ -153,11 +153,16 @@ export class Users {
    *
    * @returns {Promise<{token: string, newToken: string}>} A promise that returns new tokens for this user.
    */
-  public changePwdOpaqueStart(hmac: string, registrationRequest: string): Promise<{ registrationResponse: string }> {
+  public changePwdOpaqueStart(
+    hmac: string,
+    sessionID: string,
+    registrationRequest: string,
+  ): Promise<{ registrationResponse: string }> {
     return this.client.patch(
       '/users/password-opaque/start',
       {
         hmac,
+        sessionID,
         registrationRequest,
       },
       this.headers(),
@@ -165,6 +170,7 @@ export class Users {
   }
   public changePwdOpaqueFinish(
     hmac: string,
+    sessionID: string,
     registrationRecord: string,
     mnemonic: string,
     keys: UserKeys,
@@ -174,6 +180,7 @@ export class Users {
       '/users/password-opaque/finish',
       {
         hmac,
+        sessionID,
         keys,
         mnemonic,
         registrationRecord,

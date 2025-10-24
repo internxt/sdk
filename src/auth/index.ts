@@ -288,14 +288,12 @@ export class Auth {
     email: string,
     finishLoginRequest: string,
   ): Promise<{
-    token: Token;
+    sessionID: string;
     user: UserSettings;
-    userTeam: TeamsSettings | null;
   }> {
     return this.client.post<{
-      token: Token;
+      sessionID: string;
       user: UserSettings;
-      userTeam: TeamsSettings | null;
     }>(
       '/auth/login-opaque/finish',
       {
