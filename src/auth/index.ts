@@ -39,7 +39,7 @@ export class Auth {
   }
 
   /**
-   * Runs the fist phase (out of 2) of opaque registation of a new user
+   * Runs the first phase (out of 2) of opaque registation of a new user
    * @param email - The user email.
    * @param registrationRequest - The opaque registration request.
    * @returns The opaque sign up response.
@@ -257,7 +257,7 @@ export class Auth {
   }
 
   /**
-   * Runs the fist phase (out of 2) of opaque log for the given user
+   * Runs the first phase (out of 2) of opaque log for the given user
    * @param email - The user email.
    * @param startLoginRequest - The opaque start login request.
    * @param tfa - The two factor auth code.

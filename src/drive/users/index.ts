@@ -148,7 +148,7 @@ export class Users {
   }
 
   /**
-   * Runs the fist phase (out of 2) of the password change.
+   * Runs the first phase (out of 2) of the password change.
    * @param hmac - The HMAC to authenticate request.
    * @param sessionID - The current session ID.
    * @param registrationRequest - The opaque registration request.
