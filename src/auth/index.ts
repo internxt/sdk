@@ -39,9 +39,10 @@ export class Auth {
   }
 
   /**
-   * Tries to start opaque registation for a new user
-   * @param registrationRecord
-   * @param registerDetails
+   * Runs the fist phase (out of 2) of opaque registation of a new user
+   * @param email - The user email.
+   * @param registrationRequest - The opaque registration request.
+   * @returns The opaque sign up response.
    */
   public registerOpaqueStart(
     email: string,
@@ -60,9 +61,11 @@ export class Auth {
   }
 
   /**
-   * Tries to finish opaque registation for a new user
-   * @param registrationRecord
-   * @param registerDetails
+   * Runs the second phase (out of 2) of opaque registation of a new user
+   * @param registrationRecord - The opaque registration record.
+   * @param registerDetails - The user registration details.
+   * @param startLoginRequest - The opaque start login request.
+   * @returns The opaque login response.
    */
   public registerOpaqueFinish(
     registrationRecord: string,
@@ -254,10 +257,11 @@ export class Auth {
   }
 
   /**
-   * Tries to start opaque log for the given user
-   * @param email
-   * @param startLoginRequest
-   * @param tfa
+   * Runs the fist phase (out of 2) of opaque log for the given user
+   * @param email - The user email.
+   * @param startLoginRequest - The opaque start login request.
+   * @param tfa - The two factor auth code.
+   * @returns The opaque login response.
    */
   public async loginOpaqueStart(
     email: string,
@@ -280,7 +284,7 @@ export class Auth {
   }
 
   /**
-   * Tries to finish opaque log for the given user
+   * Runs the second phase (out of 2) of opaque log for the given user
    * @param email
    * @param finishLoginRequest
    */
@@ -475,7 +479,7 @@ export class Auth {
       .post<{
         sKey: string;
         tfa: boolean | null;
-        opaque: boolean | null;
+        useOpaqueLogin: boolean | null;
       }>(
         '/auth/login',
         {
@@ -487,7 +491,7 @@ export class Auth {
         return {
           encryptedSalt: data.sKey,
           tfaEnabled: data.tfa === true,
-          opaqueLogin: data.opaque === true,
+          useOpaqueLogin: data.useOpaqueLogin === true,
         };
       });
   }
