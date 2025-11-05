@@ -17,6 +17,7 @@ import {
   VerifyEmailChangeResponse,
 } from './types';
 
+import { UserKeys } from '../../auth/types';
 export * as UserTypes from './types';
 
 export class Users {
@@ -146,6 +147,60 @@ export class Users {
     );
   }
 
+  /**
+   * Runs the first phase (out of 2) of the password change.
+   * @param hmac - The HMAC to authenticate request.
+   * @param sessionID - The current session ID.
+   * @param registrationRequest - The opaque registration request.
+   * @returns {Promise<string>} A promise that returns opaque registration response.
+   */
+  public changePwdOpaqueStart(
+    hmac: string,
+    sessionID: string,
+    registrationRequest: string,
+  ): Promise<{ registrationResponse: string }> {
+    return this.client.patch(
+      '/users/password-opaque/start',
+      {
+        hmac,
+        sessionID,
+        registrationRequest,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Runs the second phase (out of 2) of the password change.
+   * @param hmac - The HMAC to authenticate request.
+   * @param sessionID - The current session ID.
+   * @param registrationRecord - The opaque registration record.
+   * @param mnemonic - The user's encrypted mnemonic.
+   * @param keys - The user's encrypted keys.
+   * @param startLoginRequest - The opaque start login request.
+   * @returns {Promise<string>} A promise that returns opaque login response.
+   */
+  public changePwdOpaqueFinish(
+    hmac: string,
+    sessionID: string,
+    registrationRecord: string,
+    mnemonic: string,
+    keys: UserKeys,
+    startLoginRequest: string,
+  ): Promise<{ loginResponse: string }> {
+    return this.client.patch(
+      '/users/password-opaque/finish',
+      {
+        hmac,
+        sessionID,
+        keys,
+        mnemonic,
+        registrationRecord,
+        startLoginRequest,
+      },
+      this.headers(),
+    );
+  }
   /**
    * Pre registers an email
    * @param email

@@ -610,6 +610,7 @@ describe('# auth service tests', () => {
         hasKeys: true,
         sKey: 'gibberish',
         tfa: true,
+        useOpaqueLogin: true,
       });
       const { client, headers } = clientAndHeaders();
       const email = 'my@email.com';
@@ -628,6 +629,7 @@ describe('# auth service tests', () => {
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
         tfaEnabled: true,
+        useOpaqueLogin: true,
       });
     });
 
@@ -648,6 +650,7 @@ describe('# auth service tests', () => {
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
         tfaEnabled: false,
+        useOpaqueLogin: false,
       });
     });
   });

@@ -10,6 +10,7 @@ import {
   LoginDetails,
   PrivateKeys,
   RegisterDetails,
+  RegisterOpaqueDetails,
   RegisterPreCreatedUser,
   RegisterPreCreatedUserResponse,
   SecurityDetails,
@@ -35,6 +36,65 @@ export class Auth {
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
     this.apiUrl = apiUrl;
+  }
+
+  /**
+   * Runs the first phase (out of 2) of opaque registation of a new user
+   * @param email - The user email.
+   * @param registrationRequest - The opaque registration request.
+   * @returns The opaque sign up response.
+   */
+  public registerOpaqueStart(
+    email: string,
+    registrationRequest: string,
+  ): Promise<{
+    signUpResponse: string;
+  }> {
+    return this.client.post(
+      '/register-opaque/start',
+      {
+        email,
+        registrationRequest,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Runs the second phase (out of 2) of opaque registation of a new user
+   * @param registrationRecord - The opaque registration record.
+   * @param registerDetails - The user registration details.
+   * @param startLoginRequest - The opaque start login request.
+   * @returns The opaque login response.
+   */
+  public registerOpaqueFinish(
+    registrationRecord: string,
+    registerDetails: RegisterOpaqueDetails,
+    startLoginRequest: string,
+  ): Promise<{
+    loginResponse: string;
+  }> {
+    return this.client.post(
+      '/register-opaque/finish',
+      {
+        name: registerDetails.name,
+        lastname: registerDetails.lastname,
+        email: registerDetails.email,
+        registrationRecord,
+        keys: {
+          ecc: {
+            publicKey: registerDetails.keys.ecc.publicKey,
+            privateKey: registerDetails.keys.ecc.privateKey,
+          },
+          kyber: {
+            publicKey: registerDetails.keys.kyber.publicKey,
+            privateKey: registerDetails.keys.kyber.privateKey,
+          },
+        },
+        startLoginRequest,
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
@@ -194,6 +254,58 @@ export class Auth {
    */
   public unblockAccount(token: string): Promise<void> {
     return this.client.put('users/unblock-account', { token }, this.basicHeaders());
+  }
+
+  /**
+   * Runs the first phase (out of 2) of opaque log for the given user
+   * @param email - The user email.
+   * @param startLoginRequest - The opaque start login request.
+   * @param tfa - The two factor auth code.
+   * @returns The opaque login response.
+   */
+  public async loginOpaqueStart(
+    email: string,
+    startLoginRequest: string,
+    tfa: string | undefined,
+  ): Promise<{
+    loginResponse: string;
+  }> {
+    return this.client.post<{
+      loginResponse: string;
+    }>(
+      '/auth/login-opaque/start',
+      {
+        email,
+        startLoginRequest,
+        tfa,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Runs the second phase (out of 2) of opaque log for the given user
+   * @param email
+   * @param finishLoginRequest
+   */
+  public async loginOpaqueFinish(
+    email: string,
+    finishLoginRequest: string,
+  ): Promise<{
+    sessionID: string;
+    user: UserSettings;
+  }> {
+    return this.client.post<{
+      sessionID: string;
+      user: UserSettings;
+    }>(
+      '/auth/login-opaque/finish',
+      {
+        email,
+        finishLoginRequest,
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
@@ -367,6 +479,7 @@ export class Auth {
       .post<{
         sKey: string;
         tfa: boolean | null;
+        useOpaqueLogin: boolean | null;
       }>(
         '/auth/login',
         {
@@ -378,6 +491,7 @@ export class Auth {
         return {
           encryptedSalt: data.sKey,
           tfaEnabled: data.tfa === true,
+          useOpaqueLogin: data.useOpaqueLogin === true,
         };
       });
   }

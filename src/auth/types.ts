@@ -11,6 +11,28 @@ export interface LoginDetails {
   tfaCode: string | undefined;
 }
 
+export type UserKeys = {
+  ecc: {
+    publicKey: string;
+    privateKey: string;
+  };
+  kyber: {
+    publicKey: string;
+    privateKey: string;
+  };
+};
+
+export interface RegisterOpaqueDetails {
+  name: string;
+  lastname: string;
+  email: Email;
+  mnemonic: string;
+  keys: UserKeys;
+  captcha: string;
+  referrer?: string;
+  referral?: string;
+}
+
 export interface RegisterDetails {
   name: string;
   lastname: string;
@@ -57,6 +79,7 @@ export class UserAccessError extends Error {}
 export interface SecurityDetails {
   encryptedSalt: string;
   tfaEnabled: boolean;
+  useOpaqueLogin: boolean;
 }
 
 export interface TwoFactorAuthQR {
