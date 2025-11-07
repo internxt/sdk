@@ -23,16 +23,6 @@ export function handleHealthCheckError(
   const responseTime = Date.now() - startTime;
   const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
-  // Debug: log the error structure to understand what we're receiving
-  reply.log.debug(
-    {
-      errorType: error?.constructor?.name,
-      errorKeys: error && typeof error === 'object' ? Object.keys(error) : [],
-      errorMessage,
-    },
-    'Error details for debugging',
-  );
-
   // Try to extract HTTP status code
   let httpStatus: number | undefined;
 
@@ -40,14 +30,12 @@ export function handleHealthCheckError(
     // Check for SDK AppError (has status property directly)
     if ('status' in error && typeof (error as { status?: unknown }).status === 'number') {
       httpStatus = (error as { status: number }).status;
-      reply.log.debug({ httpStatus, source: 'AppError' }, 'Found status from AppError');
     }
 
     // Check for axios-style error with response object
     if (httpStatus === undefined && 'response' in error) {
       const axiosError = error as { response?: { status?: number } };
       httpStatus = axiosError.response?.status;
-      reply.log.debug({ httpStatus, source: 'axios' }, 'Found status from axios error');
     }
 
     // Check for nested error with status in cause
@@ -55,12 +43,10 @@ export function handleHealthCheckError(
       const causeError = error as { cause?: { status?: number; response?: { status?: number } } };
       if (causeError.cause) {
         httpStatus = causeError.cause.status || causeError.cause.response?.status;
-        reply.log.debug({ httpStatus, source: 'cause' }, 'Found status from cause');
       }
     }
   }
 
-  reply.log.debug({ httpStatus, hasStatus: httpStatus !== undefined }, 'Final HTTP status extracted');
 
   if (httpStatus !== undefined) {
     if (httpStatus < 500) {
