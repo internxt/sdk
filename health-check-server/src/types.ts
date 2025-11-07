@@ -13,4 +13,7 @@ export interface Config {
   clientName: string;
   clientVersion: string;
   nodeEnv: string;
+  loginEmail: string;
+  loginPassword: string;
+  cryptoSecret: string;
 }

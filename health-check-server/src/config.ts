@@ -4,7 +4,15 @@ import { Config } from './types';
 loadEnv();
 
 function loadConfig(): Config {
-  const requiredVars = ['API_URL', 'AUTH_TOKEN', 'CLIENT_NAME', 'CLIENT_VERSION'];
+  const requiredVars = [
+    'API_URL',
+    'AUTH_TOKEN',
+    'CLIENT_NAME',
+    'CLIENT_VERSION',
+    'LOGIN_EMAIL',
+    'LOGIN_PASSWORD',
+    'CRYPTO_SECRET',
+  ];
 
   const missing = requiredVars.filter((varName) => !process.env[varName]);
 
@@ -22,6 +30,9 @@ function loadConfig(): Config {
     clientName: process.env.CLIENT_NAME!,
     clientVersion: process.env.CLIENT_VERSION!,
     nodeEnv: process.env.NODE_ENV || 'development',
+    loginEmail: process.env.LOGIN_EMAIL!,
+    loginPassword: process.env.LOGIN_PASSWORD!,
+    cryptoSecret: process.env.CRYPTO_SECRET!,
   };
 }
 
