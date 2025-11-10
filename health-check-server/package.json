@@ -11,10 +11,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@dashlane/pqc-kem-kyber512-node": "^1.0.0",
     "@fastify/env": "^4.4.0",
+    "bip39": "^3.1.0",
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
-    "fastify": "^4.28.1"
+    "fastify": "^4.28.1",
+    "openpgp": "^5.11.3"
   },
   "devDependencies": {
     "@types/crypto-js": "^4.2.2",
