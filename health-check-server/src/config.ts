@@ -12,6 +12,8 @@ function loadConfig(): Config {
     'LOGIN_EMAIL',
     'LOGIN_PASSWORD',
     'CRYPTO_SECRET',
+    'MAGIC_IV',
+    'MAGIC_SALT',
   ];
 
   const missing = requiredVars.filter((varName) => !process.env[varName]);
@@ -33,6 +35,8 @@ function loadConfig(): Config {
     loginEmail: process.env.LOGIN_EMAIL!,
     loginPassword: process.env.LOGIN_PASSWORD!,
     cryptoSecret: process.env.CRYPTO_SECRET!,
+    magicIv: process.env.MAGIC_IV!,
+    magicSalt: process.env.MAGIC_SALT!,
   };
 }
 

@@ -1,6 +1,7 @@
 import { Auth, CryptoProvider, Keys } from '../../../src/auth';
 import { config } from '../config';
 import { passToHash, encryptText, decryptText } from './crypto';
+import { getKeys } from './keys';
 
 let authClientInstance: Auth | null = null;
 
@@ -18,8 +19,7 @@ export const cryptoProvider: CryptoProvider = {
     const hashObj = passToHash({ password, salt });
     return encryptText(hashObj.hash);
   },
-  async generateKeys(_password: string): Promise<Keys> {
-    // required by interface
-    throw new Error('Key generation not supported in health check');
+  async generateKeys(password: string): Promise<Keys> {
+    return getKeys(password);
   },
 };

@@ -16,4 +16,6 @@ export interface Config {
   loginEmail: string;
   loginPassword: string;
   cryptoSecret: string;
+  magicIv: string;
+  magicSalt: string;
 }
