@@ -193,6 +193,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_getFolderFiles'];
     put?: never;
     post?: never;
@@ -209,6 +210,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_checkFileExistence'];
     put?: never;
     post?: never;
@@ -295,6 +297,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_getFolderFolders'];
     put?: never;
     post?: never;
@@ -313,6 +316,26 @@ export interface paths {
     };
     get: operations['FolderController_getFolder'];
     put: operations['FolderController_updateFolderMetadata'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/folders/{uuid}/stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get folder statistics
+     * @description Calculates the total number of files and total size including all nested subfolders
+     */
+    get: operations['FolderController_getFolderStats'];
+    put?: never;
     post?: never;
     delete?: never;
     options?: never;
@@ -359,6 +382,7 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_getFolderById'];
     put?: never;
     post?: never;
@@ -1747,7 +1771,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Get user credentials */
+    /**
+     * Get user credentials
+     * @deprecated
+     */
     get: operations['UserController_getUserCredentials'];
     put?: never;
     post?: never;
@@ -2164,6 +2191,26 @@ export interface paths {
     get: operations['UserController_generateMnemonic'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/users/payments/incomplete-checkout': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Handle incomplete checkout event
+     * @description Sends notification email when user abandons checkout process
+     */
+    post: operations['UserController_handleIncompleteCheckout'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2769,7 +2816,8 @@ export interface paths {
     delete: operations['GatewayController_destroyWorkspace'];
     options?: never;
     head?: never;
-    patch?: never;
+    /** Update workspace tier or storage */
+    patch: operations['GatewayController_updateWorkspace'];
     trace?: never;
   };
   '/gateway/workspaces/storage': {
@@ -2780,7 +2828,10 @@ export interface paths {
       cookie?: never;
     };
     get?: never;
-    /** Update a workspace */
+    /**
+     * Update a workspace (deprecated in favor of PATCH /workspaces)
+     * @deprecated
+     */
     put: operations['GatewayController_updateWorkspaceStorage'];
     post?: never;
     delete?: never;
@@ -2823,6 +2874,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/gateway/users/credentials': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get user credentials */
+    get: operations['GatewayController_getUserCredentials'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/gateway/users/storage/stackability': {
     parameters: {
       query?: never;
@@ -2855,6 +2923,47 @@ export interface paths {
     head?: never;
     /** Update user plan and storage */
     patch: operations['GatewayController_updateUser'];
+    trace?: never;
+  };
+  '/gateway/users/failed-payment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Handle failed payment notification
+     * @description Sends email notification to user when payment fails
+     */
+    post: operations['GatewayController_handleFailedPayment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gateway/users/{uuid}/limits/overrides': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get user limit overrides
+     * @description Returns all limit overrides assigned to a specific user. These overrides take precedence over tier limits.
+     */
+    get: operations['GatewayController_getUserLimitOverrides'];
+    /** @description Overrides a specific feature for a user. */
+    put: operations['GatewayController_overrideUserLimit'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
 }
@@ -3175,6 +3284,28 @@ export interface components {
     };
     ResultFoldersDto: {
       result: components['schemas']['FolderDto'][];
+    };
+    FolderStatsDto: {
+      /**
+       * @description Number of files in the folder and all subfolders
+       * @example 523
+       */
+      fileCount: number;
+      /**
+       * @description Whether file count is exact or capped at the maximum file count limit
+       * @example true
+       */
+      isFileCountExact: boolean;
+      /**
+       * @description Total size in bytes of all files in folder and subfolders
+       * @example 5368709120
+       */
+      totalSize: number;
+      /**
+       * @description Whether total size is exact or approximate due to exceeding the maximum items limit
+       * @example true
+       */
+      isTotalSizeExact: boolean;
     };
     UpdateFolderMetaDto: {
       /**
@@ -3920,7 +4051,7 @@ export interface components {
        */
       email: Record<string, never>;
     };
-    RefreshTokenUserResponseDto: {
+    UserResponseDto: {
       email: string;
       userId: string;
       mnemonic: string;
@@ -3935,25 +4066,54 @@ export interface components {
       registerCompleted: boolean;
       username: string;
       bridgeUser: string;
+      bucket: string;
       backupsBucket: string;
       avatar: string;
       emailVerified: boolean;
+      sharedWorkspace: boolean;
+      /** @deprecated */
+      hasReferralsProgram: boolean;
+      /** @deprecated */
+      teams: boolean;
       /** Format: date-time */
       lastPasswordChangedAt: string;
+      keys: components['schemas']['KeysDto'];
+      /** @deprecated */
+      privateKey: Record<string, never>;
+      /** @deprecated */
+      publicKey: Record<string, never>;
+      /** @deprecated */
+      revocateKey: Record<string, never>;
     };
-    RefreshTokenResponseDto: {
+    RefreshUserCredentialsDto: {
       /**
+       * @deprecated
        * @description The old token that has been replaced
-       * @example newToken1234567890
+       * @example oldToken1234567890
        */
-      token: string;
+      token?: string;
       /**
        * @description The new token to be used for authentication
        * @example oldToken1234567890
        */
       newToken: string;
       /** @description User information */
-      user: components['schemas']['RefreshTokenUserResponseDto'];
+      user: components['schemas']['UserResponseDto'];
+    };
+    RefreshUserTokensDto: {
+      /**
+       * @deprecated
+       * @description The old token that has been replaced
+       * @example oldToken1234567890
+       */
+      oldToken?: string;
+      /**
+       * @description The new token to be used for authentication
+       * @example oldToken1234567890
+       */
+      newToken: string;
+      /** @description User information */
+      user: components['schemas']['UserResponseDto'];
     };
     RefreshUserAvatarDto: {
       /** @description A new avatar URL for the given user */
@@ -4229,6 +4389,13 @@ export interface components {
        */
       mnemonic: string;
     };
+    IncompleteCheckoutDto: {
+      /**
+       * @description URL to complete the checkout process
+       * @example https://drive.internxt.com/checkout/complete
+       */
+      completeCheckoutUrl: string;
+    };
     FuzzySearchResult: {
       id: string;
       itemId: string;
@@ -4469,7 +4636,7 @@ export interface components {
        * @description Id of file or folder (deprecated in favor of uuid)
        * @example 4
        */
-      id: string | null;
+      id?: string;
       /**
        * @description Uuid of file or folder
        * @example 4
@@ -4629,12 +4796,12 @@ export interface components {
        * @description User password
        * @example password_example
        */
-      pass: string;
+      pass?: string;
       /**
        * @description Code tfa
        * @example 123456
        */
-      code: string;
+      code?: string;
     };
     CreateSendLinkDto: {
       /**
@@ -4682,6 +4849,11 @@ export interface components {
        */
       ownerId: string;
       /**
+       * @description Tier ID for the workspace
+       * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+       */
+      tierId?: string;
+      /**
        * @description Address of the workspace
        * @example Address from billing
        */
@@ -4701,6 +4873,28 @@ export interface components {
        * @example 20
        */
       numberOfSeats: number;
+    };
+    UpdateWorkspaceDto: {
+      /**
+       * @description UUID of the owner of the workspace
+       * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+       */
+      ownerId: string;
+      /**
+       * @description Tier ID to update workspace tier
+       * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+       */
+      tierId?: string;
+      /**
+       * @description Workspace max space in bytes (required if numberOfSeats is provided)
+       * @example 312321312
+       */
+      maxSpaceBytes?: number;
+      /**
+       * @description Number of seats in the workspace (required if maxSpaceBytes is provided)
+       * @example 5
+       */
+      numberOfSeats?: number;
     };
     UpdateWorkspaceStorageDto: {
       /**
@@ -4738,6 +4932,44 @@ export interface components {
        */
       tierId?: string;
     };
+    FailedPaymentDto: {
+      /**
+       * @description UUID of the user who had a failed payment
+       * @example 87204d6b-c4a7-4f38-bd99-f7f47964a643
+       */
+      userId: string;
+    };
+    UserLimitResponseDto: {
+      /**
+       * @description Limit ID
+       * @example a1b2c3d4-e5f6-7890-abcd-ef1234567890
+       */
+      id: string;
+      /**
+       * @description Limit label
+       * @example cli-access
+       */
+      label: string;
+      /**
+       * @description Limit type (boolean or counter)
+       * @example boolean
+       */
+      type: string;
+      /**
+       * @description Limit value
+       * @example true
+       */
+      value: string;
+    };
+    OverrideUserLimitDto: {
+      /**
+       * @description Feature name
+       * @example cli
+       */
+      feature: string;
+      /** @example true */
+      value: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -4750,12 +4982,19 @@ export interface operations {
   FileController_getFiles: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
+        /** @description File status filter */
         status: 'EXISTS' | 'TRASHED' | 'DELETED' | 'ALL';
+        /** @description Bucket ID filter */
         bucket?: string;
-        sort?: string;
-        order?: string;
+        /** @description Field to sort by */
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
+        /** @description Filter files updated after this date */
         updatedAt?: string;
       };
       header?: never;
@@ -5018,10 +5257,18 @@ export interface operations {
   FolderController_getFolders: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
-        status: 'EXISTS' | 'TRASHED' | 'DELETED' | 'ALL';
+        /** @description Folder status filter */
+        status: 'ALL' | 'EXISTS' | 'TRASHED' | 'DELETED';
+        /** @description Filter folders updated after this date */
         updatedAt?: string;
+        /** @description Field to sort by */
+        sort?: 'uuid' | 'plainName' | 'updatedAt';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
       };
       header?: never;
       path?: never;
@@ -5103,10 +5350,14 @@ export interface operations {
   FolderController_getFolderContentFiles: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
-        sort: string;
-        order: string;
+        /** @description Field to sort by */
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
       };
       header?: never;
       path: {
@@ -5129,10 +5380,14 @@ export interface operations {
   FolderController_getFolderFiles: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
-        sort?: string;
-        order?: string;
+        /** @description Field to sort by */
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
       };
       header?: never;
       path: {
@@ -5177,10 +5432,14 @@ export interface operations {
   FolderController_getFolderContentFolders: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
-        sort: string;
-        order: string;
+        /** @description Field to sort by */
+        sort?: 'updatedAt' | 'id' | 'plainName' | 'name' | 'uuid';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
       };
       header?: never;
       path: {
@@ -5302,10 +5561,14 @@ export interface operations {
   FolderController_getFolderFolders: {
     parameters: {
       query: {
+        /** @description Items per page */
         limit: number;
+        /** @description Offset for pagination */
         offset: number;
-        sort?: string;
-        order?: string;
+        /** @description Field to sort by */
+        sort?: 'updatedAt' | 'id' | 'plainName' | 'name' | 'uuid';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
       };
       header?: never;
       path: {
@@ -5367,6 +5630,28 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['FolderDto'];
+        };
+      };
+    };
+  };
+  FolderController_getFolderStats: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Folder UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FolderStatsDto'];
         };
       };
     };
@@ -5574,7 +5859,7 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Remove  */
+      /** @description Remove */
       200: {
         headers: {
           [name: string]: unknown;
@@ -6481,7 +6766,7 @@ export interface operations {
         status?: 'EXISTS' | 'TRASHED' | 'DELETED' | 'ALL';
         bucket?: string;
         sort?: string;
-        order?: string;
+        order?: 'ASC' | 'DESC';
         updatedAt?: string;
       };
       header?: never;
@@ -7593,7 +7878,9 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
-        content?: never;
+        content: {
+          'application/json': components['schemas']['RefreshUserCredentialsDto'];
+        };
       };
     };
   };
@@ -7606,13 +7893,13 @@ export interface operations {
     };
     requestBody?: never;
     responses: {
-      /** @description Returns a new token */
+      /** @description Returns the user metadata and the authentication tokens */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['RefreshTokenResponseDto'];
+          'application/json': components['schemas']['RefreshUserTokensDto'];
         };
       };
     };
@@ -8163,6 +8450,28 @@ export interface operations {
       };
     };
   };
+  UserController_handleIncompleteCheckout: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['IncompleteCheckoutDto'];
+      };
+    };
+    responses: {
+      /** @description Incomplete checkout email sent successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ShareController_getDomains: {
     parameters: {
       query?: never;
@@ -8229,6 +8538,8 @@ export interface operations {
         platform?: components['schemas']['DevicePlatform'];
         /** @description OS Installation unique identifier */
         key?: string;
+        /** @description Folder uuid */
+        folderUuid?: string;
         /** @description Device hostname */
         hostname?: string;
         limit: number;
@@ -9067,6 +9378,28 @@ export interface operations {
       };
     };
   };
+  GatewayController_updateWorkspace: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateWorkspaceDto'];
+      };
+    };
+    responses: {
+      /** @description Workspace updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   GatewayController_updateWorkspaceStorage: {
     parameters: {
       query?: never;
@@ -9131,6 +9464,27 @@ export interface operations {
       };
     };
   };
+  GatewayController_getUserCredentials: {
+    parameters: {
+      query: {
+        /** @description The email of the user */
+        email: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Get user credentials */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   GatewayController_checkUserStorageExpansion: {
     parameters: {
       query: {
@@ -9169,6 +9523,81 @@ export interface operations {
       };
     };
     responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GatewayController_handleFailedPayment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FailedPaymentDto'];
+      };
+    };
+    responses: {
+      /** @description Failed payment email sent successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            /** @example true */
+            success?: boolean;
+          };
+        };
+      };
+    };
+  };
+  GatewayController_getUserLimitOverrides: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description User UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description List of user limit overrides */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UserLimitResponseDto'][];
+        };
+      };
+    };
+  };
+  GatewayController_overrideUserLimit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description User UUID */
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['OverrideUserLimitDto'];
+      };
+    };
+    responses: {
+      /** @description Limit successfully set for user */
       200: {
         headers: {
           [name: string]: unknown;
