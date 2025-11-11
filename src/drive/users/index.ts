@@ -88,6 +88,8 @@ export class Users {
   }
 
   /**
+   * @deprecated Use `refreshUser` instead.
+   *
    * Retrieves the user data for a specific user identified by the uuid.
    *
    * @param {string} params.userUuid - The UUID of the user.
