@@ -31,19 +31,18 @@
     "@internxt/prettier-config": "1.0.2",
     "@types/jest": "30.0.0",
     "@types/sinon": "17.0.4",
-    "@types/uuid": "10.0.0",
-    "eslint": "9.36.0",
+    "eslint": "9.39.1",
     "husky": "9.1.7",
     "jest": "30.2.0",
-    "lint-staged": "16.2.3",
-    "openapi-typescript": "^7.9.1",
+    "lint-staged": "16.2.6",
+    "openapi-typescript": "7.10.1",
     "prettier": "3.6.2",
     "sinon": "21.0.0",
-    "ts-jest": "29.4.4",
+    "ts-jest": "29.4.5",
     "typescript": "5.9.3"
   },
   "dependencies": {
-    "axios": "^1.12.2",
+    "axios": "1.13.2",
     "uuid": "11.1.0"
   },
   "lint-staged": {
