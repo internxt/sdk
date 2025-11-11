@@ -18,4 +18,5 @@ export interface Config {
   cryptoSecret: string;
   magicIv: string;
   magicSalt: string;
+  networkUrl: string;
 }

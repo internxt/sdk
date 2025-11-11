@@ -14,6 +14,7 @@ function loadConfig(): Config {
     'CRYPTO_SECRET',
     'MAGIC_IV',
     'MAGIC_SALT',
+    'NETWORK_URL',
   ];
 
   const missing = requiredVars.filter((varName) => !process.env[varName]);
@@ -37,6 +38,7 @@ function loadConfig(): Config {
     cryptoSecret: process.env.CRYPTO_SECRET!,
     magicIv: process.env.MAGIC_IV!,
     magicSalt: process.env.MAGIC_SALT!,
+    networkUrl: process.env.NETWORK_URL!,
   };
 }
 
