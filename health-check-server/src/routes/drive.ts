@@ -7,6 +7,7 @@ import { HealthCheckResponse } from '../types';
 import { getAuthClient, cryptoProvider } from '../utils/auth';
 import { handleHealthCheckError } from '../utils/healthCheck';
 import { passToHash, encryptText, encryptTextWithKey } from '../utils/crypto';
+import { getNetworkClient, getStorageClient, getUsersClient } from '../utils/sdk';
 
 export async function driveRoutes(fastify: FastifyInstance) {
   const authClient = getAuthClient();
@@ -130,6 +131,128 @@ export async function driveRoutes(fastify: FastifyInstance) {
       return reply.status(200).send(response);
     } catch (error: unknown) {
       handleHealthCheckError(error, reply, 'drive/signup', startTime);
+    }
+  });
+
+  fastify.post('/drive/upload', async (request: FastifyRequest, reply: FastifyReply) => {
+    const startTime = Date.now();
+
+    try {
+      const usersClient = getUsersClient({ token: config.authToken });
+      const refreshResponse = await usersClient.refreshUser();
+      const user = refreshResponse.user as unknown as UserSettings;
+
+      if (!user.bucket || !user.userId || !user.bridgeUser || !user.mnemonic || !user.rootFolderId) {
+        throw new Error('User missing required fields for upload: bucket, userId, bridgeUser, mnemonic, rootFolderId');
+      }
+
+      const timestamp = Date.now();
+      const fileName = `health-check-${timestamp}`;
+
+      const fileContent = `Internxt Health Check Upload Test\nTimestamp: ${new Date(
+        timestamp,
+      ).toISOString()}\n${'='.repeat(950)}`;
+      const fileBuffer = Buffer.from(fileContent);
+      const fileSize = fileBuffer.length;
+
+      const networkClient = getNetworkClient({
+        bridgeUser: user.bridgeUser,
+        userId: user.userId,
+      });
+
+      const parts = 1;
+      const { uploads } = await networkClient.startUpload(
+        user.bucket,
+        {
+          uploads: [
+            {
+              index: 0,
+              size: fileSize,
+            },
+          ],
+        },
+        parts,
+      );
+
+      const [{ url, urls, uuid, UploadId }] = uploads;
+
+      if (!url && (!urls || urls.length === 0)) {
+        throw new Error('No upload URL received from network');
+      }
+
+      const uploadUrl = url || urls![0];
+
+      const uploadResponse = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: fileBuffer,
+        headers: {
+          'Content-Type': 'application/octet-stream',
+        },
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error(`File upload to network failed with status ${uploadResponse.status}`);
+      }
+
+      // Get ETag from response for multipart finish
+      const etag = uploadResponse.headers.get('etag')?.replaceAll('"', '') || '';
+
+      const finishPayload =
+        parts > 1 && UploadId
+          ? {
+              index: '0'.repeat(64), // Mock index for health check
+              shards: [
+                {
+                  hash: etag,
+                  uuid,
+                  UploadId,
+                  parts: [{ PartNumber: 1, ETag: etag }],
+                },
+              ],
+            }
+          : {
+              index: '0'.repeat(64), // Mock index for health check
+              shards: [{ hash: etag, uuid }],
+            };
+
+      const networkFinishResponse = await networkClient.finishUpload(user.bucket, finishPayload);
+
+      if (!networkFinishResponse.id) {
+        throw new Error('Network finish upload did not return file ID');
+      }
+
+      const networkFileId = networkFinishResponse.id;
+
+      const driveStorageClient = getStorageClient({ token: config.authToken });
+
+      const fileEntry = {
+        fileId: networkFileId,
+        type: 'txt',
+        size: fileSize,
+        plainName: fileName,
+        bucket: user.bucket,
+        folderUuid: user.rootFolderId,
+        encryptVersion: 'Aes03' as const,
+      };
+
+      const driveFileResponse = await driveStorageClient.createFileEntryByUuid(fileEntry);
+
+      if (!driveFileResponse.uuid || !driveFileResponse.fileId || !driveFileResponse.plainName) {
+        throw new Error('Drive file entry creation missing required fields: uuid, fileId, or plainName');
+      }
+
+      const responseTime = Date.now() - startTime;
+
+      const response: HealthCheckResponse = {
+        status: 'healthy',
+        endpoint: 'drive/upload',
+        timestamp: new Date().toISOString(),
+        responseTime,
+      };
+
+      return reply.status(200).send(response);
+    } catch (error: unknown) {
+      handleHealthCheckError(error, reply, 'drive/upload', startTime);
     }
   });
 
