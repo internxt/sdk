@@ -134,7 +134,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
     }
   });
 
-  fastify.post('/drive/upload', async (request: FastifyRequest, reply: FastifyReply) => {
+  fastify.post('/drive/files', async (request: FastifyRequest, reply: FastifyReply) => {
     const startTime = Date.now();
 
     try {
