@@ -14,12 +14,7 @@ import { HealthCheckResponse } from '../types';
  * @param endpoint The endpoint being checked (for logging/response)
  * @param startTime The start time of the request (for response time calculation)
  */
-export function handleHealthCheckError(
-  error: unknown,
-  reply: FastifyReply,
-  endpoint: string,
-  startTime: number,
-): void {
+export function handleHealthCheckError(error: unknown, reply: FastifyReply, endpoint: string, startTime: number): void {
   const responseTime = Date.now() - startTime;
   const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
 
@@ -46,7 +41,6 @@ export function handleHealthCheckError(
       }
     }
   }
-
 
   if (httpStatus !== undefined) {
     if (httpStatus < 500) {

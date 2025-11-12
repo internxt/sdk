@@ -252,7 +252,51 @@ export async function driveRoutes(fastify: FastifyInstance) {
 
       return reply.status(200).send(response);
     } catch (error: unknown) {
+      fastify.log.error(error);
       handleHealthCheckError(error, reply, 'drive/upload', startTime);
+    }
+  });
+
+  fastify.get('/drive/files', async (request: FastifyRequest, reply: FastifyReply) => {
+    const startTime = Date.now();
+
+    try {
+      const usersClient = getUsersClient({ token: config.authToken });
+      const refreshResponse = await usersClient.refreshUser();
+      const user = refreshResponse.user as unknown as UserSettings;
+
+      if (!user.rootFolderId) {
+        throw new Error('User missing required field: rootFolderId');
+      }
+
+      const driveStorageClient = getStorageClient({ token: config.authToken });
+
+      const [folderContentPromise] = driveStorageClient.getFolderContentByUuid({
+        folderUuid: user.rootFolderId,
+        trash: false,
+        offset: 0,
+        limit: 50,
+      });
+
+      const folderContent = await folderContentPromise;
+
+      if (!folderContent || (!folderContent.files && !folderContent.children)) {
+        throw new Error('Folder content response missing expected structure (files or children array)');
+      }
+
+      const responseTime = Date.now() - startTime;
+
+      const response: HealthCheckResponse = {
+        status: 'healthy',
+        endpoint: 'folders/content/:uuid/?offset=0&limit=50&trash=false',
+        timestamp: new Date().toISOString(),
+        responseTime,
+      };
+
+      return reply.status(200).send(response);
+    } catch (error: unknown) {
+      fastify.log.error(error);
+      handleHealthCheckError(error, reply, 'drive/retrieval', startTime);
     }
   });
 
