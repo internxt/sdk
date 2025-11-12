@@ -74,3 +74,7 @@ function encryptWithPassword(text: string, password: string, iv: string, salt: s
 }
 
 export { passToHash, encryptText, decryptText, encryptTextWithKey, decryptTextWithKey, encryptWithPassword };
+
+export function decryptMnemonic(encryptedMnemonic: string, password: string): string {
+  return decryptTextWithKey(encryptedMnemonic, password);
+}

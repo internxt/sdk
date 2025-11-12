@@ -6,8 +6,9 @@ import { config } from '../config';
 import { HealthCheckResponse } from '../types';
 import { getAuthClient, cryptoProvider } from '../utils/auth';
 import { handleHealthCheckError } from '../utils/healthCheck';
-import { passToHash, encryptText, encryptTextWithKey } from '../utils/crypto';
+import { passToHash, encryptText, encryptTextWithKey, decryptMnemonic } from '../utils/crypto';
 import { getNetworkClient, getStorageClient, getUsersClient } from '../utils/sdk';
+import { createCryptoProvider, encryptBuffer, decryptBuffer, toBinaryData } from '../utils/fileCrypto';
 
 export async function driveRoutes(fastify: FastifyInstance) {
   const authClient = getAuthClient();
@@ -152,8 +153,25 @@ export async function driveRoutes(fastify: FastifyInstance) {
       const fileContent = `Internxt Health Check Upload Test\nTimestamp: ${new Date(
         timestamp,
       ).toISOString()}\n${'='.repeat(950)}`;
-      const fileBuffer = Buffer.from(fileContent);
-      const fileSize = fileBuffer.length;
+      const plaintextBuffer = Buffer.from(fileContent);
+
+      const crypto = createCryptoProvider();
+
+      const decryptedMnemonic = decryptMnemonic(user.mnemonic, config.loginPassword);
+
+      fastify.log.info(`Decrypted mnemonic: ${decryptedMnemonic.substring(0, 20)}...`);
+
+      if (!crypto.validateMnemonic(decryptedMnemonic)) {
+        throw new Error('Invalid mnemonic');
+      }
+
+      const index = crypto.randomBytes(crypto.algorithm.ivSize);
+      const iv = index.slice(0, 16);
+
+      const key = await crypto.generateFileKey(decryptedMnemonic, user.bucket, index);
+
+      const encryptedBuffer = encryptBuffer(plaintextBuffer, key as Buffer, iv as Buffer);
+      const encryptedSize = encryptedBuffer.length;
 
       const networkClient = getNetworkClient({
         bridgeUser: user.bridgeUser,
@@ -167,7 +185,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
           uploads: [
             {
               index: 0,
-              size: fileSize,
+              size: encryptedSize,
             },
           ],
         },
@@ -184,7 +202,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
 
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
-        body: fileBuffer,
+        body: encryptedBuffer,
         headers: {
           'Content-Type': 'application/octet-stream',
         },
@@ -200,7 +218,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
       const finishPayload =
         parts > 1 && UploadId
           ? {
-              index: '0'.repeat(64), // Mock index for health check
+              index: index.toString('hex'),
               shards: [
                 {
                   hash: etag,
@@ -211,7 +229,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
               ],
             }
           : {
-              index: '0'.repeat(64), // Mock index for health check
+              index: index.toString('hex'),
               shards: [{ hash: etag, uuid }],
             };
 
@@ -228,7 +246,7 @@ export async function driveRoutes(fastify: FastifyInstance) {
       const fileEntry = {
         fileId: networkFileId,
         type: 'txt',
-        size: fileSize,
+        size: encryptedSize,
         plainName: fileName,
         bucket: user.bucket,
         folderUuid: user.rootFolderId,
