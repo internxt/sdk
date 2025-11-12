@@ -89,7 +89,7 @@ export function handleHealthCheckError(error: unknown, reply: FastifyReply, endp
     endpoint,
     timestamp: new Date().toISOString(),
     responseTime,
-    error: `Connection error: ${errorMessage}`,
+    error: `Error: ${errorMessage}`,
   };
 
   reply.status(503).send(response);

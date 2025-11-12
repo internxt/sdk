@@ -318,5 +318,114 @@ export async function driveRoutes(fastify: FastifyInstance) {
     }
   });
 
+  fastify.post('/drive/download', async (request: FastifyRequest, reply: FastifyReply) => {
+    const startTime = Date.now();
+
+    try {
+      const usersClient = getUsersClient({ token: config.authToken });
+      const refreshResponse = await usersClient.refreshUser();
+      const user = refreshResponse.user as unknown as UserSettings;
+
+      if (!user.bucket || !user.userId || !user.bridgeUser || !user.mnemonic || !user.rootFolderId) {
+        throw new Error('User missing required fields: bucket, userId, bridgeUser, mnemonic, rootFolderId');
+      }
+
+      const driveStorageClient = getStorageClient({ token: config.authToken });
+
+      const [folderContentPromise] = driveStorageClient.getFolderContentByUuid({
+        folderUuid: user.rootFolderId,
+        trash: false,
+        offset: 0,
+        limit: 50,
+      });
+
+      const folderContent = await folderContentPromise;
+
+      if (!folderContent?.files || folderContent.files.length === 0) {
+        throw new Error('No files found in root folder. Upload a file first using POST /drive/upload');
+      }
+
+      const healthCheckFiles = folderContent.files.filter((file) => file.plainName?.startsWith('health-check-'));
+
+      if (healthCheckFiles.length === 0) {
+        throw new Error('No health-check files found. Upload a file first using POST /drive/upload');
+      }
+
+      const mostRecentFile = [...healthCheckFiles].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      )[0];
+
+      fastify.log.info(`Attempting to download file: ${mostRecentFile.plainName} (fileId: ${mostRecentFile.fileId})`);
+
+      const networkClient = getNetworkClient({
+        bridgeUser: user.bridgeUser,
+        userId: user.userId,
+      });
+
+      const downloadInfo = await networkClient.getDownloadLinks(user.bucket, mostRecentFile.fileId);
+
+      if (!downloadInfo.index || !downloadInfo.shards || downloadInfo.shards.length === 0) {
+        throw new Error('Download info missing index or shards');
+      }
+
+      const downloadUrl = downloadInfo.shards[0].url;
+
+      if (!downloadUrl) {
+        throw new Error('No download URL in shard');
+      }
+
+      const downloadResponse = await fetch(downloadUrl);
+
+      if (!downloadResponse.ok) {
+        throw new Error(`File download failed with status ${downloadResponse.status}`);
+      }
+
+      const downloadedEncryptedBuffer = Buffer.from(await downloadResponse.arrayBuffer());
+
+      const crypto = createCryptoProvider();
+
+      const decryptedMnemonic = decryptMnemonic(user.mnemonic, config.loginPassword);
+
+      if (!crypto.validateMnemonic(decryptedMnemonic)) {
+        throw new Error('Invalid mnemonic');
+      }
+
+      const downloadedIndex = toBinaryData(downloadInfo.index, 'hex');
+      const downloadedIv = downloadedIndex.subarray(0, 16);
+      const downloadedKey = await crypto.generateFileKey(decryptedMnemonic, user.bucket, downloadedIndex);
+
+      const decryptedBuffer = decryptBuffer(downloadedEncryptedBuffer, downloadedKey as Buffer, downloadedIv as Buffer);
+
+      const decryptedContent = decryptedBuffer.toString('utf-8');
+
+      if (!decryptedContent.includes('Internxt Health Check Upload Test')) {
+        throw new Error('Decrypted content does not match expected health check pattern');
+      }
+
+      if (!decryptedContent.includes('Timestamp:')) {
+        throw new Error('Decrypted content missing timestamp field');
+      }
+
+      const responseTime = Date.now() - startTime;
+
+      const response: HealthCheckResponse = {
+        status: 'healthy',
+        endpoint: 'drive/download',
+        timestamp: new Date().toISOString(),
+        responseTime,
+      };
+
+      fastify.log.info(
+        `Download health check successful - file "${mostRecentFile.plainName}"
+         decrypted and verified (${decryptedContent.length} bytes)`,
+      );
+
+      return reply.status(200).send(response);
+    } catch (error: unknown) {
+      fastify.log.error(error);
+      handleHealthCheckError(error, reply, 'drive/download', startTime);
+    }
+  });
+
   fastify.log.info('Drive routes registered');
 }
