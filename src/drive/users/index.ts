@@ -79,6 +79,15 @@ export class Users {
   }
 
   /**
+   * Returns fresh data of the user
+   */
+  public refreshUserCredentials(): Promise<
+    paths['/users/cli/refresh']['get']['responses']['200']['content']['application/json']
+  > {
+    return this.client.get('/users/cli/refresh', this.headers());
+  }
+
+  /**
    * Returns fresh avatar URL of the user
    */
   public refreshAvatarUser(): Promise<{
