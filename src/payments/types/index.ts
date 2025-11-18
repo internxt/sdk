@@ -27,6 +27,7 @@ export interface CreatePaymentIntentPayload {
   token: string;
   currency: string;
   captchaToken: string;
+  userAddress: string;
   promoCodeId?: string;
 }
 
