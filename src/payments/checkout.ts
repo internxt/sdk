@@ -130,6 +130,7 @@ export class Checkout {
     token,
     currency,
     captchaToken,
+    userAddress,
     promoCodeId,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
@@ -140,6 +141,7 @@ export class Checkout {
         token,
         currency,
         captchaToken,
+        userAddress,
         promoCodeId,
       },
       this.authHeaders(),

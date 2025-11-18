@@ -3,7 +3,7 @@ import { HttpClient } from '../../src/shared/http/client';
 import { Checkout } from '../../src/payments';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
-import { CreateCustomerPayload, CryptoCurrency } from '../../src/payments/types';
+import { CreateCustomerPayload, CreatePaymentIntentPayload, CryptoCurrency } from '../../src/payments/types';
 
 const httpClient = HttpClient.create('');
 
@@ -43,6 +43,38 @@ describe('Checkout service tests', () => {
 
       // Assert
       expect(callStub.firstCall.args).toEqual(['/checkout/customer', userPayload, headers]);
+      expect(body).toStrictEqual([mockedResponse]);
+    });
+  });
+
+  describe('Create payment intent', () => {
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const userPayload: CreatePaymentIntentPayload = {
+        customerId: 'customer-id',
+        priceId: 'price-id',
+        token: 'user-token',
+        currency: 'eur',
+        captchaToken: 'captcha-token',
+        userAddress: '1.1.1.1',
+        promoCodeId: 'promo-code',
+      };
+      const mockedResponse = {
+        id: 'invoice-id',
+        type: 'fiat',
+        clientSecret: 'client-secret',
+        invoiceStatus: 'paid',
+      };
+
+      const callStub = sinon.stub(httpClient, 'post').resolves([mockedResponse]);
+
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      // Act
+      const body = await client.createPaymentIntent(userPayload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual(['/checkout/payment-intent', userPayload, headers]);
       expect(body).toStrictEqual([mockedResponse]);
     });
   });
