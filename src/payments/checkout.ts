@@ -3,6 +3,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
 import {
+  CreateCustomerPayload,
   CreatePaymentIntentPayload,
   CreateSubscriptionPayload,
   CryptoCurrency,
@@ -28,34 +29,44 @@ export class Checkout {
 
   /**
    * @description Creates a customer or gets the existing one if it already exists
+   * @param customerName - The name of the customer
+   * @param lineAddress1 - The address of the user
+   * @param lineAddress2 - The address of the user
+   * @param postalCode - The postal code of the city where the user lives
+   * @param city - The city of the user
    * @param country - The country of the customer
    * @param postalCode - The postal code of the customer
+   * @param captchaToken - The captcha token to verify the call
    * @param companyVatId - The VAT ID of the company (optional)
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
-  public getCustomerId({
+  public createCustomer({
     customerName,
+    lineAddress1,
+    lineAddress2,
     postalCode,
+    city,
     country,
     captchaToken,
     companyVatId,
-  }: {
-    customerName: string;
-    postalCode: string;
-    country: string;
-    captchaToken: string;
-    companyVatId?: string;
-  }): Promise<{
+  }: CreateCustomerPayload): Promise<{
     customerId: string;
     token: string;
   }> {
-    const query = new URLSearchParams();
-    query.set('customerName', customerName);
-    query.set('country', country);
-    query.set('postalCode', postalCode);
-    query.set('captchaToken', captchaToken);
-    if (companyVatId !== undefined) query.set('companyVatId', companyVatId);
-    return this.client.get(`/checkout/customer?${query.toString()}`, this.authHeaders());
+    return this.client.post(
+      '/checkout/customer',
+      {
+        customerName,
+        city,
+        lineAddress1,
+        lineAddress2,
+        country,
+        postalCode,
+        captchaToken,
+        companyVatId,
+      },
+      this.authHeaders(),
+    );
   }
 
   /**

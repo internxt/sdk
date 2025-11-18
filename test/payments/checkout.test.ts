@@ -3,7 +3,7 @@ import { HttpClient } from '../../src/shared/http/client';
 import { Checkout } from '../../src/payments';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
-import { CryptoCurrency } from '../../src/payments/types';
+import { CreateCustomerPayload, CryptoCurrency } from '../../src/payments/types';
 
 const httpClient = HttpClient.create('');
 
@@ -15,6 +15,36 @@ describe('Checkout service tests', () => {
 
   afterEach(() => {
     sinon.restore();
+  });
+
+  describe('Create customer ID', () => {
+    it('should call with right params & return data', async () => {
+      // Arrange
+      const userPayload: CreateCustomerPayload = {
+        customerName: 'example',
+        city: 'Valencia',
+        lineAddress1: 'Marina de empresas',
+        lineAddress2: '',
+        country: 'ES',
+        postalCode: '14005',
+        captchaToken: 'captcha_token',
+      };
+      const mockedResponse = {
+        customerId: 'customerId',
+        token: 'valid_token',
+      };
+
+      const callStub = sinon.stub(httpClient, 'post').resolves([mockedResponse]);
+
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      // Act
+      const body = await client.createCustomer(userPayload);
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual(['/checkout/customer', userPayload, headers]);
+      expect(body).toStrictEqual([mockedResponse]);
+    });
   });
 
   describe('Fetch available crypto currencies', () => {
