@@ -24,6 +24,7 @@ import {
   FileEntry,
   FileEntryByUuid,
   FileMeta,
+  FileVersion,
   FolderAncestor,
   FolderAncestorWorkspace,
   FolderMeta,
@@ -851,5 +852,41 @@ export class Storage {
    */
   public getFileByPath(filePath: string): Promise<FileMeta> {
     return this.client.get<FileMeta>(`files/meta?path=${filePath}`, this.headers());
+  }
+
+  /**
+   * Gets all versions of a file
+   *
+   * @param {string} uuid - The UUID of the file.
+   * @returns {Promise<FileVersion[]>} A promise that resolves with an array of file versions.
+   */
+  public getFileVersions(uuid: string): Promise<FileVersion[]> {
+    return this.client.get<FileVersion[]>(`/files/${uuid}/versions`, this.headers());
+  }
+
+  /**
+   * Deletes a specific version of a file
+   *
+   * @param {string} uuid - The UUID of the file.
+   * @param {string} versionId - The UUID of the version to delete.
+   * @returns {Promise<void>} A promise that resolves when the version is deleted.
+   */
+  public deleteFileVersion(uuid: string, versionId: string): Promise<void> {
+    return this.client.delete(`/files/${uuid}/versions/${versionId}`, this.headers());
+  }
+
+  /**
+   * Restores a file to a specific version
+   *
+   * @param {string} uuid - The UUID of the file.
+   * @param {string} versionId - The UUID of the version to restore.
+   * @returns {Promise<FileVersion>} A promise that resolves with the restored version.
+   */
+  public restoreFileVersion(uuid: string, versionId: string): Promise<FileVersion> {
+    return this.client.post<FileVersion>(
+      `/files/${uuid}/versions/${versionId}/restore`,
+      {},
+      this.headers(),
+    );
   }
 }

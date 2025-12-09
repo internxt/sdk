@@ -466,3 +466,18 @@ export interface CheckDuplicatedFolderPayload {
 export interface CheckDuplicatedFoldersResponse {
   existentFolders: DriveFolderData[];
 }
+
+export enum FileVersionStatus {
+  EXISTS = 'EXISTS',
+  DELETED = 'DELETED',
+}
+
+export interface FileVersion {
+  id: string;
+  fileId: string;
+  networkFileId: string;
+  size: bigint;
+  status: FileVersionStatus;
+  createdAt: Date;
+  updatedAt: Date;
+}
