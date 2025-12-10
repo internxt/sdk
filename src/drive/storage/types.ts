@@ -480,4 +480,5 @@ export interface FileVersion {
   status: FileVersionStatus;
   createdAt: Date;
   updatedAt: Date;
+  expiresAt: Date | null;
 }
