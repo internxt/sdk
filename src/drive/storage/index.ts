@@ -884,11 +884,7 @@ export class Storage {
    * @returns {Promise<FileVersion>} A promise that resolves with the restored version.
    */
   public restoreFileVersion(uuid: string, versionId: string): Promise<FileVersion> {
-    return this.client.post<FileVersion>(
-      `/files/${uuid}/versions/${versionId}/restore`,
-      {},
-      this.headers(),
-    );
+    return this.client.post<FileVersion>(`/files/${uuid}/versions/${versionId}/restore`, {}, this.headers());
   }
 
   /**
@@ -897,6 +893,6 @@ export class Storage {
    * @returns {Promise<GetFileLimitsResponse>} A promise that resolves with the file limits.
    */
   public getFileVersionLimits(): Promise<GetFileLimitsResponse> {
-    return this.client.get<GetFileLimitsResponse>('/api/files/limits', this.headers());
+    return this.client.get<GetFileLimitsResponse>('/files/limits', this.headers());
   }
 }
