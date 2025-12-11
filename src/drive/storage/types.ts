@@ -482,3 +482,14 @@ export interface FileVersion {
   updatedAt: Date;
   expiresAt: Date | null;
 }
+
+export interface VersioningLimits {
+  enabled: boolean;
+  maxFileSize: number;
+  retentionDays: number;
+  maxVersions: number;
+}
+
+export interface GetFileLimitsResponse {
+  versioning: VersioningLimits;
+}
