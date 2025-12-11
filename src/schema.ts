@@ -37,6 +37,23 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/files/limits': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get file limits based on user tier */
+    get: operations['FileController_getLimits'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/files/{uuid}/meta': {
     parameters: {
       query?: never;
@@ -48,6 +65,57 @@ export interface paths {
     /** Update File data */
     put: operations['FileController_updateFileMetadata'];
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{uuid}/versions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get file versions */
+    get: operations['FileController_getFileVersions'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{uuid}/versions/{versionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a file version */
+    delete: operations['FileController_deleteFileVersion'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/files/{uuid}/versions/{versionId}/restore': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Restore a file version */
+    post: operations['FileController_restoreFileVersion'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2484,50 +2552,6 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/notifications': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get user notifications
-     * @description Retrieves all notifications for the authenticated user. Notifications will be retrieved just once.
-     */
-    get: operations['NotificationsController_getUserNotifications'];
-    put?: never;
-    /**
-     * Create a new notification
-     * @description Creates a new notification
-     */
-    post: operations['NotificationsController_createNotification'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/notifications/{id}/expire': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Mark notification as expired
-     * @description Marks a notification as expired by setting its expiration date to now
-     */
-    patch: operations['NotificationsController_markNotificationAsExpired'];
-    trace?: never;
-  };
   '/storage/trash/paginated': {
     parameters: {
       query?: never;
@@ -2644,6 +2668,50 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/notifications': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get user notifications
+     * @description Retrieves all notifications for the authenticated user. Notifications will be retrieved just once.
+     */
+    get: operations['NotificationsController_getUserNotifications'];
+    put?: never;
+    /**
+     * Create a new notification
+     * @description Creates a new notification
+     */
+    post: operations['NotificationsController_createNotification'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/notifications/{id}/expire': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Mark notification as expired
+     * @description Marks a notification as expired by setting its expiration date to now
+     */
+    patch: operations['NotificationsController_markNotificationAsExpired'];
     trace?: never;
   };
   '/auth/login': {
@@ -3067,6 +3135,31 @@ export interface components {
       plainName: string;
       /** @enum {string} */
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
+    };
+    VersioningLimitsDto: {
+      /** @description Whether file versioning is enabled for this tier */
+      enabled: boolean;
+      /** @description Maximum file size in bytes that can be versioned */
+      maxFileSize: number;
+      /** @description Number of days versions are retained */
+      retentionDays: number;
+      /** @description Maximum number of versions kept per file */
+      maxVersions: number;
+    };
+    GetFileLimitsDto: {
+      versioning: components['schemas']['VersioningLimitsDto'];
+    };
+    FileVersionDto: {
+      id: string;
+      fileId: string;
+      networkFileId: string;
+      size: string;
+      /** @enum {string} */
+      status: 'EXISTS' | 'DELETED';
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
     };
     ReplaceFileDto: {
       /**
@@ -4412,6 +4505,16 @@ export interface components {
        * @example https://drive.internxt.com/checkout/complete
        */
       completeCheckoutUrl: string;
+      /**
+       * @description Name of the plan being purchased
+       * @example Premium
+       */
+      planName?: string;
+      /**
+       * @description Price of the plan in euros
+       * @example 320
+       */
+      price?: number;
     };
     FuzzySearchResult: {
       id: string;
@@ -4550,6 +4653,52 @@ export interface components {
     CreateDeviceAsFolderDto: {
       deviceName: string;
     };
+    ItemToTrashDto: {
+      /**
+       * @deprecated
+       * @description Id of file or folder (deprecated in favor of uuid)
+       * @example 4
+       */
+      id?: string;
+      /**
+       * @description Uuid of file or folder
+       * @example 4
+       */
+      uuid: string;
+      /**
+       * @description Type of item: file or folder
+       * @example file
+       * @enum {string}
+       */
+      type: 'file' | 'folder';
+    };
+    MoveItemsToTrashDto: {
+      /** @description Array of items with files and folders ids */
+      items: components['schemas']['ItemToTrashDto'][];
+    };
+    DeleteItemDto: {
+      /**
+       * @deprecated
+       * @description Id of file or folder (deprecated in favor of uuid)
+       * @example 4
+       */
+      id: string | null;
+      /**
+       * @description Uuid of file or folder
+       * @example 79a88429-b45a-4ae7-90f1-c351b6882670
+       */
+      uuid: string;
+      /**
+       * @description Type of item: file or folder
+       * @example file
+       * @enum {string}
+       */
+      type: 'file' | 'folder';
+    };
+    DeleteItemsDto: {
+      /** @description Array of items with files and folders ids */
+      items: components['schemas']['DeleteItemDto'][];
+    };
     NotificationWithStatusDto: {
       /**
        * @description Unique identifier for the notification
@@ -4646,52 +4795,6 @@ export interface components {
        * @example 2024-01-01T00:00:00.000Z
        */
       createdAt: string;
-    };
-    ItemToTrashDto: {
-      /**
-       * @deprecated
-       * @description Id of file or folder (deprecated in favor of uuid)
-       * @example 4
-       */
-      id?: string;
-      /**
-       * @description Uuid of file or folder
-       * @example 4
-       */
-      uuid: string;
-      /**
-       * @description Type of item: file or folder
-       * @example file
-       * @enum {string}
-       */
-      type: 'file' | 'folder';
-    };
-    MoveItemsToTrashDto: {
-      /** @description Array of items with files and folders ids */
-      items: components['schemas']['ItemToTrashDto'][];
-    };
-    DeleteItemDto: {
-      /**
-       * @deprecated
-       * @description Id of file or folder (deprecated in favor of uuid)
-       * @example 4
-       */
-      id: string | null;
-      /**
-       * @description Uuid of file or folder
-       * @example 79a88429-b45a-4ae7-90f1-c351b6882670
-       */
-      uuid: string;
-      /**
-       * @description Type of item: file or folder
-       * @example file
-       * @enum {string}
-       */
-      type: 'file' | 'folder';
-    };
-    DeleteItemsDto: {
-      /** @description Array of items with files and folders ids */
-      items: components['schemas']['DeleteItemDto'][];
     };
     LoginDto: {
       /**
@@ -5072,6 +5175,25 @@ export interface operations {
       };
     };
   };
+  FileController_getLimits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFileLimitsDto'];
+        };
+      };
+    };
+  };
   FileController_getFileMetadata: {
     parameters: {
       query?: never;
@@ -5115,6 +5237,69 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['FileDto'];
+        };
+      };
+    };
+  };
+  FileController_getFileVersions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FileVersionDto'][];
+        };
+      };
+    };
+  };
+  FileController_deleteFileVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  FileController_restoreFileVersion: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+        versionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['FileVersionDto'];
         };
       };
     };
@@ -8902,72 +9087,6 @@ export interface operations {
       };
     };
   };
-  NotificationsController_getUserNotifications: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description User notifications retrieved successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['NotificationWithStatusDto'][];
-        };
-      };
-    };
-  };
-  NotificationsController_createNotification: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['CreateNotificationDto'];
-      };
-    };
-    responses: {
-      /** @description Notification created successfully */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['NotificationResponseDto'];
-        };
-      };
-    };
-  };
-  NotificationsController_markNotificationAsExpired: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Notification marked as expired successfully */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          'application/json': components['schemas']['NotificationResponseDto'];
-        };
-      };
-    };
-  };
   TrashController_getTrashedFilesPaginated: {
     parameters: {
       query: {
@@ -9113,6 +9232,72 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  NotificationsController_getUserNotifications: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description User notifications retrieved successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationWithStatusDto'][];
+        };
+      };
+    };
+  };
+  NotificationsController_createNotification: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateNotificationDto'];
+      };
+    };
+    responses: {
+      /** @description Notification created successfully */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationResponseDto'];
+        };
+      };
+    };
+  };
+  NotificationsController_markNotificationAsExpired: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Notification marked as expired successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NotificationResponseDto'];
+        };
       };
     };
   };

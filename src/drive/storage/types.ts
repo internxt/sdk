@@ -467,29 +467,6 @@ export interface CheckDuplicatedFoldersResponse {
   existentFolders: DriveFolderData[];
 }
 
-export enum FileVersionStatus {
-  EXISTS = 'EXISTS',
-  DELETED = 'DELETED',
-}
+export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];
 
-export interface FileVersion {
-  id: string;
-  fileId: string;
-  networkFileId: string;
-  size: bigint;
-  status: FileVersionStatus;
-  createdAt: Date;
-  updatedAt: Date;
-  expiresAt: Date | null;
-}
-
-export interface VersioningLimits {
-  enabled: boolean;
-  maxFileSize: number;
-  retentionDays: number;
-  maxVersions: number;
-}
-
-export interface GetFileLimitsResponse {
-  versioning: VersioningLimits;
-}
+export type GetFileLimitsResponse = paths['/files/limits']['get']['responses']['200']['content']['application/json'];
