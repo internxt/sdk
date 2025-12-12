@@ -24,7 +24,11 @@
     "build": "tsc",
     "lint": "eslint ./src",
     "format": "prettier src/**/*.ts --write",
-    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format"
+    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format",
+    "health-server:install": "cd health-check-server && npm install",
+    "health-server:dev": "cd health-check-server && npm run dev",
+    "health-server:build": "cd health-check-server && npm run build",
+    "health-server:start": "cd health-check-server && npm start"
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.0.1",
