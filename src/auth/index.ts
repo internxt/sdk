@@ -266,7 +266,6 @@ export class Auth {
   public async loginOpaqueStart(
     email: string,
     startLoginRequest: string,
-    tfa: string | undefined,
   ): Promise<{
     loginResponse: string;
   }> {
@@ -277,7 +276,6 @@ export class Auth {
       {
         email,
         startLoginRequest,
-        tfa,
       },
       this.basicHeaders(),
     );
@@ -291,6 +289,7 @@ export class Auth {
   public async loginOpaqueFinish(
     email: string,
     finishLoginRequest: string,
+    tfa: string | undefined,
   ): Promise<{
     sessionID: string;
     user: UserSettings;
@@ -298,11 +297,13 @@ export class Auth {
     return this.client.post<{
       sessionID: string;
       user: UserSettings;
+      token: string;
     }>(
       '/auth/login-opaque/finish',
       {
         email,
         finishLoginRequest,
+        tfa,
       },
       this.basicHeaders(),
     );
