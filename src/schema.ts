@@ -3160,6 +3160,11 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
+      /**
+       * Format: date-time
+       * @description Date when this version expires based on retention policy
+       */
+      expiresAt: string;
     };
     ReplaceFileDto: {
       /**
@@ -5299,7 +5304,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['FileVersionDto'];
+          'application/json': components['schemas']['FileDto'];
         };
       };
     };
