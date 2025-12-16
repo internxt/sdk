@@ -37,6 +37,7 @@ import {
   MoveFolderResponse,
   MoveFolderUuidPayload,
   ReplaceFile,
+  RestoreFileVersionResponse,
   SearchResultData,
   Thumbnail,
   ThumbnailEntry,
@@ -881,10 +882,14 @@ export class Storage {
    *
    * @param {string} uuid - The UUID of the file.
    * @param {string} versionId - The UUID of the version to restore.
-   * @returns {Promise<FileVersion>} A promise that resolves with the restored version.
+   * @returns {Promise<RestoreFileVersionResponse>} A promise that resolves with the restored file.
    */
-  public restoreFileVersion(uuid: string, versionId: string): Promise<FileVersion> {
-    return this.client.post<FileVersion>(`/files/${uuid}/versions/${versionId}/restore`, {}, this.headers());
+  public restoreFileVersion(uuid: string, versionId: string): Promise<RestoreFileVersionResponse> {
+    return this.client.post<RestoreFileVersionResponse>(
+      `/files/${uuid}/versions/${versionId}/restore`,
+      {},
+      this.headers(),
+    );
   }
 
   /**
