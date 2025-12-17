@@ -469,4 +469,7 @@ export interface CheckDuplicatedFoldersResponse {
 
 export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];
 
+export type RestoreFileVersionResponse =
+  paths['/files/{uuid}/versions/{versionId}/restore']['post']['responses']['200']['content']['application/json'];
+
 export type GetFileLimitsResponse = paths['/files/limits']['get']['responses']['200']['content']['application/json'];
