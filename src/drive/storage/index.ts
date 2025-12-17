@@ -29,7 +29,7 @@ import {
   FolderAncestorWorkspace,
   FolderMeta,
   FolderTreeResponse,
-  GetFileLimitsResponse,
+  FileLimitsResponse,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -895,9 +895,9 @@ export class Storage {
   /**
    * Gets the file version limits for the user
    *
-   * @returns {Promise<GetFileLimitsResponse>} A promise that resolves with the file limits.
+   * @returns {Promise<FileLimitsResponse>} A promise that resolves with the file limits.
    */
-  public getFileVersionLimits(): Promise<GetFileLimitsResponse> {
-    return this.client.get<GetFileLimitsResponse>('/files/limits', this.headers());
+  public getFileVersionLimits(): Promise<FileLimitsResponse> {
+    return this.client.get<FileLimitsResponse>('/files/limits', this.headers());
   }
 }
