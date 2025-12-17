@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.11.22",
+  "version": "1.11.23",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -30,15 +30,15 @@
     "@internxt/eslint-config-internxt": "2.0.1",
     "@internxt/prettier-config": "1.0.2",
     "@types/jest": "30.0.0",
-    "@types/sinon": "17.0.4",
-    "eslint": "9.39.1",
+    "@types/sinon": "21.0.0",
+    "eslint": "9.39.2",
     "husky": "9.1.7",
     "jest": "30.2.0",
-    "lint-staged": "16.2.6",
+    "lint-staged": "16.2.7",
     "openapi-typescript": "7.10.1",
-    "prettier": "3.6.2",
+    "prettier": "3.7.4",
     "sinon": "21.0.0",
-    "ts-jest": "29.4.5",
+    "ts-jest": "29.4.6",
     "typescript": "5.9.3"
   },
   "dependencies": {
