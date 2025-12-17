@@ -3062,10 +3062,10 @@ export interface components {
        */
       bucket: string;
       /**
-       * @description The ID of the file
+       * @description The ID of the file (required when size > 0)
        * @example file12345
        */
-      fileId: string;
+      fileId?: string;
       /**
        * @description The encryption version used for the file
        * @example 03-aes
@@ -3115,7 +3115,7 @@ export interface components {
     FileDto: {
       id: number;
       uuid: string;
-      fileId: string;
+      fileId: string | null;
       name: string;
       type: string;
       size: string;
@@ -3151,7 +3151,7 @@ export interface components {
     };
     FileVersionDto: {
       id: string;
-      fileId: string;
+      fileId: string | null;
       networkFileId: string;
       size: string;
       /** @enum {string} */
@@ -3160,13 +3160,18 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
+      /**
+       * Format: date-time
+       * @description Date when this version expires based on retention policy
+       */
+      expiresAt: string;
     };
     ReplaceFileDto: {
       /**
-       * @description File id
+       * @description File id (required when size > 0)
        * @example 651300a2da9b27001f63f384
        */
-      fileId: string;
+      fileId?: string;
       /**
        * Format: int64
        * @description New file size
@@ -3654,7 +3659,7 @@ export interface components {
     FileInSharedFolderDto: {
       id: number;
       uuid: string;
-      fileId: string;
+      fileId: string | null;
       name: string;
       type: string;
       size: string;
@@ -3899,10 +3904,10 @@ export interface components {
        */
       bucket: string;
       /**
-       * @description The ID of the file
+       * @description The ID of the file (required when size > 0)
        * @example file12345
        */
-      fileId: string;
+      fileId?: string;
       /**
        * @description The encryption version used for the file
        * @example 03-aes
@@ -5299,7 +5304,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['FileVersionDto'];
+          'application/json': components['schemas']['FileDto'];
         };
       };
     };
