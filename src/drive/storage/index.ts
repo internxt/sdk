@@ -29,7 +29,7 @@ import {
   FolderAncestorWorkspace,
   FolderMeta,
   FolderTreeResponse,
-  GetFileLimitsResponse,
+  FileLimitsResponse,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -37,6 +37,7 @@ import {
   MoveFolderResponse,
   MoveFolderUuidPayload,
   ReplaceFile,
+  RestoreFileVersionResponse,
   SearchResultData,
   Thumbnail,
   ThumbnailEntry,
@@ -881,18 +882,22 @@ export class Storage {
    *
    * @param {string} uuid - The UUID of the file.
    * @param {string} versionId - The UUID of the version to restore.
-   * @returns {Promise<FileVersion>} A promise that resolves with the restored version.
+   * @returns {Promise<RestoreFileVersionResponse>} A promise that resolves with the restored file.
    */
-  public restoreFileVersion(uuid: string, versionId: string): Promise<FileVersion> {
-    return this.client.post<FileVersion>(`/files/${uuid}/versions/${versionId}/restore`, {}, this.headers());
+  public restoreFileVersion(uuid: string, versionId: string): Promise<RestoreFileVersionResponse> {
+    return this.client.post<RestoreFileVersionResponse>(
+      `/files/${uuid}/versions/${versionId}/restore`,
+      {},
+      this.headers(),
+    );
   }
 
   /**
    * Gets the file version limits for the user
    *
-   * @returns {Promise<GetFileLimitsResponse>} A promise that resolves with the file limits.
+   * @returns {Promise<FileLimitsResponse>} A promise that resolves with the file limits.
    */
-  public getFileVersionLimits(): Promise<GetFileLimitsResponse> {
-    return this.client.get<GetFileLimitsResponse>('/files/limits', this.headers());
+  public getFileVersionLimits(): Promise<FileLimitsResponse> {
+    return this.client.get<FileLimitsResponse>('/files/limits', this.headers());
   }
 }

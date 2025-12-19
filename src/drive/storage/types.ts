@@ -31,7 +31,7 @@ export interface DriveFileData {
   deleted: boolean;
   deletedAt: null;
   encrypt_version: string;
-  fileId: string;
+  fileId: string | null;
   folderId: number;
   folder_id: number;
   folderUuid: string;
@@ -469,4 +469,7 @@ export interface CheckDuplicatedFoldersResponse {
 
 export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];
 
-export type GetFileLimitsResponse = paths['/files/limits']['get']['responses']['200']['content']['application/json'];
+export type RestoreFileVersionResponse =
+  paths['/files/{uuid}/versions/{versionId}/restore']['post']['responses']['200']['content']['application/json'];
+
+export type FileLimitsResponse = paths['/files/limits']['get']['responses']['200']['content']['application/json'];
