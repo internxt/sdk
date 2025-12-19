@@ -293,6 +293,7 @@ export class Auth {
   ): Promise<{
     sessionID: string;
     user: UserSettings;
+    token: string;
   }> {
     return this.client.post<{
       sessionID: string;
