@@ -69,3 +69,13 @@ export type VerifyEmailChangeResponse = {
 };
 
 export type CheckChangeEmailExpirationResponse = { isExpired: boolean };
+export interface IncompleteCheckoutPayload extends Record<string, unknown> {
+  completeCheckoutUrl: string;
+  planName?: string;
+  price?: number;
+}
+
+export interface IncompleteCheckoutResponse {
+  success: boolean;
+  message: string;
+}

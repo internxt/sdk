@@ -8,6 +8,8 @@ import {
   ChangePasswordPayloadNew,
   CheckChangeEmailExpirationResponse,
   FriendInvite,
+  IncompleteCheckoutPayload,
+  IncompleteCheckoutResponse,
   InitializeUserResponse,
   PreCreateUserResponse,
   Token,
@@ -383,6 +385,15 @@ export class Users {
    */
   public generateMnemonic(): Promise<{ mnemonic: string }> {
     return this.client.get<{ mnemonic: string }>('/users/generate-mnemonic', this.basicHeaders());
+  }
+
+  /**
+   * Tracks incomplete checkout event and sends notification email when user abandons checkout process
+   * @param payload - The incomplete checkout data containing checkout URL, plan name and price
+   * @returns A promise that resolves when the event is tracked successfully
+   */
+  public handleIncompleteCheckout(payload: IncompleteCheckoutPayload): Promise<IncompleteCheckoutResponse> {
+    return this.client.post('/users/payments/incomplete-checkout', payload, this.headers());
   }
 
   private basicHeaders() {
