@@ -838,7 +838,7 @@ describe('# auth service tests', () => {
     });
   });
   describe('-> change password with link v2', () => {
-    it('Should call with right params without private keys', async () => {
+    it('Should call with right params without keys', async () => {
       const callStub = sinon.stub(httpClient, 'put').resolves({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
@@ -871,7 +871,7 @@ describe('# auth service tests', () => {
         kyber: 'newKyberKey',
       };
 
-      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, privateKeys);
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, { private: privateKeys });
 
       // Assert
       expect(callStub.firstCall.args).toEqual([
@@ -881,6 +881,72 @@ describe('# auth service tests', () => {
           salt,
           mnemonic,
           privateKeys,
+          publicKeys: undefined,
+        },
+        headers,
+      ]);
+    });
+
+    it('Should call with right params including private and public keys', async () => {
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+      const password = 'newPassword';
+      const salt = 'newSalt';
+      const mnemonic = 'newMnemonic';
+      const privateKeys = {
+        ecc: 'newEccPrivateKey',
+        kyber: 'newKyberPrivateKey',
+      };
+      const publicKeys = {
+        ecc: 'eccPublicKey',
+        kyber: 'kyberPublicKey',
+      };
+
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, {
+        private: privateKeys,
+        public: publicKeys,
+      });
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/users/recover-account-v2?token=${token}&reset=false`,
+        {
+          password,
+          salt,
+          mnemonic,
+          privateKeys,
+          publicKeys,
+        },
+        headers,
+      ]);
+    });
+
+    it('Should call with right params including only public keys (legacy backup without private keys)', async () => {
+      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const { client, headers } = clientAndHeaders();
+      const token = 'token';
+      const password = 'newPassword';
+      const salt = 'newSalt';
+      const mnemonic = 'newMnemonic';
+      const publicKeys = {
+        ecc: 'eccPublicKey',
+        kyber: 'kyberPublicKey',
+      };
+
+      await client.changePasswordWithLinkV2(token, password, salt, mnemonic, {
+        public: publicKeys,
+      });
+
+      // Assert
+      expect(callStub.firstCall.args).toEqual([
+        `/users/recover-account-v2?token=${token}&reset=false`,
+        {
+          password,
+          salt,
+          mnemonic,
+          privateKeys: undefined,
+          publicKeys,
         },
         headers,
       ]);
