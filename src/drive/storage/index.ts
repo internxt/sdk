@@ -28,6 +28,7 @@ import {
   FolderAncestor,
   FolderAncestorWorkspace,
   FolderMeta,
+  FolderStatsResponse,
   FolderTreeResponse,
   FileLimitsResponse,
   MoveFilePayload,
@@ -747,6 +748,16 @@ export class Storage {
       `folders/${uuid}/meta`,
       addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
     );
+  }
+
+  /**
+   * Gets the stats of a given folder UUID
+   *
+   * @param {string} uuid - UUID of the folder.
+   * @returns {Promise<FolderStatsResponse>}
+   */
+  public getFolderStats(uuid: string): Promise<FolderStatsResponse> {
+    return this.client.get<FolderStatsResponse>(`folders/${uuid}/stats`, this.headers());
   }
 
   /**
