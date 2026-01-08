@@ -114,6 +114,8 @@ export interface FetchFolderContentResponse {
 }
 
 export type FileMeta = paths['/files/{uuid}/meta']['get']['responses']['200']['content']['application/json'];
+export type FolderStatsResponse =
+  paths['/folders/{uuid}/stats']['get']['responses']['200']['content']['application/json'];
 
 export interface ShareLink {
   id: string;
