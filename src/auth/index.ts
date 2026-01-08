@@ -9,6 +9,7 @@ import {
   Keys,
   LoginDetails,
   PrivateKeys,
+  RecoveryKeys,
   RegisterDetails,
   RegisterOpaqueDetails,
   RegisterPreCreatedUser,
@@ -669,7 +670,7 @@ export class Auth {
     password: string,
     salt: string,
     mnemonic: string,
-    keys?: PrivateKeys,
+    keys?: RecoveryKeys,
   ): Promise<void> {
     return this.client.put(
       `/users/recover-account-v2?token=${token}&reset=false`,
@@ -677,7 +678,8 @@ export class Auth {
         password: password,
         salt: salt,
         mnemonic: mnemonic,
-        privateKeys: keys,
+        privateKeys: keys?.private,
+        publicKeys: keys?.public,
       },
       this.basicHeaders(),
     );

@@ -97,6 +97,16 @@ export interface PrivateKeys {
   kyber?: string;
 }
 
+export interface PublicKeys {
+  ecc?: string;
+  kyber?: string;
+}
+
+export interface RecoveryKeys {
+  private?: PrivateKeys;
+  public?: PublicKeys;
+}
+
 export interface PrivateKeysExtended {
   ecc: {
     public: string;
