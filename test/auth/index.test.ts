@@ -3,7 +3,7 @@ import { emptyRegisterDetails } from './registerDetails.mother';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
-import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
+import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src/auth';
 
 const httpClient = HttpClient.create('');
 

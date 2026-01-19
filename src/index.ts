@@ -6,3 +6,4 @@ export * as Workspaces from './workspaces';
 export * from './meet';
 export * as Payments from './payments';
 export * from './misc';
+export * from './mail';
