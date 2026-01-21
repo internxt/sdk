@@ -2640,7 +2640,7 @@ inherits@2:
 
 "internxt-crypto@https://github.com/internxt/crypto/releases/download/v.0.0.10-alpha/internxt-crypto-0.0.10-alpha.tgz":
   version "0.0.10-alpha"
-  resolved "https://github.com/internxt/crypto/releases/download/v.0.0.10-alpha/internxt-crypto-0.0.10-alpha.tgz#3fd8a6acb0e20f4358870c6ff238ded920c8788d"
+  resolved "https://github.com/internxt/crypto/releases/download/v.0.0.10-alpha/internxt-crypto-0.0.10-alpha.tgz#25ed2506984aa145f50b03d675cf666309b0a04d"
   dependencies:
     "@emailjs/browser" "^4.4.1"
     "@noble/hashes" "^2.0.1"
