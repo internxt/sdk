@@ -11,6 +11,8 @@ import {
   publicKeyToBase64,
   Email,
   generateUuid,
+  createPwdProtectedEmail,
+  encryptEmailHybrid,
 } from 'internxt-crypto';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
@@ -211,6 +213,7 @@ describe('Mail service tests', () => {
 
     const emailKeysA = await generateEmailKeys();
     const emailKeysB = await generateEmailKeys();
+    const emailKeysABase64 = await publicKeyToBase64(emailKeysA.publicKeys);
     const emailKeysBBase64 = await publicKeyToBase64(emailKeysB.publicKeys);
 
     const email: Email = {
@@ -229,6 +232,8 @@ describe('Mail service tests', () => {
         labels: ['inbox', 'test'],
       },
     };
+
+    const pwd = 'mock password';
 
     it('should successfully encrypt and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
@@ -268,7 +273,6 @@ describe('Mail service tests', () => {
 
     it('should successfully password protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const pwd = 'mock password';
       const postCall = sinon.stub(httpClient, 'post').resolves({});
       await client.pwdProtectAndSendEmail(email, pwd, false);
 
@@ -291,6 +295,32 @@ describe('Mail service tests', () => {
         },
         headers,
       ]);
+    });
+
+    it('should successfully open password protected email', async () => {
+      const { client } = clientAndHeadersWithToken();
+      const encEmail = await createPwdProtectedEmail(email, pwd, true);
+      const result = await client.openPwdProtectedEmail(encEmail, pwd);
+
+      expect(result).toEqual(email);
+    });
+
+    it('should successfully decrypt encrypted email', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
+      const getCall = sinon.stub(httpClient, 'getWithParams').resolves({ publicKeys: emailKeysABase64, user: userA });
+      const encEmail = await encryptEmailHybrid(email, recipient, emailKeysA.privateKeys, true);
+      const result = await client.decryptEmail(encEmail, emailKeysB);
+
+      expect(getCall.firstCall.args).toEqual([
+        '/getUserPublicKeys',
+        {
+          userEmail: userA.email,
+        },
+        headers,
+      ]);
+
+      expect(result).toEqual(email);
     });
   });
 });

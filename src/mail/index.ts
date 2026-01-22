@@ -258,8 +258,8 @@ export class Mail {
       clientName: this.appDetails.clientName,
       clientVersion: this.appDetails.clientVersion,
       token: this.apiSecurity.token,
-      workspaceToken: this.apiSecurity.workspaceToken,
       desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
     });
   }
 }
