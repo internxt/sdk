@@ -41,7 +41,7 @@ describe('Mail service tests', () => {
       await client.uploadKeystoreToServer(encryptionKeystore);
 
       expect(postCall.firstCall.args).toEqual([
-        '/uploadKeystore',
+        '/keystore',
         {
           encryptedKeystore: encryptionKeystore,
         },
@@ -55,7 +55,7 @@ describe('Mail service tests', () => {
       await client.createAndUploadKeystores(email, baseKey);
 
       expect(postCall.firstCall.args).toEqual([
-        '/uploadKeystore',
+        '/keystore',
         {
           encryptedKeystore: {
             userEmail: email,
@@ -73,7 +73,7 @@ describe('Mail service tests', () => {
       ]);
 
       expect(postCall.secondCall.args).toEqual([
-        '/uploadKeystore',
+        '/keystore',
         {
           encryptedKeystore: {
             userEmail: email,
@@ -92,11 +92,11 @@ describe('Mail service tests', () => {
     });
     it('should successfully download a keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'getWithParams').resolves({ encryptionKeystore });
+      const postCall = sinon.stub(httpClient, 'post').resolves({ encryptionKeystore });
       const result = await client.downloadKeystoreFromServer(email, KeystoreType.ENCRYPTION);
 
       expect(postCall.firstCall.args).toEqual([
-        '/getKeystore',
+        '/user/keystore',
         {
           userEmail: email,
           keystoreType: KeystoreType.ENCRYPTION,
@@ -108,11 +108,11 @@ describe('Mail service tests', () => {
 
     it('should successfully open user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'getWithParams').resolves(encryptionKeystore);
+      const postCall = sinon.stub(httpClient, 'post').resolves(encryptionKeystore);
       const result = await client.getUserEmailKeys(email, baseKey);
 
       expect(postCall.firstCall.args).toEqual([
-        '/getKeystore',
+        '/user/keystore',
         {
           userEmail: email,
           keystoreType: KeystoreType.ENCRYPTION,
@@ -124,11 +124,11 @@ describe('Mail service tests', () => {
 
     it('should successfully recover user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'getWithParams').resolves(recoveryKeystore);
+      const postCall = sinon.stub(httpClient, 'post').resolves(recoveryKeystore);
       const result = await client.recoverUserEmailKeys(email, recoveryCodes);
 
       expect(postCall.firstCall.args).toEqual([
-        '/getKeystore',
+        '/user/keystore',
         {
           userEmail: email,
           keystoreType: KeystoreType.RECOVERY,
@@ -166,11 +166,11 @@ describe('Mail service tests', () => {
 
     it('should successfully get user public keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'getWithParams').resolves({ publicKeys: emailKeysABase64, user: userA });
-      const result = await client.getUserPublicKeys(userA.email);
+      const postCall = sinon.stub(httpClient, 'post').resolves({ publicKeys: emailKeysABase64, user: userA });
+      const result = await client.getUserWithPublicKeys(userA.email);
 
       expect(postCall.firstCall.args).toEqual([
-        '/getUserPublicKeys',
+        '/user/public-keys',
         {
           userEmail: userA.email,
         },
@@ -181,15 +181,15 @@ describe('Mail service tests', () => {
 
     it('should successfully get public keys of several users', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'getWithParams').resolves([
+      const postCall = sinon.stub(httpClient, 'post').resolves([
         { publicKeys: emailKeysABase64, user: userA },
         { publicKeys: emailKeysBBase64, user: userB },
         { publicKeys: emailKeysCBase64, user: userC },
       ]);
-      const result = await client.getPublicKeysOfSeveralUsers([userA.email, userB.email, userC.email]);
+      const result = await client.getSeveralUsersWithPublicKeys([userA.email, userB.email, userC.email]);
 
       expect(postCall.firstCall.args).toEqual([
-        '/getPublicKeysOfSeveralUsers',
+        '/users/public-keys',
         {
           emails: [userA.email, userB.email, userC.email],
         },
@@ -237,20 +237,21 @@ describe('Mail service tests', () => {
 
     it('should successfully encrypt and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const getCall = sinon.stub(httpClient, 'getWithParams').resolves({ publicKeys: emailKeysBBase64, user: userB });
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
-      await client.encryptAndSendEmail(email, emailKeysA, false);
+     const postStub = sinon.stub(httpClient, 'post');
+      postStub.onCall(0).resolves({ publicKeys: emailKeysBBase64, user: userB });
+      postStub.onCall(1).resolves({});
+      await client.encryptAndSendEmail(email, emailKeysA.privateKeys, false);
 
-      expect(getCall.firstCall.args).toEqual([
-        '/getUserPublicKeys',
+      expect(postStub.firstCall.args).toEqual([
+        '/user/public-keys',
         {
           userEmail: userB.email,
         },
         headers,
       ]);
 
-      expect(postCall.firstCall.args).toEqual([
-        '/sendEncryptedEmail',
+      expect(postStub.secondCall.args).toEqual([
+        '/email/encrypted',
         {
           email: {
             encryptedKey: {
@@ -266,6 +267,7 @@ describe('Mail service tests', () => {
             id: email.id,
             isSubjectEncrypted: false,
           },
+          
         },
         headers,
       ]);
@@ -274,10 +276,10 @@ describe('Mail service tests', () => {
     it('should successfully password protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = sinon.stub(httpClient, 'post').resolves({});
-      await client.pwdProtectAndSendEmail(email, pwd, false);
+      await client.passwordProtectAndSendEmail(email, pwd, false);
 
       expect(postCall.firstCall.args).toEqual([
-        '/sendPwdProtectedEmail',
+        '/email/password-protected',
         {
           email: {
             encryptedKey: {
@@ -300,7 +302,7 @@ describe('Mail service tests', () => {
     it('should successfully open password protected email', async () => {
       const { client } = clientAndHeadersWithToken();
       const encEmail = await createPwdProtectedEmail(email, pwd, true);
-      const result = await client.openPwdProtectedEmail(encEmail, pwd);
+      const result = await client.openPasswordProtectedEmail(encEmail, pwd);
 
       expect(result).toEqual(email);
     });
@@ -308,12 +310,12 @@ describe('Mail service tests', () => {
     it('should successfully decrypt encrypted email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
-      const getCall = sinon.stub(httpClient, 'getWithParams').resolves({ publicKeys: emailKeysABase64, user: userA });
+      const getCall = sinon.stub(httpClient, 'post').resolves({ publicKeys: emailKeysABase64, user: userA });
       const encEmail = await encryptEmailHybrid(email, recipient, emailKeysA.privateKeys, true);
-      const result = await client.decryptEmail(encEmail, emailKeysB);
+      const result = await client.decryptEmail(encEmail, emailKeysB.privateKeys);
 
       expect(getCall.firstCall.args).toEqual([
-        '/getUserPublicKeys',
+        '/user/public-keys',
         {
           userEmail: userA.email,
         },
