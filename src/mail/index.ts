@@ -109,13 +109,14 @@ export class Mail {
    * @returns User with corresponding public keys
    */
   async getUserWithPublicKeys(userEmail: string): Promise<UserWithPublicKeys> {
-    const response = await this.client.post<{ publicKeys: PublicKeysBase64; user: User }>(
-      `${this.apiUrl}/user/public-keys`,
-      { userEmail },
+    const response = await this.client.post<{ publicKeys: PublicKeysBase64; user: User }[]>(
+      `${this.apiUrl}/users/public-keys`,
+      { emails: [userEmail] },
       this.headers(),
     );
-    const publicKeys = await base64ToPublicKey(response.publicKeys);
-    const result = { ...response.user, publicKeys };
+    const signleResponse = response[0];
+    const publicKeys = await base64ToPublicKey(signleResponse.publicKeys);
+    const result = { ...signleResponse.user, publicKeys };
     return result;
   }
 
@@ -149,7 +150,7 @@ export class Mail {
    * @returns Server response
    */
   async sendEncryptedEmail(email: HybridEncryptedEmail): Promise<void> {
-    return this.client.post(`${this.apiUrl}/email/encrypted`, { email }, this.headers());
+    return this.client.post(`${this.apiUrl}/emails`, { emails: [email] }, this.headers());
   }
 
   /**
@@ -177,7 +178,7 @@ export class Mail {
    * @returns Server response
    */
   async sendEncryptedEmailToMultipleRecipients(emails: HybridEncryptedEmail[]): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails/encrypted`, { emails }, this.headers());
+    return this.client.post(`${this.apiUrl}/emails`, { emails }, this.headers());
   }
 
   /**
@@ -214,7 +215,7 @@ export class Mail {
    * @returns Server response
    */
   async sendPasswordProtectedEmail(email: PwdProtectedEmail): Promise<void> {
-    return this.client.post(`${this.apiUrl}/email/password-protected`, { email }, this.headers());
+    return this.client.post(`${this.apiUrl}/emails`, { email }, this.headers());
   }
 
   /**
