@@ -197,7 +197,10 @@ export class HttpClient {
    * @private
    */
   private normalizeError(error: AxiosError) {
-    let errorMessage: string, errorStatus: number, errorCode: string | undefined;
+    let errorMessage: string,
+      errorStatus: number,
+      errorCode: string | undefined,
+      errorHeaders: Record<string, string> | undefined;
 
     if (error.response) {
       const response = error.response as AxiosResponse<{
@@ -212,6 +215,7 @@ export class HttpClient {
       errorMessage = response.data.message || response.data.error || JSON.stringify(response.data);
       errorStatus = response.status;
       errorCode = response.data.code;
+      errorHeaders = response.headers as Record<string, string>;
     } else if (error.request) {
       errorMessage = 'Server unavailable';
       errorStatus = 500;
@@ -220,7 +224,7 @@ export class HttpClient {
       errorStatus = 400;
     }
 
-    throw new AppError(errorMessage, errorStatus, errorCode);
+    throw new AppError(errorMessage, errorStatus, errorCode, errorHeaders);
   }
 }
 
