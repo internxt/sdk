@@ -1,12 +1,30 @@
-import axios, { Axios, AxiosError, AxiosResponse, CancelToken } from 'axios';
+import axios, { Axios, AxiosError, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
 import AppError from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 
 export { RequestCanceler } from './types';
 
+export interface CustomInterceptor {
+  request?: {
+    onFulfilled?: (
+      config: InternalAxiosRequestConfig,
+    ) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
+    onRejected?: (error: unknown) => unknown;
+  };
+  response?: {
+    onFulfilled?: (response: AxiosResponse) => AxiosResponse;
+    onRejected?: (error: unknown) => unknown;
+  };
+}
+
 export class HttpClient {
   private readonly axios: Axios;
   private readonly unauthorizedCallback: UnauthorizedCallback;
+  static globalInterceptors: CustomInterceptor[] = [];
+
+  static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
+    HttpClient.globalInterceptors = interceptors;
+  }
 
   public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
     if (unauthorizedCallback === undefined) {
@@ -20,6 +38,16 @@ export class HttpClient {
       baseURL: baseURL,
     });
     this.unauthorizedCallback = unauthorizedCallback;
+
+    HttpClient.globalInterceptors.forEach((interceptor) => {
+      if (interceptor.request) {
+        this.axios.interceptors.request.use(interceptor.request.onFulfilled, interceptor.request.onRejected);
+      }
+      if (interceptor.response) {
+        this.axios.interceptors.response.use(interceptor.response.onFulfilled, interceptor.response.onRejected);
+      }
+    });
+
     this.initializeMiddleware();
   }
 
