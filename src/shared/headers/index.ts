@@ -4,6 +4,13 @@ export interface CustomHeaders {
   [key: string]: string;
 }
 
+export interface BasicHeadersPayload {
+  clientName: string;
+  clientVersion: string;
+  customHeaders?: Record<string, string>;
+  desktopToken?: Token;
+}
+
 type InternxtHeaders = {
   'content-type': string;
   'internxt-version': string;
@@ -20,12 +27,7 @@ export function basicHeaders({
   clientVersion,
   customHeaders,
   desktopToken,
-}: {
-  clientName: string;
-  clientVersion: string;
-  customHeaders?: Record<string, string>;
-  desktopToken?: Token;
-}): InternxtHeaders {
+}: BasicHeadersPayload): InternxtHeaders {
   const extra: ExtraHeaders = {};
   if (desktopToken) {
     extra['x-internxt-desktop-header'] = desktopToken;
