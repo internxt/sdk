@@ -18,6 +18,6 @@ export class Location {
   }
 
   public async getUserLocation(): Promise<UserLocation> {
-    return this.client.get<UserLocation>('', {});
+    return this.client.get<UserLocation>('/', {});
   }
 }
