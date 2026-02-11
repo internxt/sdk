@@ -19,11 +19,12 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prepare": "husky",
-    "test": "jest --detectOpenHandles test/",
-    "test:cov": "jest --coverage",
-    "build": "tsc",
+    "test": "vitest run --coverage",
+    "test:watch": "vitest watch",
+    "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
+    "build": "yarn clean && tsc",
     "lint": "eslint ./src",
-    "format": "prettier src/**/*.ts --write",
+    "format": "prettier --write **/*.{js,jsx,tsx,ts}",
     "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format"
   },
   "devDependencies": {
