@@ -1,9 +1,10 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomBytes } from 'crypto';
 
 import { ALGORITHMS, BinaryDataEncoding, Crypto, DownloadableShard, Network } from '../../src/network';
 import { downloadFile, FileVersionOneError } from '../../src/network/download';
 import { DownloadInvalidMnemonicError } from '../../src/network/errors';
+import { fail } from 'assert';
 
 const fakeFileId = 'fake-file-id';
 const fakeBucketId = 'fake-bucket-id';
@@ -32,11 +33,11 @@ const network = Network.client(
   },
 );
 
-afterEach(() => {
-  sinon.restore();
-});
-
 describe('network/download', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('downloadFile()', () => {
     describe('Should work properly if all is fine', () => {
       it('Should work when the mnemonic is provided', async () => {
@@ -63,9 +64,9 @@ describe('network/download', () => {
         ];
 
         const fileSize = shards.reduce((a, s) => a + s.size, 0);
-        const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
-        const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
-        const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
+        const validateMnemonicStub = vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(true);
+        const generateFileKeyStub = vi.spyOn(crypto, 'generateFileKey').mockResolvedValue(key);
+        const getDownloadLinksStub = vi.spyOn(network, 'getDownloadLinks').mockResolvedValue({
           index,
           shards,
           version: 2,
@@ -74,9 +75,9 @@ describe('network/download', () => {
           size: fileSize,
         });
 
-        const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
-        const downloadFileMock = jest.fn();
-        const decryptFileMock = jest.fn();
+        const toBinaryDataMock = vi.fn().mockReturnValue(bufferizedIndex);
+        const downloadFileMock = vi.fn();
+        const decryptFileMock = vi.fn();
 
         try {
           await downloadFile(
@@ -90,18 +91,18 @@ describe('network/download', () => {
             decryptFileMock,
           );
 
-          expect(validateMnemonicStub.calledOnce).toBeTruthy();
-          expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
+          expect(validateMnemonicStub).toHaveBeenCalledOnce();
+          expect(validateMnemonicStub).toHaveBeenCalledWith(mnemonic);
 
-          expect(getDownloadLinksStub.calledOnce).toBeTruthy();
-          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, undefined]);
+          expect(getDownloadLinksStub).toHaveBeenCalledOnce();
+          expect(getDownloadLinksStub).toHaveBeenCalledWith(bucketId, fileId, undefined);
 
           expect(toBinaryDataMock).toHaveBeenCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
 
-          expect(generateFileKeyStub.calledOnce).toBeTruthy();
-          expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+          expect(generateFileKeyStub).toHaveBeenCalledOnce();
+          expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
           expect(downloadFileMock).toHaveBeenCalledTimes(1);
           expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
@@ -113,9 +114,8 @@ describe('network/download', () => {
             bufferizedIndex.slice(0, 16),
             fileSize,
           );
-        } catch (err) {
-          console.log(err);
-          expect(true).toBeFalsy();
+        } catch {
+          fail('Expected function to not throw an error, but it did.');
         }
       });
 
@@ -144,9 +144,9 @@ describe('network/download', () => {
         ];
 
         const fileSize = shards.reduce((a, s) => a + s.size, 0);
-        const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
-        const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
-        const getDownloadLinksStub = sinon.stub(network, 'getDownloadLinks').resolves({
+        const validateMnemonicStub = vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(true);
+        const generateFileKeyStub = vi.spyOn(crypto, 'generateFileKey').mockResolvedValue(key);
+        const getDownloadLinksStub = vi.spyOn(network, 'getDownloadLinks').mockResolvedValue({
           index,
           shards,
           version: 2,
@@ -155,9 +155,9 @@ describe('network/download', () => {
           size: fileSize,
         });
 
-        const toBinaryDataMock = jest.fn().mockReturnValue(bufferizedIndex);
-        const downloadFileMock = jest.fn();
-        const decryptFileMock = jest.fn();
+        const toBinaryDataMock = vi.fn().mockReturnValue(bufferizedIndex);
+        const downloadFileMock = vi.fn();
+        const decryptFileMock = vi.fn();
 
         try {
           await downloadFile(
@@ -172,17 +172,17 @@ describe('network/download', () => {
             { token },
           );
 
-          expect(validateMnemonicStub.callCount).toBe(0);
+          expect(validateMnemonicStub).not.toHaveBeenCalled();
 
-          expect(getDownloadLinksStub.calledOnce).toBeTruthy();
-          expect(getDownloadLinksStub.firstCall.args).toStrictEqual([bucketId, fileId, token]);
+          expect(getDownloadLinksStub).toHaveBeenCalledOnce();
+          expect(getDownloadLinksStub).toHaveBeenCalledWith(bucketId, fileId, token);
 
           expect(toBinaryDataMock).toHaveBeenCalledTimes(2);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
           expect(toBinaryDataMock).toHaveBeenCalledWith(index, BinaryDataEncoding.HEX);
 
-          expect(generateFileKeyStub.calledOnce).toBeTruthy();
-          expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+          expect(generateFileKeyStub).toHaveBeenCalledOnce();
+          expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
           expect(downloadFileMock).toHaveBeenCalledTimes(1);
           expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
@@ -194,14 +194,14 @@ describe('network/download', () => {
             bufferizedIndex.slice(0, 16),
             fileSize,
           );
-        } catch (err) {
-          expect(true).toBeFalsy();
+        } catch {
+          fail('Expected function to not throw an error, but it did.');
         }
       });
     });
 
     it('Should throw if file version is missing', async () => {
-      sinon.stub(network, 'getDownloadLinks').resolves({
+      vi.spyOn(network, 'getDownloadLinks').mockResolvedValue({
         index: '',
         shards: [],
         bucket: '',
@@ -209,7 +209,7 @@ describe('network/download', () => {
         size: 1000,
       });
       try {
-        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, vi.fn(), vi.fn(), vi.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(FileVersionOneError);
@@ -217,7 +217,7 @@ describe('network/download', () => {
     });
 
     it('Should throw if file version is 1', async () => {
-      sinon.stub(network, 'getDownloadLinks').resolves({
+      vi.spyOn(network, 'getDownloadLinks').mockResolvedValue({
         index: '',
         shards: [],
         bucket: '',
@@ -226,7 +226,7 @@ describe('network/download', () => {
         size: 1000,
       });
       try {
-        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, vi.fn(), vi.fn(), vi.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(FileVersionOneError);
@@ -234,19 +234,19 @@ describe('network/download', () => {
     });
 
     it('Should throw if the mnemonic is invalid', async () => {
-      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(false);
-      const downloadLinksStub = sinon.stub(network, 'getDownloadLinks');
+      const validateMnemonicStub = vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(false);
+      const downloadLinksStub = vi.spyOn(network, 'getDownloadLinks');
 
       try {
-        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, jest.fn(), jest.fn(), jest.fn());
+        await downloadFile(fakeFileId, fakeBucketId, fakeMnemonic, network, crypto, vi.fn(), vi.fn(), vi.fn());
         expect(false).toBeTruthy();
       } catch (err) {
         expect(err).toBeInstanceOf(DownloadInvalidMnemonicError);
 
-        expect(validateMnemonicStub.calledOnce).toBeTruthy();
-        expect(validateMnemonicStub.firstCall.args).toStrictEqual([fakeMnemonic]);
+        expect(validateMnemonicStub).toHaveBeenCalledOnce();
+        expect(validateMnemonicStub).toHaveBeenCalledWith(fakeMnemonic);
 
-        expect(downloadLinksStub.callCount).toEqual(0);
+        expect(downloadLinksStub).not.toHaveBeenCalled();
       }
     });
   });

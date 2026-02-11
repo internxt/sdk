@@ -1,26 +1,20 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Users } from '../../../src/drive';
-import { ChangePasswordPayloadNew } from '../../../src/drive/users/types';
+import { ChangePasswordPayloadNew, UserPublicKeyWithCreationResponse } from '../../../src/drive/users/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('# users service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('send invitation', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const postStub = sinon.stub(httpClient, 'post').resolves({
+      const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         sent: true,
       });
       const email = 'my@email.com';
@@ -29,13 +23,13 @@ describe('# users service tests', () => {
       const body = await client.sendInvitation(email);
 
       // Assert
-      expect(postStub.firstCall.args).toEqual([
+      expect(postStub).toHaveBeenCalledWith(
         '/user/invite',
         {
           email: email,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         sent: true,
       });
@@ -46,7 +40,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         user: {
           root_folder: 1,
         },
@@ -58,14 +52,14 @@ describe('# users service tests', () => {
       const body = await client.initialize(email, mnemonic);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/initialize',
         {
           email: email,
           mnemonic: mnemonic,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         root_folder: 1,
       });
@@ -76,7 +70,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         user: {},
         token: 't',
       });
@@ -85,7 +79,7 @@ describe('# users service tests', () => {
       const body = await client.refreshUser();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/users/refresh', headers]);
+      expect(callStub).toHaveBeenCalledWith('/users/refresh', headers);
       expect(body).toEqual({
         user: {},
         token: 't',
@@ -98,7 +92,7 @@ describe('# users service tests', () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const mockedAvatarUrl = 'https://example.avatar.com/avatar.jpg';
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         avatar: mockedAvatarUrl,
       });
 
@@ -106,7 +100,7 @@ describe('# users service tests', () => {
       const body = await client.refreshAvatarUser();
 
       // Assert
-      expect(callStub.firstCall.args).toStrictEqual(['/users/avatar/refresh', headers]);
+      expect(callStub).toHaveBeenCalledWith('/users/avatar/refresh', headers);
       expect(body).toStrictEqual({
         avatar: mockedAvatarUrl,
       });
@@ -118,7 +112,7 @@ describe('# users service tests', () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
       const email = 'test@test.com';
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         publicKey: 'publicKey',
         keys: {
           kyber: 'publicKeyberKey',
@@ -131,7 +125,7 @@ describe('# users service tests', () => {
       const body = await client.preRegister(email);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/users/pre-create', { email }, headers]);
+      expect(callStub).toHaveBeenCalledWith('/users/pre-create', { email }, headers);
       expect(body).toEqual({
         publicKey: 'publicKey',
         keys: {
@@ -147,7 +141,7 @@ describe('# users service tests', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(httpClient, 'patch').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue({});
       const payload: ChangePasswordPayloadNew = {
         currentEncryptedPassword: '1',
         encryptedMnemonic: '2',
@@ -165,7 +159,7 @@ describe('# users service tests', () => {
       const body = await client.changePassword(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/users/password',
         {
           currentPassword: payload.currentEncryptedPassword,
@@ -177,8 +171,26 @@ describe('# users service tests', () => {
           encryptVersion: payload.encryptVersion,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({});
+    });
+  });
+
+  describe('getPublicKeyWithPrecreation', () => {
+    it('should call the correct endpoint and return the public key response', async () => {
+      const email = 'test@example.com';
+      const publicKeyResponse: UserPublicKeyWithCreationResponse = {
+        publicKey: 'public_key_example_123',
+        publicKyberKey: 'kyber_key_example_123',
+      };
+
+      const { client, headers } = clientAndHeaders();
+      const putCall = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue(publicKeyResponse);
+
+      const response = await client.getPublicKeyWithPrecreation({ email });
+
+      expect(putCall).toHaveBeenCalledWith(`/users/public-key/${email}`, {}, headers);
+      expect(response).toEqual(publicKeyResponse);
     });
   });
 });

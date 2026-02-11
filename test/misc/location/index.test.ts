@@ -1,16 +1,10 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Location, UserLocation } from '../../../src/misc/location';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('Location service', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('Get user location', () => {
@@ -20,7 +14,7 @@ describe('Location service', () => {
         ip: '1.1.1.1',
         location: 'ES',
       };
-      sinon.stub(httpClient, 'get').resolves(mockLocation);
+      vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(mockLocation);
       const { client } = clientAndHeaders();
 
       // Act

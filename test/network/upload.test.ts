@@ -1,9 +1,10 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { randomBytes } from 'crypto';
 
 import { ALGORITHMS, Network, Crypto } from '../../src/network';
 import { uploadFile } from '../../src/network/upload';
 import { UploadInvalidMnemonicError } from '../../src/network/errors';
+import { fail } from 'assert';
 
 const fakeFileId = 'aaaaaa';
 const fakeBucketId = 'fake-bucket-id';
@@ -31,11 +32,11 @@ const network = Network.client(
   },
 );
 
-afterEach(() => {
-  sinon.restore();
-});
-
 describe('network/upload', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('uploadFile()', () => {
     it('Should work properly if all is fine', async () => {
       const fileId = fakeFileId;
@@ -51,10 +52,10 @@ describe('network/upload', () => {
       const bufferizedIndex = Buffer.from(index, 'hex');
       const key = Buffer.from('');
 
-      const randomBytesStub = sinon.stub(crypto, 'randomBytes').returns(bufferizedIndex);
-      const generateFileKeyStub = sinon.stub(crypto, 'generateFileKey').resolves(key);
-      const validateMnemonicStub = sinon.stub(crypto, 'validateMnemonic').returns(true);
-      const startUploadStub = sinon.stub(network, 'startUpload').resolves({
+      const randomBytesStub = vi.spyOn(crypto, 'randomBytes').mockReturnValue(bufferizedIndex);
+      const generateFileKeyStub = vi.spyOn(crypto, 'generateFileKey').mockResolvedValue(key);
+      const validateMnemonicStub = vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(true);
+      const startUploadStub = vi.spyOn(network, 'startUpload').mockResolvedValue({
         uploads: [
           {
             url: fakeUrl,
@@ -64,7 +65,7 @@ describe('network/upload', () => {
           },
         ],
       });
-      const finishUploadStub = sinon.stub(network, 'finishUpload').resolves({
+      const finishUploadStub = vi.spyOn(network, 'finishUpload').mockResolvedValue({
         bucket: '',
         created: new Date(),
         id: fileId,
@@ -73,8 +74,8 @@ describe('network/upload', () => {
         name: fakeFilename,
       });
 
-      const encryptFileMock = jest.fn();
-      const uploadFileMock = jest.fn().mockReturnValue(fakeHash);
+      const encryptFileMock = vi.fn();
+      const uploadFileMock = vi.fn().mockReturnValue(fakeHash);
 
       try {
         const receivedFileId = await uploadFile(
@@ -87,27 +88,24 @@ describe('network/upload', () => {
           uploadFileMock,
         );
 
-        expect(validateMnemonicStub.calledOnce).toBeTruthy();
-        expect(validateMnemonicStub.firstCall.args).toStrictEqual([mnemonic]);
+        expect(validateMnemonicStub).toHaveBeenCalledOnce();
+        expect(validateMnemonicStub).toHaveBeenCalledWith(mnemonic);
 
-        expect(randomBytesStub.calledOnce).toBeTruthy();
-        expect(randomBytesStub.firstCall.args).toStrictEqual([ALGORITHMS.AES256CTR.ivSize]);
+        expect(randomBytesStub).toHaveBeenCalledOnce();
+        expect(randomBytesStub).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.ivSize);
 
-        expect(generateFileKeyStub.calledOnce).toBeTruthy();
-        expect(generateFileKeyStub.firstCall.args).toStrictEqual([mnemonic, bucketId, bufferizedIndex]);
+        expect(generateFileKeyStub).toHaveBeenCalledOnce();
+        expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
-        expect(startUploadStub.calledOnce).toBeTruthy();
-        expect(startUploadStub.firstCall.args).toStrictEqual([
-          bucketId,
-          {
-            uploads: [
-              {
-                index: 0,
-                size: fileSize,
-              },
-            ],
-          },
-        ]);
+        expect(startUploadStub).toHaveBeenCalledOnce();
+        expect(startUploadStub).toHaveBeenCalledWith(bucketId, {
+          uploads: [
+            {
+              index: 0,
+              size: fileSize,
+            },
+          ],
+        });
 
         expect(encryptFileMock).toHaveBeenCalledTimes(1);
         expect(encryptFileMock).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.type, key, bufferizedIndex.slice(0, 16));
@@ -115,23 +113,20 @@ describe('network/upload', () => {
         expect(uploadFileMock).toHaveBeenCalledTimes(1);
         expect(uploadFileMock).toHaveBeenCalledWith(fakeUrl);
 
-        expect(finishUploadStub.calledOnce).toBeTruthy();
-        expect(finishUploadStub.firstCall.args).toStrictEqual([
-          bucketId,
-          {
-            index,
-            shards: [
-              {
-                hash: fakeHash,
-                uuid: fakeUuid,
-              },
-            ],
-          },
-        ]);
+        expect(finishUploadStub).toHaveBeenCalledOnce();
+        expect(finishUploadStub).toHaveBeenCalledWith(bucketId, {
+          index,
+          shards: [
+            {
+              hash: fakeHash,
+              uuid: fakeUuid,
+            },
+          ],
+        });
 
         expect(receivedFileId).toEqual(fileId);
-      } catch (err) {
-        expect(true).toBeFalsy();
+      } catch {
+        fail('Expected function to not throw an error, but it did.');
       }
     });
 
@@ -140,20 +135,20 @@ describe('network/upload', () => {
       const mnemonic = fakeMnemonic;
       const fileSize = 1000;
 
-      const validateMnemonic = sinon.stub(crypto, 'validateMnemonic').returns(false);
-      const randomBytes = sinon.stub(crypto, 'randomBytes').returns(Buffer.from(''));
+      const validateMnemonic = vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(false);
+      const randomBytes = vi.spyOn(crypto, 'randomBytes').mockReturnValue(Buffer.from(''));
 
       try {
-        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, jest.fn(), jest.fn());
+        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, vi.fn(), vi.fn());
 
-        expect(true).toBeFalsy();
+        fail('Expected function to throw an error, but it did not.');
       } catch (err) {
         expect(err).toBeInstanceOf(UploadInvalidMnemonicError);
 
-        expect(validateMnemonic.calledOnce).toBeTruthy();
-        expect(validateMnemonic.firstCall.args).toStrictEqual([mnemonic]);
+        expect(validateMnemonic).toHaveBeenCalledOnce();
+        expect(validateMnemonic).toHaveBeenCalledWith(mnemonic);
 
-        expect(randomBytes.callCount).toEqual(0);
+        expect(randomBytes).not.toHaveBeenCalled();
       }
     });
   });

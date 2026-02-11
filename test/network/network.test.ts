@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HttpClient } from '../../src/shared/http/client';
 import { AppDetails } from '../../src/shared';
@@ -16,8 +16,7 @@ import {
   FinishUploadResponse,
   StartUploadResponse,
 } from '../../src/network/types';
-
-const httpClient = HttpClient.create('');
+import { fail } from 'assert';
 
 const validUUID = 'b541b138-a6f2-4729-8d20-8e6011cb8216';
 const validHex = '2e1884c34f174110ca6e324e7b745754b3d6356b53ef9f594b960fd534050089';
@@ -32,11 +31,7 @@ const validSize = 1;
 
 describe('network ', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('startUpload()', () => {
@@ -48,7 +43,7 @@ describe('network ', () => {
         await client.startUpload(idBucket, {
           uploads: [{ index: validIndex, size: invalidSize }],
         });
-        expect(true).toBeFalsy();
+        fail('Expected function to throw an error, but it did not.');
       } catch (err) {
         expect(err).toBeInstanceOf(InvalidUploadSizeError);
       }
@@ -62,7 +57,7 @@ describe('network ', () => {
         await client.startUpload(idBucket, {
           uploads: [{ index: invalidIndex, size: validSize }],
         });
-        expect(true).toBeFalsy();
+        fail('Expected function to throw an error, but it did not.');
       } catch (err) {
         expect(err).toBeInstanceOf(InvalidUploadIndexError);
       }
@@ -79,7 +74,7 @@ describe('network ', () => {
             { index: validIndex, size: validSize },
           ],
         });
-        expect(true).toBeFalsy();
+        fail('Expected function to throw an error, but it did not.');
       } catch (err) {
         expect(err).toBeInstanceOf(DuplicatedIndexesError);
       }
@@ -102,7 +97,7 @@ describe('network ', () => {
         })),
       };
 
-      sinon.stub(Network, 'startUpload').resolves(expected);
+      vi.spyOn(Network, 'startUpload').mockResolvedValue(expected);
 
       const received = await client.startUpload(idBucket, { uploads });
 
@@ -163,8 +158,8 @@ describe('network ', () => {
       const resolvesTo: StartUploadResponse = {
         uploads: [{ index: validIndex, uuid: validUUID, url: '', urls: null }],
       };
-      const callStub = sinon.stub(httpClient, 'post').resolves(resolvesTo);
-      const staticStartUpload = jest.spyOn(Network.prototype as any, 'startUpload');
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(resolvesTo);
+      const staticStartUpload = vi.spyOn(Network.prototype, 'startUpload');
 
       // Act
       const response = await client.startUpload(idBucket, validStartUploadPayload);
@@ -172,11 +167,11 @@ describe('network ', () => {
       // Assert
       expect(response).toEqual(resolvesTo);
       expect(staticStartUpload).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/v2/buckets/${idBucket}/files/start?multiparts=1`,
         validStartUploadPayload,
         headers,
-      ]);
+      );
     });
 
     it('should call static finishUpload with correct parameters', async () => {
@@ -201,9 +196,9 @@ describe('network ', () => {
         created: new Date(),
       };
 
-      const callStub = sinon.stub(httpClient, 'post').resolves(resolvesTo);
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(resolvesTo);
 
-      const staticFinishUpload = jest.spyOn(Network.prototype as any, 'finishUpload');
+      const staticFinishUpload = vi.spyOn(Network.prototype, 'finishUpload');
 
       // Act
       const response = await client.finishUpload(idBucket, validFinishUploadPayload);
@@ -211,11 +206,7 @@ describe('network ', () => {
       // Assert
       expect(response).toEqual(resolvesTo);
       expect(staticFinishUpload).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([
-        `/v2/buckets/${idBucket}/files/finish`,
-        validFinishUploadPayload,
-        headers,
-      ]);
+      expect(callStub).toHaveBeenCalledWith(`/v2/buckets/${idBucket}/files/finish`, validFinishUploadPayload, headers);
     });
 
     it('should call static getDownloadLinks with correct parameters', async () => {
@@ -229,9 +220,9 @@ describe('network ', () => {
         created: new Date(),
         shards: [{ index: validHex, size: 33, hash: 'a-hash', url: 'a-url' }],
       };
-      const callStub = sinon.stub(httpClient, 'get').resolves(resolvesTo);
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(resolvesTo);
 
-      const staticGetDownloadLinks = jest.spyOn(Network.prototype as any, 'getDownloadLinks');
+      const staticGetDownloadLinks = vi.spyOn(Network.prototype, 'getDownloadLinks');
 
       // Act
       const links = await client.getDownloadLinks(idBucket, file);
@@ -239,10 +230,10 @@ describe('network ', () => {
       // Assert
       expect(links).toEqual(resolvesTo);
       expect(staticGetDownloadLinks).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([
-        `/buckets/${idBucket}/files/${file}/info`,
-        { ...headers, 'x-api-version': '2' },
-      ]);
+      expect(callStub).toHaveBeenCalledWith(`/buckets/${idBucket}/files/${file}/info`, {
+        ...headers,
+        'x-api-version': '2',
+      });
     });
 
     it('should call static deleteFile with correct parameters', async () => {
@@ -250,16 +241,16 @@ describe('network ', () => {
       const { client, headers } = clientAndHeadersWithBasicAuth();
       const idBucket = 'id-bucket';
       const file = 'a-file';
-      const callStub = sinon.stub(httpClient, 'delete').resolves();
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
-      const staticGetDownloadLinks = jest.spyOn(Network.prototype as any, 'deleteFile');
+      const staticGetDownloadLinks = vi.spyOn(Network.prototype, 'deleteFile');
 
       // Act
       await client.deleteFile(idBucket, file);
 
       // Assert
       expect(staticGetDownloadLinks).toHaveBeenCalled();
-      expect(callStub.firstCall.args).toEqual([`/v2/buckets/${idBucket}/files/${file}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/v2/buckets/${idBucket}/files/${file}`, headers);
     });
   });
 });

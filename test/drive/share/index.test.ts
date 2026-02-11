@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   GenerateShareLinkPayload,
   GetSharedDirectoryPayload,
@@ -10,25 +10,20 @@ import { Share } from '../../../src/drive';
 import { basicHeaders, headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
-
-const httpClient = HttpClient.create('');
+import { fail } from 'assert';
 
 describe('# share service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('generate share link', () => {
     it('Should be called with fail argments & throws Error', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         token: 'token',
       });
-      const { client, headers } = clientAndHeadersWithToken();
+      const { client } = clientAndHeadersWithToken();
       const payload: GenerateShareLinkPayload = {
         itemId: '1',
         type: 'files',
@@ -40,14 +35,18 @@ describe('# share service tests', () => {
       };
 
       // Assert
-      expect(() => {
-        client.createShareLink(payload);
-      }).toThrow('Invalid type');
+      try {
+        await client.createShareLink(payload);
+        fail('Expected function to throw an error, but it did not.');
+      } catch (error) {
+        expect(error).toBeInstanceOf(Error);
+        expect((error as Error).message).toBe('Invalid type');
+      }
     });
 
     it('Should be called with right arguments & return content of file', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         token: 'token',
       });
       const { client, headers } = clientAndHeadersWithToken();
@@ -65,7 +64,7 @@ describe('# share service tests', () => {
       const body = await client.createShareLink(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/storage/share/file/1',
         {
           timesValid: payload.timesValid,
@@ -75,7 +74,7 @@ describe('# share service tests', () => {
           encryptedCode: payload.encryptedCode,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         token: 'token',
       });
@@ -83,7 +82,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right arguments & return content of folders', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         token: 'token',
       });
       const { client, headers } = clientAndHeadersWithToken();
@@ -101,7 +100,7 @@ describe('# share service tests', () => {
       const body = await client.createShareLink(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/storage/share/folder/1',
         {
           timesValid: payload.timesValid,
@@ -111,7 +110,7 @@ describe('# share service tests', () => {
           encryptedCode: payload.encryptedCode,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         token: 'token',
       });
@@ -121,17 +120,17 @@ describe('# share service tests', () => {
   describe('get share token info', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         info: 'some',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndBasicHeaders();
       const token = 'ma-token';
 
       // Act
       const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
+      expect(callStub).toHaveBeenCalledWith('/storage/share/ma-token', headers);
       expect(body).toEqual({
         info: 'some',
       });
@@ -141,18 +140,18 @@ describe('# share service tests', () => {
   describe('delete share by id', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'delete').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
         deleted: true,
         shareId: '1',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndHeadersWithToken();
       const shareId = '1';
 
       // Act
       const body = await client.deleteShareLink(shareId);
 
       // Assert
-      expect(callStub.firstCall.args).toMatchObject(['/storage/share/1', headers]);
+      expect(callStub).toHaveBeenCalledWith('/storage/share/1', headers);
       expect(body).toEqual({
         deleted: true,
         shareId: '1',
@@ -165,17 +164,17 @@ describe('# share service tests', () => {
       // Arrange
       const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
 
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         uuid: mockUuid,
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndHeadersWithToken();
       const shareId = mockUuid;
 
       // Act
       const body = await client.validateInviteExpiration(shareId);
 
       // Assert
-      expect(callStub.firstCall.args).toMatchObject([`sharings/invites/${mockUuid}/validate`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`sharings/invites/${mockUuid}/validate`, headers);
       expect(body).toEqual({
         uuid: mockUuid,
       });
@@ -203,18 +202,18 @@ describe('# share service tests', () => {
         itemToken: 'sampleItemToken',
       };
 
-      const callStub = sinon.stub(httpClient, 'patch').resolves(sharedFile);
-      const { client, headers } = clientAndHeaders();
+      const callStub = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(sharedFile);
+      const { client, headers } = clientAndHeadersWithToken();
 
       // Act
       const body = await client.saveSharingPassword(mockUuid, 'encryptedPassword');
 
       // Assert
-      expect(callStub.firstCall.args).toMatchObject([
+      expect(callStub).toHaveBeenCalledWith(
         `sharings/${mockUuid}/password`,
         { encryptedPassword: 'encryptedPassword' },
         headers,
-      ]);
+      );
       expect(body).toEqual(sharedFile);
     });
   });
@@ -224,21 +223,21 @@ describe('# share service tests', () => {
       // Arrange
       const mockUuid = '550e8400-e29b-41d4-a716-446655440000';
 
-      const callStub = sinon.stub(httpClient, 'delete').resolves();
-      const { client, headers } = clientAndHeaders();
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithToken();
 
       // Act
       await client.removeSharingPassword(mockUuid);
 
       // Assert
-      expect(callStub.firstCall.args).toMatchObject([`sharings/${mockUuid}/password`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`sharings/${mockUuid}/password`, headers);
     });
   });
 
   describe('get public shared item info', () => {
     it('Should be called with sharingId and return basic info', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         plainName: 'anyname',
         size: 30,
         type: 'pdf',
@@ -250,7 +249,7 @@ describe('# share service tests', () => {
       const body = await client.getPublicSharedItemInfo(mockUuid);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/item`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`sharings/public/${mockUuid}/item`, headers);
       expect(body).toEqual({
         plainName: 'anyname',
         size: 30,
@@ -262,7 +261,7 @@ describe('# share service tests', () => {
   describe('get shares list', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         list: 'some',
       });
       const { client, headers } = clientAndHeadersWithToken();
@@ -271,7 +270,7 @@ describe('# share service tests', () => {
       const body = await client.getShareLinks();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=0&perPage=50', headers]);
+      expect(callStub).toHaveBeenCalledWith('/storage/share/list?page=0&perPage=50', headers);
       expect(body).toEqual({
         list: 'some',
       });
@@ -279,7 +278,7 @@ describe('# share service tests', () => {
 
     it('Should be called with right pagination & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         list: 'some',
       });
       const { client, headers } = clientAndHeadersWithToken();
@@ -288,7 +287,7 @@ describe('# share service tests', () => {
       const body = await client.getShareLinks(2, 100);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/storage/share/list?page=2&perPage=100', headers]);
+      expect(callStub).toHaveBeenCalledWith('/storage/share/list?page=2&perPage=100', headers);
       expect(body).toEqual({
         list: 'some',
       });
@@ -298,17 +297,17 @@ describe('# share service tests', () => {
   describe('get shared folder info', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         info: 'some',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndBasicHeaders();
       const token = 'ma-token';
 
       // Act
       const body = await client.getShareLink(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/storage/share/ma-token', headers]);
+      expect(callStub).toHaveBeenCalledWith('/storage/share/ma-token', headers);
       expect(body).toEqual({
         info: 'some',
       });
@@ -318,10 +317,10 @@ describe('# share service tests', () => {
   describe('get shared-directory folders', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         info: 'some',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndBasicHeaders();
       const payload: GetSharedDirectoryPayload = {
         token: 'tokk',
         folderId: 1,
@@ -335,10 +334,10 @@ describe('# share service tests', () => {
       const body = await client.getShareLinkDirectory(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/storage/share/down/folders?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}`,
         headers,
-      ]);
+      );
       expect(body).toEqual({
         info: 'some',
       });
@@ -348,10 +347,10 @@ describe('# share service tests', () => {
   describe('get shared-directory files', () => {
     it('Should be called with right arguments & return content', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         info: 'some',
       });
-      const { client, headers } = clientAndHeaders();
+      const { client, headers } = clientAndBasicHeaders();
       const payload: GetSharedDirectoryPayload = {
         token: 'tokk',
         type: 'file',
@@ -366,10 +365,10 @@ describe('# share service tests', () => {
       const body = await client.getShareLinkDirectory(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/storage/share/down/files?token=${payload.token}&folderId=${payload.folderId}&parentId=${payload.parentId}&page=${payload.page}&perPage=${payload.perPage}&code=${payload.code}`,
         headers,
-      ]);
+      );
       expect(body).toEqual({
         info: 'some',
       });
@@ -379,7 +378,7 @@ describe('# share service tests', () => {
   describe('get shared folder size', () => {
     it('Should be called with right arguments & return folder size', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         size: 30,
       });
       const { client, headers } = clientAndHeadersWithToken();
@@ -389,7 +388,7 @@ describe('# share service tests', () => {
       const body = await client.getSharedFolderSize(mockUuid);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`sharings/public/${mockUuid}/folder/size`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`sharings/public/${mockUuid}/folder/size`, headers);
       expect(body).toEqual({
         size: 30,
       });
@@ -407,7 +406,7 @@ describe('# share service tests', () => {
         },
         type: 'public',
       };
-      const callStub = sinon.stub(httpClient, 'get').resolves(mockedResponse);
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(mockedResponse);
       const { client, headers } = clientAndHeadersWithToken();
       const mockId = 'item-id';
       const mockedItemType = 'item-type';
@@ -416,7 +415,7 @@ describe('# share service tests', () => {
       const body = await client.getSharingInfo({ itemId: mockId, itemType: mockedItemType });
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`sharings/${mockedItemType}/${mockId}/info`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`sharings/${mockedItemType}/${mockId}/info`, headers);
       expect(body).toStrictEqual(mockedResponse);
     });
   });
@@ -442,7 +441,7 @@ describe('# share service tests', () => {
     return { client, headers };
   }
 
-  function clientAndHeaders(
+  function clientAndBasicHeaders(
     apiUrl = '',
     clientName = 'c-name',
     clientVersion = '0.1',

@@ -5,6 +5,6 @@ export function randomMoveFilePayload(): MoveFilePayload {
     fileId: 'xtr-std-asd',
     destination: 0,
     destinationPath: 'x',
-    bucketId: ''
+    bucketId: '',
   };
 }

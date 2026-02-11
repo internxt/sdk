@@ -1,25 +1,19 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
 import { Referrals } from '../../../src/drive';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('# users service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('get referrals', () => {
     it('should call with right params & return response', async () => {
       // Arrange
       const { client, headers } = clientAndHeaders();
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         referrals: [1, 2],
       });
 
@@ -27,7 +21,7 @@ describe('# users service tests', () => {
       const body = await client.getReferrals();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/users-referrals', headers]);
+      expect(callStub).toHaveBeenCalledWith('/users-referrals', headers);
       expect(body).toEqual({
         referrals: [1, 2],
       });

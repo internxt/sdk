@@ -1,37 +1,31 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppDetails } from '../../../src/shared';
 import { basicHeaders } from '../../../src/shared/headers';
 import { ObjectStorage } from '../../../src/drive';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('Object Storage service', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('Get object storage plan by id', () => {
     it('When get object storage plan by id is requested, then it should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         id: 'plan_123',
       });
       const { client, headers } = basicHeadersAndClient();
 
       const body = await client.getObjectStoragePlanById('plan_123', 'eur');
 
-      expect(callStub.firstCall.args).toEqual(['/object-storage/price?planId=plan_123&currency=eur', headers]);
+      expect(callStub).toHaveBeenCalledWith('/object-storage/price?planId=plan_123&currency=eur', headers);
       expect(body).toEqual({ id: 'plan_123' });
     });
   });
 
   describe('Create customer for object storage', () => {
     it('When create customer is requested, then it should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         customerId: 'cus_123',
       });
       const { client, headers } = basicHeadersAndClient();
@@ -57,14 +51,14 @@ describe('Object Storage service', () => {
       query.set('country', country);
       query.set('companyVatId', companyVatId);
 
-      expect(callStub.firstCall.args).toEqual([`/object-storage/customer?${query.toString()}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/object-storage/customer?${query.toString()}`, headers);
       expect(body).toEqual({ customerId: 'cus_123' });
     });
   });
 
   describe('Create object storage subscription', () => {
     it('When create subscription is requested, then it should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         subscriptionId: 'sub_123',
       });
 
@@ -78,7 +72,7 @@ describe('Object Storage service', () => {
         promoCodeId: 'promo_123',
       });
 
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/object-storage/subscription',
         {
           customerId: 'cus_123',
@@ -88,13 +82,13 @@ describe('Object Storage service', () => {
           promoCodeId: 'promo_123',
         },
         headers,
-      ]);
+      );
     });
   });
 
   describe('Verifying the user payment method', () => {
     it("When the user wants to verify the payment method and it's verified, then an object indicating so is returned", async () => {
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         intentId: 'intent_id',
         verified: true,
       });
@@ -109,7 +103,7 @@ describe('Object Storage service', () => {
         paymentMethod: 'pm123',
       });
 
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/payment-method-verification',
         {
           customerId: 'cus_123',
@@ -119,13 +113,13 @@ describe('Object Storage service', () => {
           paymentMethod: 'pm123',
         },
         headers,
-      ]);
+      );
 
       expect(result).toEqual({ intentId: 'intent_id', verified: true });
     });
 
     it("When the user wants to verify the payment method and it's not verified, then an object indicating so is returned", async () => {
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         intentId: '',
         verified: false,
         clientSecret: 'client_secret',
@@ -141,7 +135,7 @@ describe('Object Storage service', () => {
         paymentMethod: 'pm123',
       });
 
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/payment-method-verification',
         {
           customerId: 'cus_123',
@@ -151,7 +145,7 @@ describe('Object Storage service', () => {
           paymentMethod: 'pm123',
         },
         headers,
-      ]);
+      );
 
       expect(result).toEqual({ intentId: '', verified: false, clientSecret: 'client_secret' });
     });

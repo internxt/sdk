@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { v4 } from 'uuid';
 import { Storage, StorageTypes } from '../../../src/drive';
 import {
@@ -26,15 +26,9 @@ import { randomMoveFilePayload } from './mothers/moveFilePayload.mother';
 import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
 
-const httpClient = HttpClient.create('');
-
 describe('# storage service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('-> folders', () => {
@@ -43,7 +37,7 @@ describe('# storage service tests', () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client } = clientAndHeaders({});
-        sinon.stub(httpClient, 'getCancellable').returns({
+        vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
@@ -51,7 +45,7 @@ describe('# storage service tests', () => {
         });
 
         // Act
-        const [promise, requestCanceler] = client.getFolderContent(1);
+        const [promise] = client.getFolderContent(1);
         const body = await promise;
 
         // Assert
@@ -91,13 +85,13 @@ describe('# storage service tests', () => {
           ],
         };
         const { client, headers } = clientAndHeaders({});
-        sinon.stub(httpClient, 'getCancellable').returns({
+        vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
           },
         });
-        const getFolderFoldersStub = jest.spyOn(httpClient, 'getCancellable');
+        const getFolderFoldersStub = vi.spyOn(HttpClient.prototype, 'getCancellable');
 
         // Act
         const [promise] = client.getFolderFolders(folderId);
@@ -144,13 +138,13 @@ describe('# storage service tests', () => {
           ],
         };
         const { client, headers } = clientAndHeaders({});
-        sinon.stub(httpClient, 'getCancellable').returns({
+        vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
           },
         });
-        const getFolderFoldersStub = jest.spyOn(httpClient, 'getCancellable');
+        const getFolderFoldersStub = vi.spyOn(HttpClient.prototype, 'getCancellable');
 
         // Act
         const [promise] = client.getFolderFiles(folderId);
@@ -170,13 +164,13 @@ describe('# storage service tests', () => {
         const responseSubfiles = randomSubfilesResponse(3);
         const randomUUID = v4();
         const { client, headers } = clientAndHeaders({});
-        sinon.stub(httpClient, 'getCancellable').returns({
+        vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(responseSubfiles),
           requestCanceler: {
             cancel: () => null,
           },
         });
-        const getFolderContentFilesStub = jest.spyOn(httpClient, 'getCancellable');
+        const getFolderContentFilesStub = vi.spyOn(HttpClient.prototype, 'getCancellable');
 
         // Act
         const [promise] = client.getFolderFilesByUuid(randomUUID);
@@ -196,13 +190,13 @@ describe('# storage service tests', () => {
         const responseSubfolders = randomSubfoldersResponse(4);
         const { client, headers } = clientAndHeaders({});
 
-        sinon.stub(httpClient, 'getCancellable').returns({
+        vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(responseSubfolders),
           requestCanceler: {
             cancel: () => null,
           },
         });
-        const getFolderContentFoldersStub = jest.spyOn(httpClient, 'getCancellable');
+        const getFolderContentFoldersStub = vi.spyOn(HttpClient.prototype, 'getCancellable');
 
         // Act
         const [promise] = client.getFolderFoldersByUuid(randomUUID);
@@ -232,7 +226,7 @@ describe('# storage service tests', () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
@@ -240,11 +234,11 @@ describe('# storage service tests', () => {
         });
 
         // Act
-        const [promise, requestCanceler] = client.getFolderContent(1, true);
+        const [promise] = client.getFolderContent(1, true);
         const body = await promise;
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/v2/folder/1/?trash=true', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/v2/folder/1/?trash=true', headers);
         expect(body.files).toHaveLength(2);
         expect(body.children).toHaveLength(2);
       });
@@ -276,7 +270,7 @@ describe('# storage service tests', () => {
           removed: false,
           removedAt: null,
         };
-        const callStub = sinon.stub(httpClient, 'postCancellable').returns({
+        const callStub = vi.spyOn(HttpClient.prototype, 'postCancellable').mockReturnValue({
           promise: Promise.resolve(createFolderResponse),
           requestCanceler: {
             cancel: () => null,
@@ -285,18 +279,18 @@ describe('# storage service tests', () => {
         const { client, headers } = clientAndHeaders({});
 
         // Act
-        const [promise, requestCanceler] = client.createFolder(createFolderPayload);
+        const [promise] = client.createFolder(createFolderPayload);
         const body = await promise;
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/folder',
           {
             parentFolderId: 34,
             folderName: 'ma-fol',
           },
           headers,
-        ]);
+        );
         expect(body).toEqual(createFolderResponse);
       });
 
@@ -341,21 +335,21 @@ describe('# storage service tests', () => {
           },
           moved: false,
         };
-        const callStub = sinon.stub(httpClient, 'post').resolves(moveFolderResponse);
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(moveFolderResponse);
         const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.moveFolder(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/move/folder',
           {
             folderId: payload.folderId,
             destination: payload.destinationFolderId,
           },
           headers,
-        ]);
+        );
         expect(body).toEqual(moveFolderResponse);
       });
     });
@@ -365,13 +359,13 @@ describe('# storage service tests', () => {
         // Arrange
         const payload = randomUpdateFolderMetadataPayload();
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'post').resolves({});
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
 
         // Act
         await client.updateFolder(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/folder/2/meta',
           {
             metadata: {
@@ -381,14 +375,14 @@ describe('# storage service tests', () => {
             },
           },
           headers,
-        ]);
+        );
       });
     });
 
     describe('delete folder', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'delete').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
           valid: true,
         });
         const { client, headers } = clientAndHeaders({});
@@ -397,7 +391,7 @@ describe('# storage service tests', () => {
         const body = await client.deleteFolder(2);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/folder/2', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/folder/2', headers);
         expect(body).toEqual({
           valid: true,
         });
@@ -407,7 +401,7 @@ describe('# storage service tests', () => {
     describe('folder size', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           size: 10,
         });
         const { client, headers } = clientAndHeaders({});
@@ -416,7 +410,7 @@ describe('# storage service tests', () => {
         const body = await client.getFolderSize(2);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/folder/size/2', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/folder/size/2', headers);
         expect(body).toEqual(10);
       });
     });
@@ -442,7 +436,7 @@ describe('# storage service tests', () => {
             plainName: 'mi-folder3',
           },
         ];
-        const callStub = sinon.stub(httpClient, 'get').resolves(mockResponse);
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(mockResponse);
         const { client, headers } = clientAndHeaders({
           customHeaders: {
             'internxt-resources-token': resourceToken,
@@ -453,10 +447,7 @@ describe('# storage service tests', () => {
         const body = await client.getFolderAncestorsInWorkspace(workspaceId, itemType, itemUuid, resourceToken);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          `workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`,
-          headers,
-        ]);
+        expect(callStub).toHaveBeenCalledWith(`workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`, headers);
         expect(body).toEqual(mockResponse);
       });
 
@@ -479,17 +470,14 @@ describe('# storage service tests', () => {
             plainName: 'mi-folder3',
           },
         ];
-        const callStub = sinon.stub(httpClient, 'get').resolves(mockResponse);
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(mockResponse);
         const { client, headers } = clientAndHeaders({});
 
         // Act
         const body = await client.getFolderAncestorsInWorkspace(workspaceId, itemType, itemUuid);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          `workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`,
-          headers,
-        ]);
+        expect(callStub).toHaveBeenCalledWith(`workspaces/${workspaceId}/${itemType}/${itemUuid}/ancestors`, headers);
         expect(body).toEqual(mockResponse);
       });
     });
@@ -499,7 +487,7 @@ describe('# storage service tests', () => {
     describe('create file entry', () => {
       it('Should have all the correct params on call', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'post').resolves({});
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
         const { client, headers } = clientAndHeaders({});
         const fileEntry: StorageTypes.FileEntry = {
           id: '1',
@@ -516,7 +504,7 @@ describe('# storage service tests', () => {
         await client.createFileEntry(fileEntry);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/file',
           {
             file: {
@@ -531,7 +519,7 @@ describe('# storage service tests', () => {
             },
           },
           headers,
-        ]);
+        );
       });
     });
 
@@ -546,7 +534,7 @@ describe('# storage service tests', () => {
             itemName: 'new name',
           },
         };
-        const callStub = sinon.stub(httpClient, 'post').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
           valid: true,
         });
         const { client, headers } = clientAndHeaders({});
@@ -555,7 +543,7 @@ describe('# storage service tests', () => {
         const body = await client.updateFile(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/file/6/meta',
           {
             metadata: {
@@ -565,7 +553,7 @@ describe('# storage service tests', () => {
             relativePath: 'x',
           },
           headers,
-        ]);
+        );
         expect(body).toEqual({
           valid: true,
         });
@@ -575,7 +563,7 @@ describe('# storage service tests', () => {
     describe('delete file', () => {
       it('Should call with right arguments and return control', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'delete').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
           valid: true,
         });
         const { client, headers } = clientAndHeaders({});
@@ -588,7 +576,7 @@ describe('# storage service tests', () => {
         const body = await client.deleteFile(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/folder/2/file/5', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/folder/2/file/5', headers);
         expect(body).toEqual({
           valid: true,
         });
@@ -599,7 +587,7 @@ describe('# storage service tests', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
         const payload = randomMoveFilePayload();
-        const callStub = sinon.stub(httpClient, 'post').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
           content: 'test',
         });
         const { client, headers } = clientAndHeaders({});
@@ -611,7 +599,7 @@ describe('# storage service tests', () => {
         expect(body).toEqual({
           content: 'test',
         });
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/storage/move/file',
           {
             fileId: payload.fileId,
@@ -620,14 +608,14 @@ describe('# storage service tests', () => {
             bucketId: payload.bucketId,
           },
           headers,
-        ]);
+        );
       });
     });
 
     describe('get recent files', () => {
       it('Should be called with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           files: [],
         });
         const { client, headers } = clientAndHeaders({});
@@ -636,7 +624,7 @@ describe('# storage service tests', () => {
         const body = await client.getRecentFiles(5);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/recents?limit=5', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/recents?limit=5', headers);
         expect(body).toEqual({
           files: [],
         });
@@ -646,7 +634,7 @@ describe('# storage service tests', () => {
     describe('get recent files V2', () => {
       it('Should be called with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           files: [],
         });
         const { client, headers } = clientAndHeaders({});
@@ -655,7 +643,7 @@ describe('# storage service tests', () => {
         const body = await client.getRecentFilesV2(5);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/files/recents?limit=5', headers]);
+        expect(callStub).toHaveBeenCalledWith('/files/recents?limit=5', headers);
         expect(body).toEqual({
           files: [],
         });
@@ -669,7 +657,7 @@ describe('# storage service tests', () => {
         const size = 100;
         const fileUUID = v4();
         const response = randomFileData();
-        const callStub = sinon.stub(httpClient, 'put').resolves(response);
+        const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue(response);
         const { client, headers } = clientAndHeaders({});
 
         // Act
@@ -679,14 +667,14 @@ describe('# storage service tests', () => {
         });
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           `/files/${fileUUID}`,
           {
             fileId,
             size,
           },
           headers,
-        ]);
+        );
         expect(body).toEqual(response);
       });
     });
@@ -696,7 +684,7 @@ describe('# storage service tests', () => {
         // Arrange
         const fileUUID = v4();
         const response = randomFileMetaData();
-        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
@@ -710,7 +698,7 @@ describe('# storage service tests', () => {
         const body = await promise;
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([`/files/${fileUUID}/meta`, headers]);
+        expect(callStub).toHaveBeenCalledWith(`/files/${fileUUID}/meta`, headers);
         expect(body).toEqual(response);
       });
 
@@ -718,7 +706,7 @@ describe('# storage service tests', () => {
         // Arrange
         const fileUUID = v4();
         const response = randomFileMetaData();
-        const callStub = sinon.stub(httpClient, 'getCancellable').returns({
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
           requestCanceler: {
             cancel: () => null,
@@ -732,7 +720,7 @@ describe('# storage service tests', () => {
         const body = await promise;
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([`/files/${fileUUID}/meta`, headers]);
+        expect(callStub).toHaveBeenCalledWith(`/files/${fileUUID}/meta`, headers);
         expect(body).toEqual(response);
       });
     });
@@ -743,7 +731,7 @@ describe('# storage service tests', () => {
       it('should call with right params & return response', async () => {
         // Arrange
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           total: 10,
         });
 
@@ -751,7 +739,7 @@ describe('# storage service tests', () => {
         const body = await client.spaceUsage();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/usage', headers]);
+        expect(callStub).toHaveBeenCalledWith('/usage', headers);
         expect(body).toEqual({
           total: 10,
         });
@@ -761,13 +749,13 @@ describe('# storage service tests', () => {
     describe('space usage v2', () => {
       it('should call with right params & return response', async () => {
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           drive: 10,
         });
 
         const body = await client.spaceUsageV2();
 
-        expect(callStub.firstCall.args).toEqual(['/users/usage', headers]);
+        expect(callStub).toHaveBeenCalledWith('/users/usage', headers);
         expect(body).toEqual({
           drive: 10,
         });
@@ -777,13 +765,13 @@ describe('# storage service tests', () => {
     describe('The user already uploaded any file', () => {
       it('it should return a boolean indicating if the user already uploaded any file or not', async () => {
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           hasUploadedFiles: true,
         });
 
         const body = await client.hasUploadedFiles();
 
-        expect(callStub.firstCall.args).toEqual(['/users/me/upload-status', headers]);
+        expect(callStub).toHaveBeenCalledWith('/users/me/upload-status', headers);
         expect(body).toEqual({
           hasUploadedFiles: true,
         });
@@ -794,7 +782,7 @@ describe('# storage service tests', () => {
       it('should call with right params & return response', async () => {
         // Arrange
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           total: 10,
         });
 
@@ -802,7 +790,7 @@ describe('# storage service tests', () => {
         const body = await client.spaceLimit();
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/limit', headers]);
+        expect(callStub).toHaveBeenCalledWith('/limit', headers);
         expect(body).toEqual({
           total: 10,
         });
@@ -812,13 +800,13 @@ describe('# storage service tests', () => {
     describe('space limit v2', () => {
       it('should call with right params & return response', async () => {
         const { client, headers } = clientAndHeaders({});
-        const callStub = sinon.stub(httpClient, 'get').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
           maxSpaceBytes: 10,
         });
 
         const body = await client.spaceLimitV2();
 
-        expect(callStub.firstCall.args).toEqual(['/users/limit', headers]);
+        expect(callStub).toHaveBeenCalledWith('/users/limit', headers);
         expect(body).toEqual({
           maxSpaceBytes: 10,
         });
@@ -831,7 +819,7 @@ describe('# storage service tests', () => {
           // Arrange
           const response = randomFolderContentResponse(2, 2);
           const { client } = clientAndHeaders({});
-          sinon.stub(httpClient, 'getCancellable').returns({
+          vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
             promise: Promise.resolve(response),
             requestCanceler: {
               cancel: () => null,
@@ -839,7 +827,7 @@ describe('# storage service tests', () => {
           });
 
           // Act
-          const [promise, requestCanceler] = client.getTrash();
+          const [promise] = client.getTrash();
           const body = await promise;
 
           // Assert
@@ -863,7 +851,7 @@ describe('# storage service tests', () => {
       describe('Add Items into trash', () => {
         it('should call with right params & return 200', async () => {
           const { client, headers } = clientAndHeaders({});
-          const callStub = sinon.stub(httpClient, 'post').resolves(true);
+          const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(true);
           const itemsToTrash = [
             { id: 'id1', uuid: 'uuid1', type: 'file' as const },
             { id: 'id2', uuid: 'uuid2', type: 'folder' as const },
@@ -873,7 +861,7 @@ describe('# storage service tests', () => {
           const body = await client.addItemsToTrash({ items: itemsToTrash });
 
           // Assert
-          expect(callStub.firstCall.args).toEqual(['/storage/trash/add', { items: itemsToTrash }, headers]);
+          expect(callStub).toHaveBeenCalledWith('/storage/trash/add', { items: itemsToTrash }, headers);
           expect(body).toEqual(true);
         });
       });
@@ -914,16 +902,18 @@ describe('# storage service tests', () => {
           'internxt-resources-token': resourcesToken,
         };
 
-        const postStub = sinon.stub(httpClient, 'post').resolves(expectedResponse);
+        const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(expectedResponse);
 
         const response = await client.createThumbnailEntryWithUUID(thumbnailEntryPayload, resourcesToken);
 
-        expect(postStub.calledOnce).toBeTruthy();
-        expect(postStub.firstCall.args[0]).toEqual('/files/thumbnail');
-        expect(postStub.firstCall.args[1]).toEqual({
-          ...thumbnailEntryPayload,
-        });
-        expect(postStub.firstCall.args[2]).toEqual(headersWithResourceToken);
+        expect(postStub).toHaveBeenCalledOnce();
+        expect(postStub).toHaveBeenCalledWith(
+          '/files/thumbnail',
+          {
+            ...thumbnailEntryPayload,
+          },
+          headersWithResourceToken,
+        );
         expect(response).toEqual(expectedResponse);
       });
     });

@@ -1,20 +1,13 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HttpClient } from '../../src/shared/http/client';
 import { Checkout } from '../../src/payments';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { CreateCustomerPayload, CreatePaymentIntentPayload, CryptoCurrency } from '../../src/payments/types';
 
-const httpClient = HttpClient.create('');
-
 describe('Checkout service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-    jest.resetAllMocks();
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('Create customer ID', () => {
@@ -34,7 +27,7 @@ describe('Checkout service tests', () => {
         token: 'valid_token',
       };
 
-      const callStub = sinon.stub(httpClient, 'post').resolves([mockedResponse]);
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([mockedResponse]);
 
       const { client, headers } = clientAndHeadersWithAuthToken({});
 
@@ -42,7 +35,7 @@ describe('Checkout service tests', () => {
       const body = await client.createCustomer(userPayload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/checkout/customer', userPayload, headers]);
+      expect(callStub).toHaveBeenCalledWith('/checkout/customer', userPayload, headers);
       expect(body).toStrictEqual([mockedResponse]);
     });
   });
@@ -66,7 +59,7 @@ describe('Checkout service tests', () => {
         invoiceStatus: 'paid',
       };
 
-      const callStub = sinon.stub(httpClient, 'post').resolves([mockedResponse]);
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([mockedResponse]);
 
       const { client, headers } = clientAndHeadersWithAuthToken({});
 
@@ -74,7 +67,7 @@ describe('Checkout service tests', () => {
       const body = await client.createPaymentIntent(userPayload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/checkout/payment-intent', userPayload, headers]);
+      expect(callStub).toHaveBeenCalledWith('/checkout/payment-intent', userPayload, headers);
       expect(body).toStrictEqual([mockedResponse]);
     });
   });
@@ -95,7 +88,7 @@ describe('Checkout service tests', () => {
         receiveType: true,
         type: 'crypto',
       };
-      const callStub = sinon.stub(httpClient, 'get').resolves([mockedCryptoCurrency]);
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue([mockedCryptoCurrency]);
 
       const { client, headers } = clientAndHeadersWithToken({});
 
@@ -103,7 +96,7 @@ describe('Checkout service tests', () => {
       const body = await client.getAvailableCryptoCurrencies();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/checkout/crypto/currencies', headers]);
+      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/currencies', headers);
       expect(body).toStrictEqual([mockedCryptoCurrency]);
     });
   });
@@ -112,7 +105,7 @@ describe('Checkout service tests', () => {
     it('should call with right params & return data', async () => {
       // Arrange
       const mockedInvoiceId = 'encoded-invoice-id';
-      const callStub = sinon.stub(httpClient, 'post').resolves(true);
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(true);
 
       const { client, headers } = clientAndHeadersWithAuthToken({});
 
@@ -120,7 +113,7 @@ describe('Checkout service tests', () => {
       const body = await client.verifyCryptoPayment(mockedInvoiceId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers]);
+      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers);
       expect(body).toStrictEqual(true);
     });
   });
