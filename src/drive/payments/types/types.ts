@@ -215,3 +215,12 @@ export type AvailableProducts = {
     backups: boolean;
   };
 };
+
+export type TrackSubscriptionCancelledPayload = {
+  email: string;
+};
+
+export interface TrackSubscriptionCancelledResponse {
+  success: boolean;
+  message: string;
+}

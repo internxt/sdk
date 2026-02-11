@@ -19,6 +19,8 @@ import {
   UpdateSubscriptionPaymentMethod,
   UserSubscription,
   UserType,
+  TrackSubscriptionCancelledPayload,
+  TrackSubscriptionCancelledResponse,
 } from './types/types';
 
 export class Payments {
@@ -253,6 +255,17 @@ export class Payments {
     const query = new URLSearchParams();
     if (userType !== undefined) query.set('tierType', userType);
     return this.client.get<Tier>(`/products/tier?${query.toString()}`, this.headers());
+  }
+
+  /**
+   * Tracks a cancelled subscription event by sending the user's email to the server
+   * @param payload - The cancelled subscription data containing the user's email
+   * @returns A promise that resolves with the success status and message from the server
+   */
+  public trackCanceledSubscription(
+    payload: TrackSubscriptionCancelledPayload,
+  ): Promise<TrackSubscriptionCancelledResponse> {
+    return this.client.post('/subscriptions/track-cancelled-subscription', { ...payload }, this.headers());
   }
 
   /**
