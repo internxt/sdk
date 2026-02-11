@@ -1,6 +1,6 @@
-import sinon from 'sinon';
-import { headersWithToken } from '../shared/headers';
-import { HttpClient } from '../shared/http/client';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { headersWithToken } from '../../src/shared/headers';
+import { HttpClient } from '../../src/shared/http/client';
 import {
   GetMemberDetailsResponse,
   PendingInvitesResponse,
@@ -9,17 +9,11 @@ import {
   WorkspaceTeamResponse,
   Workspaces,
   WorkspacesResponse,
-} from './index';
-
-const httpClient = HttpClient.create('');
+} from '../../src/workspaces/index';
 
 describe('Workspaces service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('Workspaces methods', () => {
@@ -147,7 +141,7 @@ describe('Workspaces service tests', () => {
     describe('getWorkspaces', () => {
       it('should return the expected workspaces when getWorkspaces is called', async () => {
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'get').resolves(workspacesResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(workspacesResponse);
 
         const response = await client.getWorkspaces();
 
@@ -158,7 +152,7 @@ describe('Workspaces service tests', () => {
     describe('getPendingWorkspaces', () => {
       it('should return the pending workspaces when getPendingWorkspaces is called', async () => {
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'get').resolves(workspacesResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(workspacesResponse);
 
         const response = await client.getPendingWorkspaces();
 
@@ -180,15 +174,15 @@ describe('Workspaces service tests', () => {
         };
 
         const { client, headers } = clientAndHeaders();
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.setupWorkspace(workspaceSetupInfo);
 
-        expect(patchCall.firstCall.args).toEqual([
+        expect(patchCall).toHaveBeenCalledWith(
           `workspaces/${workspaceSetupInfo.workspaceId}/setup`,
           workspaceData,
           headers,
-        ]);
+        );
       });
     });
 
@@ -203,11 +197,11 @@ describe('Workspaces service tests', () => {
           spaceUsed: 1024 * 1024 * 1024 * 1,
         };
 
-        const getCall = sinon.stub(httpClient, 'get').resolves(usageResponse);
+        const getCall = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(usageResponse);
 
         const response = await client.getWorkspaceUsage(workspaceId);
 
-        expect(getCall.firstCall.args).toEqual([`workspaces/${workspaceId}/usage`, headers]);
+        expect(getCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/usage`, headers);
         expect(response).toEqual(usageResponse);
       });
     });
@@ -252,7 +246,7 @@ describe('Workspaces service tests', () => {
         ];
 
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'get').resolves(workspaceTeamsResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(workspaceTeamsResponse);
 
         const response = await client.getWorkspacesTeams(workspaceId);
 
@@ -268,10 +262,10 @@ describe('Workspaces service tests', () => {
           ...teamData,
         };
         const { client, headers } = clientAndHeaders();
-        const postCall = sinon.stub(httpClient, 'post').resolves({ status: 200 });
+        const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({ status: 200 });
         const response = await client.createTeam(createTeamData);
 
-        expect(postCall.firstCall.args).toEqual(['workspaces/123sdf/teams', teamData, headers]);
+        expect(postCall).toHaveBeenCalledWith('workspaces/123sdf/teams', teamData, headers);
         expect(response).toEqual({ status: 200 });
       });
     });
@@ -282,11 +276,11 @@ describe('Workspaces service tests', () => {
         const newName = 'New Team Name';
 
         const { client, headers } = clientAndHeaders();
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.editTeam({ teamId, name: newName });
 
-        expect(patchCall.firstCall.args).toEqual([`workspaces/teams/${teamId}`, { name: newName }, headers]);
+        expect(patchCall).toHaveBeenCalledWith(`workspaces/teams/${teamId}`, { name: newName }, headers);
       });
     });
 
@@ -295,11 +289,11 @@ describe('Workspaces service tests', () => {
         const workspaceId = 'workspaceId';
         const teamId = 'teamId';
         const { client, headers } = clientAndHeaders();
-        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+        const deleteCall = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         await client.deleteTeam({ workspaceId, teamId });
 
-        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/teams/${teamId}`, headers]);
+        expect(deleteCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/teams/${teamId}`, headers);
       });
     });
 
@@ -307,11 +301,11 @@ describe('Workspaces service tests', () => {
       it('should return the members of a team when getWorkspacesTeamMembers is called', async () => {
         const teamId = 'teamId';
         const { client, headers } = clientAndHeaders();
-        const getCall = sinon.stub(httpClient, 'get').resolves();
+        const getCall = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(undefined);
 
         await client.getWorkspacesTeamMembers(teamId);
 
-        expect(getCall.firstCall.args).toEqual([`workspaces/teams/${teamId}/members`, headers]);
+        expect(getCall).toHaveBeenCalledWith(`workspaces/teams/${teamId}/members`, headers);
       });
     });
 
@@ -320,11 +314,11 @@ describe('Workspaces service tests', () => {
         const teamId = 'teamId';
         const userUuid = 'userUuid';
         const { client, headers } = clientAndHeaders();
-        const postCall = sinon.stub(httpClient, 'post').resolves();
+        const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
 
         await client.addTeamUser(teamId, userUuid);
 
-        expect(postCall.firstCall.args).toEqual([`/workspaces/teams/${teamId}/user/${userUuid}`, {}, headers]);
+        expect(postCall).toHaveBeenCalledWith(`/workspaces/teams/${teamId}/user/${userUuid}`, {}, headers);
       });
     });
 
@@ -333,11 +327,11 @@ describe('Workspaces service tests', () => {
         const teamId = 'teamId';
         const userUuid = 'userUuid';
         const { client, headers } = clientAndHeaders();
-        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+        const deleteCall = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         await client.removeTeamUser(teamId, userUuid);
 
-        expect(deleteCall.firstCall.args).toEqual([`/workspaces/teams/${teamId}/user/${userUuid}`, headers]);
+        expect(deleteCall).toHaveBeenCalledWith(`/workspaces/teams/${teamId}/user/${userUuid}`, headers);
       });
     });
 
@@ -347,15 +341,15 @@ describe('Workspaces service tests', () => {
         const teamId = 'teamId';
         const userUuid = 'userUuid';
         const { client, headers } = clientAndHeaders();
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.changeTeamManager(workspaceId, teamId, userUuid);
 
-        expect(patchCall.firstCall.args).toEqual([
+        expect(patchCall).toHaveBeenCalledWith(
           `/workspaces/${workspaceId}/teams/${teamId}/manager`,
           { managerId: userUuid },
           headers,
-        ]);
+        );
       });
     });
 
@@ -365,15 +359,15 @@ describe('Workspaces service tests', () => {
         const memberId = 'memberId';
         const role = 'newRole';
         const { client, headers } = clientAndHeaders();
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.changeUserRole(teamId, memberId, role);
 
-        expect(patchCall.firstCall.args).toEqual([
+        expect(patchCall).toHaveBeenCalledWith(
           `/api/workspaces/teams/${teamId}/members/${memberId}/role`,
           { role },
           headers,
-        ]);
+        );
       });
     });
 
@@ -385,7 +379,7 @@ describe('Workspaces service tests', () => {
         const encryptedMnemonicInBase64 = 'encryptedMnemonic';
         const encryptionAlgorithm = 'aes-256-gcm';
         const { client, headers } = clientAndHeaders();
-        const postCall = sinon.stub(httpClient, 'post').resolves();
+        const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
         const message = 'Test message';
 
         await client.inviteMemberToWorkspace({
@@ -397,7 +391,7 @@ describe('Workspaces service tests', () => {
           message,
         });
 
-        expect(postCall.firstCall.args).toEqual([
+        expect(postCall).toHaveBeenCalledWith(
           `workspaces/${workspaceId}/members/invite`,
           {
             invitedUser: invitedUserEmail,
@@ -407,7 +401,7 @@ describe('Workspaces service tests', () => {
             message: message,
           },
           headers,
-        ]);
+        );
       });
     });
 
@@ -432,15 +426,15 @@ describe('Workspaces service tests', () => {
           },
         };
 
-        const patchCall = sinon.stub(httpClient, 'patch').resolves(workspaceUserResponse);
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(workspaceUserResponse);
 
         const response = await client.modifyMemberUsage(workspaceId, memberId, spaceLimitBytes);
 
-        expect(patchCall.firstCall.args).toEqual([
+        expect(patchCall).toHaveBeenCalledWith(
           `workspaces/${workspaceId}/members/${memberId}/usage`,
           { spaceLimit: spaceLimitBytes },
           headers,
-        ]);
+        );
         expect(response).toEqual(workspaceUserResponse);
       });
     });
@@ -475,7 +469,7 @@ describe('Workspaces service tests', () => {
             },
           },
         ];
-        sinon.stub(httpClient, 'get').resolves(pendingInvitesResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(pendingInvitesResponse);
 
         const response = await client.getPendingInvites();
 
@@ -488,7 +482,7 @@ describe('Workspaces service tests', () => {
         const { client } = clientAndHeaders();
         const inviteId = 'inviteId';
 
-        sinon.stub(httpClient, 'get').resolves(inviteId);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(inviteId);
 
         const response = await client.validateWorkspaceInvite(inviteId);
 
@@ -500,11 +494,11 @@ describe('Workspaces service tests', () => {
       it('should delete the workspace avatar successfully', async () => {
         const workspaceId = 'workspaceId';
         const { client, headers } = clientAndHeaders();
-        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+        const deleteCall = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         await client.deleteWorkspaceAvatar(workspaceId);
 
-        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/avatar`, headers]);
+        expect(deleteCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/avatar`, headers);
       });
     });
 
@@ -524,7 +518,7 @@ describe('Workspaces service tests', () => {
           tokenHeader: 'tokenHeader',
         };
 
-        sinon.stub(httpClient, 'get').resolves(getWorkspaceCredentialsResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(getWorkspaceCredentialsResponse);
 
         const response = await client.getWorkspaceCredentials(workspaceId);
 
@@ -542,7 +536,7 @@ describe('Workspaces service tests', () => {
           folders: [],
         };
 
-        sinon.stub(httpClient, 'get').resolves(getPersonalTrashResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(getPersonalTrashResponse);
 
         const response = await client.getPersonalTrash(workspaceId, 'file');
 
@@ -554,11 +548,11 @@ describe('Workspaces service tests', () => {
       it('should empty the personal trash successfully', async () => {
         const { client, headers } = clientAndHeaders();
         const workspaceId = 'workspaceId';
-        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+        const deleteCall = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         await client.emptyPersonalTrash(workspaceId);
 
-        expect(deleteCall.firstCall.args).toEqual([`/workspaces/${workspaceId}/trash`, headers]);
+        expect(deleteCall).toHaveBeenCalledWith(`/workspaces/${workspaceId}/trash`, headers);
       });
     });
 
@@ -571,7 +565,7 @@ describe('Workspaces service tests', () => {
           description: 'Workspace Description',
           address: 'Workspace Address',
         };
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.editWorkspace(workspaceId, {
           description: workspaceData.description,
@@ -579,7 +573,7 @@ describe('Workspaces service tests', () => {
           address: workspaceData.address,
         });
 
-        expect(patchCall.firstCall.args).toEqual([`workspaces/${workspaceId}`, workspaceData, headers]);
+        expect(patchCall).toHaveBeenCalledWith(`workspaces/${workspaceId}`, workspaceData, headers);
       });
     });
 
@@ -587,11 +581,11 @@ describe('Workspaces service tests', () => {
       it('should leave the workspace successfully', async () => {
         const { client, headers } = clientAndHeaders();
         const workspaceId = 'workspaceId';
-        const deleteCall = sinon.stub(httpClient, 'delete').resolves();
+        const deleteCall = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         await client.leaveWorkspace(workspaceId);
 
-        expect(deleteCall.firstCall.args).toEqual([`workspaces/${workspaceId}/members/leave`, headers]);
+        expect(deleteCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/members/leave`, headers);
       });
     });
 
@@ -627,7 +621,7 @@ describe('Workspaces service tests', () => {
           ],
         };
 
-        sinon.stub(httpClient, 'get').resolves(getMemberDetailsResponse);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(getMemberDetailsResponse);
 
         const response = await client.getMemberDetails('workspaceId', memberId);
 
@@ -640,15 +634,11 @@ describe('Workspaces service tests', () => {
         const { client, headers } = clientAndHeaders();
         const workspaceId = 'workspaceId';
         const memberId = 'memberId';
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.deactivateMember(workspaceId, memberId);
 
-        expect(patchCall.firstCall.args).toEqual([
-          `workspaces/${workspaceId}/members/${memberId}/deactivate`,
-          {},
-          headers,
-        ]);
+        expect(patchCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/members/${memberId}/deactivate`, {}, headers);
       });
     });
 
@@ -657,15 +647,11 @@ describe('Workspaces service tests', () => {
         const { client, headers } = clientAndHeaders();
         const workspaceId = 'workspaceId';
         const memberId = 'memberId';
-        const patchCall = sinon.stub(httpClient, 'patch').resolves();
+        const patchCall = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue(undefined);
 
         await client.activateMember(workspaceId, memberId);
 
-        expect(patchCall.firstCall.args).toEqual([
-          `workspaces/${workspaceId}/members/${memberId}/activate`,
-          {},
-          headers,
-        ]);
+        expect(patchCall).toHaveBeenCalledWith(`workspaces/${workspaceId}/members/${memberId}/activate`, {}, headers);
       });
     });
 
@@ -688,7 +674,7 @@ describe('Workspaces service tests', () => {
         const { client } = clientAndHeaders();
         const workspaceId = 'workspaceId';
 
-        sinon.stub(httpClient, 'get').resolves(workspace);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(workspace);
 
         const response = await client.getWorkspace(workspaceId);
 

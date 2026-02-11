@@ -1,19 +1,13 @@
-import sinon from 'sinon';
-import { ApiSecurity, AppDetails } from '../shared';
-import { basicHeaders, headersWithToken } from '../shared/headers';
-import { HttpClient } from '../shared/http/client';
-import { Meet } from './index';
-import { CreateCallResponse, JoinCallPayload, JoinCallResponse, UsersInCallResponse } from './types';
-
-const httpClient = HttpClient.create('');
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ApiSecurity, AppDetails } from '../../../src/shared';
+import { basicHeaders, headersWithToken } from '../../../src/shared/headers';
+import { HttpClient } from '../../../src/shared/http/client';
+import { Meet } from '../../../src/meet/index';
+import { CreateCallResponse, JoinCallPayload, JoinCallResponse, UsersInCallResponse } from '../../../src/meet/types';
 
 describe('Meet service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('createCall method', () => {
@@ -27,13 +21,13 @@ describe('Meet service tests', () => {
       };
 
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves(expectedResponse);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(expectedResponse);
 
       // Act
       const response = await client.createCall();
 
       // Assert
-      expect(postCall.firstCall.args).toEqual(['call', {}, headers]);
+      expect(postCall).toHaveBeenCalledWith('call', {}, headers);
       expect(response).toEqual(expectedResponse);
     });
 
@@ -64,28 +58,26 @@ describe('Meet service tests', () => {
     it('should join a call successfully with token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves(joinCallResponse);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(joinCallResponse);
 
       // Act
       const response = await client.joinCall(callId, payload);
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([`call/${callId}/users/join`, payload, headers]);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/join`, payload, headers);
       expect(response).toEqual(joinCallResponse);
     });
 
     it('should join a call successfully without token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithoutToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves(joinCallResponse);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(joinCallResponse);
 
       // Act
       const response = await client.joinCall(callId, payload);
 
       // Assert
-      expect(postCall.firstCall.args[0]).toEqual(`call/${callId}/users/join`);
-      expect(postCall.firstCall.args[1]).toEqual(payload);
-      expect(postCall.firstCall.args[2]).toEqual(headers);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/join`, payload, headers);
       expect(response).toEqual(joinCallResponse);
     });
   });
@@ -112,27 +104,26 @@ describe('Meet service tests', () => {
     it('should get current users in call successfully with token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const getCall = sinon.stub(httpClient, 'get').resolves(usersInCallResponse);
+      const getCall = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(usersInCallResponse);
 
       // Act
       const response = await client.getCurrentUsersInCall(callId);
 
       // Assert
-      expect(getCall.firstCall.args).toEqual([`call/${callId}/users`, headers]);
+      expect(getCall).toHaveBeenCalledWith(`call/${callId}/users`, headers);
       expect(response).toEqual(usersInCallResponse);
     });
 
     it('should get current users in call successfully without token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithoutToken();
-      const getCall = sinon.stub(httpClient, 'get').resolves(usersInCallResponse);
+      const getCall = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(usersInCallResponse);
 
       // Act
       const response = await client.getCurrentUsersInCall(callId);
 
       // Assert
-      expect(getCall.firstCall.args[0]).toEqual(`call/${callId}/users`);
-      expect(getCall.firstCall.args[1]).toEqual(headers);
+      expect(getCall).toHaveBeenCalledWith(`call/${callId}/users`, headers);
       expect(response).toEqual(usersInCallResponse);
     });
   });
@@ -143,27 +134,25 @@ describe('Meet service tests', () => {
     it('should leave a call successfully with token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves();
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
 
       // Act
       await client.leaveCall(callId);
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([`call/${callId}/users/leave`, {}, headers]);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
     });
 
     it('should leave a call successfully without token', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithoutToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves();
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
 
       // Act
       await client.leaveCall(callId);
 
       // Assert
-      expect(postCall.firstCall.args[0]).toEqual(`call/${callId}/users/leave`);
-      expect(postCall.firstCall.args[1]).toEqual({});
-      expect(postCall.firstCall.args[2]).toEqual(headers);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
     });
   });
 });

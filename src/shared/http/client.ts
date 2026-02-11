@@ -1,4 +1,4 @@
-import axios, { Axios, AxiosError, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
 import AppError from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 
@@ -18,7 +18,7 @@ export interface CustomInterceptor {
 }
 
 export class HttpClient {
-  private readonly axios: Axios;
+  private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
   static globalInterceptors: CustomInterceptor[] = [];
 

@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Trash } from '../../../src/drive';
 import { randomFolderContentResponse } from '../storage/mothers/folderContentResponse.mother';
 import { DeleteFilePayload, DeleteItemsPermanentlyPayload } from '../../../src/drive/trash/types';
@@ -6,22 +6,16 @@ import { headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('# trash service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('-> folders', () => {
     describe('delete folder', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'delete').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
           valid: true,
         });
         const { client, headers } = clientAndHeaders();
@@ -30,7 +24,7 @@ describe('# trash service tests', () => {
         const body = await client.deleteFolder(2);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/folder/2', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/folder/2', headers);
         expect(body).toEqual({
           valid: true,
         });
@@ -42,7 +36,7 @@ describe('# trash service tests', () => {
     describe('delete file', () => {
       it('Should call with right arguments and return control', async () => {
         // Arrange
-        const callStub = sinon.stub(httpClient, 'delete').resolves({
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
           valid: true,
         });
         const { client, headers } = clientAndHeaders();
@@ -55,7 +49,7 @@ describe('# trash service tests', () => {
         const body = await client.deleteFile(payload);
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/folder/2/file/5', headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/folder/2/file/5', headers);
         expect(body).toEqual({
           valid: true,
         });
@@ -69,7 +63,7 @@ describe('# trash service tests', () => {
         // Arrange
         const response = randomFolderContentResponse(2, 2);
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'get').resolves(response);
+        vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
 
         // Act
         const body = await client.getTrash();
@@ -82,7 +76,7 @@ describe('# trash service tests', () => {
     describe('Add Items into trash', () => {
       it('should call with right params & return 200', async () => {
         const { client, headers } = clientAndHeaders();
-        const callStub = sinon.stub(httpClient, 'post').resolves(true);
+        const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(true);
         const itemsToTrash = [
           { id: 'id1', uuid: 'uuid1', type: 'file' as const },
           { id: 'id2', uuid: 'uuid2', type: 'folder' as const },
@@ -92,7 +86,7 @@ describe('# trash service tests', () => {
         const body = await client.addItemsToTrash({ items: itemsToTrash });
 
         // Assert
-        expect(callStub.firstCall.args).toEqual(['/storage/trash/add', { items: itemsToTrash }, headers]);
+        expect(callStub).toHaveBeenCalledWith('/storage/trash/add', { items: itemsToTrash }, headers);
         expect(body).toEqual(true);
       });
     });
@@ -101,7 +95,7 @@ describe('# trash service tests', () => {
       it('should return an empty body', async () => {
         // Arrange
         const { client } = clientAndHeaders();
-        sinon.stub(httpClient, 'delete').resolves();
+        vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
 
         // Act
         const body = await client.clearTrash();
@@ -114,7 +108,7 @@ describe('# trash service tests', () => {
     describe('Delete trashed items', () => {
       it('should call with right params', async () => {
         const { client, headers } = clientAndHeaders();
-        const callStub = sinon.stub(httpClient, 'delete').resolves();
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue(undefined);
         const payload: DeleteItemsPermanentlyPayload = {
           items: [
             { id: 36225, type: 'folder' },
@@ -125,7 +119,7 @@ describe('# trash service tests', () => {
 
         const body = await client.deleteItemsPermanently(payload);
 
-        expect(callStub.firstCall.args).toEqual(['/storage/trash', headers, payload]);
+        expect(callStub).toHaveBeenCalledWith('/storage/trash', headers, payload);
         expect(body).toBe(undefined);
       });
     });
