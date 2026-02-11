@@ -1,1 +1,4 @@
-yarn lint && yarn format && yarn test && yarn lint-staged
+yarn format
+yarn test
+yarn lint
+yarn lint-staged
