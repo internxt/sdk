@@ -1,0 +1,29 @@
+{
+  "name": "@internxt/health-check-server",
+  "version": "1.0.0",
+  "description": "Health check server for monitoring Internxt API endpoints",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@dashlane/pqc-kem-kyber512-node": "^1.0.0",
+    "@fastify/env": "^4.4.0",
+    "bip39": "^3.1.0",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "openpgp": "^5.11.3"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^20.14.10",
+    "pino-pretty": "^11.2.1",
+    "tsx": "^4.16.2",
+    "typescript": "^5.9.3"
+  }
+}
