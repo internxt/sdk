@@ -3156,6 +3156,11 @@ export interface components {
       size: string;
       /** @enum {string} */
       status: 'EXISTS' | 'DELETED';
+      /**
+       * Format: date-time
+       * @description Date when the file was last modified before this version was created
+       */
+      modificationTime: string;
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
