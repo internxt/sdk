@@ -2810,7 +2810,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    /** CLI platform login access */
+    /** CLI/Rclone platform login access */
     post: operations['AuthController_cliLoginAccess'];
     delete?: never;
     options?: never;
@@ -3156,6 +3156,11 @@ export interface components {
       size: string;
       /** @enum {string} */
       status: 'EXISTS' | 'DELETED';
+      /**
+       * Format: date-time
+       * @description Date when the file was last modified before this version was created
+       */
+      modificationTime: string;
       /** Format: date-time */
       createdAt: string;
       /** Format: date-time */
@@ -3197,6 +3202,7 @@ export interface components {
        */
       type: string;
     };
+    Object: Record<string, never>;
     MoveFileDto: {
       /**
        * @description New Destination Folder UUID
@@ -5116,11 +5122,13 @@ export interface operations {
         /** @description Bucket ID filter */
         bucket?: string;
         /** @description Field to sort by */
-        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'uuid';
         /** @description Sort order */
         order?: 'ASC' | 'DESC';
         /** @description Filter files updated after this date */
         updatedAt?: string;
+        /** @description The last file uuid of the provided list in the previous call */
+        lastId?: components['schemas']['Object'];
       };
       header?: never;
       path?: never;
@@ -5562,7 +5570,7 @@ export interface operations {
         /** @description Offset for pagination */
         offset: number;
         /** @description Field to sort by */
-        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'uuid';
         /** @description Sort order */
         order?: 'ASC' | 'DESC';
       };
@@ -5592,7 +5600,7 @@ export interface operations {
         /** @description Offset for pagination */
         offset: number;
         /** @description Field to sort by */
-        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'name' | 'uuid';
+        sort?: 'updatedAt' | 'size' | 'id' | 'plainName' | 'uuid';
         /** @description Sort order */
         order?: 'ASC' | 'DESC';
       };
@@ -5644,7 +5652,7 @@ export interface operations {
         /** @description Offset for pagination */
         offset: number;
         /** @description Field to sort by */
-        sort?: 'updatedAt' | 'id' | 'plainName' | 'name' | 'uuid';
+        sort?: 'updatedAt' | 'id' | 'plainName' | 'uuid';
         /** @description Sort order */
         order?: 'ASC' | 'DESC';
       };
@@ -5773,7 +5781,7 @@ export interface operations {
         /** @description Offset for pagination */
         offset: number;
         /** @description Field to sort by */
-        sort?: 'updatedAt' | 'id' | 'plainName' | 'name' | 'uuid';
+        sort?: 'updatedAt' | 'id' | 'plainName' | 'uuid';
         /** @description Sort order */
         order?: 'ASC' | 'DESC';
       };
@@ -9468,7 +9476,7 @@ export interface operations {
       };
     };
     responses: {
-      /** @description CLI user successfully accessed their account */
+      /** @description User successfully accessed their account via CLI or Rclone */
       200: {
         headers: {
           [name: string]: unknown;
@@ -9477,7 +9485,7 @@ export interface operations {
           'application/json': components['schemas']['LoginAccessResponseDto'];
         };
       };
-      /** @description This user current tier does not allow CLI access */
+      /** @description This user current tier does not allow CLI/Rclone access */
       402: {
         headers: {
           [name: string]: unknown;

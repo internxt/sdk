@@ -1,4 +1,3 @@
-import sinon from 'sinon';
 import { HttpClient } from '../../src/shared/http/client';
 import { Mail } from '../../src/mail/index';
 import { ApiSecurity, AppDetails } from '../../src/shared';
@@ -14,17 +13,11 @@ import {
   createPwdProtectedEmail,
   encryptEmailHybrid,
 } from 'internxt-crypto';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-
-const httpClient = HttpClient.create('');
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Mail service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('test keystore call methods', async () => {
@@ -37,10 +30,10 @@ describe('Mail service tests', () => {
 
     it('should successfully upload a keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.uploadKeystoreToServer(encryptionKeystore);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/keystore',
         {
           encryptedKeystore: encryptionKeystore,
@@ -51,10 +44,10 @@ describe('Mail service tests', () => {
 
     it('should successfully create and upload a keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.createAndUploadKeystores(email, baseKey);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/keystore',
         {
           encryptedKeystore: {
@@ -72,7 +65,7 @@ describe('Mail service tests', () => {
         headers,
       ]);
 
-      expect(postCall.secondCall.args).toEqual([
+      expect(postCall.mock.calls[1]).toEqual([
         '/keystore',
         {
           encryptedKeystore: {
@@ -92,10 +85,10 @@ describe('Mail service tests', () => {
     });
     it('should successfully download a keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves({ encryptionKeystore });
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({ encryptionKeystore });
       const result = await client.downloadKeystoreFromServer(email, KeystoreType.ENCRYPTION);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/user/keystore',
         {
           userEmail: email,
@@ -108,10 +101,10 @@ describe('Mail service tests', () => {
 
     it('should successfully open user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves(encryptionKeystore);
+      const postCall =  vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(encryptionKeystore);
       const result = await client.getUserEmailKeys(email, baseKey);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/user/keystore',
         {
           userEmail: email,
@@ -124,10 +117,10 @@ describe('Mail service tests', () => {
 
     it('should successfully recover user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves(recoveryKeystore);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(recoveryKeystore);
       const result = await client.recoverUserEmailKeys(email, recoveryCodes);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/user/keystore',
         {
           userEmail: email,
@@ -166,10 +159,11 @@ describe('Mail service tests', () => {
 
     it('should successfully get user public keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves([{ publicKeys: emailKeysABase64, user: userA }]);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
+        { publicKeys: emailKeysABase64, user: userA }]);
       const result = await client.getUserWithPublicKeys(userA.email);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
           emails: [userA.email],
@@ -181,14 +175,14 @@ describe('Mail service tests', () => {
 
     it('should successfully get public keys of several users', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves([
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
         { publicKeys: emailKeysABase64, user: userA },
         { publicKeys: emailKeysBBase64, user: userB },
         { publicKeys: emailKeysCBase64, user: userC },
       ]);
       const result = await client.getSeveralUsersWithPublicKeys([userA.email, userB.email, userC.email]);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
           emails: [userA.email, userB.email, userC.email],
@@ -237,12 +231,12 @@ describe('Mail service tests', () => {
 
     it('should successfully encrypt and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-     const postStub = sinon.stub(httpClient, 'post');
-      postStub.onCall(0).resolves([{ publicKeys: emailKeysBBase64, user: userB }]);
-      postStub.onCall(1).resolves({});
+    const postCall = vi.spyOn(HttpClient.prototype, 'post')
+  .mockResolvedValueOnce([{ publicKeys: emailKeysBBase64, user: userB }])
+  .mockResolvedValueOnce({});
       await client.encryptAndSendEmail(email, emailKeysA.privateKeys, false);
 
-      expect(postStub.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
           emails: [userB.email],
@@ -250,7 +244,7 @@ describe('Mail service tests', () => {
         headers,
       ]);
 
-      expect(postStub.secondCall.args).toEqual([
+      expect(postCall.mock.calls[1]).toEqual([
         '/emails',
         {
           emails: [ {
@@ -274,10 +268,10 @@ describe('Mail service tests', () => {
 
     it('should successfully password protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.passwordProtectAndSendEmail(email, pwd, false);
 
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/emails',
         {
           email: {
@@ -309,11 +303,12 @@ describe('Mail service tests', () => {
     it('should successfully decrypt encrypted email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
-      const getCall = sinon.stub(httpClient, 'post').resolves([{ publicKeys: emailKeysABase64, user: userA }]);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
+        { publicKeys: emailKeysABase64, user: userA }]);
       const encEmail = await encryptEmailHybrid(email, recipient, emailKeysA.privateKeys, true);
       const result = await client.decryptEmail(encEmail, emailKeysB.privateKeys);
 
-      expect(getCall.firstCall.args).toEqual([
+      expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
           emails: [userA.email],

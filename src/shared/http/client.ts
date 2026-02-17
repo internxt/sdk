@@ -1,12 +1,30 @@
-import axios, { Axios, AxiosError, AxiosResponse, CancelToken } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
 import AppError from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 
 export { RequestCanceler } from './types';
 
+export interface CustomInterceptor {
+  request?: {
+    onFulfilled?: (
+      config: InternalAxiosRequestConfig,
+    ) => InternalAxiosRequestConfig | Promise<InternalAxiosRequestConfig>;
+    onRejected?: (error: unknown) => unknown;
+  };
+  response?: {
+    onFulfilled?: (response: AxiosResponse) => AxiosResponse;
+    onRejected?: (error: unknown) => unknown;
+  };
+}
+
 export class HttpClient {
-  private readonly axios: Axios;
+  private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
+  static globalInterceptors: CustomInterceptor[] = [];
+
+  static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
+    HttpClient.globalInterceptors = interceptors;
+  }
 
   public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
     if (unauthorizedCallback === undefined) {
@@ -20,6 +38,16 @@ export class HttpClient {
       baseURL: baseURL,
     });
     this.unauthorizedCallback = unauthorizedCallback;
+
+    HttpClient.globalInterceptors.forEach((interceptor) => {
+      if (interceptor.request) {
+        this.axios.interceptors.request.use(interceptor.request.onFulfilled, interceptor.request.onRejected);
+      }
+      if (interceptor.response) {
+        this.axios.interceptors.response.use(interceptor.response.onFulfilled, interceptor.response.onRejected);
+      }
+    });
+
     this.initializeMiddleware();
   }
 
@@ -197,7 +225,10 @@ export class HttpClient {
    * @private
    */
   private normalizeError(error: AxiosError) {
-    let errorMessage: string, errorStatus: number, errorCode: string | undefined;
+    let errorMessage: string,
+      errorStatus: number,
+      errorCode: string | undefined,
+      errorHeaders: Record<string, string> | undefined;
 
     if (error.response) {
       const response = error.response as AxiosResponse<{
@@ -212,6 +243,7 @@ export class HttpClient {
       errorMessage = response.data.message || response.data.error || JSON.stringify(response.data);
       errorStatus = response.status;
       errorCode = response.data.code;
+      errorHeaders = response.headers as Record<string, string>;
     } else if (error.request) {
       errorMessage = 'Server unavailable';
       errorStatus = 500;
@@ -220,7 +252,7 @@ export class HttpClient {
       errorStatus = 400;
     }
 
-    throw new AppError(errorMessage, errorStatus, errorCode);
+    throw new AppError(errorMessage, errorStatus, errorCode, errorHeaders);
   }
 }
 

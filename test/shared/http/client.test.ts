@@ -1,26 +1,26 @@
-import sinon from 'sinon';
-import axios, { Axios, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { HttpClient } from '../../../src/shared/http/client';
+import { UnauthorizedCallback } from '../../../src/shared/http/types';
+import { fail } from 'assert';
 
 describe('HttpClient', () => {
-  afterEach(() => {
-    sinon.restore();
+  beforeEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('construction', () => {
     it('should set the a given base URL', () => {
       // Arrange
-      const createSpy = sinon.spy(axios, 'create');
+      const createSpy = vi.spyOn(axios, 'create');
 
       // Act
       HttpClient.create('my-url');
 
       // Assert
-      expect(
-        createSpy.calledOnceWith({
-          baseURL: 'my-url',
-        }),
-      ).toBeTruthy();
+      expect(createSpy).toHaveBeenCalledWith({
+        baseURL: 'my-url',
+      });
     });
   });
 
@@ -29,7 +29,7 @@ describe('HttpClient', () => {
       const myAxios = axios.create();
 
       beforeEach(() => {
-        sinon.stub(axios, 'create').returns(myAxios);
+        vi.spyOn(axios, 'create').mockReturnValue(myAxios);
       });
 
       it('should return only the data inside the response', () => {
@@ -46,7 +46,7 @@ describe('HttpClient', () => {
         const fulfilled = myAxios.interceptors.response.handlers[0].fulfilled;
 
         // Act
-        const result = fulfilled(responseFake);
+        const result = fulfilled(responseFake as AxiosResponse<any, any, {}>);
 
         // Assert
         expect(result).toEqual({
@@ -98,14 +98,10 @@ describe('HttpClient', () => {
     });
 
     describe('interceptor with callback', () => {
-      const myAxios = axios.create();
-
-      beforeEach(() => {
-        sinon.stub(axios, 'create').returns(myAxios);
-      });
-
       it('should return unauthorized and execute callback if unauthorized callback is present', () => {
-        // Arrange
+        const myAxios = axios.create();
+        vi.spyOn(axios, 'create').mockReturnValue(myAxios);
+
         const error = getAxiosError();
         error.response = <AxiosResponse>{
           data: {
@@ -113,34 +109,17 @@ describe('HttpClient', () => {
           },
           status: 401,
         };
-        const unauthorizedSpy = sinon.spy();
-        HttpClient.create('', unauthorizedSpy);
+        const unauthorizedSpy = vi.fn();
 
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const rejected = myAxios.interceptors.response.handlers[0].rejected;
-
-        try {
-          // Act
-          rejected(error);
-        } catch (e) {
-          // Assert
-          expect(e).toEqual(new Error('not authorized'));
-          expect(unauthorizedSpy.calledOnce).toBeTruthy();
-        }
+        assertMessageOnOutputError(myAxios, error, 'not authorized', unauthorizedSpy);
+        expect(unauthorizedSpy).toHaveBeenCalledOnce();
       });
     });
 
     describe('calls', () => {
-      const myAxios = axios.create();
-
-      beforeEach(() => {
-        sinon.stub(axios, 'create').returns(myAxios);
-      });
-
       it('should execute GET request with correct parameters', async () => {
         // Arrange
-        const callStub = sinon.stub(myAxios, 'get').resolves({});
+        const callStub = vi.spyOn(axios.Axios.prototype, 'get').mockResolvedValue({});
         const client = HttpClient.create('');
 
         // Act
@@ -149,14 +128,11 @@ describe('HttpClient', () => {
         });
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/some-path?with=arguments',
-          {
-            headers: {
-              some: 'header',
-            },
+        expect(callStub).toHaveBeenCalledWith('/some-path?with=arguments', {
+          headers: {
+            some: 'header',
           },
-        ]);
+        });
       });
 
       it('should be able to cancel a GET request', async () => {
@@ -173,7 +149,7 @@ describe('HttpClient', () => {
 
       it('should be able to complete a cancellable GET request', async () => {
         // Arrange
-        sinon.stub(myAxios, 'get').resolves({
+        vi.spyOn(axios.Axios.prototype, 'get').mockResolvedValue({
           some: true,
         });
         const client = HttpClient.create('');
@@ -189,7 +165,7 @@ describe('HttpClient', () => {
 
       it('should execute POST request with correct parameters', async () => {
         // Arrange
-        const callStub = sinon.stub(myAxios, 'post').resolves({});
+        const callStub = vi.spyOn(axios.Axios.prototype, 'post').mockResolvedValue({});
         const client = HttpClient.create('');
 
         // Act
@@ -205,7 +181,7 @@ describe('HttpClient', () => {
         );
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/some-path',
           {
             something: 'here',
@@ -216,7 +192,7 @@ describe('HttpClient', () => {
               some: 'header',
             },
           },
-        ]);
+        );
       });
 
       it('should be able to cancel a POST request', async () => {
@@ -233,7 +209,7 @@ describe('HttpClient', () => {
 
       it('should be able to complete a cancellable a POST request', async () => {
         // Arrange
-        sinon.stub(myAxios, 'post').resolves({
+        vi.spyOn(axios.Axios.prototype, 'post').mockResolvedValue({
           some: true,
         });
         const client = HttpClient.create('');
@@ -249,7 +225,7 @@ describe('HttpClient', () => {
 
       it('should execute PUT request with correct parameters', async () => {
         // Arrange
-        const callStub = sinon.stub(myAxios, 'put').resolves({});
+        const callStub = vi.spyOn(axios.Axios.prototype, 'put').mockResolvedValue({});
         const client = HttpClient.create('');
 
         // Act
@@ -265,7 +241,7 @@ describe('HttpClient', () => {
         );
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/some-path',
           {
             something: 'here',
@@ -276,12 +252,12 @@ describe('HttpClient', () => {
               some: 'header',
             },
           },
-        ]);
+        );
       });
 
       it('should execute PATCH request with correct parameters', async () => {
         // Arrange
-        const callStub = sinon.stub(myAxios, 'patch').resolves({});
+        const callStub = vi.spyOn(axios.Axios.prototype, 'patch').mockResolvedValue({});
         const client = HttpClient.create('');
 
         // Act
@@ -297,7 +273,7 @@ describe('HttpClient', () => {
         );
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
+        expect(callStub).toHaveBeenCalledWith(
           '/some-path',
           {
             something: 'here',
@@ -308,12 +284,12 @@ describe('HttpClient', () => {
               some: 'header',
             },
           },
-        ]);
+        );
       });
 
       it('should execute DELETE request with correct parameters', async () => {
         // Arrange
-        const callStub = sinon.stub(myAxios, 'delete').resolves({});
+        const callStub = vi.spyOn(axios.Axios.prototype, 'delete').mockResolvedValue({});
         const client = HttpClient.create('');
 
         // Act
@@ -329,18 +305,15 @@ describe('HttpClient', () => {
         );
 
         // Assert
-        expect(callStub.firstCall.args).toEqual([
-          '/some-path',
-          {
-            data: {
-              something: 'here',
-              else: 'there',
-            },
-            headers: {
-              some: 'header',
-            },
+        expect(callStub).toHaveBeenCalledWith('/some-path', {
+          data: {
+            something: 'here',
+            else: 'there',
           },
-        ]);
+          headers: {
+            some: 'header',
+          },
+        });
       });
     });
   });
@@ -361,9 +334,14 @@ function getAxiosError(): AxiosError {
   };
 }
 
-function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: string) {
+function assertMessageOnOutputError(
+  axios: AxiosInstance,
+  error: AxiosError,
+  message: string,
+  unauthorizedCallback?: UnauthorizedCallback,
+) {
   // Arrange
-  HttpClient.create('');
+  HttpClient.create('', unauthorizedCallback);
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -371,6 +349,7 @@ function assertMessageOnOutputError(axios: Axios, error: AxiosError, message: st
 
   // Act & Assert
   expect(() => {
-    rejected(error);
+    rejected?.(error);
+    fail('Expected function to throw an error, but it did not.');
   }).toThrow(message);
 }

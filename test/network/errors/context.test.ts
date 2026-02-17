@@ -1,19 +1,20 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   NetworkUploadContext,
   NetworkDownloadContext,
   getNetworkErrorContext,
   DownloadInvalidMnemonicError,
-  UploadInvalidMnemonicError
+  UploadInvalidMnemonicError,
 } from '../../../src/network/errors';
 
 function getNetworkUploadContext(merge?: Partial<NetworkUploadContext>): NetworkUploadContext {
   const defaultContext: NetworkUploadContext = {
     bucketId: '',
     crypto: {
-      mnemonic: 'mnemonic'
+      mnemonic: 'mnemonic',
     },
     fileSize: 10,
-    user: 'user'
+    user: 'user',
   };
 
   return { ...defaultContext, ...merge };
@@ -23,16 +24,20 @@ function getNetworkDownloadContext(merge?: Partial<NetworkUploadContext>): Netwo
   const defaultContext: NetworkDownloadContext = {
     bucketId: '',
     crypto: {
-      mnemonic: 'mnemonic'
+      mnemonic: 'mnemonic',
     },
     fileId: 'fileId',
-    user: 'user'
+    user: 'user',
   };
 
   return { ...defaultContext, ...merge };
 }
 
 describe('network/errors/context', () => {
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
   describe('Get download error context', () => {
     it('When the download error is not related to the mnemonic, the mnemonic is not included', async () => {
       const context = getNetworkDownloadContext();

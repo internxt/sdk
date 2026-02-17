@@ -1,25 +1,19 @@
 import { HttpClient } from '../../../src/shared/http/client';
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
 import { Backups } from '../../../src/drive/backups';
 
-const httpClient = HttpClient.create('');
-
 describe('backups service', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('get all devices', () => {
     it('should call with right params & return data', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         devices: 'some',
       });
 
@@ -27,7 +21,7 @@ describe('backups service', () => {
       const body = await client.getAllDevices();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/backup/device', headers]);
+      expect(callStub).toHaveBeenCalledWith('/backup/device', headers);
       expect(body).toEqual({
         devices: 'some',
       });
@@ -38,7 +32,7 @@ describe('backups service', () => {
     it('should call with right params & return data', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         backups: 'some',
       });
       const mac = 'lololo';
@@ -47,7 +41,7 @@ describe('backups service', () => {
       const body = await client.getAllBackups(mac);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`/backup/${mac}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/backup/${mac}`, headers);
       expect(body).toEqual({
         backups: 'some',
       });
@@ -58,7 +52,7 @@ describe('backups service', () => {
     it('should call with right params & return data', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const callStub = sinon.stub(httpClient, 'delete').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
         done: true,
       });
       const backupId = 1;
@@ -67,7 +61,7 @@ describe('backups service', () => {
       const body = await client.deleteBackup(backupId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`/backup/${backupId}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/backup/${backupId}`, headers);
       expect(body).toEqual({
         done: true,
       });
@@ -78,7 +72,7 @@ describe('backups service', () => {
     it('should call with right params & return data', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const callStub = sinon.stub(httpClient, 'delete').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
         done: true,
       });
       const deviceId = 1;
@@ -87,7 +81,7 @@ describe('backups service', () => {
       const body = await client.deleteDevice(deviceId);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([`/backup/device/${deviceId}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/backup/device/${deviceId}`, headers);
       expect(body).toEqual({
         done: true,
       });

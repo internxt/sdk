@@ -1,4 +1,5 @@
 export * from './auth';
+export { AppError } from './shared';
 export * as Drive from './drive';
 export * as Network from './network';
 export * as Shared from './shared';

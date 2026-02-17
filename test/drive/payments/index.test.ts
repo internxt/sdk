@@ -1,26 +1,19 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Payments } from '../../../src/drive';
 import { CreatePaymentSessionPayload, StripeSessionMode, UserType } from '../../../src/drive/payments/types/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
 
-const httpClient = HttpClient.create('');
-
 describe('payments service', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-    jest.resetAllMocks();
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('get products', () => {
     it('should call with right params & return data', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         content: 'true',
       });
 
@@ -30,7 +23,7 @@ describe('payments service', () => {
       const body = await client.getProducts();
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['/v3/stripe/products', headers]);
+      expect(callStub).toHaveBeenCalledWith('/v3/stripe/products', headers);
       expect(body).toEqual({
         content: 'true',
       });
@@ -38,12 +31,8 @@ describe('payments service', () => {
   });
 
   describe('getInvoices', () => {
-    afterEach(() => {
-      sinon.restore();
-    });
-
     it('should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'get').resolves([
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue([
         { id: 'invoice_123', amount: 1000 },
         { id: 'invoice_456', amount: 2000 },
       ]);
@@ -66,7 +55,7 @@ describe('payments service', () => {
         limit: '10',
       }).toString();
 
-      expect(callStub.firstCall.args).toEqual([`/invoices?${expectedQuery}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/invoices?${expectedQuery}`, headers);
 
       expect(invoices).toEqual([
         { id: 'invoice_123', amount: 1000 },
@@ -75,7 +64,7 @@ describe('payments service', () => {
     });
 
     it('should handle missing optional parameters correctly', async () => {
-      const callStub = sinon.stub(httpClient, 'get').resolves([]);
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue([]);
 
       const { client, headers } = clientAndHeadersWithToken({});
 
@@ -87,14 +76,14 @@ describe('payments service', () => {
 
       const invoices = await client.getInvoices(params as any);
 
-      expect(callStub.firstCall.args).toEqual([`/invoices?${expectedQuery}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/invoices?${expectedQuery}`, headers);
       expect(invoices).toEqual([]);
     });
   });
 
   describe('check if product is available', () => {
     it('should call with right params & return data', async () => {
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         featuresPerService: {
           antivirus: false,
         },
@@ -103,7 +92,7 @@ describe('payments service', () => {
 
       const body = await client.checkUserAvailableProducts();
 
-      expect(callStub.firstCall.args).toEqual(['/products', headers]);
+      expect(callStub).toHaveBeenCalledWith('/products', headers);
       expect(body).toEqual({
         featuresPerService: {
           antivirus: false,
@@ -115,7 +104,7 @@ describe('payments service', () => {
   describe('create payment session', () => {
     it('should call with right params & return data', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         id: 'ident',
       });
       const { client, headers } = clientAndHeadersWithToken({});
@@ -132,7 +121,7 @@ describe('payments service', () => {
       const body = await client.createSession(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/v2/stripe/session',
         {
           test: payload.test,
@@ -143,7 +132,7 @@ describe('payments service', () => {
           canceledUrl: payload.canceledUrl,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         id: 'ident',
       });
@@ -153,12 +142,12 @@ describe('payments service', () => {
   describe('Get user used promotional codes', () => {
     it('When requesting a user redeemed promo codes, it returns the correct data with the right parameters', async () => {
       const response = { usedCoupons: ['PROMO_CODE', 'PROMO_CODE_1'] };
-      const callStub = sinon.stub(httpClient, 'get').resolves(response);
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
       const { client, headers } = clientAndHeadersWithToken({});
 
       const body = await client.getPromoCodesUsedByUser();
 
-      expect(callStub.firstCall.args).toEqual(['/customer/redeemed-promotion-codes', headers]);
+      expect(callStub).toHaveBeenCalledWith('/customer/redeemed-promotion-codes', headers);
       expect(body).toEqual(response);
     });
   });

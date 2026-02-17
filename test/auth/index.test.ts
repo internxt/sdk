@@ -1,19 +1,13 @@
-import sinon from 'sinon';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { emptyRegisterDetails } from './registerDetails.mother';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
 import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src/auth';
 
-const httpClient = HttpClient.create('');
-
 describe('# auth service tests', () => {
   beforeEach(() => {
-    sinon.stub(HttpClient, 'create').returns(httpClient);
-  });
-
-  afterEach(() => {
-    sinon.restore();
+    vi.restoreAllMocks();
   });
 
   describe('-> register use case', () => {
@@ -33,14 +27,14 @@ describe('# auth service tests', () => {
       registerDetails.keys.revocationCertificate = '11';
       registerDetails.captcha = '12';
 
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
 
       // Act
       await client.register(registerDetails);
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall).toHaveBeenCalledWith(
         '/users',
         {
           name: registerDetails.name,
@@ -67,12 +61,12 @@ describe('# auth service tests', () => {
           captcha: registerDetails.captcha,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(httpClient, 'post').resolves({
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         valid: true,
       });
       const { client } = clientAndHeaders();
@@ -105,14 +99,14 @@ describe('# auth service tests', () => {
       registerDetails.keys.revocationCertificate = '11';
       registerDetails.captcha = '12';
 
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
 
       // Act
       await client.registerWithoutKeys(registerDetails);
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall).toHaveBeenCalledWith(
         '/users',
         {
           name: registerDetails.name,
@@ -126,12 +120,12 @@ describe('# auth service tests', () => {
           captcha: registerDetails.captcha,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(httpClient, 'post').resolves({
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         valid: true,
       });
       const { client } = clientAndHeaders();
@@ -166,14 +160,14 @@ describe('# auth service tests', () => {
 
       const mockInvitatioId = 'invitationId';
 
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
 
       // Act
       await client.registerPreCreatedUser({ ...registerDetails, invitationId: mockInvitatioId });
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall).toHaveBeenCalledWith(
         'users/pre-created-users/register',
         {
           name: registerDetails.name,
@@ -201,12 +195,12 @@ describe('# auth service tests', () => {
           invitationId: mockInvitatioId,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(httpClient, 'post').resolves({
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         valid: true,
       });
       const { client } = clientAndHeaders();
@@ -241,14 +235,14 @@ describe('# auth service tests', () => {
 
       const mockInvitatioId = 'invitationId';
 
-      const postCall = sinon.stub(httpClient, 'post').resolves({});
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
 
       // Act
       await client.registerPreCreatedUserWithoutKeys({ ...registerDetails, invitationId: mockInvitatioId });
 
       // Assert
-      expect(postCall.firstCall.args).toEqual([
+      expect(postCall).toHaveBeenCalledWith(
         'users/pre-created-users/register',
         {
           name: registerDetails.name,
@@ -263,12 +257,12 @@ describe('# auth service tests', () => {
           invitationId: mockInvitatioId,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should resolve valid on valid response', async () => {
       // Arrange
-      sinon.stub(httpClient, 'post').resolves({
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         valid: true,
       });
       const { client } = clientAndHeaders();
@@ -292,7 +286,7 @@ describe('# auth service tests', () => {
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
       const error = new Error('Network error');
-      sinon.stub(httpClient, 'post').rejects(error);
+      vi.spyOn(HttpClient.prototype, 'post').mockRejectedValue(error);
       const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
@@ -354,14 +348,12 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         },
       };
-      const postStub = sinon.stub(httpClient, 'post');
+      const postStub = vi.spyOn(HttpClient.prototype, 'post');
       postStub
-        .onFirstCall()
-        .resolves({
+        .mockResolvedValueOnce({
           sKey: 'encrypted_salt',
         })
-        .onSecondCall()
-        .rejects(error);
+        .mockRejectedValueOnce(error);
 
       // Act
       const call = client.login(loginDetails, cryptoProvider);
@@ -397,14 +389,12 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         },
       };
-      const postStub = sinon.stub(httpClient, 'post');
+      const postStub = vi.spyOn(HttpClient.prototype, 'post');
       postStub
-        .onFirstCall()
-        .resolves({
+        .mockResolvedValueOnce({
           sKey: 'encrypted_salt',
         })
-        .onSecondCall()
-        .resolves({
+        .mockResolvedValueOnce({
           user: {
             revocateKey: 'key',
           },
@@ -414,14 +404,15 @@ describe('# auth service tests', () => {
       const body = await client.login(loginDetails, cryptoProvider);
 
       // Assert
-      expect(postStub.firstCall.args).toEqual([
+      expect(postStub).toHaveBeenCalledTimes(2);
+      expect(postStub).toHaveBeenCalledWith(
         '/auth/login',
         {
           email: loginDetails.email,
         },
         headers,
-      ]);
-      expect(postStub.secondCall.args).toEqual([
+      );
+      expect(postStub).toHaveBeenCalledWith(
         '/auth/login/access',
         {
           email: loginDetails.email,
@@ -442,7 +433,7 @@ describe('# auth service tests', () => {
           },
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         user: {
           revocateKey: 'key',
@@ -480,14 +471,12 @@ describe('# auth service tests', () => {
           return Promise.resolve(keys);
         },
       };
-      const postStub = sinon.stub(httpClient, 'post');
+      const postStub = vi.spyOn(HttpClient.prototype, 'post');
       postStub
-        .onFirstCall()
-        .resolves({
+        .mockResolvedValueOnce({
           sKey: 'encrypted_salt',
         })
-        .onSecondCall()
-        .resolves({
+        .mockResolvedValueOnce({
           user: {
             revocateKey: 'key',
           },
@@ -497,14 +486,15 @@ describe('# auth service tests', () => {
       const body = await client.loginWithoutKeys(loginDetails, cryptoProvider);
 
       // Assert
-      expect(postStub.firstCall.args).toEqual([
+      expect(postStub).toHaveBeenCalledTimes(2);
+      expect(postStub).toHaveBeenCalledWith(
         '/auth/login',
         {
           email: loginDetails.email,
         },
         headers,
-      ]);
-      expect(postStub.secondCall.args).toEqual([
+      );
+      expect(postStub).toHaveBeenCalledWith(
         '/auth/login/access',
         {
           email: loginDetails.email,
@@ -512,7 +502,7 @@ describe('# auth service tests', () => {
           tfa: loginDetails.tfaCode,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         user: {
           revocateKey: 'key',
@@ -524,7 +514,7 @@ describe('# auth service tests', () => {
     it('Should bubble up the error on first call failure', async () => {
       // Arrange
       const error = new Error('Network error');
-      sinon.stub(httpClient, 'post').rejects(error);
+      vi.spyOn(HttpClient.prototype, 'post').mockRejectedValue(error);
       const { client } = clientAndHeaders();
       const loginDetails: LoginDetails = {
         email: '',
@@ -577,13 +567,13 @@ describe('# auth service tests', () => {
           privateKeyEncrypted: 'privKyber',
         },
       };
-      const axiosStub = sinon.stub(httpClient, 'patch').resolves({});
+      const axiosStub = vi.spyOn(HttpClient.prototype, 'patch').mockResolvedValue({});
 
       // Act
       await client.updateKeys(keys, token);
 
       // Assert
-      expect(axiosStub.firstCall.args).toEqual([
+      expect(axiosStub).toHaveBeenCalledWith(
         '/user/keys',
         {
           publicKey: 'pubk',
@@ -599,14 +589,14 @@ describe('# auth service tests', () => {
           },
         },
         headers,
-      ]);
+      );
     });
   });
 
   describe('-> security details', () => {
     it('Should call with right parameters & return correct content', async () => {
       // Arrange
-      const postStub = sinon.stub(httpClient, 'post').resolves({
+      const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         hasKeys: true,
         sKey: 'gibberish',
         tfa: true,
@@ -619,13 +609,13 @@ describe('# auth service tests', () => {
       const body = await client.securityDetails(email);
 
       // Assert
-      expect(postStub.firstCall.args).toEqual([
+      expect(postStub).toHaveBeenCalledWith(
         '/auth/login',
         {
           email: email,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
         tfaEnabled: true,
@@ -635,7 +625,7 @@ describe('# auth service tests', () => {
 
     it('Should return boolean value on null param response', async () => {
       // Arrange
-      sinon.stub(httpClient, 'post').resolves({
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
         hasKeys: true,
         sKey: 'gibberish',
         tfa: null,
@@ -658,7 +648,7 @@ describe('# auth service tests', () => {
   describe('-> generate twoFactorAuth code', () => {
     it('Should call with right params & return data', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({
         qr: 'qr',
         code: 'code',
       });
@@ -668,7 +658,7 @@ describe('# auth service tests', () => {
       const body = await client.generateTwoFactorAuthQR();
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual(['/auth/tfa', headers]);
+      expect(callStub).toHaveBeenCalledWith('/auth/tfa', headers);
       expect(body).toEqual({
         qr: 'qr',
         backupKey: 'code',
@@ -679,7 +669,7 @@ describe('# auth service tests', () => {
   describe('-> disable twoFactorAuth', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'delete').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({});
       const { client, headers } = clientAndHeadersWithToken();
       const pass = 'pass',
         code = 'code';
@@ -688,14 +678,10 @@ describe('# auth service tests', () => {
       const body = await client.disableTwoFactorAuth(pass, code);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([
-        '/auth/tfa',
-        headers,
-        {
-          pass: pass,
-          code: code,
-        },
-      ]);
+      expect(callStub).toHaveBeenCalledWith('/auth/tfa', headers, {
+        pass: pass,
+        code: code,
+      });
       expect(body).toEqual({});
     });
   });
@@ -703,7 +689,7 @@ describe('# auth service tests', () => {
   describe('-> store twoFactorAuth key', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeadersWithToken();
       const backupKey = 'key',
         code = 'code';
@@ -712,14 +698,14 @@ describe('# auth service tests', () => {
       const body = await client.storeTwoFactorAuthKey(backupKey, code);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/auth/tfa',
         {
           key: backupKey,
           code: code,
         },
         headers,
-      ]);
+      );
       expect(body).toEqual({});
     });
   });
@@ -727,7 +713,7 @@ describe('# auth service tests', () => {
   describe('-> send email to deactivate account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const email = 'my@email';
 
@@ -735,7 +721,7 @@ describe('# auth service tests', () => {
       const body = await client.sendDeactivationEmail(email);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([`/deactivate/${email}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/deactivate/${email}`, headers);
       expect(body).toEqual({});
     });
   });
@@ -743,7 +729,7 @@ describe('# auth service tests', () => {
   describe('-> confirm account deactivation', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'get').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
 
@@ -751,7 +737,7 @@ describe('# auth service tests', () => {
       const body = await client.confirmDeactivation(token);
 
       // Assert
-      await expect(callStub.firstCall.args).toEqual([`/confirmDeactivation/${token}`, headers]);
+      expect(callStub).toHaveBeenCalledWith(`/confirmDeactivation/${token}`, headers);
       expect(body).toEqual({});
     });
   });
@@ -759,7 +745,7 @@ describe('# auth service tests', () => {
   describe('-> send email unblock account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'post').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const email = 'email@gmail.com';
 
@@ -767,7 +753,7 @@ describe('# auth service tests', () => {
       const body = await client.requestUnblockAccount(email);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['users/unblock-account', { email }, headers]);
+      expect(callStub).toHaveBeenCalledWith('users/unblock-account', { email }, headers);
       expect(body).toEqual({});
     });
   });
@@ -775,7 +761,7 @@ describe('# auth service tests', () => {
   describe('-> unblock account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
 
@@ -783,14 +769,14 @@ describe('# auth service tests', () => {
       const body = await client.unblockAccount(token);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual(['users/unblock-account', { token }, headers]);
+      expect(callStub).toHaveBeenCalledWith('users/unblock-account', { token }, headers);
       expect(body).toEqual({});
     });
   });
 
   describe('-> change password with link', () => {
     it('Should call with right params without private keys', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -799,7 +785,7 @@ describe('# auth service tests', () => {
 
       await client.changePasswordWithLink(token, password, salt, mnemonic);
 
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account?token=${token}&reset=false`,
         {
           password,
@@ -807,11 +793,11 @@ describe('# auth service tests', () => {
           mnemonic,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should call with right params including private keys', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -825,7 +811,7 @@ describe('# auth service tests', () => {
       await client.changePasswordWithLink(token, password, salt, mnemonic, privateKeys);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account?token=${token}&reset=false`,
         {
           password,
@@ -834,12 +820,12 @@ describe('# auth service tests', () => {
           privateKeys,
         },
         headers,
-      ]);
+      );
     });
   });
   describe('-> change password with link v2', () => {
     it('Should call with right params without keys', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -848,7 +834,7 @@ describe('# auth service tests', () => {
 
       await client.changePasswordWithLinkV2(token, password, salt, mnemonic);
 
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account-v2?token=${token}&reset=false`,
         {
           password,
@@ -856,11 +842,11 @@ describe('# auth service tests', () => {
           mnemonic,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should call with right params including private keys', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -874,7 +860,7 @@ describe('# auth service tests', () => {
       await client.changePasswordWithLinkV2(token, password, salt, mnemonic, { private: privateKeys });
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account-v2?token=${token}&reset=false`,
         {
           password,
@@ -884,11 +870,11 @@ describe('# auth service tests', () => {
           publicKeys: undefined,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should call with right params including private and public keys', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -909,7 +895,7 @@ describe('# auth service tests', () => {
       });
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account-v2?token=${token}&reset=false`,
         {
           password,
@@ -919,11 +905,11 @@ describe('# auth service tests', () => {
           publicKeys,
         },
         headers,
-      ]);
+      );
     });
 
     it('Should call with right params including only public keys (legacy backup without private keys)', async () => {
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
       const token = 'token';
       const password = 'newPassword';
@@ -939,7 +925,7 @@ describe('# auth service tests', () => {
       });
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         `/users/recover-account-v2?token=${token}&reset=false`,
         {
           password,
@@ -949,13 +935,13 @@ describe('# auth service tests', () => {
           publicKeys,
         },
         headers,
-      ]);
+      );
     });
   });
   describe('Legacy recover account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
-      const callStub = sinon.stub(httpClient, 'put').resolves({});
+      const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
 
       const payload = {
@@ -982,7 +968,7 @@ describe('# auth service tests', () => {
       const result = await client.legacyRecoverAccount(payload);
 
       // Assert
-      expect(callStub.firstCall.args).toEqual([
+      expect(callStub).toHaveBeenCalledWith(
         '/users/legacy-recover-account',
         {
           token: payload.token,
@@ -996,7 +982,7 @@ describe('# auth service tests', () => {
           keys: payload.keys,
         },
         headers,
-      ]);
+      );
       expect(result).toEqual({});
     });
   });

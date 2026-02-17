@@ -1,3 +1,4 @@
+import { ApiUrl } from '../../shared';
 import { HttpClient } from '../../shared/http/client';
 
 export interface UserLocation {
@@ -5,7 +6,18 @@ export interface UserLocation {
   location: string;
 }
 
-export const getUserLocation = async (apiUrl: string): Promise<UserLocation> => {
-  const client = HttpClient.create(apiUrl);
-  return client.get<UserLocation>(`${apiUrl}`, {});
-};
+export class Location {
+  private readonly client: HttpClient;
+
+  private constructor(apiUrl: ApiUrl) {
+    this.client = HttpClient.create(apiUrl);
+  }
+
+  public static client(apiUrl: ApiUrl) {
+    return new Location(apiUrl);
+  }
+
+  public async getUserLocation(): Promise<UserLocation> {
+    return this.client.get<UserLocation>('/', {});
+  }
+}

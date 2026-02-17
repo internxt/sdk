@@ -1,7 +1,7 @@
-name: Publish Package to npmjs
+name: Publish package to github package registry
 on:
   release:
-    types: [published]
+    types: [created]
   workflow_dispatch:
 
 jobs:
@@ -9,7 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
       packages: write
     steps:
       - name: Checkout
@@ -29,8 +28,10 @@ jobs:
 
       - name: Set the NPM registry with token
         run: |
-          echo "registry=https://registry.npmjs.org/" > .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+          echo "registry=https://npm.pkg.github.com/" > .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
-      - name: Publish on NPM
-        run: npm publish --scope=@internxt --access public
+      - name: Publish on GitHub
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
