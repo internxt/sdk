@@ -85,7 +85,7 @@ describe('Mail service tests', () => {
     });
     it('should successfully download a keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({ encryptionKeystore });
+      const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue({ encryptionKeystore });
       const result = await client.downloadKeystoreFromServer(email, KeystoreType.ENCRYPTION);
 
       expect(postCall.mock.calls[0]).toEqual([
@@ -101,7 +101,7 @@ describe('Mail service tests', () => {
 
     it('should successfully open user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(encryptionKeystore);
+      const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(encryptionKeystore);
       const result = await client.getUserEmailKeys(email, baseKey);
 
       expect(postCall.mock.calls[0]).toEqual([
@@ -117,7 +117,7 @@ describe('Mail service tests', () => {
 
     it('should successfully recover user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(recoveryKeystore);
+      const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(recoveryKeystore);
       const result = await client.recoverUserEmailKeys(email, recoveryCodes);
 
       expect(postCall.mock.calls[0]).toEqual([

@@ -62,8 +62,7 @@ export class Mail {
       userEmail,
       baseKey,
     );
-    await this.uploadKeystoreToServer(encryptionKeystore);
-    await this.uploadKeystoreToServer(recoveryKeystore);
+    await Promise.all([this.uploadKeystoreToServer(encryptionKeystore), this.uploadKeystoreToServer(recoveryKeystore)]);
     return recoveryCodes;
   }
 
@@ -75,7 +74,7 @@ export class Mail {
    * @returns The encrypted keystore
    */
   async downloadKeystoreFromServer(userEmail: string, keystoreType: KeystoreType): Promise<EncryptedKeystore> {
-    return this.client.post(`${this.apiUrl}/user/keystore`, { userEmail, keystoreType }, this.headers());
+    return this.client.getWithParams(`${this.apiUrl}/user/keystore`, { userEmail, keystoreType }, this.headers());
   }
 
   /**
@@ -114,9 +113,9 @@ export class Mail {
       { emails: [userEmail] },
       this.headers(),
     );
-    const signleResponse = response[0];
-    const publicKeys = await base64ToPublicKey(signleResponse.publicKeys);
-    const result = { ...signleResponse.user, publicKeys };
+    const singleResponse = response[0];
+    const publicKeys = await base64ToPublicKey(singleResponse.publicKeys);
+    const result = { ...singleResponse.user, publicKeys };
     return result;
   }
 
