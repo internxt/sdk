@@ -101,7 +101,7 @@ describe('Mail service tests', () => {
 
     it('should successfully open user email keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall =  vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(encryptionKeystore);
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(encryptionKeystore);
       const result = await client.getUserEmailKeys(email, baseKey);
 
       expect(postCall.mock.calls[0]).toEqual([
@@ -159,8 +159,9 @@ describe('Mail service tests', () => {
 
     it('should successfully get user public keys', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
-        { publicKeys: emailKeysABase64, user: userA }]);
+      const postCall = vi
+        .spyOn(HttpClient.prototype, 'post')
+        .mockResolvedValue([{ publicKeys: emailKeysABase64, user: userA }]);
       const result = await client.getUserWithPublicKeys(userA.email);
 
       expect(postCall.mock.calls[0]).toEqual([
@@ -231,9 +232,10 @@ describe('Mail service tests', () => {
 
     it('should successfully encrypt and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
-    const postCall = vi.spyOn(HttpClient.prototype, 'post')
-  .mockResolvedValueOnce([{ publicKeys: emailKeysBBase64, user: userB }])
-  .mockResolvedValueOnce({});
+      const postCall = vi
+        .spyOn(HttpClient.prototype, 'post')
+        .mockResolvedValueOnce([{ publicKeys: emailKeysBBase64, user: userB }])
+        .mockResolvedValueOnce({});
       await client.encryptAndSendEmail(email, emailKeysA.privateKeys, false);
 
       expect(postCall.mock.calls[0]).toEqual([
@@ -247,20 +249,22 @@ describe('Mail service tests', () => {
       expect(postCall.mock.calls[1]).toEqual([
         '/emails',
         {
-          emails: [ {
-            encryptedKey: {
-              kyberCiphertext: expect.any(String),
-              encryptedKey: expect.any(String),
+          emails: [
+            {
+              encryptedKey: {
+                kyberCiphertext: expect.any(String),
+                encryptedKey: expect.any(String),
+              },
+              enc: {
+                encText: expect.any(String),
+                encAttachments: [expect.any(String)],
+              },
+              recipientEmail: userB.email,
+              params: email.params,
+              id: email.id,
+              isSubjectEncrypted: false,
             },
-            enc: {
-              encText: expect.any(String),
-              encAttachments: [expect.any(String)],
-            },
-            recipientEmail: userB.email,
-            params: email.params,
-            id: email.id,
-            isSubjectEncrypted: false,
-          }],  
+          ],
         },
         headers,
       ]);
@@ -303,8 +307,9 @@ describe('Mail service tests', () => {
     it('should successfully decrypt encrypted email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
-        { publicKeys: emailKeysABase64, user: userA }]);
+      const postCall = vi
+        .spyOn(HttpClient.prototype, 'post')
+        .mockResolvedValue([{ publicKeys: emailKeysABase64, user: userA }]);
       const encEmail = await encryptEmailHybrid(email, recipient, emailKeysA.privateKeys, true);
       const result = await client.decryptEmail(encEmail, emailKeysB.privateKeys);
 
