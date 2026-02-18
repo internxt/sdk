@@ -113,6 +113,7 @@ export class Mail {
       { emails: [userEmail] },
       this.headers(),
     );
+    if (!response[0]) throw new Error(`No public keys found for ${userEmail}`);
     const singleResponse = response[0];
     const publicKeys = await base64ToPublicKey(singleResponse.publicKeys);
     const result = { ...singleResponse.user, publicKeys };
