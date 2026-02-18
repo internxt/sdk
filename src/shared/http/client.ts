@@ -1,6 +1,7 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import AppError from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
+import { RetryOptions, retryWithBackoff } from './retryWithBackoff';
 
 export { RequestCanceler } from './types';
 
@@ -21,9 +22,14 @@ export class HttpClient {
   private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
   static globalInterceptors: CustomInterceptor[] = [];
+  static retryOptions: RetryOptions = {};
 
   static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
     HttpClient.globalInterceptors = interceptors;
+  }
+
+  static setGlobalRetryOptions(options: RetryOptions): void {
+    HttpClient.retryOptions = options;
   }
 
   public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
@@ -51,15 +57,17 @@ export class HttpClient {
     this.initializeMiddleware();
   }
 
+  private withRetry<T>(fn: () => Promise<T>): Promise<T> {
+    return retryWithBackoff(fn, HttpClient.retryOptions);
+  }
+
   /**
    * Requests a GET
    * @param url
    * @param headers
    */
   public get<Response>(url: URL, headers: Headers): Promise<Response> {
-    return this.axios.get(url, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.get(url, { headers }));
   }
 
   /**
@@ -69,10 +77,7 @@ export class HttpClient {
    * @param headers
    */
   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.get(url, {
-      params,
-      headers,
-    });
+    return this.withRetry(() => this.axios.get(url, { params, headers }));
   }
 
   /**
@@ -87,18 +92,16 @@ export class HttpClient {
     promise: Promise<Response>;
     requestCanceler: RequestCanceler;
   } {
-    const cancelTokenSource = axios.CancelToken.source();
-    const config: RequestConfig = {
-      headers: headers,
-      cancelToken: cancelTokenSource.token,
-    };
-    const promise = this.axios.get<never, Response>(url, config);
-    return {
-      promise: promise,
-      requestCanceler: <RequestCanceler>{
-        cancel: cancelTokenSource.cancel,
-      },
-    };
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.withRetry(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.get<never, Response>(url, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
   }
 
   /**
@@ -108,9 +111,7 @@ export class HttpClient {
    * @param headers
    */
   public post<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.post(url, params, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.post(url, params, { headers }));
   }
 
   /**
@@ -120,9 +121,7 @@ export class HttpClient {
    * @param headers
    */
   public postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.postForm(url, params, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.postForm(url, params, { headers }));
   }
 
   /**
@@ -139,18 +138,16 @@ export class HttpClient {
     promise: Promise<Response>;
     requestCanceler: RequestCanceler;
   } {
-    const cancelTokenSource = axios.CancelToken.source();
-    const config: RequestConfig = {
-      headers: headers,
-      cancelToken: cancelTokenSource.token,
-    };
-    const promise = this.axios.post<never, Response>(url, params, config);
-    return {
-      promise: promise,
-      requestCanceler: <RequestCanceler>{
-        cancel: cancelTokenSource.cancel,
-      },
-    };
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.withRetry(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.post<never, Response>(url, params, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
   }
 
   /**
@@ -160,9 +157,7 @@ export class HttpClient {
    * @param headers
    */
   public patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.patch(url, params, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.patch(url, params, { headers }));
   }
 
   /**
@@ -172,9 +167,7 @@ export class HttpClient {
    * @param headers
    */
   public put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.put(url, params, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.put(url, params, { headers }));
   }
 
   /**
@@ -184,9 +177,7 @@ export class HttpClient {
    * @param headers
    */
   public putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.putForm(url, params, {
-      headers: headers,
-    });
+    return this.withRetry(() => this.axios.putForm(url, params, { headers }));
   }
 
   /**
@@ -196,10 +187,7 @@ export class HttpClient {
    * @param params
    */
   public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    return this.axios.delete(url, {
-      headers: headers,
-      data: params,
-    });
+    return this.withRetry(() => this.axios.delete(url, { headers, data: params }));
   }
 
   /**
@@ -254,10 +242,4 @@ export class HttpClient {
 
     throw new AppError(errorMessage, errorStatus, errorCode, errorHeaders);
   }
-}
-
-interface RequestConfig {
-  headers: Headers;
-  cancelToken?: CancelToken;
-  data?: Record<string, unknown>;
 }
