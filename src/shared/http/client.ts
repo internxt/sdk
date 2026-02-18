@@ -28,6 +28,12 @@ export class HttpClient {
     HttpClient.globalInterceptors = interceptors;
   }
 
+  /**
+   * Configures global retry options applied to all HTTP methods across every HttpClient instance.
+   * @param options - Retry configuration options
+   * @param options.maxRetries - Maximum number of retry attempts on rate limit errors (default: 5)
+   * @param options.onRetry - Optional callback invoked before each retry with the attempt number and delay in ms
+   */
   static setGlobalRetryOptions(options: RetryOptions): void {
     HttpClient.retryOptions = options;
   }
