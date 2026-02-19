@@ -28,7 +28,7 @@ describe('Mail service tests', () => {
       baseKey,
     );
 
-    it('should successfully upload a keystore', async () => {
+    it('When a keystore upload is requested, then it should successfully upload the keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.uploadKeystoreToServer(encryptionKeystore);
@@ -42,7 +42,7 @@ describe('Mail service tests', () => {
       ]);
     });
 
-    it('should successfully create and upload a keystore', async () => {
+    it('When keystore creation is requested, then it should create and upload two keystores', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.createAndUploadKeystores(email, baseKey);
@@ -83,7 +83,7 @@ describe('Mail service tests', () => {
         headers,
       ]);
     });
-    it('should successfully download a keystore', async () => {
+    it('When a keystore downloading is requested, then it should successfully download the keystore', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue({ encryptionKeystore });
       const result = await client.downloadKeystoreFromServer(email, KeystoreType.ENCRYPTION);
@@ -99,7 +99,7 @@ describe('Mail service tests', () => {
       expect(result).toEqual({ encryptionKeystore: encryptionKeystore });
     });
 
-    it('should successfully open user email keys', async () => {
+    it('When user email keys are requested, then it should successfully download keystore and open it', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(encryptionKeystore);
       const result = await client.getUserEmailKeys(email, baseKey);
@@ -115,7 +115,7 @@ describe('Mail service tests', () => {
       expect(result).toEqual(keys);
     });
 
-    it('should successfully recover user email keys', async () => {
+    it('When email key recovery is requested, then it should successfully download keystore and open it', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(recoveryKeystore);
       const result = await client.recoverUserEmailKeys(email, recoveryCodes);
@@ -157,7 +157,7 @@ describe('Mail service tests', () => {
     const emailKeysBBase64 = await publicKeyToBase64(emailKeysB.publicKeys);
     const emailKeysCBase64 = await publicKeyToBase64(emailKeysC.publicKeys);
 
-    it('should successfully get user public keys', async () => {
+    it('When user email public keys are requested, then it should successfully get them', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi
         .spyOn(HttpClient.prototype, 'post')
@@ -174,7 +174,7 @@ describe('Mail service tests', () => {
       expect(result).toStrictEqual(userAwithKeys);
     });
 
-    it('should successfully get public keys of several users', async () => {
+    it('When public keys are requested for several users, then it should successfully get all of them', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
         { publicKeys: emailKeysABase64, user: userA },
@@ -215,7 +215,7 @@ describe('Mail service tests', () => {
       id: uuid,
       body: {
         text: 'Email text',
-        attachments: ['Email attachement'],
+        attachments: ['Email attachment'],
       },
       params: {
         subject: 'Email subject',
@@ -230,7 +230,7 @@ describe('Mail service tests', () => {
 
     const pwd = 'mock password';
 
-    it('should successfully encrypt and send an email', async () => {
+    it('When user request encrypting email, then it should successfully encrypt and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi
         .spyOn(HttpClient.prototype, 'post')
@@ -270,7 +270,7 @@ describe('Mail service tests', () => {
       ]);
     });
 
-    it('should successfully password protect and send an email', async () => {
+    it('When user request password protect email, then it should successfully protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       await client.passwordProtectAndSendEmail(email, pwd, false);
@@ -296,7 +296,7 @@ describe('Mail service tests', () => {
       ]);
     });
 
-    it('should successfully open password protected email', async () => {
+    it('When user request opening a password protect email, then it should successfully open it', async () => {
       const { client } = clientAndHeadersWithToken();
       const encEmail = await createPwdProtectedEmail(email, pwd, true);
       const result = await client.openPasswordProtectedEmail(encEmail, pwd);
@@ -304,7 +304,7 @@ describe('Mail service tests', () => {
       expect(result).toEqual(email);
     });
 
-    it('should successfully decrypt encrypted email', async () => {
+    it('When user request decrypting an encrypted email, then it should successfully decrypt it', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
       const postCall = vi
