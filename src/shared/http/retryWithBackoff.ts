@@ -1,8 +1,8 @@
 export interface RetryOptions {
   maxRetries?: number;
+  maxRetryAfter?: number;
   onRetry?: (attempt: number, delay: number) => void;
 }
-
 interface ErrorWithStatus {
   status?: number;
   headers?: Record<string, string>;
@@ -45,6 +45,7 @@ const extractRetryAfter = (error: ErrorWithStatus): number | undefined => {
  * @param fn - The async function to execute with retry logic
  * @param options - Configuration options for retry behavior
  * @param options.maxRetries - Maximum number of retry attempts (default: 5)
+ * @param options.maxRetryAfter - Maximum wait time in ms regardless of retry-after header value (default: 70000)
  * @param options.onRetry - Optional callback invoked before each retry with attempt number and delay in ms
  * @returns The result of the function if successful
  * @throws The original error if it's not a rate limit error, if max retries exceeded, or if retry-after header is missing
@@ -52,11 +53,13 @@ const extractRetryAfter = (error: ErrorWithStatus): number | undefined => {
 export const retryWithBackoff = async <T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> => {
   const opts = {
     maxRetries: 5,
+    maxRetryAfter: 70_000,
     onRetry: () => {},
     ...options,
   };
 
-  for (let attempt = 0; attempt < opts.maxRetries; attempt++) {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= opts.maxRetries; attempt++) {
     try {
       return await fn();
     } catch (error: unknown) {
@@ -69,12 +72,15 @@ export const retryWithBackoff = async <T>(fn: () => Promise<T>, options: RetryOp
       if (!retryAfter) {
         throw error;
       }
+      const delay = Math.min(retryAfter, opts.maxRetryAfter);
 
-      opts.onRetry(attempt + 1, retryAfter);
+      opts.onRetry(attempt, delay);
 
-      await wait(retryAfter);
+      lastError = error;
+      await wait(delay);
     }
   }
-
-  return await fn();
+  const err = lastError as Error;
+  err.message = `Max retries exceeded: ${err.message}`;
+  throw err;
 };

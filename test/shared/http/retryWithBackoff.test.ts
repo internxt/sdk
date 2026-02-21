@@ -96,8 +96,44 @@ describe('retryWithBackoff', () => {
     await vi.advanceTimersByTimeAsync(3000);
     await expectation;
 
-    expect(mockFn).toHaveBeenCalledTimes(3);
+    expect(mockFn).toHaveBeenCalledTimes(2);
     expect(setTimeoutSpy).toHaveBeenCalledTimes(2);
+  });
+
+  it('when server asks to wait longer than the default limit then waits only up to the default limit', async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const mockFn = createRateLimitMock('3600');
+
+    const promise = retryWithBackoff(mockFn);
+    await vi.advanceTimersByTimeAsync(70_000);
+    const result = await promise;
+
+    expect(result).toBe('success');
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 70_000);
+  });
+
+  it('when server asks to wait longer than a custom limit then waits only up to that limit', async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const mockFn = createRateLimitMock('120');
+
+    const promise = retryWithBackoff(mockFn, { maxRetryAfter: 10_000 });
+    await vi.advanceTimersByTimeAsync(10_000);
+    const result = await promise;
+
+    expect(result).toBe('success');
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 10_000);
+  });
+
+  it('when server asks to wait less than the limit then waits the exact requested time', async () => {
+    const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+    const mockFn = createRateLimitMock('5');
+
+    const promise = retryWithBackoff(mockFn);
+    await vi.advanceTimersByTimeAsync(5_000);
+    const result = await promise;
+
+    expect(result).toBe('success');
+    expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 5_000);
   });
 
   it('when error is not an object then throws immediately without retry', async () => {

@@ -18,24 +18,31 @@ export interface CustomInterceptor {
   };
 }
 
+type NonZero<N extends number> = N extends 0 ? never : N;
+
+type GlobalRetryOptions<M extends number = number> = Omit<RetryOptions, 'maxRetries'> & {
+  maxRetries?: NonZero<M>;
+};
+
 export class HttpClient {
   private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
   static globalInterceptors: CustomInterceptor[] = [];
-  static retryOptions: RetryOptions = {};
+  static retryOptions?: RetryOptions;
 
   static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
     HttpClient.globalInterceptors = interceptors;
   }
 
   /**
-   * Configures global retry options applied to all HTTP methods across every HttpClient instance.
-   * @param options - Retry configuration options
-   * @param options.maxRetries - Maximum number of retry attempts on rate limit errors (default: 5)
-   * @param options.onRetry - Optional callback invoked before each retry with the attempt number and delay in ms
+   * Enables global retry with backoff for rate limit errors (429) across every HttpClient instance.
+   * @param [options] - Optional retry configuration options
+   * @param [options.maxRetries] - Maximum number of retry attempts (default: 5)
+   * @param [options.maxRetryAfter] - Maximum wait time in ms regardless of retry-after header value (default: 70000)
+   * @param [options.onRetry] - Callback invoked before each retry with the attempt number and delay in ms
    */
-  static setGlobalRetryOptions(options: RetryOptions): void {
-    HttpClient.retryOptions = options;
+  static enableGlobalRetry<M extends number = number>(options?: GlobalRetryOptions<M>): void {
+    HttpClient.retryOptions = (options ?? {}) as RetryOptions;
   }
 
   public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
@@ -63,7 +70,10 @@ export class HttpClient {
     this.initializeMiddleware();
   }
 
-  private withRetry<T>(fn: () => Promise<T>): Promise<T> {
+  private execute<T>(fn: () => Promise<T>): Promise<T> {
+    if (!HttpClient.retryOptions) {
+      return fn();
+    }
     return retryWithBackoff(fn, HttpClient.retryOptions);
   }
 
@@ -73,7 +83,7 @@ export class HttpClient {
    * @param headers
    */
   public get<Response>(url: URL, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.get(url, { headers }));
+    return this.execute(() => this.axios.get(url, { headers }));
   }
 
   /**
@@ -83,7 +93,7 @@ export class HttpClient {
    * @param headers
    */
   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.get(url, { params, headers }));
+    return this.execute(() => this.axios.get(url, { params, headers }));
   }
 
   /**
@@ -101,7 +111,7 @@ export class HttpClient {
     let currentCancel: RequestCanceler['cancel'] = () => {};
     const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
 
-    const promise = this.withRetry(() => {
+    const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
       return this.axios.get<never, Response>(url, { headers, cancelToken: source.token });
@@ -117,7 +127,7 @@ export class HttpClient {
    * @param headers
    */
   public post<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.post(url, params, { headers }));
+    return this.execute(() => this.axios.post(url, params, { headers }));
   }
 
   /**
@@ -127,7 +137,7 @@ export class HttpClient {
    * @param headers
    */
   public postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.postForm(url, params, { headers }));
+    return this.execute(() => this.axios.postForm(url, params, { headers }));
   }
 
   /**
@@ -147,7 +157,7 @@ export class HttpClient {
     let currentCancel: RequestCanceler['cancel'] = () => {};
     const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
 
-    const promise = this.withRetry(() => {
+    const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
       return this.axios.post<never, Response>(url, params, { headers, cancelToken: source.token });
@@ -163,7 +173,7 @@ export class HttpClient {
    * @param headers
    */
   public patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.patch(url, params, { headers }));
+    return this.execute(() => this.axios.patch(url, params, { headers }));
   }
 
   /**
@@ -173,7 +183,7 @@ export class HttpClient {
    * @param headers
    */
   public put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.put(url, params, { headers }));
+    return this.execute(() => this.axios.put(url, params, { headers }));
   }
 
   /**
@@ -183,7 +193,7 @@ export class HttpClient {
    * @param headers
    */
   public putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.withRetry(() => this.axios.putForm(url, params, { headers }));
+    return this.execute(() => this.axios.putForm(url, params, { headers }));
   }
 
   /**
@@ -193,7 +203,7 @@ export class HttpClient {
    * @param params
    */
   public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    return this.withRetry(() => this.axios.delete(url, { headers, data: params }));
+    return this.execute(() => this.axios.delete(url, { headers, data: params }));
   }
 
   /**
