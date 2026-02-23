@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.14.2",
+  "version": "1.14.3",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -46,7 +46,6 @@
     "axios": "1.13.5",
     "uuid": "^11.1.0",
     "internxt-crypto": "0.0.13"
-  
   },
   "lint-staged": {
     "*.{js,jsx,tsx,ts}": [
