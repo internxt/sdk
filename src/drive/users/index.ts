@@ -32,7 +32,7 @@ export class Users {
   }
 
   private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback);
+    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback, apiSecurity?.retryOptions);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
   }

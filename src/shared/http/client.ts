@@ -27,8 +27,9 @@ type GlobalRetryOptions<M extends number = number> = Omit<RetryOptions, 'maxRetr
 export class HttpClient {
   private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
+  private retryOptions?: RetryOptions;
   static globalInterceptors: CustomInterceptor[] = [];
-  static retryOptions?: RetryOptions;
+  static globalRetryOptions?: RetryOptions;
 
   static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
     HttpClient.globalInterceptors = interceptors;
@@ -42,21 +43,22 @@ export class HttpClient {
    * @param [options.onRetry] - Callback invoked before each retry with the attempt number and delay in ms
    */
   static enableGlobalRetry<M extends number = number>(options?: GlobalRetryOptions<M>): void {
-    HttpClient.retryOptions = (options ?? {}) as RetryOptions;
+    HttpClient.globalRetryOptions = (options ?? {}) as RetryOptions;
   }
 
-  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
+  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback, retryOptions?: RetryOptions) {
     if (unauthorizedCallback === undefined) {
       unauthorizedCallback = () => null;
     }
-    return new HttpClient(baseURL, unauthorizedCallback);
+    return new HttpClient(baseURL, unauthorizedCallback, retryOptions);
   }
 
-  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback) {
+  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback, retryOptions?: RetryOptions) {
     this.axios = axios.create({
       baseURL: baseURL,
     });
     this.unauthorizedCallback = unauthorizedCallback;
+    this.retryOptions = retryOptions;
 
     HttpClient.globalInterceptors.forEach((interceptor) => {
       if (interceptor.request) {
@@ -71,10 +73,11 @@ export class HttpClient {
   }
 
   private execute<T>(fn: () => Promise<T>): Promise<T> {
-    if (!HttpClient.retryOptions) {
+    const options = this.retryOptions ?? HttpClient.globalRetryOptions;
+    if (!options) {
       return fn();
     }
-    return retryWithBackoff(fn, HttpClient.retryOptions);
+    return retryWithBackoff(fn, options);
   }
 
   /**
