@@ -2,11 +2,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import axios, { AxiosInstance, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { HttpClient } from '../../../src/shared/http/client';
 import { UnauthorizedCallback } from '../../../src/shared/http/types';
+import * as retryModule from '../../../src/shared/http/retryWithBackoff';
 import { fail } from 'assert';
 
 describe('HttpClient', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    HttpClient.globalRetryOptions = undefined;
   });
 
   describe('construction', () => {
@@ -315,6 +317,51 @@ describe('HttpClient', () => {
           },
         });
       });
+    });
+  });
+
+  describe('retry options', () => {
+    let retrySpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      vi.spyOn(axios.Axios.prototype, 'get').mockResolvedValue({});
+      retrySpy = vi.spyOn(retryModule, 'retryWithBackoff').mockImplementation((fn) => fn());
+    });
+
+    it('should not use retry when no instance or global retry options are set', async () => {
+      const client = HttpClient.create('');
+
+      await client.get('/path', {});
+
+      expect(retrySpy).not.toHaveBeenCalled();
+    });
+
+    it('should use instance retry options when provided', async () => {
+      const instanceOptions = { maxRetries: 2 };
+      const client = HttpClient.create('', undefined, instanceOptions);
+
+      await client.get('/path', {});
+
+      expect(retrySpy).toHaveBeenCalledWith(expect.any(Function), instanceOptions);
+    });
+
+    it('should fall back to global retry options when no instance options are set', async () => {
+      HttpClient.enableGlobalRetry({ maxRetries: 5 });
+      const client = HttpClient.create('');
+
+      await client.get('/path', {});
+
+      expect(retrySpy).toHaveBeenCalledWith(expect.any(Function), HttpClient.globalRetryOptions);
+    });
+
+    it('should prefer instance retry options over global retry options', async () => {
+      const instanceOptions = { maxRetries: 2 };
+      HttpClient.enableGlobalRetry({ maxRetries: 5 });
+      const client = HttpClient.create('', undefined, instanceOptions);
+
+      await client.get('/path', {});
+
+      expect(retrySpy).toHaveBeenCalledWith(expect.any(Function), instanceOptions);
     });
   });
 });

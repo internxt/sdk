@@ -1,0 +1,86 @@
+export interface RetryOptions {
+  maxRetries?: number;
+  maxRetryAfter?: number;
+  onRetry?: (attempt: number, delay: number) => void;
+}
+interface ErrorWithStatus {
+  status?: number;
+  headers?: Record<string, string>;
+}
+
+const HTTP_STATUS_TOO_MANY_REQUESTS = 429;
+
+const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isErrorWithStatus = (error: unknown): error is ErrorWithStatus => {
+  return typeof error === 'object' && error !== null;
+};
+
+const isRateLimitError = (error: unknown): boolean => {
+  if (!isErrorWithStatus(error)) {
+    return false;
+  }
+  return error.status === HTTP_STATUS_TOO_MANY_REQUESTS;
+};
+
+const extractRetryAfter = (error: ErrorWithStatus): number | undefined => {
+  const headers = error.headers;
+  const resetHeader = headers?.['retry-after'];
+  if (!resetHeader) {
+    return undefined;
+  }
+
+  const resetValueInSeconds = Number.parseInt(resetHeader, 10);
+  if (Number.isNaN(resetValueInSeconds)) {
+    return undefined;
+  }
+
+  return resetValueInSeconds * 1000;
+};
+
+/**
+ * Retries a function when it encounters a rate limit error (429).
+ * Uses the retry-after header to determine how long to wait before retrying.
+ *
+ * @param fn - The async function to execute with retry logic
+ * @param options - Configuration options for retry behavior
+ * @param options.maxRetries - Maximum number of retry attempts (default: 5)
+ * @param options.maxRetryAfter - Maximum wait time in ms regardless of retry-after header value (default: 70000)
+ * @param options.onRetry - Optional callback invoked before each retry with attempt number and delay in ms
+ * @returns The result of the function if successful
+ * @throws The original error if it's not a rate limit error, if max retries exceeded, or if retry-after header is missing
+ */
+export const retryWithBackoff = async <T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> => {
+  const opts = {
+    maxRetries: 5,
+    maxRetryAfter: 70_000,
+    onRetry: () => {},
+    ...options,
+  };
+
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= opts.maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      if (!isRateLimitError(error)) {
+        throw error;
+      }
+
+      const retryAfter = extractRetryAfter(error as ErrorWithStatus);
+
+      if (!retryAfter) {
+        throw error;
+      }
+      const delay = Math.min(retryAfter, opts.maxRetryAfter);
+
+      opts.onRetry(attempt, delay);
+
+      lastError = error;
+      await wait(delay);
+    }
+  }
+  const err = lastError as Error;
+  err.message = `Max retries exceeded: ${err.message}`;
+  throw err;
+};

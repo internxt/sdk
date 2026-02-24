@@ -1,6 +1,7 @@
-import axios, { AxiosError, AxiosInstance, AxiosResponse, CancelToken, InternalAxiosRequestConfig } from 'axios';
+import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import AppError from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
+import { RetryOptions, retryWithBackoff } from './retryWithBackoff';
 
 export { RequestCanceler } from './types';
 
@@ -17,27 +18,47 @@ export interface CustomInterceptor {
   };
 }
 
+type NonZero<N extends number> = N extends 0 ? never : N;
+
+type GlobalRetryOptions<M extends number = number> = Omit<RetryOptions, 'maxRetries'> & {
+  maxRetries?: NonZero<M>;
+};
+
 export class HttpClient {
   private readonly axios: AxiosInstance;
   private readonly unauthorizedCallback: UnauthorizedCallback;
+  private retryOptions?: RetryOptions;
   static globalInterceptors: CustomInterceptor[] = [];
+  static globalRetryOptions?: RetryOptions;
 
   static setGlobalInterceptors(interceptors: CustomInterceptor[]): void {
     HttpClient.globalInterceptors = interceptors;
   }
 
-  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback) {
+  /**
+   * Enables global retry with backoff for rate limit errors (429) across every HttpClient instance.
+   * @param [options] - Optional retry configuration options
+   * @param [options.maxRetries] - Maximum number of retry attempts (default: 5)
+   * @param [options.maxRetryAfter] - Maximum wait time in ms regardless of retry-after header value (default: 70000)
+   * @param [options.onRetry] - Callback invoked before each retry with the attempt number and delay in ms
+   */
+  static enableGlobalRetry<M extends number = number>(options?: GlobalRetryOptions<M>): void {
+    HttpClient.globalRetryOptions = (options ?? {}) as RetryOptions;
+  }
+
+  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback, retryOptions?: RetryOptions) {
     if (unauthorizedCallback === undefined) {
       unauthorizedCallback = () => null;
     }
-    return new HttpClient(baseURL, unauthorizedCallback);
+    return new HttpClient(baseURL, unauthorizedCallback, retryOptions);
   }
 
-  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback) {
+  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback, retryOptions?: RetryOptions) {
     this.axios = axios.create({
       baseURL: baseURL,
     });
     this.unauthorizedCallback = unauthorizedCallback;
+    this.retryOptions = retryOptions;
 
     HttpClient.globalInterceptors.forEach((interceptor) => {
       if (interceptor.request) {
@@ -51,15 +72,21 @@ export class HttpClient {
     this.initializeMiddleware();
   }
 
+  private execute<T>(fn: () => Promise<T>): Promise<T> {
+    const options = this.retryOptions ?? HttpClient.globalRetryOptions;
+    if (!options) {
+      return fn();
+    }
+    return retryWithBackoff(fn, options);
+  }
+
   /**
    * Requests a GET
    * @param url
    * @param headers
    */
   public get<Response>(url: URL, headers: Headers): Promise<Response> {
-    return this.axios.get(url, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.get(url, { headers }));
   }
 
   /**
@@ -69,10 +96,7 @@ export class HttpClient {
    * @param headers
    */
   public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.get(url, {
-      params,
-      headers,
-    });
+    return this.execute(() => this.axios.get(url, { params, headers }));
   }
 
   /**
@@ -87,18 +111,16 @@ export class HttpClient {
     promise: Promise<Response>;
     requestCanceler: RequestCanceler;
   } {
-    const cancelTokenSource = axios.CancelToken.source();
-    const config: RequestConfig = {
-      headers: headers,
-      cancelToken: cancelTokenSource.token,
-    };
-    const promise = this.axios.get<never, Response>(url, config);
-    return {
-      promise: promise,
-      requestCanceler: <RequestCanceler>{
-        cancel: cancelTokenSource.cancel,
-      },
-    };
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.execute(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.get<never, Response>(url, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
   }
 
   /**
@@ -108,9 +130,7 @@ export class HttpClient {
    * @param headers
    */
   public post<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.post(url, params, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.post(url, params, { headers }));
   }
 
   /**
@@ -120,9 +140,7 @@ export class HttpClient {
    * @param headers
    */
   public postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.postForm(url, params, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.postForm(url, params, { headers }));
   }
 
   /**
@@ -139,18 +157,16 @@ export class HttpClient {
     promise: Promise<Response>;
     requestCanceler: RequestCanceler;
   } {
-    const cancelTokenSource = axios.CancelToken.source();
-    const config: RequestConfig = {
-      headers: headers,
-      cancelToken: cancelTokenSource.token,
-    };
-    const promise = this.axios.post<never, Response>(url, params, config);
-    return {
-      promise: promise,
-      requestCanceler: <RequestCanceler>{
-        cancel: cancelTokenSource.cancel,
-      },
-    };
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.execute(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.post<never, Response>(url, params, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
   }
 
   /**
@@ -160,9 +176,7 @@ export class HttpClient {
    * @param headers
    */
   public patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.patch(url, params, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.patch(url, params, { headers }));
   }
 
   /**
@@ -172,9 +186,7 @@ export class HttpClient {
    * @param headers
    */
   public put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.put(url, params, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.put(url, params, { headers }));
   }
 
   /**
@@ -184,9 +196,7 @@ export class HttpClient {
    * @param headers
    */
   public putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.axios.putForm(url, params, {
-      headers: headers,
-    });
+    return this.execute(() => this.axios.putForm(url, params, { headers }));
   }
 
   /**
@@ -196,10 +206,7 @@ export class HttpClient {
    * @param params
    */
   public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    return this.axios.delete(url, {
-      headers: headers,
-      data: params,
-    });
+    return this.execute(() => this.axios.delete(url, { headers, data: params }));
   }
 
   /**
@@ -254,10 +261,4 @@ export class HttpClient {
 
     throw new AppError(errorMessage, errorStatus, errorCode, errorHeaders);
   }
-}
-
-interface RequestConfig {
-  headers: Headers;
-  cancelToken?: CancelToken;
-  data?: Record<string, unknown>;
 }
