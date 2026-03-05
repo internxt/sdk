@@ -15,6 +15,7 @@ export async function uploadFile(
   bucketId: string,
   mnemonic: string,
   fileSize: number,
+  signal: AbortSignal,
   encryptFile: EncryptFileFunction,
   uploadFile: UploadFileFunction,
 ): Promise<string> {
@@ -33,14 +34,7 @@ export async function uploadFile(
     iv = index.slice(0, 16);
     key = await crypto.generateFileKey(mnemonic, bucketId, index);
 
-    const { uploads } = await network.startUpload(bucketId, {
-      uploads: [
-        {
-          index: 0,
-          size: fileSize,
-        },
-      ],
-    });
+    const { uploads } = await network.startUpload(bucketId, fileSize, signal);
 
     const [{ url, uuid }] = uploads;
 
@@ -56,7 +50,7 @@ export async function uploadFile(
       shards: [{ hash, uuid }],
     };
 
-    const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload);
+    const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload, signal);
 
     return finishUploadResponse.id;
   } catch (err) {
@@ -84,6 +78,7 @@ export async function uploadMultipartFile(
   bucketId: string,
   mnemonic: string,
   fileSize: number,
+  signal: AbortSignal,
   encryptFile: EncryptFileFunction,
   uploadMultiparts: UploadFileMultipartFunction,
   parts = 1,
@@ -98,18 +93,7 @@ export async function uploadMultipartFile(
   const iv = index.slice(0, 16);
   const key = await crypto.generateFileKey(mnemonic, bucketId, index);
 
-  const { uploads } = await network.startUpload(
-    bucketId,
-    {
-      uploads: [
-        {
-          index: 0,
-          size: fileSize,
-        },
-      ],
-    },
-    parts,
-  );
+  const { uploads } = await network.startUpload(bucketId, fileSize, signal, parts);
 
   const [{ urls, uuid, UploadId }] = uploads;
 
@@ -128,7 +112,7 @@ export async function uploadMultipartFile(
     shards: [{ hash, uuid, UploadId, parts: uploadedPartsReference }],
   };
 
-  const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload);
+  const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload, signal);
 
   return finishUploadResponse.id;
 }

@@ -2,13 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { HttpClient } from '../../src/shared/http/client';
 import { AppDetails } from '../../src/shared';
-import {
-  DuplicatedIndexesError,
-  InvalidFileIndexError,
-  InvalidUploadIndexError,
-  InvalidUploadSizeError,
-  Network,
-} from '../../src/network/index';
+import { InvalidFileIndexError, Network, InvalidUploadSizeError } from '../../src/network/index';
 import { headersWithBasicAuth } from '../../src/shared/headers/index';
 import {
   StartUploadPayload,
@@ -23,11 +17,10 @@ const validHex = '2e1884c34f174110ca6e324e7b745754b3d6356b53ef9f594b960fd5340500
 
 const url = 'http://internxt.com';
 
-const invalidIndex = -1;
-const validIndex = 0;
-
 const invalidSize = -33;
 const validSize = 1;
+
+const abortSignal = new AbortController().signal;
 
 describe('network ', () => {
   beforeEach(() => {
@@ -40,66 +33,24 @@ describe('network ', () => {
       const idBucket = 'id-bucket';
 
       try {
-        await client.startUpload(idBucket, {
-          uploads: [{ index: validIndex, size: invalidSize }],
-        });
+        await client.startUpload(idBucket, invalidSize, abortSignal);
         fail('Expected function to throw an error, but it did not.');
       } catch (err) {
         expect(err).toBeInstanceOf(InvalidUploadSizeError);
       }
     });
 
-    it('Should throw if an invalid index is provided', async () => {
-      const { client } = clientAndHeadersWithBasicAuth();
-      const idBucket = 'id-bucket';
-
-      try {
-        await client.startUpload(idBucket, {
-          uploads: [{ index: invalidIndex, size: validSize }],
-        });
-        fail('Expected function to throw an error, but it did not.');
-      } catch (err) {
-        expect(err).toBeInstanceOf(InvalidUploadIndexError);
-      }
-    });
-
-    it('Should throw if an index is duplicated', async () => {
-      const { client } = clientAndHeadersWithBasicAuth();
-      const idBucket = 'id-bucket';
-
-      try {
-        await client.startUpload(idBucket, {
-          uploads: [
-            { index: validIndex, size: validSize },
-            { index: validIndex, size: validSize },
-          ],
-        });
-        fail('Expected function to throw an error, but it did not.');
-      } catch (err) {
-        expect(err).toBeInstanceOf(DuplicatedIndexesError);
-      }
-    });
-
     it('Should work properly if the input is valid', async () => {
       const { client } = clientAndHeadersWithBasicAuth();
       const idBucket = 'id-bucket';
-      const uploads = [
-        { index: validIndex, size: validSize },
-        { index: validIndex + 1, size: validSize },
-      ];
 
       const expected = {
-        uploads: uploads.map((u) => ({
-          index: u.index,
-          uuid: validUUID,
-          url,
-          urls: null,
-        })),
+        uploads: [{ index: 0, uuid: validUUID, url, urls: null }],
       };
 
       vi.spyOn(Network, 'startUpload').mockResolvedValue(expected);
 
-      const received = await client.startUpload(idBucket, { uploads });
+      const received = await client.startUpload(idBucket, validSize, abortSignal);
 
       expect(received).toStrictEqual(expected);
     });
@@ -120,7 +71,7 @@ describe('network ', () => {
     };
 
     try {
-      const promise = await client.finishUpload(idBucket, invalidIndexPayload);
+      const promise = await client.finishUpload(idBucket, invalidIndexPayload, abortSignal);
       expect(promise).toBeUndefined();
     } catch (err) {
       expect(err).toBeInstanceOf(InvalidFileIndexError);
@@ -139,7 +90,7 @@ describe('network ', () => {
 
     // Act
     try {
-      const promise = await client.finishUpload(idBucket, invalidUUIDPayload);
+      const promise = await client.finishUpload(idBucket, invalidUUIDPayload, abortSignal);
       expect(promise).toBeUndefined();
     } catch (err) {
       // Assert
@@ -152,17 +103,18 @@ describe('network ', () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithBasicAuth();
       const idBucket = 'id-bucket';
+      const size = 40;
       const validStartUploadPayload: StartUploadPayload = {
-        uploads: [{ index: 0, size: 40 }],
+        uploads: [{ index: 0, size }],
       };
       const resolvesTo: StartUploadResponse = {
-        uploads: [{ index: validIndex, uuid: validUUID, url: '', urls: null }],
+        uploads: [{ index: 0, uuid: validUUID, url: '', urls: null }],
       };
       const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(resolvesTo);
       const staticStartUpload = vi.spyOn(Network.prototype, 'startUpload');
 
       // Act
-      const response = await client.startUpload(idBucket, validStartUploadPayload);
+      const response = await client.startUpload(idBucket, size, abortSignal);
 
       // Assert
       expect(response).toEqual(resolvesTo);
@@ -171,6 +123,7 @@ describe('network ', () => {
         `/v2/buckets/${idBucket}/files/start?multiparts=1`,
         validStartUploadPayload,
         headers,
+        abortSignal,
       );
     });
 
@@ -201,12 +154,17 @@ describe('network ', () => {
       const staticFinishUpload = vi.spyOn(Network.prototype, 'finishUpload');
 
       // Act
-      const response = await client.finishUpload(idBucket, validFinishUploadPayload);
+      const response = await client.finishUpload(idBucket, validFinishUploadPayload, abortSignal);
 
       // Assert
       expect(response).toEqual(resolvesTo);
       expect(staticFinishUpload).toHaveBeenCalled();
-      expect(callStub).toHaveBeenCalledWith(`/v2/buckets/${idBucket}/files/finish`, validFinishUploadPayload, headers);
+      expect(callStub).toHaveBeenCalledWith(
+        `/v2/buckets/${idBucket}/files/finish`,
+        validFinishUploadPayload,
+        headers,
+        abortSignal,
+      );
     });
 
     it('should call static getDownloadLinks with correct parameters', async () => {

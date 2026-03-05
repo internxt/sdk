@@ -129,8 +129,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public post<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.post(url, params, { headers }));
+  public post<Response>(url: URL, params: Parameters, headers: Headers, signal?: AbortSignal): Promise<Response> {
+    return this.execute(() => this.axios.post(url, params, { headers, signal }));
   }
 
   /**

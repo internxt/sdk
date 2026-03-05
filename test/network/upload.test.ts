@@ -10,6 +10,7 @@ const fakeFileId = 'aaaaaa';
 const fakeBucketId = 'fake-bucket-id';
 const fakeHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 const fakeMnemonic = 'test test test test test test test test';
+const abortSignal = new AbortController().signal;
 const crypto: Crypto = {
   validateMnemonic: () => {
     return false;
@@ -77,44 +78,39 @@ describe('network/upload', () => {
       const encryptFileMock = vi.fn();
       const uploadFileMock = vi.fn().mockReturnValue(fakeHash);
 
-      try {
-        const receivedFileId = await uploadFile(
-          network,
-          crypto,
-          bucketId,
-          mnemonic,
-          fileSize,
-          encryptFileMock,
-          uploadFileMock,
-        );
+      const receivedFileId = await uploadFile(
+        network,
+        crypto,
+        bucketId,
+        mnemonic,
+        fileSize,
+        abortSignal,
+        encryptFileMock,
+        uploadFileMock,
+      );
 
-        expect(validateMnemonicStub).toHaveBeenCalledOnce();
-        expect(validateMnemonicStub).toHaveBeenCalledWith(mnemonic);
+      expect(validateMnemonicStub).toHaveBeenCalledOnce();
+      expect(validateMnemonicStub).toHaveBeenCalledWith(mnemonic);
 
-        expect(randomBytesStub).toHaveBeenCalledOnce();
-        expect(randomBytesStub).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.ivSize);
+      expect(randomBytesStub).toHaveBeenCalledOnce();
+      expect(randomBytesStub).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.ivSize);
 
-        expect(generateFileKeyStub).toHaveBeenCalledOnce();
-        expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
+      expect(generateFileKeyStub).toHaveBeenCalledOnce();
+      expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
-        expect(startUploadStub).toHaveBeenCalledOnce();
-        expect(startUploadStub).toHaveBeenCalledWith(bucketId, {
-          uploads: [
-            {
-              index: 0,
-              size: fileSize,
-            },
-          ],
-        });
+      expect(startUploadStub).toHaveBeenCalledOnce();
+      expect(startUploadStub).toHaveBeenCalledWith(bucketId, fileSize, abortSignal);
 
-        expect(encryptFileMock).toHaveBeenCalledTimes(1);
-        expect(encryptFileMock).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.type, key, bufferizedIndex.slice(0, 16));
+      expect(encryptFileMock).toHaveBeenCalledTimes(1);
+      expect(encryptFileMock).toHaveBeenCalledWith(ALGORITHMS.AES256CTR.type, key, bufferizedIndex.slice(0, 16));
 
-        expect(uploadFileMock).toHaveBeenCalledTimes(1);
-        expect(uploadFileMock).toHaveBeenCalledWith(fakeUrl);
+      expect(uploadFileMock).toHaveBeenCalledTimes(1);
+      expect(uploadFileMock).toHaveBeenCalledWith(fakeUrl);
 
-        expect(finishUploadStub).toHaveBeenCalledOnce();
-        expect(finishUploadStub).toHaveBeenCalledWith(bucketId, {
+      expect(finishUploadStub).toHaveBeenCalledOnce();
+      expect(finishUploadStub).toHaveBeenCalledWith(
+        bucketId,
+        {
           index,
           shards: [
             {
@@ -122,12 +118,11 @@ describe('network/upload', () => {
               uuid: fakeUuid,
             },
           ],
-        });
+        },
+        abortSignal,
+      );
 
-        expect(receivedFileId).toEqual(fileId);
-      } catch {
-        fail('Expected function to not throw an error, but it did.');
-      }
+      expect(receivedFileId).toEqual(fileId);
     });
 
     it('Should throw if the mnemonic is invalid', async () => {
@@ -139,7 +134,7 @@ describe('network/upload', () => {
       const randomBytes = vi.spyOn(crypto, 'randomBytes').mockReturnValue(Buffer.from(''));
 
       try {
-        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, vi.fn(), vi.fn());
+        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, abortSignal, vi.fn(), vi.fn());
 
         fail('Expected function to throw an error, but it did not.');
       } catch (err) {

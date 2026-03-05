@@ -19,27 +19,11 @@ const uuidValidate = (str: string): boolean => UUID_REGEX.test(str);
 
 export * from './types';
 
-export class DuplicatedIndexesError extends Error {
-  constructor() {
-    super('Duplicated indexes found');
-
-    Object.setPrototypeOf(this, DuplicatedIndexesError.prototype);
-  }
-}
-
 export class InvalidFileIndexError extends Error {
   constructor() {
     super('Invalid file index');
 
     Object.setPrototypeOf(this, InvalidFileIndexError.prototype);
-  }
-}
-
-export class InvalidUploadIndexError extends Error {
-  constructor() {
-    super('Invalid upload index');
-
-    Object.setPrototypeOf(this, InvalidUploadIndexError.prototype);
   }
 }
 
@@ -89,21 +73,13 @@ export class Network {
     return this.auth;
   }
 
-  startUpload(bucketId: string, payload: StartUploadPayload, parts = 1): Promise<StartUploadResponse> {
-    let totalSize = 0;
-
-    for (const { index, size } of payload.uploads) {
-      if (index < 0) {
-        throw new InvalidUploadIndexError();
-      }
-      if (size < 0) {
-        throw new InvalidUploadSizeError();
-      }
-      totalSize += size;
+  startUpload(bucketId: string, fileSize: number, signal: AbortSignal, parts = 1): Promise<StartUploadResponse> {
+    if (fileSize < 0) {
+      throw new InvalidUploadSizeError();
     }
 
     const MB100 = 100 * 1024 * 1024;
-    if (totalSize < MB100 && parts > 1) {
+    if (fileSize < MB100 && parts > 1) {
       throw new FileTooSmallForMultipartError();
     }
 
@@ -111,15 +87,10 @@ export class Network {
       throw new InvalidMultipartValueError();
     }
 
-    const uploadIndexesWithoutDuplicates = new Set(payload.uploads.map((upload) => upload.index));
-
-    if (uploadIndexesWithoutDuplicates.size < payload.uploads.length) {
-      throw new DuplicatedIndexesError();
-    }
-
     return Network.startUpload(
       bucketId,
-      payload,
+      { uploads: [{ index: 0, size: fileSize }] },
+      signal,
       {
         client: this.client,
         appDetails: this.appDetails,
@@ -129,7 +100,7 @@ export class Network {
     );
   }
 
-  finishUpload(bucketId: string, payload: FinishUploadPayload): Promise<FinishUploadResponse> {
+  finishUpload(bucketId: string, payload: FinishUploadPayload, signal: AbortSignal): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
       throw new InvalidFileIndexError();
@@ -141,14 +112,18 @@ export class Network {
       }
     }
 
-    return Network.finishUpload(bucketId, payload, {
+    return Network.finishUpload(bucketId, payload, signal, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
     });
   }
 
-  finishMultipartUpload(bucketId: string, payload: FinishMultipartUploadPayload): Promise<FinishUploadResponse> {
+  finishMultipartUpload(
+    bucketId: string,
+    payload: FinishMultipartUploadPayload,
+    signal: AbortSignal,
+  ): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
       throw new InvalidFileIndexError();
@@ -167,7 +142,7 @@ export class Network {
       }
     }
 
-    return Network.finishUpload(bucketId, payload, {
+    return Network.finishUpload(bucketId, payload, signal, {
       client: this.client,
       appDetails: this.appDetails,
       auth: this.auth,
@@ -203,6 +178,7 @@ export class Network {
   static startUpload(
     bucketId: string,
     payload: StartUploadPayload,
+    signal: AbortSignal,
     { client, appDetails, auth }: NetworkRequestConfig,
     parts = 1,
   ) {
@@ -211,6 +187,7 @@ export class Network {
       `/v2/buckets/${bucketId}/files/start?multiparts=${parts}`,
       payload,
       headers,
+      signal,
     );
   }
 
@@ -223,10 +200,11 @@ export class Network {
   private static finishUpload(
     bucketId: string,
     payload: FinishUploadPayload | FinishMultipartUploadPayload,
+    signal: AbortSignal,
     { client, appDetails, auth }: NetworkRequestConfig,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return client.post<FinishUploadResponse>(`/v2/buckets/${bucketId}/files/finish`, payload, headers);
+    return client.post<FinishUploadResponse>(`/v2/buckets/${bucketId}/files/finish`, payload, headers, signal);
   }
 
   /**
