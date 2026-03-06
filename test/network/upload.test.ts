@@ -84,9 +84,9 @@ describe('network/upload', () => {
         bucketId,
         mnemonic,
         fileSize,
-        abortSignal,
         encryptFileMock,
         uploadFileMock,
+        abortSignal,
       );
 
       expect(validateMnemonicStub).toHaveBeenCalledOnce();

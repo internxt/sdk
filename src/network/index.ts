@@ -73,8 +73,8 @@ export class Network {
     return this.auth;
   }
 
-  async startUpload(bucketId: string, fileSize: number, signal: AbortSignal, parts = 1): Promise<StartUploadResponse> {
-    if (fileSize < 0) {
+  async startUpload(bucketId: string, fileSize: number, signal?: AbortSignal, parts = 1): Promise<StartUploadResponse> {
+    if (fileSize <= 0) {
       throw new InvalidUploadSizeError();
     }
 
@@ -90,12 +90,12 @@ export class Network {
     return await Network.startUpload(
       bucketId,
       { uploads: [{ index: 0, size: fileSize }] },
-      signal,
       {
         client: this.client,
         appDetails: this.appDetails,
         auth: this.auth,
       },
+      signal,
       parts,
     );
   }
@@ -103,7 +103,7 @@ export class Network {
   async finishUpload(
     bucketId: string,
     payload: FinishUploadPayload,
-    signal: AbortSignal,
+    signal?: AbortSignal,
   ): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
@@ -116,17 +116,22 @@ export class Network {
       }
     }
 
-    return await Network.finishUpload(bucketId, payload, signal, {
-      client: this.client,
-      appDetails: this.appDetails,
-      auth: this.auth,
-    });
+    return await Network.finishUpload(
+      bucketId,
+      payload,
+      {
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
+      },
+      signal,
+    );
   }
 
   async finishMultipartUpload(
     bucketId: string,
     payload: FinishMultipartUploadPayload,
-    signal: AbortSignal,
+    signal?: AbortSignal,
   ): Promise<FinishUploadResponse> {
     const { index, shards } = payload;
     if (!isHexString(index) || index.length !== 64) {
@@ -146,11 +151,16 @@ export class Network {
       }
     }
 
-    return await Network.finishUpload(bucketId, payload, signal, {
-      client: this.client,
-      appDetails: this.appDetails,
-      auth: this.auth,
-    });
+    return await Network.finishUpload(
+      bucketId,
+      payload,
+      {
+        client: this.client,
+        appDetails: this.appDetails,
+        auth: this.auth,
+      },
+      signal,
+    );
   }
 
   async getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
@@ -182,8 +192,8 @@ export class Network {
   static async startUpload(
     bucketId: string,
     payload: StartUploadPayload,
-    signal: AbortSignal,
     { client, appDetails, auth }: NetworkRequestConfig,
+    signal?: AbortSignal,
     parts = 1,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
@@ -204,8 +214,8 @@ export class Network {
   private static async finishUpload(
     bucketId: string,
     payload: FinishUploadPayload | FinishMultipartUploadPayload,
-    signal: AbortSignal,
     { client, appDetails, auth }: NetworkRequestConfig,
+    signal?: AbortSignal,
   ) {
     const headers = Network.headersWithBasicAuth(appDetails, auth);
     return await client.post<FinishUploadResponse>(`/v2/buckets/${bucketId}/files/finish`, payload, headers, signal);

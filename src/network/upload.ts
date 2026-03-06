@@ -15,9 +15,9 @@ export async function uploadFile(
   bucketId: string,
   mnemonic: string,
   fileSize: number,
-  signal: AbortSignal,
   encryptFile: EncryptFileFunction,
   uploadFile: UploadFileFunction,
+  signal?: AbortSignal,
 ): Promise<string> {
   let index: BinaryData;
   let iv: BinaryData;
@@ -78,9 +78,9 @@ export async function uploadMultipartFile(
   bucketId: string,
   mnemonic: string,
   fileSize: number,
-  signal: AbortSignal,
   encryptFile: EncryptFileFunction,
   uploadMultiparts: UploadFileMultipartFunction,
+  signal?: AbortSignal,
   parts = 1,
 ): Promise<string> {
   const mnemonicIsValid = crypto.validateMnemonic(mnemonic);
