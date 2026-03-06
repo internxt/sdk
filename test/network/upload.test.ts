@@ -134,7 +134,7 @@ describe('network/upload', () => {
       const randomBytes = vi.spyOn(crypto, 'randomBytes').mockReturnValue(Buffer.from(''));
 
       try {
-        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, abortSignal, vi.fn(), vi.fn());
+        await uploadFile(network, crypto, bucketId, mnemonic, fileSize, vi.fn(), vi.fn(), abortSignal);
 
         fail('Expected function to throw an error, but it did not.');
       } catch (err) {
