@@ -48,7 +48,7 @@ describe('network ', () => {
         uploads: [{ index: 0, uuid: validUUID, url, urls: null }],
       };
 
-      vi.spyOn(Network, 'startUpload').mockResolvedValue(expected);
+      vi.spyOn(client, 'startUploadRequest').mockResolvedValue(expected);
 
       const received = await client.startUpload(idBucket, validSize, abortSignal);
 
