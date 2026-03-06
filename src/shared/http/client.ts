@@ -85,8 +85,8 @@ export class HttpClient {
    * @param url
    * @param headers
    */
-  public get<Response>(url: URL, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.get(url, { headers }));
+  public async get<Response>(url: URL, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.get(url, { headers }));
   }
 
   /**
@@ -95,8 +95,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.get(url, { params, headers }));
+  public async getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.get(url, { params, headers }));
   }
 
   /**
@@ -129,8 +129,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public post<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.post(url, params, { headers }));
+  public async post<Response>(url: URL, params: Parameters, headers: Headers, signal?: AbortSignal): Promise<Response> {
+    return await this.execute(() => this.axios.post(url, params, { headers, signal }));
   }
 
   /**
@@ -139,8 +139,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.postForm(url, params, { headers }));
+  public async postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.postForm(url, params, { headers }));
   }
 
   /**
@@ -175,8 +175,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.patch(url, params, { headers }));
+  public async patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.patch(url, params, { headers }));
   }
 
   /**
@@ -185,8 +185,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.put(url, params, { headers }));
+  public async put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.put(url, params, { headers }));
   }
 
   /**
@@ -195,8 +195,8 @@ export class HttpClient {
    * @param params
    * @param headers
    */
-  public putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return this.execute(() => this.axios.putForm(url, params, { headers }));
+  public async putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() => this.axios.putForm(url, params, { headers }));
   }
 
   /**
@@ -205,8 +205,8 @@ export class HttpClient {
    * @param headers
    * @param params
    */
-  public delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    return this.execute(() => this.axios.delete(url, { headers, data: params }));
+  public async delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
+    return await this.execute(() => this.axios.delete(url, { headers, data: params }));
   }
 
   /**
