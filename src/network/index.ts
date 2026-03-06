@@ -87,17 +87,7 @@ export class Network {
       throw new InvalidMultipartValueError();
     }
 
-    return await Network.startUpload(
-      bucketId,
-      { uploads: [{ index: 0, size: fileSize }] },
-      {
-        client: this.client,
-        appDetails: this.appDetails,
-        auth: this.auth,
-      },
-      signal,
-      parts,
-    );
+    return await this.startUploadRequest(bucketId, { uploads: [{ index: 0, size: fileSize }] }, signal, parts);
   }
 
   async finishUpload(
@@ -116,16 +106,7 @@ export class Network {
       }
     }
 
-    return await Network.finishUpload(
-      bucketId,
-      payload,
-      {
-        client: this.client,
-        appDetails: this.appDetails,
-        auth: this.auth,
-      },
-      signal,
-    );
+    return await this.finishUploadRequest(bucketId, payload, signal);
   }
 
   async finishMultipartUpload(
@@ -151,16 +132,7 @@ export class Network {
       }
     }
 
-    return await Network.finishUpload(
-      bucketId,
-      payload,
-      {
-        client: this.client,
-        appDetails: this.appDetails,
-        auth: this.auth,
-      },
-      signal,
-    );
+    return await this.finishUploadRequest(bucketId, payload, signal);
   }
 
   async getDownloadLinks(bucketId: string, fileId: string, token?: string): Promise<GetDownloadLinksResponse> {
@@ -189,15 +161,9 @@ export class Network {
    * @param bucketId
    * @param uploads
    */
-  static async startUpload(
-    bucketId: string,
-    payload: StartUploadPayload,
-    { client, appDetails, auth }: NetworkRequestConfig,
-    signal?: AbortSignal,
-    parts = 1,
-  ) {
-    const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return await client.post<StartUploadResponse>(
+  async startUploadRequest(bucketId: string, payload: StartUploadPayload, signal?: AbortSignal, parts = 1) {
+    const headers = Network.headersWithBasicAuth(this.appDetails, this.auth);
+    return await this.client.post<StartUploadResponse>(
       `/v2/buckets/${bucketId}/files/start?multiparts=${parts}`,
       payload,
       headers,
@@ -211,14 +177,18 @@ export class Network {
    * @param index
    * @param shards
    */
-  private static async finishUpload(
+  private async finishUploadRequest(
     bucketId: string,
     payload: FinishUploadPayload | FinishMultipartUploadPayload,
-    { client, appDetails, auth }: NetworkRequestConfig,
     signal?: AbortSignal,
   ) {
-    const headers = Network.headersWithBasicAuth(appDetails, auth);
-    return await client.post<FinishUploadResponse>(`/v2/buckets/${bucketId}/files/finish`, payload, headers, signal);
+    const headers = Network.headersWithBasicAuth(this.appDetails, this.auth);
+    return await this.client.post<FinishUploadResponse>(
+      `/v2/buckets/${bucketId}/files/finish`,
+      payload,
+      headers,
+      signal,
+    );
   }
 
   /**
