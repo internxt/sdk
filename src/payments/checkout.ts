@@ -38,6 +38,7 @@ export class Checkout {
    * @param postalCode - The postal code of the customer
    * @param captchaToken - The captcha token to verify the call
    * @param companyVatId - The VAT ID of the company (optional)
+   * @param metadata - Additional metadata to attach to the customer (optional)
    * @returns The customer ID and the user token used to create a subscription or payment intent
    */
   public createCustomer({
@@ -49,6 +50,7 @@ export class Checkout {
     country,
     captchaToken,
     companyVatId,
+    metadata,
   }: CreateCustomerPayload): Promise<{
     customerId: string;
     token: string;
@@ -64,6 +66,7 @@ export class Checkout {
         postalCode,
         captchaToken,
         companyVatId,
+        metadata,
       },
       this.authHeaders(),
     );

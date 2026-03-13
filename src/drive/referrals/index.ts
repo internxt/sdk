@@ -1,6 +1,6 @@
 import { headersWithToken } from '../../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { UserReferral } from './types';
+import { ReferralTokenResponse, UserReferral } from './types';
 import { HttpClient } from '../../shared/http/client';
 
 export * as ReferralTypes from './types';
@@ -25,6 +25,13 @@ export class Referrals {
    */
   public getReferrals(): Promise<UserReferral[]> {
     return this.client.get('/users-referrals', this.headers());
+  }
+
+  /**
+   * Generates a referral token for the authenticated user
+   */
+  public createReferralToken(): Promise<ReferralTokenResponse> {
+    return this.client.post('/referral/token', {}, this.headers());
   }
 
   /**
