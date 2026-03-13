@@ -9,6 +9,7 @@ export interface CreateCustomerPayload {
   postalCode: string;
   captchaToken: string;
   companyVatId?: string;
+  metadata?: Record<string, string>;
 }
 
 export interface CreateSubscriptionPayload {

@@ -49,6 +49,7 @@ export class Checkout {
     country,
     captchaToken,
     companyVatId,
+    metadata,
   }: CreateCustomerPayload): Promise<{
     customerId: string;
     token: string;
@@ -64,6 +65,7 @@ export class Checkout {
         postalCode,
         captchaToken,
         companyVatId,
+        metadata,
       },
       this.authHeaders(),
     );

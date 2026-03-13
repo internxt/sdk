@@ -21,3 +21,7 @@ export interface UserReferral {
   credit: number;
   type: ReferralType;
 }
+
+export interface ReferralTokenResponse {
+  token: string;
+}
