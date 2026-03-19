@@ -19,6 +19,10 @@ export interface JoinCallResponse {
   appId: string;
 }
 
+export interface LeaveCallPayload {
+  userId: string;
+}
+
 export interface UsersInCallResponse {
   userId: string;
   name: string;
