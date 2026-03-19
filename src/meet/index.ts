@@ -1,7 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreateCallResponse, JoinCallPayload, JoinCallResponse, UsersInCallResponse } from './types';
+import { CreateCallResponse, JoinCallPayload, JoinCallResponse, LeaveCallPayload, UsersInCallResponse } from './types';
 
 export class Meet {
   private readonly client: HttpClient;
@@ -28,10 +28,10 @@ export class Meet {
     return this.client.post<JoinCallResponse>(`call/${callId}/users/join`, { ...payload }, headers);
   }
 
-  async leaveCall(callId: string): Promise<void> {
+  async leaveCall(callId: string, payload?: LeaveCallPayload): Promise<void> {
     const headers = this.apiSecurity?.token ? this.headersWithToken() : this.basicHeaders();
 
-    return this.client.post<void>(`call/${callId}/users/leave`, {}, headers);
+    return this.client.post<void>(`call/${callId}/users/leave`, payload ? { ...payload } : {}, headers);
   }
 
   async getCurrentUsersInCall(callId: string): Promise<UsersInCallResponse[]> {
