@@ -4,23 +4,23 @@ import { HttpClient } from '../shared/http/client';
 import {
   EncryptedKeystore,
   KeystoreType,
-  PublicKeysBase64,
-  PrivateKeys,
   HybridEncryptedEmail,
   PwdProtectedEmail,
-  base64ToPublicKey,
-  EmailKeys,
+  HybridKeyPair,
   Email,
+  EmailBody,
   createEncryptionAndRecoveryKeystores,
   encryptEmailHybrid,
-  User,
   openEncryptionKeystore,
-  UserWithPublicKeys,
+  RecipientWithPublicKey,
   encryptEmailHybridForMultipleRecipients,
   decryptEmailHybrid,
   createPwdProtectedEmail,
   decryptPwdProtectedEmail,
   openRecoveryKeystore,
+  UTF8ToUint8,
+  base64ToUint8Array,
+  EmailPublicParameters,
 } from 'internxt-crypto';
 
 export class Mail {
@@ -82,9 +82,9 @@ export class Mail {
    *
    * @param userEmail - The email of the user
    * @param baseKey - The secret key of the user
-   * @returns The email keys of the user
+   * @returns The hybrid keys of the user
    */
-  async getUserEmailKeys(userEmail: string, baseKey: Uint8Array): Promise<EmailKeys> {
+  async getUserEmailKeys(userEmail: string, baseKey: Uint8Array): Promise<HybridKeyPair> {
     const keystore = await this.downloadKeystoreFromServer(userEmail, KeystoreType.ENCRYPTION);
     return openEncryptionKeystore(keystore, baseKey);
   }
@@ -94,9 +94,9 @@ export class Mail {
    *
    * @param userEmail - The email of the user
    * @param recoveryCodes - The recovery codes of the user
-   * @returns The email keys of the user
+   * @returns The hybrid keys of the user
    */
-  async recoverUserEmailKeys(userEmail: string, recoveryCodes: string): Promise<EmailKeys> {
+  async recoverUserEmailKeys(userEmail: string, recoveryCodes: string): Promise<HybridKeyPair> {
     const keystore = await this.downloadKeystoreFromServer(userEmail, KeystoreType.RECOVERY);
     return openRecoveryKeystore(recoveryCodes, keystore);
   }
@@ -107,16 +107,16 @@ export class Mail {
    * @param userEmail - The email of the user
    * @returns User with corresponding public keys
    */
-  async getUserWithPublicKeys(userEmail: string): Promise<UserWithPublicKeys> {
-    const response = await this.client.post<{ publicKeys: PublicKeysBase64; user: User }[]>(
+  async getUserWithPublicKeys(userEmail: string): Promise<RecipientWithPublicKey> {
+    const response = await this.client.post<{ publicKey: string; email: string }[]>(
       `${this.apiUrl}/users/public-keys`,
       { emails: [userEmail] },
       this.headers(),
     );
     if (!response[0]) throw new Error(`No public keys found for ${userEmail}`);
     const singleResponse = response[0];
-    const publicKeys = await base64ToPublicKey(singleResponse.publicKeys);
-    const result = { ...singleResponse.user, publicKeys };
+    const publicHybridKey = base64ToUint8Array(singleResponse.publicKey);
+    const result = { email: singleResponse.email, publicHybridKey };
     return result;
   }
 
@@ -126,8 +126,8 @@ export class Mail {
    * @param emails - The emails of the users
    * @returns Users with corresponding public keys
    */
-  async getSeveralUsersWithPublicKeys(emails: string[]): Promise<UserWithPublicKeys[]> {
-    const response = await this.client.post<{ publicKeys: PublicKeysBase64; user: User }[]>(
+  async getSeveralUsersWithPublicKeys(emails: string[]): Promise<RecipientWithPublicKey[]> {
+    const response = await this.client.post<{ publicKey: string; email: string }[]>(
       `${this.apiUrl}/users/public-keys`,
       { emails },
       this.headers(),
@@ -135,8 +135,8 @@ export class Mail {
 
     const result = await Promise.all(
       response.map(async (item) => {
-        const publicKeys = await base64ToPublicKey(item.publicKeys);
-        return { ...item.user, publicKeys };
+        const publicHybridKey = base64ToUint8Array(item.publicKey);
+        return { email: item.email, publicHybridKey };
       }),
     );
 
@@ -147,38 +147,39 @@ export class Mail {
    * Sends the encrypted email to the server
    *
    * @param email - The encrypted email
+   * @param params - The public parameters of the email (sender, recipients, replyTo, etc.)
    * @returns Server response
    */
-  async sendEncryptedEmail(email: HybridEncryptedEmail): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { emails: [email] }, this.headers());
+  async sendEncryptedEmail(email: HybridEncryptedEmail, params: EmailPublicParameters): Promise<void> {
+    return this.client.post(`${this.apiUrl}/emails`, { emails: [email], params }, this.headers());
   }
 
   /**
    * Encrypts email and sends it to the server
    *
    * @param email - The message to encrypt
-   * @param senderPrivateKeys - The private keys of the sender
-   * @param isSubjectEncrypted - Indicates if the subject field should be encrypted
+   * @param aux - An optional string that can be used as additional input for the encryption
    * @returns Server response
    */
-  async encryptAndSendEmail(
-    email: Email,
-    senderPrivateKeys: PrivateKeys,
-    isSubjectEncrypted: boolean = false,
-  ): Promise<void> {
+  async encryptAndSendEmail(email: Email, aux?: string): Promise<void> {
     const recipient = await this.getUserWithPublicKeys(email.params.recipient.email);
-    const encEmail = await encryptEmailHybrid(email, recipient, senderPrivateKeys, isSubjectEncrypted);
-    return this.sendEncryptedEmail(encEmail);
+    const auxArray = aux ? UTF8ToUint8(aux) : new Uint8Array();
+    const encEmail = await encryptEmailHybrid(email.body, recipient, auxArray);
+    return this.sendEncryptedEmail(encEmail, email.params);
   }
 
   /**
    * Sends the encrypted emails for multiple recipients to the server
    *
    * @param emails - The encrypted emails
+   * @param params - The public parameters of the email (sender, recipients, replyTo, etc.)
    * @returns Server response
    */
-  async sendEncryptedEmailToMultipleRecipients(emails: HybridEncryptedEmail[]): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { emails }, this.headers());
+  async sendEncryptedEmailToMultipleRecipients(
+    emails: HybridEncryptedEmail[],
+    params: EmailPublicParameters,
+  ): Promise<void> {
+    return this.client.post(`${this.apiUrl}/emails`, { emails, params }, this.headers());
   }
 
   /**
@@ -189,23 +190,15 @@ export class Mail {
    * @param isSubjectEncrypted - Indicates if the subject field should be encrypted
    * @returns Server response
    */
-  async encryptAndSendEmailToMultipleRecipients(
-    email: Email,
-    senderPrivateKeys: PrivateKeys,
-    isSubjectEncrypted: boolean = false,
-  ): Promise<void> {
+  async encryptAndSendEmailToMultipleRecipients(email: Email, aux?: string): Promise<void> {
     const recipientEmails = email.params.recipients
       ? email.params.recipients.map((user) => user.email)
       : [email.params.recipient.email];
 
     const recipients = await this.getSeveralUsersWithPublicKeys(recipientEmails);
-    const encEmails = await encryptEmailHybridForMultipleRecipients(
-      email,
-      recipients,
-      senderPrivateKeys,
-      isSubjectEncrypted,
-    );
-    return this.sendEncryptedEmailToMultipleRecipients(encEmails);
+    const auxArray = aux ? UTF8ToUint8(aux) : new Uint8Array();
+    const encEmails = await encryptEmailHybridForMultipleRecipients(email.body, recipients, auxArray);
+    return this.sendEncryptedEmailToMultipleRecipients(encEmails, email.params);
   }
 
   /**
@@ -214,8 +207,8 @@ export class Mail {
    * @param email - The password-protected email
    * @returns Server response
    */
-  async sendPasswordProtectedEmail(email: PwdProtectedEmail): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { email }, this.headers());
+  async sendPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
+    return this.client.post(`${this.apiUrl}/emails`, { email, params }, this.headers());
   }
 
   /**
@@ -226,9 +219,10 @@ export class Mail {
    * @param isSubjectEncrypted - Indicates if the subject field should be encrypted
    * @returns Server response
    */
-  async passwordProtectAndSendEmail(email: Email, pwd: string, isSubjectEncrypted: boolean = false): Promise<void> {
-    const encEmail = await createPwdProtectedEmail(email, pwd, isSubjectEncrypted);
-    return this.sendPasswordProtectedEmail(encEmail);
+  async passwordProtectAndSendEmail(email: Email, pwd: string, aux?: string): Promise<void> {
+    const auxArray = aux ? UTF8ToUint8(aux) : new Uint8Array();
+    const encEmail = await createPwdProtectedEmail(email.body, pwd, auxArray);
+    return this.sendPasswordProtectedEmail(encEmail, email.params);
   }
 
   /**
@@ -236,9 +230,9 @@ export class Mail {
    *
    * @param email - The password-protected email
    * @param pwd - The shared password
-   * @returns The decrypted email
+   * @returns The decrypted email body
    */
-  async openPasswordProtectedEmail(email: PwdProtectedEmail, pwd: string): Promise<Email> {
+  async openPasswordProtectedEmail(email: PwdProtectedEmail, pwd: string): Promise<EmailBody> {
     return decryptPwdProtectedEmail(email, pwd);
   }
 
@@ -247,12 +241,10 @@ export class Mail {
    *
    * @param email - The encrypted email
    * @param recipientPrivateKeys - The private keys of the email recipient
-   * @returns The decrypted email
+   * @returns The decrypted email body
    */
-  async decryptEmail(email: HybridEncryptedEmail, recipientPrivateKeys: PrivateKeys): Promise<Email> {
-    const senderEmail = email.params.sender.email;
-    const sender = await this.getUserWithPublicKeys(senderEmail);
-    return decryptEmailHybrid(email, sender.publicKeys, recipientPrivateKeys);
+  async decryptEmail(email: HybridEncryptedEmail, recipientPrivateKeys: Uint8Array): Promise<EmailBody> {
+    return decryptEmailHybrid(email, recipientPrivateKeys);
   }
 
   /**
