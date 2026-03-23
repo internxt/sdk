@@ -25,3 +25,7 @@ export interface UserReferral {
 export interface ReferralTokenResponse {
   token: string;
 }
+
+export interface ReferralEnabledResponse {
+  isEnabled: boolean;
+}

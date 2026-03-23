@@ -1,6 +1,6 @@
 import { headersWithToken } from '../../shared/headers';
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { ReferralTokenResponse, UserReferral } from './types';
+import { ReferralEnabledResponse, ReferralTokenResponse, UserReferral } from './types';
 import { HttpClient } from '../../shared/http/client';
 
 export * as ReferralTypes from './types';
@@ -32,6 +32,13 @@ export class Referrals {
    */
   public createReferralToken(): Promise<ReferralTokenResponse> {
     return this.client.post('/referral/token', {}, this.headers());
+  }
+
+  /**
+   * Checks if the referral feature is enabled for the authenticated user
+   */
+  public isReferralEnabled(): Promise<ReferralEnabledResponse> {
+    return this.client.get('/referral/enabled', this.headers());
   }
 
   /**
