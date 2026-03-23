@@ -3,7 +3,13 @@ import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { basicHeaders, headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
 import { Meet } from '../../../src/meet/index';
-import { CreateCallResponse, JoinCallPayload, JoinCallResponse, UsersInCallResponse } from '../../../src/meet/types';
+import {
+  CreateCallResponse,
+  JoinCallPayload,
+  JoinCallResponse,
+  LeaveCallPayload,
+  UsersInCallResponse,
+} from '../../../src/meet/types';
 
 describe('Meet service tests', () => {
   beforeEach(() => {
@@ -131,7 +137,7 @@ describe('Meet service tests', () => {
   describe('leaveCall method', () => {
     const callId = 'call-123';
 
-    it('should leave a call successfully with token', async () => {
+    it('should leave a call successfully with token and no payload', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
@@ -143,7 +149,7 @@ describe('Meet service tests', () => {
       expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
     });
 
-    it('should leave a call successfully without token', async () => {
+    it('should leave a call successfully without token and no payload', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithoutToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
@@ -153,6 +159,26 @@ describe('Meet service tests', () => {
 
       // Assert
       expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
+    });
+
+    it('should send userId in body when anonymous user leaves with token', async () => {
+      const payload: LeaveCallPayload = { userId: 'anon-uuid-456' };
+      const { client, headers } = clientAndHeadersWithToken();
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+
+      await client.leaveCall(callId, payload);
+
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, { userId: 'anon-uuid-456' }, headers);
+    });
+
+    it('should send userId in body when anonymous user leaves without token', async () => {
+      const payload: LeaveCallPayload = { userId: 'anon-uuid-789' };
+      const { client, headers } = clientAndHeadersWithoutToken();
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+
+      await client.leaveCall(callId, payload);
+
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, { userId: 'anon-uuid-789' }, headers);
     });
   });
 });
