@@ -1270,10 +1270,10 @@ index-to-position@^1.1.0:
   resolved "https://registry.yarnpkg.com/index-to-position/-/index-to-position-1.2.0.tgz#c800eb34dacf4dbf96b9b06c7eb78d5f704138b4"
   integrity sha512-Yg7+ztRkqslMAS2iFaU+Oa4KTSidr63OsFGlOrJoW981kIYO3CGCS3wA95P1mUi/IVSJkn0D479KTJpVpvFNuw==
 
-internxt-crypto@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/internxt-crypto/-/internxt-crypto-1.0.0.tgz#6761bbb0602971aae1abcc3d56d197d0ec3ad896"
-  integrity sha512-NTlMq+AenZH8jUcjxErzeVnM/JvwYdzoS4tdjHY2Sl9SzJsu4nc+5/62aN41iMZ7GLPJ8egLgeO1cZQC4rTK8w==
+internxt-crypto@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/internxt-crypto/-/internxt-crypto-1.0.2.tgz#983fe991dfbb00a453e93070bb34049a88a94707"
+  integrity sha512-F9PuXci0eU1wlgDwqEbGR7hVDNS0MX8VNh/W+pdpR4ZsEsjRDBrOD2g1DvViR2woCxPiu1AW9Wwekpw2YVKfnA==
   dependencies:
     "@noble/ciphers" "^2.1.1"
     "@noble/curves" "^2.0.1"

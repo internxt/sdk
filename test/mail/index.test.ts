@@ -14,6 +14,7 @@ import {
   uint8ArrayToBase64,
 } from 'internxt-crypto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/create';
 
 describe('Mail service tests', () => {
   beforeEach(() => {
@@ -200,7 +201,6 @@ describe('Mail service tests', () => {
       params: {
         createdAt: '2026-01-21T15:11:22.000Z',
         sender: userA,
-        recipient: userB,
         recipients: [userB],
         replyToEmailID: uuid,
         labels: ['inbox', 'test'],
@@ -274,18 +274,16 @@ describe('Mail service tests', () => {
     });
 
     it('When user request opening a password protect email, then it should successfully open it', async () => {
-      const { client } = clientAndHeadersWithToken();
       const encEmail = await createPwdProtectedEmail(email.body, pwd);
-      const result = await client.openPasswordProtectedEmail(encEmail, pwd);
+      const result = await openPasswordProtectedEmail(encEmail, pwd);
 
       expect(result).toEqual(email.body);
     });
 
     it('When user request decrypting an encrypted email, then it should successfully decrypt it', async () => {
-      const { client } = clientAndHeadersWithToken();
       const recipient = { email: userB.email, publicHybridKey: emailKeysB.publicKey };
       const encEmail = await encryptEmailHybrid(email.body, recipient);
-      const result = await client.decryptEmail(encEmail, emailKeysB.secretKey);
+      const result = await decryptEmail(encEmail, emailKeysB.secretKey);
 
       expect(result).toEqual(email.body);
     });
