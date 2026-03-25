@@ -9,7 +9,6 @@ import {
   RecipientWithPublicKey,
   base64ToUint8Array,
   EmailPublicParameters,
-  Email,
 } from 'internxt-crypto';
 import {
   MailboxResponse,
@@ -103,10 +102,6 @@ export class MailApi {
    */
   async sendE2EPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
     return this.client.post(`${this.apiUrl}/emails`, { email, params }, this.headers());
-  }
-
-  async getE2EEmails(): Promise<Email[]> {
-    return this.client.get(`${this.apiUrl}/emails`, this.headers());
   }
 
   async getMailboxes(): Promise<MailboxResponse[]> {
