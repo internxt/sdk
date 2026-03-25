@@ -7,13 +7,14 @@ import {
   genSymmetricKey,
   KeystoreType,
   generateEmailKeys,
-  publicKeyToBase64,
   Email,
   generateUuid,
   createPwdProtectedEmail,
   encryptEmailHybrid,
+  uint8ArrayToBase64,
 } from 'internxt-crypto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/create';
 
 describe('Mail service tests', () => {
   beforeEach(() => {
@@ -53,13 +54,8 @@ describe('Mail service tests', () => {
           encryptedKeystore: {
             userEmail: email,
             type: KeystoreType.ENCRYPTION,
-            encryptedKeys: expect.objectContaining({
-              publicKeys: { eccPublicKeyBase64: expect.any(String), kyberPublicKeyBase64: expect.any(String) },
-              privateKeys: {
-                eccPrivateKeyBase64: expect.any(String),
-                kyberPrivateKeyBase64: expect.any(String),
-              },
-            }),
+            privateKeyEncrypted: expect.any(String),
+            publicKey: expect.any(String),
           },
         },
         headers,
@@ -71,13 +67,8 @@ describe('Mail service tests', () => {
           encryptedKeystore: {
             userEmail: email,
             type: KeystoreType.RECOVERY,
-            encryptedKeys: expect.objectContaining({
-              publicKeys: { eccPublicKeyBase64: expect.any(String), kyberPublicKeyBase64: expect.any(String) },
-              privateKeys: {
-                eccPrivateKeyBase64: expect.any(String),
-                kyberPrivateKeyBase64: expect.any(String),
-              },
-            }),
+            privateKeyEncrypted: expect.any(String),
+            publicKey: expect.any(String),
           },
         },
         headers,
@@ -133,64 +124,55 @@ describe('Mail service tests', () => {
   });
 
   describe('test public keys call methods', async () => {
-    const userA = {
-      email: 'user A email',
-      name: 'user A name',
-    };
-    const userB = {
-      email: 'user B email',
-      name: 'user B name',
-    };
-    const userC = {
-      email: 'user C email',
-      name: 'user C name',
-    };
+    const userA = 'user A email';
+    const userB = 'user B email';
+    const userC = 'user C email';
     const emailKeysA = await generateEmailKeys();
     const emailKeysB = await generateEmailKeys();
     const emailKeysC = await generateEmailKeys();
 
-    const userAwithKeys = { ...userA, publicKeys: emailKeysA.publicKeys };
-    const userBwithKeys = { ...userB, publicKeys: emailKeysB.publicKeys };
-    const userCwithKeys = { ...userC, publicKeys: emailKeysC.publicKeys };
-
-    const emailKeysABase64 = await publicKeyToBase64(emailKeysA.publicKeys);
-    const emailKeysBBase64 = await publicKeyToBase64(emailKeysB.publicKeys);
-    const emailKeysCBase64 = await publicKeyToBase64(emailKeysC.publicKeys);
+    const publicKeyA = uint8ArrayToBase64(emailKeysA.publicKey);
+    const publicKeyB = uint8ArrayToBase64(emailKeysB.publicKey);
+    const publicKeyC = uint8ArrayToBase64(emailKeysC.publicKey);
 
     it('When user email public keys are requested, then it should successfully get them', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi
         .spyOn(HttpClient.prototype, 'post')
-        .mockResolvedValue([{ publicKeys: emailKeysABase64, user: userA }]);
-      const result = await client.getUserWithPublicKeys(userA.email);
+        .mockResolvedValue([{ publicKey: publicKeyA, email: userA }]);
+      const result = await client.getUserWithPublicKeys(userA);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
-          emails: [userA.email],
+          emails: [userA],
         },
         headers,
       ]);
-      expect(result).toStrictEqual(userAwithKeys);
+      expect(result).toStrictEqual({ email: userA, publicHybridKey: emailKeysA.publicKey });
     });
 
     it('When public keys are requested for several users, then it should successfully get all of them', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue([
-        { publicKeys: emailKeysABase64, user: userA },
-        { publicKeys: emailKeysBBase64, user: userB },
-        { publicKeys: emailKeysCBase64, user: userC },
+        { publicKey: publicKeyA, email: userA },
+        { publicKey: publicKeyB, email: userB },
+        { publicKey: publicKeyC, email: userC },
       ]);
-      const result = await client.getSeveralUsersWithPublicKeys([userA.email, userB.email, userC.email]);
+      const result = await client.getSeveralUsersWithPublicKeys([userA, userB, userC]);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
         {
-          emails: [userA.email, userB.email, userC.email],
+          emails: [userA, userB, userC],
         },
         headers,
       ]);
-      expect(result).toEqual([userAwithKeys, userBwithKeys, userCwithKeys]);
+      expect(result).toEqual([
+        { email: userA, publicHybridKey: emailKeysA.publicKey },
+        { email: userB, publicHybridKey: emailKeysB.publicKey },
+        { email: userC, publicHybridKey: emailKeysC.publicKey },
+      ]);
     });
   });
 
@@ -206,22 +188,19 @@ describe('Mail service tests', () => {
     };
     const uuid = generateUuid();
 
-    const emailKeysA = await generateEmailKeys();
     const emailKeysB = await generateEmailKeys();
-    const emailKeysABase64 = await publicKeyToBase64(emailKeysA.publicKeys);
-    const emailKeysBBase64 = await publicKeyToBase64(emailKeysB.publicKeys);
+    const publicKeyB = uint8ArrayToBase64(emailKeysB.publicKey);
 
     const email: Email = {
       id: uuid,
       body: {
         text: 'Email text',
+        subject: 'Email subject',
         attachments: ['Email attachment'],
       },
       params: {
-        subject: 'Email subject',
         createdAt: '2026-01-21T15:11:22.000Z',
         sender: userA,
-        recipient: userB,
         recipients: [userB],
         replyToEmailID: uuid,
         labels: ['inbox', 'test'],
@@ -234,9 +213,9 @@ describe('Mail service tests', () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi
         .spyOn(HttpClient.prototype, 'post')
-        .mockResolvedValueOnce([{ publicKeys: emailKeysBBase64, user: userB }])
+        .mockResolvedValueOnce([{ publicKey: publicKeyB, email: userB.email }])
         .mockResolvedValueOnce({});
-      await client.encryptAndSendEmail(email, emailKeysA.privateKeys, false);
+      await client.encryptAndSendEmail(email);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
@@ -251,20 +230,19 @@ describe('Mail service tests', () => {
         {
           emails: [
             {
-              encryptedKey: {
-                kyberCiphertext: expect.any(String),
-                encryptedKey: expect.any(String),
-              },
-              enc: {
+              encEmailBody: {
                 encText: expect.any(String),
+                encSubject: expect.any(String),
                 encAttachments: [expect.any(String)],
               },
-              recipientEmail: userB.email,
-              params: email.params,
-              id: email.id,
-              isSubjectEncrypted: false,
+              encryptedKey: {
+                encryptedKey: expect.any(String),
+                hybridCiphertext: expect.any(String),
+                encryptedForEmail: userB.email,
+              },
             },
           ],
+          params: email.params,
         },
         headers,
       ]);
@@ -273,7 +251,7 @@ describe('Mail service tests', () => {
     it('When user request password protect email, then it should successfully protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
-      await client.passwordProtectAndSendEmail(email, pwd, false);
+      await client.passwordProtectAndSendEmail(email, pwd);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/emails',
@@ -283,45 +261,31 @@ describe('Mail service tests', () => {
               encryptedKey: expect.any(String),
               salt: expect.any(String),
             },
-            enc: {
+            encEmailBody: {
               encText: expect.any(String),
+              encSubject: expect.any(String),
               encAttachments: [expect.any(String)],
             },
-            params: email.params,
-            id: email.id,
-            isSubjectEncrypted: false,
           },
+          params: email.params,
         },
         headers,
       ]);
     });
 
     it('When user request opening a password protect email, then it should successfully open it', async () => {
-      const { client } = clientAndHeadersWithToken();
-      const encEmail = await createPwdProtectedEmail(email, pwd, true);
-      const result = await client.openPasswordProtectedEmail(encEmail, pwd);
+      const encEmail = await createPwdProtectedEmail(email.body, pwd);
+      const result = await openPasswordProtectedEmail(encEmail, pwd);
 
-      expect(result).toEqual(email);
+      expect(result).toEqual(email.body);
     });
 
     it('When user request decrypting an encrypted email, then it should successfully decrypt it', async () => {
-      const { client, headers } = clientAndHeadersWithToken();
-      const recipient = { ...userB, publicKeys: emailKeysB.publicKeys };
-      const postCall = vi
-        .spyOn(HttpClient.prototype, 'post')
-        .mockResolvedValue([{ publicKeys: emailKeysABase64, user: userA }]);
-      const encEmail = await encryptEmailHybrid(email, recipient, emailKeysA.privateKeys, true);
-      const result = await client.decryptEmail(encEmail, emailKeysB.privateKeys);
+      const recipient = { email: userB.email, publicHybridKey: emailKeysB.publicKey };
+      const encEmail = await encryptEmailHybrid(email.body, recipient);
+      const result = await decryptEmail(encEmail, emailKeysB.secretKey);
 
-      expect(postCall.mock.calls[0]).toEqual([
-        '/users/public-keys',
-        {
-          emails: [userA.email],
-        },
-        headers,
-      ]);
-
-      expect(result).toEqual(email);
+      expect(result).toEqual(email.body);
     });
   });
 });
