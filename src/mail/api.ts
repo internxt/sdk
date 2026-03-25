@@ -90,7 +90,7 @@ export class MailApi {
    * @param params - The public parameters of the email
    * @returns Server response
    */
-  async sendEmails(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
+  async sendE2EEmails(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
     return this.client.post(`${this.apiUrl}/emails`, { emails, params }, this.headers());
   }
 
@@ -101,11 +101,11 @@ export class MailApi {
    * @param params - The public parameters of the email
    * @returns Server response
    */
-  async sendPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
+  async sendE2EPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
     return this.client.post(`${this.apiUrl}/emails`, { email, params }, this.headers());
   }
 
-  async getMails(): Promise<Email[]> {
+  async getE2EEmails(): Promise<Email[]> {
     return this.client.get(`${this.apiUrl}/emails`, this.headers());
   }
 

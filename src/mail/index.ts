@@ -124,8 +124,8 @@ export class Mail {
    * @param params - The public parameters of the email (sender, recipients, CCs, BCCs, etc.)
    * @returns Server response
    */
-  async sendEncryptedEmail(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
-    return this.api.sendEmails(emails, params);
+  async sendE2EEncryptedEmail(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
+    return this.api.sendE2EEmails(emails, params);
   }
 
   /**
@@ -135,7 +135,7 @@ export class Mail {
    * @param aux - The optional auxilary data to encrypt together with the email (e.g. email sender)
    * @returns Server response
    */
-  async encryptAndSendEmail(email: Email, aux?: string): Promise<void> {
+  async e2eEncryptAndSendEmail(email: Email, aux?: string): Promise<void> {
     const recipientEmails = email.params.recipients?.map((user) => user.email);
 
     if (!recipientEmails) throw new Error('No recipients found');
@@ -143,7 +143,7 @@ export class Mail {
     const recipients = await this.api.getUsersWithPublicKeys(recipientEmails);
 
     const encEmails = await encryptEmail(email, recipients, aux);
-    return this.api.sendEmails(encEmails, email.params);
+    return this.api.sendE2EEmails(encEmails, email.params);
   }
 
   /**
@@ -153,21 +153,21 @@ export class Mail {
    * @param params - The public parameters of the email
    * @returns Server response
    */
-  async sendPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
-    return this.api.sendPasswordProtectedEmail(email, params);
+  async sendE2EPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
+    return this.api.sendE2EPasswordProtectedEmail(email, params);
   }
 
   /**
-   * Creates the password-protected email and sends it to the server
+   * Creates the password-protected E2E email and sends it to the server
    *
    * @param email - The email
    * @param pwd - The password
    * @param aux - The optional auxiliary data to encrypt together with the email (e.g. email sender)
    * @returns Server response
    */
-  async passwordProtectAndSendEmail(email: Email, pwd: string, aux?: string): Promise<void> {
+  async e2ePasswordProtectAndSendEmail(email: Email, pwd: string, aux?: string): Promise<void> {
     const encEmail = await passwordProtectAndSendEmail(email, pwd, aux);
-    return this.api.sendPasswordProtectedEmail(encEmail, email.params);
+    return this.api.sendE2EPasswordProtectedEmail(encEmail, email.params);
   }
 
   async getMailboxes(): Promise<MailboxResponse[]> {
