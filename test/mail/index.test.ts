@@ -14,7 +14,7 @@ import {
   uint8ArrayToBase64,
 } from 'internxt-crypto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/create';
+import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/crypto';
 
 describe('Mail service tests', () => {
   beforeEach(() => {

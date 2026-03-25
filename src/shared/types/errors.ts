@@ -11,5 +11,7 @@ export default class AppError extends Error {
     this.code = code;
     this.headers = headers;
     this.requestId = headers?.['x-request-id'];
+
+    Object.setPrototypeOf(this, AppError.prototype);
   }
 }

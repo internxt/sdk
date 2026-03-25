@@ -1,6 +1,4 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
-import { headersWithToken } from '../shared/headers';
-import { HttpClient } from '../shared/http/client';
 import {
   EncryptedKeystore,
   KeystoreType,
@@ -9,27 +7,31 @@ import {
   HybridKeyPair,
   Email,
   RecipientWithPublicKey,
-  base64ToUint8Array,
   EmailPublicParameters,
 } from 'internxt-crypto';
 
-import { createKeystores, encryptEmail, passwordProtectAndSendEmail, openKeystore, recoverKeys } from './create';
+import { MailApi } from './api';
+import {
+  MailboxResponse,
+  EmailListResponse,
+  EmailResponse,
+  EmailCreatedResponse,
+  SendEmailRequest,
+  DraftEmailRequest,
+  UpdateEmailRequest,
+  ListEmailsQuery,
+} from './types';
+import { createKeystores, encryptEmail, passwordProtectAndSendEmail, openKeystore, recoverKeys } from './crypto';
 
 export class Mail {
-  private readonly client: HttpClient;
-  private readonly appDetails: AppDetails;
-  private readonly apiSecurity: ApiSecurity;
-  private readonly apiUrl: ApiUrl;
+  private readonly api: MailApi;
 
   public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
     return new Mail(apiUrl, appDetails, apiSecurity);
   }
 
   private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity: ApiSecurity) {
-    this.client = HttpClient.create(apiUrl, apiSecurity.unauthorizedCallback);
-    this.appDetails = appDetails;
-    this.apiSecurity = apiSecurity;
-    this.apiUrl = apiUrl;
+    this.api = MailApi.client(apiUrl, appDetails, apiSecurity);
   }
 
   /**
@@ -39,7 +41,7 @@ export class Mail {
    * @returns Server response
    */
   async uploadKeystoreToServer(encryptedKeystore: EncryptedKeystore): Promise<void> {
-    return this.client.post(`${this.apiUrl}/keystore`, { encryptedKeystore }, this.headers());
+    return this.api.uploadKeystore(encryptedKeystore);
   }
 
   /**
@@ -54,7 +56,7 @@ export class Mail {
     baseKey: Uint8Array,
   ): Promise<{ recoveryCodes: string; keys: HybridKeyPair }> {
     const { encryptionKeystore, recoveryKeystore, recoveryCodes, keys } = await createKeystores(userEmail, baseKey);
-    await Promise.all([this.uploadKeystoreToServer(encryptionKeystore), this.uploadKeystoreToServer(recoveryKeystore)]);
+    await Promise.all([this.api.uploadKeystore(encryptionKeystore), this.api.uploadKeystore(recoveryKeystore)]);
     return { recoveryCodes, keys };
   }
 
@@ -66,7 +68,7 @@ export class Mail {
    * @returns The encrypted keystore
    */
   async downloadKeystoreFromServer(userEmail: string, keystoreType: KeystoreType): Promise<EncryptedKeystore> {
-    return this.client.getWithParams(`${this.apiUrl}/user/keystore`, { userEmail, keystoreType }, this.headers());
+    return this.api.downloadKeystore(userEmail, keystoreType);
   }
 
   /**
@@ -77,7 +79,7 @@ export class Mail {
    * @returns The hybrid keys of the user
    */
   async getUserEmailKeys(userEmail: string, baseKey: Uint8Array): Promise<HybridKeyPair> {
-    const keystore = await this.downloadKeystoreFromServer(userEmail, KeystoreType.ENCRYPTION);
+    const keystore = await this.api.downloadKeystore(userEmail, KeystoreType.ENCRYPTION);
     return openKeystore(keystore, baseKey);
   }
 
@@ -89,7 +91,7 @@ export class Mail {
    * @returns The hybrid keys of the user
    */
   async recoverUserEmailKeys(userEmail: string, recoveryCodes: string): Promise<HybridKeyPair> {
-    const keystore = await this.downloadKeystoreFromServer(userEmail, KeystoreType.RECOVERY);
+    const keystore = await this.api.downloadKeystore(userEmail, KeystoreType.RECOVERY);
     return recoverKeys(keystore, recoveryCodes);
   }
 
@@ -100,16 +102,9 @@ export class Mail {
    * @returns User with corresponding public keys
    */
   async getUserWithPublicKeys(userEmail: string): Promise<RecipientWithPublicKey> {
-    const response = await this.client.post<{ publicKey: string; email: string }[]>(
-      `${this.apiUrl}/users/public-keys`,
-      { emails: [userEmail] },
-      this.headers(),
-    );
-    if (!response[0]) throw new Error(`No public keys found for ${userEmail}`);
-    const singleResponse = response[0];
-    const publicHybridKey = base64ToUint8Array(singleResponse.publicKey);
-    const result = { email: singleResponse.email, publicHybridKey };
-    return result;
+    const results = await this.api.getUsersWithPublicKeys([userEmail]);
+    if (!results[0]) throw new Error(`No public keys found for ${userEmail}`);
+    return results[0];
   }
 
   /**
@@ -119,20 +114,7 @@ export class Mail {
    * @returns Users with corresponding public keys
    */
   async getSeveralUsersWithPublicKeys(emails: string[]): Promise<RecipientWithPublicKey[]> {
-    const response = await this.client.post<{ publicKey: string; email: string }[]>(
-      `${this.apiUrl}/users/public-keys`,
-      { emails },
-      this.headers(),
-    );
-
-    const result = await Promise.all(
-      response.map(async (item) => {
-        const publicHybridKey = base64ToUint8Array(item.publicKey);
-        return { email: item.email, publicHybridKey };
-      }),
-    );
-
-    return result;
+    return this.api.getUsersWithPublicKeys(emails);
   }
 
   /**
@@ -143,7 +125,7 @@ export class Mail {
    * @returns Server response
    */
   async sendEncryptedEmail(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { emails, params }, this.headers());
+    return this.api.sendEmails(emails, params);
   }
 
   /**
@@ -154,21 +136,25 @@ export class Mail {
    * @returns Server response
    */
   async encryptAndSendEmail(email: Email, aux?: string): Promise<void> {
-    const recipientEmails = email.params.recipients.map((user) => user.email);
-    const recipients = await this.getSeveralUsersWithPublicKeys(recipientEmails);
+    const recipientEmails = email.params.recipients?.map((user) => user.email);
+
+    if (!recipientEmails) throw new Error('No recipients found');
+
+    const recipients = await this.api.getUsersWithPublicKeys(recipientEmails);
 
     const encEmails = await encryptEmail(email, recipients, aux);
-    return this.sendEncryptedEmail(encEmails, email.params);
+    return this.api.sendEmails(encEmails, email.params);
   }
 
   /**
    * Sends the password-protected email to the server
    *
    * @param email - The password-protected email
+   * @param params - The public parameters of the email
    * @returns Server response
    */
   async sendPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { email, params }, this.headers());
+    return this.api.sendPasswordProtectedEmail(email, params);
   }
 
   /**
@@ -176,25 +162,42 @@ export class Mail {
    *
    * @param email - The email
    * @param pwd - The password
-   * @param aux - The optional auxilary data to encrypt together with the email (e.g. email sender)
+   * @param aux - The optional auxiliary data to encrypt together with the email (e.g. email sender)
    * @returns Server response
    */
   async passwordProtectAndSendEmail(email: Email, pwd: string, aux?: string): Promise<void> {
     const encEmail = await passwordProtectAndSendEmail(email, pwd, aux);
-    return this.sendPasswordProtectedEmail(encEmail, email.params);
+    return this.api.sendPasswordProtectedEmail(encEmail, email.params);
   }
 
-  /**
-   * Returns the needed headers for the module requests
-   * @private
-   */
-  private headers() {
-    return headersWithToken({
-      clientName: this.appDetails.clientName,
-      clientVersion: this.appDetails.clientVersion,
-      token: this.apiSecurity.token,
-      desktopToken: this.appDetails.desktopHeader,
-      customHeaders: this.appDetails.customHeaders,
-    });
+  async getMailboxes(): Promise<MailboxResponse[]> {
+    return this.api.getMailboxes();
+  }
+
+  async listEmails(query?: ListEmailsQuery): Promise<EmailListResponse> {
+    return this.api.listEmails(query);
+  }
+
+  async getEmail(id: string): Promise<EmailResponse> {
+    return this.api.getEmail(id);
+  }
+
+  async deleteEmail(id: string): Promise<void> {
+    return this.api.deleteEmail(id);
+  }
+
+  async updateEmail(id: string, body: UpdateEmailRequest): Promise<void> {
+    return this.api.updateEmail(id, body);
+  }
+
+  async sendEmail(body: SendEmailRequest): Promise<EmailCreatedResponse> {
+    return this.api.sendEmail(body);
+  }
+
+  async saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
+    return this.api.saveDraft(body);
   }
 }
+
+export * from './crypto';
+export * from './types';

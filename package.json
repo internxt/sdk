@@ -25,7 +25,8 @@
     "build": "yarn clean && tsc",
     "lint": "eslint ./src",
     "format": "prettier --write **/*.{js,jsx,tsx,ts}",
-    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format"
+    "swagger": "openapi-typescript https://gateway.internxt.com/drive/api-json -o ./src/schema.ts && yarn format",
+    "swagger:mail": "openapi-typescript http://localhost:3100/api-json -o ./src/mail/schema.ts && yarn format"
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.1.0",
