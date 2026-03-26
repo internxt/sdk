@@ -14,7 +14,7 @@ import {
   uint8ArrayToBase64,
 } from 'internxt-crypto';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/create';
+import { decryptEmail, openPasswordProtectedEmail } from '../../src/mail/crypto';
 
 describe('Mail service tests', () => {
   beforeEach(() => {
@@ -215,7 +215,7 @@ describe('Mail service tests', () => {
         .spyOn(HttpClient.prototype, 'post')
         .mockResolvedValueOnce([{ publicKey: publicKeyB, email: userB.email }])
         .mockResolvedValueOnce({});
-      await client.encryptAndSendEmail(email);
+      await client.e2eEncryptAndSendEmail(email);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/users/public-keys',
@@ -251,7 +251,7 @@ describe('Mail service tests', () => {
     it('When user request password protect email, then it should successfully protect and send an email', async () => {
       const { client, headers } = clientAndHeadersWithToken();
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
-      await client.passwordProtectAndSendEmail(email, pwd);
+      await client.e2ePasswordProtectAndSendEmail(email, pwd);
 
       expect(postCall.mock.calls[0]).toEqual([
         '/emails',
