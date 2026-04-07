@@ -49,7 +49,7 @@ export interface paths {
     };
     /**
      * List emails
-     * @description Paginated list of email summaries for a given mailbox. Defaults to the inbox.
+     * @description Paginated list of email summaries. Filter by mailbox or omit to list all.
      */
     get: operations['EmailController_list'];
     put?: never;
@@ -128,6 +128,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/gateway/accounts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Provision a new mail account (called by the auth service) */
+    post: operations['GatewayController_provisionAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gateway/domains': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List available mail domains (called by the auth service) */
+    get: operations['GatewayController_listDomains'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gateway/accounts/{uuid}/suspend': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Suspend a mail account */
+    post: operations['GatewayController_suspendAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gateway/accounts/{uuid}/reactivate': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Reactivate a mail account */
+    post: operations['GatewayController_reactivateAccount'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -158,6 +226,13 @@ export interface components {
     EmailSummaryResponseDto: {
       /** @example Ma1f09b… */
       id: string;
+      /**
+       * @example [
+       *       "d",
+       *       "a"
+       *     ]
+       */
+      mailboxIds: string[];
       /** @example T1a2b3c… */
       threadId: string;
       from: components['schemas']['EmailAddressDto'][];
@@ -187,10 +262,24 @@ export interface components {
        * @example 142
        */
       total: number;
+      /**
+       * @description Whether there are more emails to fetch
+       * @example true
+       */
+      hasMoreMails: boolean;
+      /** @example Ma1f09b… */
+      nextAnchor?: string;
     };
     EmailResponseDto: {
       /** @example Ma1f09b… */
       id: string;
+      /**
+       * @example [
+       *       "d",
+       *       "a"
+       *     ]
+       */
+      mailboxIds: string[];
       /** @example T1a2b3c… */
       threadId: string;
       from: components['schemas']['EmailAddressDto'][];
@@ -216,11 +305,11 @@ export interface components {
       bcc: components['schemas']['EmailAddressDto'][];
       replyTo: components['schemas']['EmailAddressDto'][];
       /** @example 2025-06-15T10:29:55Z */
-      sentAt: Record<string, never> | null;
+      sentAt: string | null;
       /** @example Hi team, here are the notes… */
-      textBody: Record<string, never> | null;
+      textBody: string | null;
       /** @example <p>Hi team, here are the notes…</p> */
-      htmlBody: Record<string, never> | null;
+      htmlBody: string | null;
     };
     SendEmailRequestDto: {
       /** @description Primary recipients (at least one required) */
@@ -276,6 +365,28 @@ export interface components {
        */
       isFlagged?: boolean;
     };
+    ProvisionAccountRequestDto: {
+      /**
+       * @description User id
+       * @example d7ffe6b1-434d-4eae-86a5-029f76d1aa80
+       */
+      userId: string;
+      /**
+       * @description Full email address
+       * @example alice@internxt.com
+       */
+      address: string;
+      /**
+       * @description Email domain
+       * @example internxt.com
+       */
+      domain: string;
+      /**
+       * @description User display name
+       * @example Alice Smith
+       */
+      displayName: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -324,12 +435,14 @@ export interface operations {
   EmailController_list: {
     parameters: {
       query?: {
-        /** @description Mailbox to list. Defaults to `inbox`. */
+        /** @description Mailbox to filter by. Omit to list emails from all mailboxes. */
         mailbox?: 'inbox' | 'drafts' | 'sent' | 'trash' | 'spam' | 'archive';
         /** @description Maximum number of emails to return. Defaults to `20`. */
         limit?: number;
         /** @description Zero-based offset for pagination. Defaults to `0`. */
         position?: number;
+        /** @description Anchor ID for pagination. */
+        anchorId?: string;
       };
       header?: never;
       path?: never;
@@ -481,6 +594,82 @@ export interface operations {
         content: {
           'application/json': components['schemas']['EmailCreatedResponseDto'];
         };
+      };
+    };
+  };
+  GatewayController_provisionAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProvisionAccountRequestDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GatewayController_listDomains: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GatewayController_suspendAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GatewayController_reactivateAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
