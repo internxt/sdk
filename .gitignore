@@ -105,5 +105,6 @@ dist
 
 coverage/
 
+.npmrc
 .DS_Store
 .vscode/settings.json
