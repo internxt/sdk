@@ -1,7 +1,7 @@
 {
   "name": "@internxt/sdk",
   "author": "Internxt <hello@internxt.com>",
-  "version": "1.15.8",
+  "version": "1.15.9",
   "description": "An sdk for interacting with Internxt's services",
   "repository": {
     "type": "git",
@@ -21,7 +21,7 @@
     "prepare": "husky",
     "test": "vitest run --coverage",
     "test:watch": "vitest watch",
-    "clean": "rimraf dist coverage tsconfig.tsbuildinfo",
+    "clean": "rimraf dist coverage",
     "build": "yarn clean && tsc",
     "lint": "eslint ./src",
     "format": "prettier --write **/*.{js,jsx,tsx,ts}",
@@ -30,10 +30,8 @@
   },
   "devDependencies": {
     "@internxt/eslint-config-internxt": "2.1.0",
-    "@internxt/prettier-config": "internxt/prettier-config#v1.0.2",
     "@types/node": "25.5.0",
     "@vitest/coverage-istanbul": "4.1.0",
-    "@vitest/spy": "4.1.0",
     "eslint": "10.0.3",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",

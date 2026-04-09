@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import AppError from '../types/errors';
+import { AxiosResponseError, AxiosUnknownError } from '../types/errors';
 import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 import { RetryOptions, retryWithBackoff } from './retryWithBackoff';
 
@@ -232,33 +232,19 @@ export class HttpClient {
    * @private
    */
   private normalizeError(error: AxiosError) {
-    let errorMessage: string,
-      errorStatus: number,
-      errorCode: string | undefined,
-      errorHeaders: Record<string, string> | undefined;
+    const baseUrl = error.config?.baseURL ?? '';
+    const url = error.config?.url ?? '';
+    const method = error.config?.method ?? '';
+    const request = `${method} ${baseUrl}${url}`;
 
     if (error.response) {
-      const response = error.response as AxiosResponse<{
-        error: string;
-        message: string;
-        statusCode: number;
-        code?: string;
-      }>;
-      if (response.status === 401) {
+      if (error.response.status === 401) {
         this.unauthorizedCallback();
       }
-      errorMessage = response.data.message || response.data.error || JSON.stringify(response.data);
-      errorStatus = response.status;
-      errorCode = response.data.code;
-      errorHeaders = response.headers as Record<string, string>;
-    } else if (error.request) {
-      errorMessage = 'Server unavailable';
-      errorStatus = 500;
-    } else {
-      errorMessage = error.message;
-      errorStatus = 400;
-    }
 
-    throw new AppError(errorMessage, errorStatus, errorCode, errorHeaders);
+      throw new AxiosResponseError(error.message, request, error.response);
+    } else {
+      throw new AxiosUnknownError(error.message, request, error);
+    }
   }
 }
