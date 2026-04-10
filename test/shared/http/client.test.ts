@@ -58,44 +58,54 @@ describe('HttpClient', () => {
 
       it('should return the received error message on valid response', () => {
         const error = getAxiosError();
+        error.message = 'message';
         error.response = <AxiosResponse>{
-          data: {
-            error: 'here-my-message',
-          },
+          data: { error: 'here-my-message' },
         };
-        assertMessageOnOutputError(myAxios, error, 'here-my-message');
-      });
-
-      it('should return the received data when no error message on valid response', () => {
-        const error = getAxiosError();
-        error.response = <AxiosResponse>{
-          data: 'at-least-this',
-        };
-        assertMessageOnOutputError(myAxios, error, 'at-least-this');
+        assertMessageOnOutputError(myAxios, error, {
+          data: { error: 'here-my-message' },
+          message: 'message',
+          request: ' ',
+          status: undefined,
+          xRequestId: undefined,
+        });
       });
 
       it('should return generic message when request failed', () => {
         const error = getAxiosError();
-        error.response = undefined;
+        error.message = 'message';
         error.request = true;
-        assertMessageOnOutputError(myAxios, error, 'Server unavailable');
+        assertMessageOnOutputError(myAxios, error, {
+          message: 'message',
+          request: ' ',
+          status: 500,
+        });
       });
 
       it('should return reason error message when setting request failed', () => {
         const error = getAxiosError();
-        error.message = 'wat-did-u-do?';
-        assertMessageOnOutputError(myAxios, error, 'wat-did-u-do?');
+        error.message = 'message';
+        assertMessageOnOutputError(myAxios, error, {
+          message: 'message',
+          request: ' ',
+          status: 400,
+        });
       });
 
       it('should return unauthorized message if unauthorized callback is not present', () => {
         const error = getAxiosError();
+        error.message = 'message';
         error.response = <AxiosResponse>{
-          data: {
-            error: 'not authorized',
-          },
+          data: { error: 'not authorized' },
           status: 401,
         };
-        assertMessageOnOutputError(myAxios, error, 'not authorized');
+        assertMessageOnOutputError(myAxios, error, {
+          data: { error: 'not authorized' },
+          message: 'message',
+          request: ' ',
+          status: 401,
+          xRequestId: undefined,
+        });
       });
     });
 
@@ -105,15 +115,25 @@ describe('HttpClient', () => {
         vi.spyOn(axios, 'create').mockReturnValue(myAxios);
 
         const error = getAxiosError();
+        error.message = 'message';
         error.response = <AxiosResponse>{
-          data: {
-            error: 'not authorized',
-          },
+          data: { error: 'not authorized' },
           status: 401,
         };
         const unauthorizedSpy = vi.fn();
 
-        assertMessageOnOutputError(myAxios, error, 'not authorized', unauthorizedSpy);
+        assertMessageOnOutputError(
+          myAxios,
+          error,
+          {
+            data: { error: 'not authorized' },
+            message: 'message',
+            request: ' ',
+            status: 401,
+            xRequestId: undefined,
+          },
+          unauthorizedSpy,
+        );
         expect(unauthorizedSpy).toHaveBeenCalledOnce();
       });
     });
@@ -384,7 +404,7 @@ function getAxiosError(): AxiosError {
 function assertMessageOnOutputError(
   axios: AxiosInstance,
   error: AxiosError,
-  message: string,
+  expectedError: object,
   unauthorizedCallback?: UnauthorizedCallback,
 ) {
   // Arrange
@@ -395,8 +415,10 @@ function assertMessageOnOutputError(
   const rejected = axios.interceptors.response.handlers[0].rejected;
 
   // Act & Assert
-  expect(() => {
+  try {
     rejected?.(error);
     fail('Expected function to throw an error, but it did not.');
-  }).toThrow(message);
+  } catch (e) {
+    expect(e).toMatchObject(expectedError);
+  }
 }
