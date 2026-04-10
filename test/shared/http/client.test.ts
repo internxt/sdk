@@ -4,7 +4,6 @@ import { HttpClient } from '../../../src/shared/http/client';
 import { UnauthorizedCallback } from '../../../src/shared/http/types';
 import * as retryModule from '../../../src/shared/http/retryWithBackoff';
 import { fail } from 'assert';
-import { AxiosResponseError, AxiosUnknownError } from '../../../src/shared/types/errors';
 
 describe('HttpClient', () => {
   beforeEach(() => {
