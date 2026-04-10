@@ -43,7 +43,7 @@
     "vitest": "4.1.0"
   },
   "dependencies": {
-    "axios": "1.13.6",
+    "axios": "1.15.0",
     "internxt-crypto": "1.0.2"
   },
   "lint-staged": {
