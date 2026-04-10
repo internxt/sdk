@@ -8,7 +8,6 @@ export default [
   {
     rules: {
       '@typescript-eslint/no-explicit-any': 'warn',
-      'linebreak-style': ['error', 'windows'],
       'no-restricted-imports': [
         'error',
         {

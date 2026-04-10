@@ -249,9 +249,9 @@
     eslint-config-prettier "^10.1.8"
     typescript-eslint "^8.57.1"
 
-"@internxt/prettier-config@internxt/prettier-config#v1.0.2":
-  version "1.0.2"
-  resolved "https://codeload.github.com/internxt/prettier-config/tar.gz/9fa74e9a2805e1538b50c3809324f1c9d0f3e4f9"
+"@internxt/prettier-config@internxt/prettier-config#v2.0.0":
+  version "2.0.0"
+  resolved "https://codeload.github.com/internxt/prettier-config/tar.gz/66ff94f2d78b71884eac141ae026ca3892c6c4d6"
 
 "@istanbuljs/schema@^0.1.3":
   version "0.1.3"
