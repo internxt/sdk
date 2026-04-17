@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { v4 } from 'uuid';
 import { Storage, StorageTypes } from '../../../src/drive';
 import {
   CreateFolderPayload,
@@ -162,7 +161,7 @@ describe('# storage service tests', () => {
       it('Should return the expected elements, when getFolderFilesByUuid is called', async () => {
         // Arrange
         const responseSubfiles = randomSubfilesResponse(3);
-        const randomUUID = v4();
+        const randomUUID = crypto.randomUUID();
         const { client, headers } = clientAndHeaders({});
         vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(responseSubfiles),
@@ -186,7 +185,7 @@ describe('# storage service tests', () => {
 
       it('Should return the expected elements, when getFolderFoldersByUuid is called', async () => {
         // Arrange
-        const randomUUID = v4();
+        const randomUUID = crypto.randomUUID();
         const responseSubfolders = randomSubfoldersResponse(4);
         const { client, headers } = clientAndHeaders({});
 
@@ -257,7 +256,7 @@ describe('# storage service tests', () => {
           id: 2,
           name: 'zero',
           plainName: 'ma-fol',
-          parentUuid: v4(),
+          parentUuid: crypto.randomUUID(),
           parentId: 0,
           updatedAt: new Date(),
           userId: 1,
@@ -418,21 +417,21 @@ describe('# storage service tests', () => {
     describe('getFolderAncestorsInWorkspace', () => {
       it('When resourceToken is provided then should call with right arguments & return content', async () => {
         // Arrange
-        const workspaceId = v4();
+        const workspaceId = crypto.randomUUID();
         const itemType = 'folder';
-        const itemUuid = v4();
+        const itemUuid = crypto.randomUUID();
         const resourceToken = 'resource-token-workspace';
         const mockResponse: FolderAncestorWorkspace[] = [
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder1',
           },
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder2',
           },
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder3',
           },
         ];
@@ -453,20 +452,20 @@ describe('# storage service tests', () => {
 
       it('When resourceToken is NOT provided then it should call the client.get method without the resourcesToken in headers', async () => {
         // Arrange
-        const workspaceId = v4();
+        const workspaceId = crypto.randomUUID();
         const itemType = 'folder';
-        const itemUuid = v4();
+        const itemUuid = crypto.randomUUID();
         const mockResponse: FolderAncestorWorkspace[] = [
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder1',
           },
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder2',
           },
           {
-            uuid: v4(),
+            uuid: crypto.randomUUID(),
             plainName: 'mi-folder3',
           },
         ];
@@ -655,7 +654,7 @@ describe('# storage service tests', () => {
         // Arrange
         const fileId = 'https://api.4shared.com/v1_2/files/replace';
         const size = 100;
-        const fileUUID = v4();
+        const fileUUID = crypto.randomUUID();
         const response = randomFileData();
         const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue(response);
         const { client, headers } = clientAndHeaders({});
@@ -682,7 +681,7 @@ describe('# storage service tests', () => {
     describe('getFile', () => {
       it('When a fileId is provided without a workspaceToken then it should call getCancellable with the correct URL and headers', async () => {
         // Arrange
-        const fileUUID = v4();
+        const fileUUID = crypto.randomUUID();
         const response = randomFileMetaData();
         const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
@@ -704,7 +703,7 @@ describe('# storage service tests', () => {
 
       it('When a fileId is provided with a workspaceToken then it should call getCancellable with the correct URL and custom headers', async () => {
         // Arrange
-        const fileUUID = v4();
+        const fileUUID = crypto.randomUUID();
         const response = randomFileMetaData();
         const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve(response),
@@ -872,7 +871,7 @@ describe('# storage service tests', () => {
     describe('createThumbnailEntryWithUUID', () => {
       it('Should create a thumbnail entry with UUID and handle resourcesToken', async () => {
         const thumbnailEntryPayload: StorageTypes.CreateThumbnailEntryPayload = {
-          fileUuid: v4(),
+          fileUuid: crypto.randomUUID(),
           type: 'image/jpeg',
           size: 1024,
           maxWidth: 200,

@@ -112,7 +112,7 @@ export async function uploadMultipartFile(
     shards: [{ hash, uuid, UploadId, parts: uploadedPartsReference }],
   };
 
-  const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload, signal);
+  const finishUploadResponse = await network.finishMultipartUpload(bucketId, finishUploadPayload, signal);
 
   return finishUploadResponse.id;
 }
