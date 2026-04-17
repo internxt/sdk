@@ -221,14 +221,16 @@ export type webhooks = Record<string, never>;
 export interface components {
   schemas: {
     MailDomainDto: {
-      /** @example alice@internxt.me */
-      address: string;
+      /** @example f3a1b2c4-… */
+      id: string;
+      /** @example active */
+      status: string;
       /** @example internxt.me */
       domain: string;
-      /** @example Internxt */
-      displayName: string;
-      /** @example 123456789 */
-      password: string;
+      /** @example 2025-06-15T10:29:55Z */
+      createdAt: string;
+      /** @example 2025-06-15T10:29:55Z */
+      updatedAt: string;
     };
     MailboxResponseDto: {
       /** @example f3a1b2c4-… */
