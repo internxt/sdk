@@ -20,6 +20,7 @@ import {
   DraftEmailRequest,
   UpdateEmailRequest,
   ListEmailsQuery,
+  EmailDomainsResponse,
 } from './types';
 import { createKeystores, encryptEmail, passwordProtectAndSendEmail, openKeystore, recoverKeys } from './crypto';
 
@@ -170,31 +171,75 @@ export class Mail {
     return this.api.sendE2EPasswordProtectedEmail(encEmail, email.params);
   }
 
+  /**
+   * Gets the mailboxes of the user
+   *
+   * @returns The mailboxes of the user
+   */
   async getMailboxes(): Promise<MailboxResponse[]> {
     return this.api.getMailboxes();
   }
 
+  /**
+   * Lists emails of the user
+   *
+   * @param query - The query to filter emails
+   * @returns The list of emails
+   */
   async listEmails(query?: ListEmailsQuery): Promise<EmailListResponse> {
     return this.api.listEmails(query);
   }
 
+  /**
+   * Gets the email with the corresponding id
+   *
+   * @param id - The id of the email
+   * @returns The email with the corresponding id
+   */
   async getEmail(id: string): Promise<EmailResponse> {
     return this.api.getEmail(id);
   }
 
+  /**
+   * Deletes the email with the corresponding id
+   *
+   * @param id - The id of the email to delete
+   */
   async deleteEmail(id: string): Promise<void> {
     return this.api.deleteEmail(id);
   }
 
+  /**
+   * Updates the email with the corresponding id
+   *
+   * @param id - The id of the email to update
+   * @param body - The new body of the email
+   */
   async updateEmail(id: string, body: UpdateEmailRequest): Promise<void> {
     return this.api.updateEmail(id, body);
   }
 
+  /**
+   * Sends an email to the specified recipients
+   *
+   * @param body - The body of the email to send
+   * @returns The created email
+   */
   async sendEmail(body: SendEmailRequest): Promise<EmailCreatedResponse> {
     return this.api.sendEmail(body);
   }
 
+  /**
+   * Saves a draft email.
+   *
+   * @param body - The body of the email to save as a draft
+   * @returns The created email
+   */
   async saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
     return this.api.saveDraft(body);
+  }
+
+  async getActiveDomains(): Promise<EmailDomainsResponse> {
+    return this.api.getActiveDomains();
   }
 }
