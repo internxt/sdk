@@ -16,4 +16,10 @@ export type SetupMailAccountPayload = {
   domain: string;
   displayName: string;
   password: string;
+  keys: {
+    publicKey: string;
+    encryptionPrivateKey: string;
+    recoveryPrivateKey: string;
+    salt: string;
+  };
 };

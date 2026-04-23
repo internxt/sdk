@@ -19,7 +19,6 @@ import {
   TwoFactorAuthQR,
 } from './types';
 import { paths } from '../schema';
-import { SetupMailAccountPayload } from '../../src/mail';
 
 export * from './types';
 
@@ -472,15 +471,6 @@ export class Auth {
       },
       this.headersWithToken(token),
     );
-  }
-
-  /**
-   * Sets up a mail account for the user
-   * @param payload - Set of details for mail account setup
-   * @returns A promise that resolves with an object containing the address of the mail account
-   */
-  async setupMailAccount(payload: SetupMailAccountPayload): Promise<{ address: string }> {
-    return this.client.post('/mail/accounts', payload, this.headersWithToken(<string>this.apiSecurity?.token));
   }
 
   /**

@@ -21,6 +21,7 @@ import {
   UpdateEmailRequest,
   ListEmailsQuery,
   EmailDomainsResponse,
+  SetupMailAccountPayload,
 } from './types';
 import { createKeystores, encryptEmail, passwordProtectAndSendEmail, openKeystore, recoverKeys } from './crypto';
 
@@ -241,5 +242,15 @@ export class Mail {
 
   async getActiveDomains(): Promise<EmailDomainsResponse> {
     return this.api.getActiveDomains();
+  }
+
+  /**
+   * Sets up a mail account for the user
+   *
+   * @param payload - Set of details for mail account setup
+   * @returns A promise that resolves with the created mail account address
+   */
+  async setupMailAccount(payload: SetupMailAccountPayload): Promise<{ address: string }> {
+    return this.api.setupMailAccount(payload);
   }
 }

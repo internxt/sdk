@@ -938,26 +938,6 @@ describe('# auth service tests', () => {
       );
     });
   });
-  describe('Setting up the mail account', () => {
-    it('Should call with right params & return values', async () => {
-      const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({
-        address: 'user@domain.com',
-      });
-      const { client, headers } = clientAndHeadersWithToken();
-      const payload = {
-        address: 'user',
-        domain: 'domain.com',
-        displayName: 'User',
-        password: 'mail-password',
-      };
-
-      const body = await client.setupMailAccount(payload);
-
-      expect(postStub).toHaveBeenCalledWith('/mail/accounts', payload, headers);
-      expect(body).toEqual({ address: 'user@domain.com' });
-    });
-  });
-
   describe('Legacy recover account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
