@@ -60,6 +60,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/email/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Search emails
+     * @description Search emails by text, sender, recipient, date range, read status or attachment.
+     */
+    post: operations['EmailController_search'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/email/{id}': {
     parameters: {
       query?: never;
@@ -270,6 +290,38 @@ export interface components {
       /** @example Ma1f09b… */
       nextAnchor?: string;
     };
+    SearchEmailQueryDto: {
+      /** @description Full-text search */
+      text?: string;
+      /** @example 20 */
+      limit?: number;
+      /** @example 0 */
+      position?: number;
+      /**
+       * @description Filter by sender
+       * @example [
+       *       "a@inxt.eu",
+       *       "b@inxt.me"
+       *     ]
+       */
+      from?: string[];
+      /**
+       * @description Filter by recipient
+       * @example [
+       *       "a@inxt.eu",
+       *       "b@inxt.me"
+       *     ]
+       */
+      to?: string[];
+      /** @description ISO 8601 date — emails received after this date */
+      after?: string;
+      /** @description ISO 8601 date — emails received before this date */
+      before?: string;
+      /** @description Filter by read status */
+      unread?: boolean;
+      /** @description Filter by attachment presence */
+      hasAttachment?: boolean;
+    };
     EmailResponseDto: {
       /** @example Ma1f09b… */
       id: string;
@@ -449,6 +501,29 @@ export interface operations {
       cookie?: never;
     };
     requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailListResponseDto'];
+        };
+      };
+    };
+  };
+  EmailController_search: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SearchEmailQueryDto'];
+      };
+    };
     responses: {
       200: {
         headers: {

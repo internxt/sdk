@@ -20,6 +20,7 @@ import {
   DraftEmailRequest,
   UpdateEmailRequest,
   ListEmailsQuery,
+  SearchFiltersQuery,
 } from './types';
 import { createKeystores, encryptEmail, passwordProtectAndSendEmail, openKeystore, recoverKeys } from './crypto';
 
@@ -196,5 +197,9 @@ export class Mail {
 
   async saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
     return this.api.saveDraft(body);
+  }
+
+  async search(filters: SearchFiltersQuery): Promise<EmailListResponse> {
+    return this.api.search(filters);
   }
 }
