@@ -495,6 +495,8 @@ export interface operations {
         position?: number;
         /** @description Anchor ID for pagination. */
         anchorId?: string;
+        /** @description Filter by read status. */
+        unread?: boolean;
       };
       header?: never;
       path?: never;
