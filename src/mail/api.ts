@@ -21,6 +21,7 @@ import {
   ListEmailsQuery,
   EmailDomainsResponse,
   SetupMailAccountPayload,
+  SearchFiltersQuery,
 } from './types';
 
 export class MailApi {
@@ -104,6 +105,10 @@ export class MailApi {
    */
   async sendE2EPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
     return this.client.post('/emails', { email, params }, this.headers());
+  }
+
+  async search(filters: SearchFiltersQuery): Promise<EmailListResponse> {
+    return this.client.post('/email/search', filters, this.headers());
   }
 
   /**

@@ -20,6 +20,7 @@ import {
   DraftEmailRequest,
   UpdateEmailRequest,
   ListEmailsQuery,
+  SearchFiltersQuery,
   EmailDomainsResponse,
   SetupMailAccountPayload,
 } from './types';
@@ -238,6 +239,10 @@ export class Mail {
    */
   async saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
     return this.api.saveDraft(body);
+  }
+
+  async search(filters: SearchFiltersQuery): Promise<EmailListResponse> {
+    return this.api.search(filters);
   }
 
   async getActiveDomains(): Promise<EmailDomainsResponse> {
