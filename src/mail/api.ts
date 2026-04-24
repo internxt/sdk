@@ -19,6 +19,8 @@ import {
   DraftEmailRequest,
   UpdateEmailRequest,
   ListEmailsQuery,
+  EmailDomainsResponse,
+  SetupMailAccountPayload,
   SearchFiltersQuery,
 } from './types';
 
@@ -46,7 +48,7 @@ export class MailApi {
    * @returns Server response
    */
   async uploadKeystore(keystore: EncryptedKeystore): Promise<void> {
-    return this.client.post(`${this.apiUrl}/keystore`, { encryptedKeystore: keystore }, this.headers());
+    return this.client.post('/keystore', { encryptedKeystore: keystore }, this.headers());
   }
 
   /**
@@ -57,7 +59,7 @@ export class MailApi {
    * @returns The encrypted keystore
    */
   async downloadKeystore(userEmail: string, keystoreType: KeystoreType): Promise<EncryptedKeystore> {
-    return this.client.getWithParams(`${this.apiUrl}/user/keystore`, { userEmail, keystoreType }, this.headers());
+    return this.client.getWithParams('/user/keystore', { userEmail, keystoreType }, this.headers());
   }
 
   /**
@@ -68,7 +70,7 @@ export class MailApi {
    */
   async getUsersWithPublicKeys(emails: string[]): Promise<RecipientWithPublicKey[]> {
     const response = await this.client.post<{ publicKey: string; email: string }[]>(
-      `${this.apiUrl}/users/public-keys`,
+      '/users/public-keys',
       { emails },
       this.headers(),
     );
@@ -91,7 +93,7 @@ export class MailApi {
    * @returns Server response
    */
   async sendE2EEmails(emails: HybridEncryptedEmail[], params: EmailPublicParameters): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { emails, params }, this.headers());
+    return this.client.post('/emails', { emails, params }, this.headers());
   }
 
   /**
@@ -102,39 +104,100 @@ export class MailApi {
    * @returns Server response
    */
   async sendE2EPasswordProtectedEmail(email: PwdProtectedEmail, params: EmailPublicParameters): Promise<void> {
-    return this.client.post(`${this.apiUrl}/emails`, { email, params }, this.headers());
+    return this.client.post('/emails', { email, params }, this.headers());
   }
 
   async search(filters: SearchFiltersQuery): Promise<EmailListResponse> {
-    return this.client.post(`${this.apiUrl}/email/search`, filters, this.headers());
+    return this.client.post('/email/search', filters, this.headers());
   }
 
+  /**
+   * Gets the mailboxes of the user
+   *
+   * @returns The mailboxes of the user - `MailboxResponse[]`
+   */
   async getMailboxes(): Promise<MailboxResponse[]> {
-    return this.client.get(`${this.apiUrl}/email/mailboxes`, this.headers());
+    return this.client.get('/email/mailboxes', this.headers());
   }
 
+  /**
+   * Lists emails of the user
+   *
+   * @param query - The query to filter emails (e.g. mailbox, limit, etc.)
+   * @returns The list of emails - `EmailListResponse`
+   */
   async listEmails(query?: ListEmailsQuery): Promise<EmailListResponse> {
-    return this.client.getWithParams(`${this.apiUrl}/email`, query ?? {}, this.headers());
+    return this.client.getWithParams('/email', query ?? {}, this.headers());
   }
 
+  /**
+   * Gets the email with the corresponding id
+   *
+   * @param id - The id of the email
+   * @returns The email with the corresponding id - `EmailResponse`
+   */
   async getEmail(id: string): Promise<EmailResponse> {
-    return this.client.get(`${this.apiUrl}/email/${id}`, this.headers());
+    return this.client.get(`/email/${id}`, this.headers());
   }
 
+  /**
+   * Deletes the email with the corresponding id
+   *
+   * @param id - The id of the email to delete
+   * @returns A promise that resolves when the email is deleted
+   */
   async deleteEmail(id: string): Promise<void> {
-    return this.client.delete(`${this.apiUrl}/email/${id}`, this.headers());
+    return this.client.delete(`/email/${id}`, this.headers());
   }
 
+  /**
+   * Updates the email with the corresponding id
+   *
+   * @param id - The id of the email to update
+   * @param body - The new body of the email
+   * @returns A promise that resolves when the email is updated
+   */
   async updateEmail(id: string, body: UpdateEmailRequest): Promise<void> {
-    return this.client.patch(`${this.apiUrl}/email/${id}`, body, this.headers());
+    return this.client.patch(`/email/${id}`, body, this.headers());
   }
 
+  /**
+   * Sends an email to the specified recipients
+   *
+   * @param body - The body of the email to send
+   * @returns The created email
+   */
   async sendEmail(body: SendEmailRequest): Promise<EmailCreatedResponse> {
-    return this.client.post(`${this.apiUrl}/email/send`, body, this.headers());
+    return this.client.post('/email/send', body, this.headers());
   }
 
+  /**
+   * Saves a draft email
+   *
+   * @param body - The body of the draft email to save
+   * @returns The created email - `EmailCreatedResponse`
+   */
   async saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
-    return this.client.post(`${this.apiUrl}/email/drafts`, body, this.headers());
+    return this.client.post('/email/drafts', body, this.headers());
+  }
+
+  /**
+   * Returns the list of active domains for the email gateway
+   *
+   * @returns The list of active domains - `ActiveDomainsResponse`
+   */
+  async getActiveDomains(): Promise<EmailDomainsResponse> {
+    return this.client.get('/email/domains', this.headers());
+  }
+
+  /**
+   * Sets up a mail account for the user
+   *
+   * @param payload - Set of details for mail account setup
+   * @returns A promise that resolves with the created mail account address
+   */
+  async setupMailAccount(payload: SetupMailAccountPayload): Promise<{ address: string }> {
+    return this.client.post('/users/me/mail-account', payload, this.headers());
   }
 
   /**

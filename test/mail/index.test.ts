@@ -288,6 +288,30 @@ describe('Mail service tests', () => {
       expect(result).toEqual(email.body);
     });
   });
+
+  describe('test mail account setup', () => {
+    it('When a mail account setup is requested, then it should POST to /users/me/mail-account and return the created address', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({ address: 'user@domain.com' });
+      const payload = {
+        address: 'user',
+        domain: 'domain.com',
+        displayName: 'User',
+        password: 'mail-password',
+        keys: {
+          publicKey: 'public-key',
+          encryptionPrivateKey: 'encryption-private-key',
+          recoveryPrivateKey: 'recovery-private-key',
+          salt: 'salt',
+        },
+      };
+
+      const result = await client.setupMailAccount(payload);
+
+      expect(postStub).toHaveBeenCalledWith('/users/me/mail-account', payload, headers);
+      expect(result).toEqual({ address: 'user@domain.com' });
+    });
+  });
 });
 
 function clientAndHeadersWithToken(
