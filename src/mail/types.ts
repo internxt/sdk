@@ -24,3 +24,11 @@ export type SetupMailAccountPayload = {
     salt: string;
   };
 };
+
+export type MailAccountKeysResponse = {
+  address: string;
+  publicKey: string;
+  encryptionPrivateKey: string;
+  recoveryPrivateKey: string;
+  salt: string;
+};

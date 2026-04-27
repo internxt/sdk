@@ -311,6 +311,23 @@ describe('Mail service tests', () => {
       expect(postStub).toHaveBeenCalledWith('/users/me/mail-account', payload, headers);
       expect(result).toEqual({ address: 'user@domain.com' });
     });
+
+    it('When the mail account keys are requested, then it should GET /users/me/mail-account/keys with the address', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const expectedKeys = {
+        address: 'user@domain.com',
+        publicKey: 'public-key',
+        encryptionPrivateKey: 'encryption-private-key',
+        recoveryPrivateKey: 'recovery-private-key',
+        salt: 'salt',
+      };
+      const getStub = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(expectedKeys);
+
+      const result = await client.getMailAccountKeys('user@domain.com');
+
+      expect(getStub).toHaveBeenCalledWith('/users/me/mail-account/keys', { address: 'user@domain.com' }, headers);
+      expect(result).toEqual(expectedKeys);
+    });
   });
 });
 

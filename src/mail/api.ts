@@ -22,6 +22,7 @@ import {
   EmailDomainsResponse,
   SetupMailAccountPayload,
   SearchFiltersQuery,
+  MailAccountKeysResponse,
 } from './types';
 
 export class MailApi {
@@ -198,6 +199,16 @@ export class MailApi {
    */
   async setupMailAccount(payload: SetupMailAccountPayload): Promise<{ address: string }> {
     return this.client.post('/users/me/mail-account', payload, this.headers());
+  }
+
+  /**
+   * Gets the mail account keys for the given address
+   *
+   * @param address - The mail address whose keys should be retrieved
+   * @returns The public, encrypted private and recovery keys plus the salt
+   */
+  async getMailAccountKeys(address: string): Promise<MailAccountKeysResponse> {
+    return this.client.getWithParams('/users/me/mail-account/keys', { address }, this.headers());
   }
 
   /**
