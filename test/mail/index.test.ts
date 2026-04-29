@@ -302,7 +302,6 @@ describe('Mail service tests', () => {
           publicKey: 'public-key',
           encryptionPrivateKey: 'encryption-private-key',
           recoveryPrivateKey: 'recovery-private-key',
-          salt: 'salt',
         },
       };
 
@@ -319,7 +318,6 @@ describe('Mail service tests', () => {
         publicKey: 'public-key',
         encryptionPrivateKey: 'encryption-private-key',
         recoveryPrivateKey: 'recovery-private-key',
-        salt: 'salt',
       };
       const getStub = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(expectedKeys);
 
