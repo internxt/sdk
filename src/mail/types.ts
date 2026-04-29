@@ -21,7 +21,6 @@ export type SetupMailAccountPayload = {
     publicKey: string;
     encryptionPrivateKey: string;
     recoveryPrivateKey: string;
-    salt: string;
   };
 };
 
@@ -30,5 +29,4 @@ export type MailAccountKeysResponse = {
   publicKey: string;
   encryptionPrivateKey: string;
   recoveryPrivateKey: string;
-  salt: string;
 };
