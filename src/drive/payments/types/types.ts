@@ -81,6 +81,11 @@ export type StoragePlan = {
   isTeam: boolean;
   isLifetime: boolean;
   renewalPeriod: RenewalPeriod;
+  commitment: {
+    enabled: boolean;
+    remainingMonths: number;
+    cancellationDate: string | null;
+  };
   storageLimit: number;
   amountOfSeats: number;
   isAppSumo?: boolean;
