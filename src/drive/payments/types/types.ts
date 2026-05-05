@@ -83,8 +83,9 @@ export type StoragePlan = {
   renewalPeriod: RenewalPeriod;
   commitment: {
     enabled: boolean;
-    remainingMonths: number;
-    cancellationDate: string | null;
+    isFirstMonth?: boolean;
+    remainingMonths?: number;
+    cancellationDate?: string | null;
   };
   storageLimit: number;
   amountOfSeats: number;
