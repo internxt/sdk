@@ -30,8 +30,15 @@ export class Meet {
 
   async leaveCall(callId: string, payload?: LeaveCallPayload): Promise<void> {
     const headers = this.apiSecurity?.token ? this.headersWithToken() : this.basicHeaders();
+    const fetchOptions = { keepalive: true } as RequestInit;
 
-    return this.client.post<void>(`call/${callId}/users/leave`, payload ? { ...payload } : {}, headers);
+    return this.client.post<void>(
+      `call/${callId}/users/leave`,
+      payload ? { ...payload } : {},
+      headers,
+      undefined,
+      fetchOptions,
+    );
   }
 
   async getCurrentUsersInCall(callId: string): Promise<UsersInCallResponse[]> {

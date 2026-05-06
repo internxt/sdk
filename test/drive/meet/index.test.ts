@@ -146,7 +146,7 @@ describe('Meet service tests', () => {
       await client.leaveCall(callId);
 
       // Assert
-      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers, undefined, { keepalive: true });
     });
 
     it('should leave a call successfully without token and no payload', async () => {
@@ -158,7 +158,7 @@ describe('Meet service tests', () => {
       await client.leaveCall(callId);
 
       // Assert
-      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers);
+      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, {}, headers, undefined, { keepalive: true });
     });
 
     it('should send userId in body when anonymous user leaves with token', async () => {
@@ -168,7 +168,13 @@ describe('Meet service tests', () => {
 
       await client.leaveCall(callId, payload);
 
-      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, { userId: 'anon-uuid-456' }, headers);
+      expect(postCall).toHaveBeenCalledWith(
+        `call/${callId}/users/leave`,
+        { userId: 'anon-uuid-456' },
+        headers,
+        undefined,
+        { keepalive: true },
+      );
     });
 
     it('should send userId in body when anonymous user leaves without token', async () => {
@@ -178,7 +184,13 @@ describe('Meet service tests', () => {
 
       await client.leaveCall(callId, payload);
 
-      expect(postCall).toHaveBeenCalledWith(`call/${callId}/users/leave`, { userId: 'anon-uuid-789' }, headers);
+      expect(postCall).toHaveBeenCalledWith(
+        `call/${callId}/users/leave`,
+        { userId: 'anon-uuid-789' },
+        headers,
+        undefined,
+        { keepalive: true },
+      );
     });
   });
 });
