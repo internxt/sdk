@@ -134,7 +134,7 @@ export class HttpClient {
   }
 
   /**
-   * Requests a POST with fetch adapter andkeep-alive option
+   * Requests a POST with fetch adapter and keep-alive option
    * @param url
    * @param params
    * @param headers
