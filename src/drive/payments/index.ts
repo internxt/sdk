@@ -5,16 +5,12 @@ import AppError from '../../shared/types/errors';
 import { Tier } from './types/tiers';
 import {
   AvailableProducts,
-  CreateCheckoutSessionPayload,
-  CreatedSubscriptionData,
-  CreatePaymentSessionPayload,
+  CouponCodeData,
   CustomerBillingInfo,
   DisplayPrice,
-  FreeTrialAvailable,
   Invoice,
   InvoicePayload,
   PaymentMethod,
-  ProductData,
   RedeemCodePayload,
   UpdateSubscriptionPaymentMethod,
   UserSubscription,
@@ -34,83 +30,6 @@ export class Payments {
     this.client = HttpClient.create(apiUrl, apiSecurity.unauthorizedCallback, apiSecurity.retryOptions);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
-  }
-
-  public createCustomer(
-    name: string,
-    email: string,
-    country?: string,
-    companyVatId?: string,
-  ): Promise<{ customerId: string; token: string }> {
-    return this.client.post('/create-customer', { name, email, country, companyVatId }, this.headers());
-  }
-
-  public createSubscription(
-    customerId: string,
-    priceId: string,
-    token: string,
-    quantity: number,
-    currency?: string,
-    promoCodeId?: string,
-  ): Promise<CreatedSubscriptionData> {
-    return this.client.post(
-      '/create-subscription',
-      {
-        customerId,
-        priceId,
-        token,
-        quantity,
-        currency,
-        promoCodeId,
-      },
-      this.headers(),
-    );
-  }
-
-  public createPaymentIntent(
-    customerId: string,
-    amount: number,
-    planId: string,
-    token: string,
-    currency?: string,
-    promoCodeName?: string,
-  ): Promise<{ clientSecret: string; id: string; invoiceStatus?: string }> {
-    const query = new URLSearchParams();
-    query.set('customerId', customerId);
-    query.set('amount', String(amount));
-    query.set('planId', planId);
-    query.set('token', token);
-    if (currency !== undefined) query.set('currency', currency);
-    if (promoCodeName !== undefined) query.set('promoCodeName', promoCodeName);
-    return this.client.get(`/payment-intent?${query.toString()}`, this.headers());
-  }
-
-  /**
-   * Fetches the existing products and its details
-   */
-  public getProducts(): Promise<ProductData[]> {
-    return this.client.get('/v3/stripe/products', this.headers());
-  }
-
-  /**
-   * Creates and returns a new session identifier for the client to go to payment platform
-   * @param payload
-   */
-  public createSession(payload: CreatePaymentSessionPayload): Promise<{
-    id: string;
-  }> {
-    return this.client.post(
-      '/v2/stripe/session',
-      {
-        test: payload.test,
-        lifetime_tier: payload.lifetime_tier,
-        mode: payload.mode,
-        priceId: payload.priceId,
-        successUrl: payload.successUrl,
-        canceledUrl: payload.canceledUrl,
-      },
-      this.headers(),
-    );
   }
 
   public getSetupIntent(userType?: UserType): Promise<{ clientSecret: string }> {
@@ -140,15 +59,6 @@ export class Payments {
     return this.client.get(`/invoices?${query.toString()}`, this.headers());
   }
 
-  public isCouponUsedByUser({ couponCode }: { couponCode: string }): Promise<{
-    couponUsed: boolean;
-  }> {
-    const query = new URLSearchParams();
-    if (couponCode !== undefined) query.set('code', couponCode);
-
-    return this.client.get(`/coupon-in-use?${query.toString()}`, this.headers());
-  }
-
   public getPromoCodesUsedByUser(): Promise<{ usedCoupons: string[] }> {
     return this.client.get('/customer/redeemed-promotion-codes', this.headers());
   }
@@ -164,19 +74,25 @@ export class Payments {
     });
   }
 
+  public async fetchPromotionCodeByName(priceId: string, promotionCodeName: string): Promise<CouponCodeData> {
+    const promotionCode = await this.client.get<{ codeId: string; amountOff: number; percentOff: number }>(
+      `/promo-code-by-name?priceId=${priceId}&promotionCode=${promotionCodeName}`,
+      this.headers(),
+    );
+
+    return {
+      codeId: promotionCode.codeId,
+      codeName: promotionCodeName,
+      amountOff: promotionCode.amountOff,
+      percentOff: promotionCode.percentOff,
+    };
+  }
+
   public async getPrices(currency?: string, userType?: UserType): Promise<DisplayPrice[]> {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
     if (userType) query.set('userType', userType);
     return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
-  }
-
-  public requestPreventCancellation(): Promise<FreeTrialAvailable> {
-    return this.client.get('/request-prevent-cancellation', this.headers());
-  }
-
-  public preventCancellation(): Promise<void> {
-    return this.client.put('/prevent-cancellation', {}, this.headers());
   }
 
   public applyRedeemCode(payload: RedeemCodePayload): Promise<void> {
@@ -215,10 +131,6 @@ export class Payments {
     const query = new URLSearchParams();
     if (userType) query.set('userType', userType);
     return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
-  }
-
-  public createCheckoutSession(payload: CreateCheckoutSessionPayload): Promise<{ sessionId: string }> {
-    return this.client.post('/checkout-session', { ...payload }, this.headers());
   }
 
   public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
