@@ -140,7 +140,7 @@ describe('Meet service tests', () => {
     it('should leave a call successfully with token and no payload', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+      const postCall = vi.spyOn(HttpClient.prototype, 'postWithKeepAlive').mockResolvedValue(undefined);
 
       // Act
       await client.leaveCall(callId);
@@ -152,7 +152,7 @@ describe('Meet service tests', () => {
     it('should leave a call successfully without token and no payload', async () => {
       // Arrange
       const { client, headers } = clientAndHeadersWithoutToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+      const postCall = vi.spyOn(HttpClient.prototype, 'postWithKeepAlive').mockResolvedValue(undefined);
 
       // Act
       await client.leaveCall(callId);
@@ -164,7 +164,7 @@ describe('Meet service tests', () => {
     it('should send userId in body when anonymous user leaves with token', async () => {
       const payload: LeaveCallPayload = { userId: 'anon-uuid-456' };
       const { client, headers } = clientAndHeadersWithToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+      const postCall = vi.spyOn(HttpClient.prototype, 'postWithKeepAlive').mockResolvedValue(undefined);
 
       await client.leaveCall(callId, payload);
 
@@ -174,7 +174,7 @@ describe('Meet service tests', () => {
     it('should send userId in body when anonymous user leaves without token', async () => {
       const payload: LeaveCallPayload = { userId: 'anon-uuid-789' };
       const { client, headers } = clientAndHeadersWithoutToken();
-      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+      const postCall = vi.spyOn(HttpClient.prototype, 'postWithKeepAlive').mockResolvedValue(undefined);
 
       await client.leaveCall(callId, payload);
 

@@ -134,6 +134,24 @@ export class HttpClient {
   }
 
   /**
+   * Requests a POST with fetch adapter and keep-alive option
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public async postWithKeepAlive<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
+    return await this.execute(() =>
+      this.axios.post(url, params, {
+        headers,
+        adapter: 'fetch',
+        fetchOptions: {
+          keepalive: true,
+        },
+      }),
+    );
+  }
+
+  /**
    * Requests a POST FORM
    * @param url
    * @param params
