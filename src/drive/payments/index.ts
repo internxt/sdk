@@ -1,5 +1,5 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
-import { headersWithToken } from '../../shared/headers';
+import { basicHeaders, headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
 import AppError from '../../shared/types/errors';
 import { Tier } from './types/tiers';
@@ -77,7 +77,7 @@ export class Payments {
   public async fetchPromotionCodeByName(priceId: string, promotionCodeName: string): Promise<CouponCodeData> {
     const promotionCode = await this.client.get<{ codeId: string; amountOff: number; percentOff: number }>(
       `/promo-code-by-name?priceId=${priceId}&promotionCode=${promotionCodeName}`,
-      this.headers(),
+      this.headersWithoutToken(),
     );
 
     return {
@@ -92,7 +92,7 @@ export class Payments {
     const query = new URLSearchParams();
     if (currency !== undefined) query.set('currency', currency);
     if (userType) query.set('userType', userType);
-    return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headers());
+    return this.client.get<DisplayPrice[]>(`/prices?${query.toString()}`, this.headersWithoutToken());
   }
 
   public applyRedeemCode(payload: RedeemCodePayload): Promise<void> {
@@ -177,6 +177,19 @@ export class Payments {
       clientVersion: this.appDetails.clientVersion,
       token: this.apiSecurity.token,
       workspaceToken: this.apiSecurity.workspaceToken,
+      desktopToken: this.appDetails.desktopHeader,
+      customHeaders: this.appDetails.customHeaders,
+    });
+  }
+
+  /**
+   * Returns the basic headers (without auth) for the module requests
+   * @private
+   */
+  private headersWithoutToken() {
+    return basicHeaders({
+      clientName: this.appDetails.clientName,
+      clientVersion: this.appDetails.clientVersion,
       desktopToken: this.appDetails.desktopHeader,
       customHeaders: this.appDetails.customHeaders,
     });
