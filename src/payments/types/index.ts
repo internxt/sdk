@@ -19,7 +19,6 @@ export interface CreateSubscriptionPayload {
   captchaToken: string;
   currency?: string;
   promoCodeId?: string;
-  quantity?: number;
 }
 
 export interface CreatePaymentIntentPayload {
@@ -64,8 +63,6 @@ export type Price = {
   decimalAmount: number;
   type: UserType;
   product: string;
-  minimumSeats?: number;
-  maximumSeats?: number;
 };
 
 export type Taxes = {
