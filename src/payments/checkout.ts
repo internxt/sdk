@@ -93,7 +93,6 @@ export class Checkout {
     currency,
     captchaToken,
     promoCodeId,
-    quantity,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/checkout/subscription',
@@ -104,7 +103,6 @@ export class Checkout {
         currency,
         captchaToken,
         promoCodeId,
-        quantity,
       },
       this.authHeaders(),
     );
