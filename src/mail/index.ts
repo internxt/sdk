@@ -14,6 +14,7 @@ import {
   SetupMailAccountPayload,
   SearchFiltersQuery,
   MailAccountKeysResponse,
+  MailAccountResponse,
   EncryptedKeystore,
   KeystoreType,
   RecipientWithPublicKey,
@@ -171,6 +172,16 @@ export class MailApi {
    */
   getActiveDomains(): Promise<EmailDomainsResponse> {
     return this.client.get('/email/domains', this.headers());
+  }
+
+  /**
+   * Returns the current mail account for the authenticated user, including its
+   * state, default address, and (when suspended) the scheduled deletion time.
+   *
+   * @returns The mail account details — `MailAccountResponse`
+   */
+  getMailAccount(): Promise<MailAccountResponse> {
+    return this.client.get('/users/me/mail-account', this.headers());
   }
 
   /**

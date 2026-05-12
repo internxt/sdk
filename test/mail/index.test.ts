@@ -1,5 +1,6 @@
 import { HttpClient } from '../../src/shared/http/client';
 import { MailApi } from '../../src/mail/index';
+import type { MailAccountResponse } from '../../src/mail/types';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { headersWithToken } from '../../src/shared/headers';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -7,6 +8,47 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 describe('Mail service tests', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+  });
+
+  describe('getMailAccount', () => {
+    it('When the account is active, then it should GET /users/me/mail-account and return the account', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const response: MailAccountResponse = {
+        id: 'account-1',
+        defaultAddress: 'jane@inxt.me',
+        status: 'active',
+      };
+      const getStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
+
+      const result = await client.getMailAccount();
+
+      expect(getStub).toHaveBeenCalledWith('/users/me/mail-account', headers);
+      expect(result).toEqual(response);
+    });
+
+    it('When the account is suspended, then it should return suspendedAt and deletionAt timestamps', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const response: MailAccountResponse = {
+        id: 'account-1',
+        defaultAddress: 'jane@inxt.me',
+        status: 'suspended',
+        suspendedAt: '2026-05-01T00:00:00.000Z',
+        deletionAt: '2026-06-01T00:00:00.000Z',
+      };
+      const getStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
+
+      const result = await client.getMailAccount();
+
+      expect(getStub).toHaveBeenCalledWith('/users/me/mail-account', headers);
+      expect(result).toEqual(response);
+    });
+
+    it('When the HTTP client throws, then the error should propagate', async () => {
+      const { client } = clientAndHeadersWithToken();
+      vi.spyOn(HttpClient.prototype, 'get').mockRejectedValue(new Error('Unauthorized'));
+
+      await expect(client.getMailAccount()).rejects.toThrow('Unauthorized');
+    });
   });
 
   describe('test mail account setup', () => {
