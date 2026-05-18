@@ -395,6 +395,24 @@ export interface components {
       /** @example <p>Hi team, here are the notes…</p> */
       htmlBody: string | null;
     };
+    EncryptedWrappedKeyDto: {
+      /** @description Hybrid ciphertext (base64) */
+      hybridCiphertext: string;
+      /** @description Encrypted symmetric key (base64) */
+      encryptedKey: string;
+    };
+    EncryptionBlockDto: {
+      /** @example v1 */
+      version: 'v1';
+      /** @description Encrypted subject (base64) */
+      encryptedSubject: string;
+      /** @description Encrypted text body (base64) */
+      encryptedText: string;
+      /** @description Per-address wrapped keys, keyed by email address */
+      wrappedKeys: {
+        [address: string]: components['schemas']['EncryptedWrappedKeyDto'];
+      };
+    };
     SendEmailRequestDto: {
       /** @description Primary recipients (at least one required) */
       to: components['schemas']['EmailAddressDto'][];
@@ -412,6 +430,23 @@ export interface components {
        * @example <p>Hi team, here are the notes from today…</p>
        */
       htmlBody?: string;
+      encryption?: components['schemas']['EncryptionBlockDto'];
+    };
+    LookupRecipientKeysRequestDto: {
+      /**
+       * @description 1-50 email addresses to look up
+       * @example ['alice@internxt.me','bob@internxt.com']
+       */
+      addresses: string[];
+    };
+    RecipientKeyDto: {
+      /** @example alice@internxt.me */
+      address: string;
+      /** @example base64encodedpublickey== */
+      publicKey: string | null;
+    };
+    LookupRecipientKeysResponseDto: {
+      recipients: components['schemas']['RecipientKeyDto'][];
     };
     EmailCreatedResponseDto: {
       /**
@@ -670,6 +705,36 @@ export interface operations {
       };
       /** @description Email not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EmailController_lookupRecipientKeys: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LookupRecipientKeysRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LookupRecipientKeysResponseDto'];
+        };
+      };
+      /** @description Invalid request: 1-50 valid emails required */
+      400: {
         headers: {
           [name: string]: unknown;
         };
