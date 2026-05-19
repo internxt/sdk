@@ -28,10 +28,10 @@ export class Meet {
     return this.client.post<JoinCallResponse>(`call/${callId}/users/join`, { ...payload }, headers);
   }
 
-  async leaveCall(callId: string, payload?: LeaveCallPayload): Promise<void> {
+  async leaveCall(callId: string, payload: LeaveCallPayload): Promise<void> {
     const headers = this.apiSecurity?.token ? this.headersWithToken() : this.basicHeaders();
 
-    return this.client.postWithKeepAlive<void>(`call/${callId}/users/leave`, payload ? { ...payload } : {}, headers);
+    return this.client.postWithKeepAlive<void>(`call/${callId}/users/leave`, { ...payload }, headers);
   }
 
   async getCurrentUsersInCall(callId: string): Promise<UsersInCallResponse[]> {
