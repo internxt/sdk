@@ -1,0 +1,11 @@
+apis:
+  default:
+    root: https://gateway.internxt.com/drive/api-json
+    x-openapi-ts:
+      output: ./src/schema.ts
+resolve:
+  http:
+    headers:
+      - name: internxt-client
+        value: sdk
+        matches: https://gateway.internxt.com/**

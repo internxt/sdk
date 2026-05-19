@@ -31,6 +31,14 @@ export type MailAccountKeysResponse = {
   recoveryPrivateKey: string;
 };
 
+export type MailAccountResponse = {
+  id: string;
+  defaultAddress: string;
+  status: 'active' | 'suspended';
+  suspendedAt?: string;
+  deletionAt?: string;
+};
+
 export type EncryptedKeystore = {
   userEmail: string;
   type: KeystoreType;

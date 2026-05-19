@@ -14,6 +14,7 @@ import {
   SetupMailAccountPayload,
   SearchFiltersQuery,
   MailAccountKeysResponse,
+  MailAccountResponse,
   EncryptedKeystore,
   KeystoreType,
   RecipientWithPublicKey,
@@ -174,6 +175,16 @@ export class MailApi {
   }
 
   /**
+   * Returns the current mail account for the authenticated user, including its
+   * state, default address, and (when suspended) the scheduled deletion time.
+   *
+   * @returns The mail account details — `MailAccountResponse`
+   */
+  getMailAccount(): Promise<MailAccountResponse> {
+    return this.client.get('/users/me/mail-account', this.headers());
+  }
+
+  /**
    * Sets up a mail account for the user
    *
    * @param payload - Set of details for mail account setup
@@ -184,13 +195,15 @@ export class MailApi {
   }
 
   /**
-   * Gets the mail account keys for the given address
+   * Gets the mail account keys for the given address. When omitted, the
+   * backend returns the keys for the caller's default address.
    *
-   * @param address - The mail address whose keys should be retrieved
+   * @param address - Optional. The mail address whose keys should be retrieved
    * @returns The public, encrypted private and recovery keys plus the salt
    */
-  getMailAccountKeys(address: string): Promise<MailAccountKeysResponse> {
-    return this.client.getWithParams('/users/me/mail-account/keys', { address }, this.headers());
+  getMailAccountKeys(address?: string): Promise<MailAccountKeysResponse> {
+    const params = address ? { address } : {};
+    return this.client.getWithParams('/users/me/mail-account/keys', params, this.headers());
   }
 
   /**

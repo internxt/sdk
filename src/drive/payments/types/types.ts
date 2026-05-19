@@ -221,3 +221,10 @@ export type AvailableProducts = {
     backups: boolean;
   };
 };
+
+export interface CouponCodeData {
+  codeId: string;
+  codeName: string;
+  amountOff?: number;
+  percentOff?: number;
+}
