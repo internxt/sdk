@@ -498,16 +498,6 @@ export class Share {
     return this.client.get(`sharings/invites/${invitationId}/validate`, this.headers());
   }
 
-  /**
-   * Share a private folder with a user.
-   * @param {string} invitationId - The id of the invitation.
-   * @param {ShareFolderWithUserPayload} options - The options for sharing the private folder with a user.
-   * @param {string} options.encryptionKey - The encryption key (just in case the invitation is a request).
-   * @param {string} options.itemType - The encryption algorithm (just in case the invitation is a request).
-   
-   * @returns {Promise<void>} A promise that resolves when the folder is shared with the user.
-   */
-
   public acceptSharedFolderInvite({
     invitationId,
     acceptInvite,
@@ -522,7 +512,7 @@ export class Share {
     return this.client.post(
       `sharings/invites/${invitationId}/accept`,
       {
-        acceptInvite,
+        ...acceptInvite,
       },
       headers,
     );
