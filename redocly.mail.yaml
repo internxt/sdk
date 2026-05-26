@@ -1,0 +1,5 @@
+apis:
+  mail:
+    root: http://localhost:3100/docs-json
+    x-openapi-ts:
+      output: ./src/mail/schema.ts
