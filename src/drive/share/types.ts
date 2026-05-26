@@ -208,6 +208,7 @@ export type PublicSharedItemInfo = {
 export type AcceptInvitationToSharedFolderPayload = {
   encryptionKey: string;
   encryptionAlgorithm: string;
+  roleId?: string;
 };
 
 export type PrivateSharingRole = { id: string; name: string; createdAt: Date; updatedAt: Date };
@@ -339,6 +340,13 @@ export type SharingInvite = {
   roleId: string;
   createdAt: Date;
   updatedAt: Date;
+  invited: {
+    avatar: string | null;
+    email: string;
+    lastname?: string;
+    name: string;
+    uuid: string;
+  };
 };
 
 export type SharingMeta = {
