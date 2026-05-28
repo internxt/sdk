@@ -128,6 +128,26 @@ export interface paths {
     patch: operations['EmailController_update'];
     trace?: never;
   };
+  '/email/keys/lookup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Look up recipient public keys
+     * @description Returns the public encryption key for each address if it belongs to an active Internxt domain. Returns null for external or unknown addresses.
+     */
+    post: operations['EmailController_lookupRecipientKeys'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/email/send': {
     parameters: {
       query?: never;
@@ -168,32 +188,73 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/gateway/accounts': {
+  '/users/me/mail-account': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get?: never;
+    /**
+     * Get the caller`s mail account status
+     * @description Returns the account status. When suspended, includes `suspendedAt` and the scheduled `deletionAt`.
+     */
+    get: operations['UserController_getMailAccount'];
     put?: never;
-    /** Provision a new mail account (called by the auth service) */
-    post: operations['GatewayController_provisionAccount'];
+    /** Provision the caller`s mail account */
+    post: operations['UserController_createMailAccount'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
     trace?: never;
   };
-  '/gateway/domains': {
+  '/users/me/mail-account/keys': {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    /** List available mail domains (called by the auth service) */
-    get: operations['GatewayController_listDomains'];
+    /**
+     * Get encryption keys and salt for one of the caller`s addresses
+     * @description If `address` is omitted, returns keys for the caller`s primary address.
+     */
+    get: operations['UserController_getMailAccountKeys'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/addresses/availability': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Check address availability (called by the auth service) */
+    get: operations['AddressesController_checkAvailability'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/gateway/addresses/{address}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a mail address resource (used to resolve drive user id) */
+    get: operations['GatewayController_getAddress'];
     put?: never;
     post?: never;
     delete?: never;
@@ -275,6 +336,18 @@ export interface components {
       /** @example alice@internxt.me */
       email: string;
     };
+    EncryptedWrappedKeyDto: {
+      /** @description Hybrid ciphertext (base64) */
+      hybridCiphertext: string;
+      /** @description Encrypted symmetric key (base64) */
+      encryptedKey: string;
+    };
+    EncryptedSummaryDto: {
+      /** @description Encrypted preview snippet (base64) */
+      encryptedPreview: string;
+      /** @description De-identified wrapped keys; the client trial-decrypts to read */
+      wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
+    };
     EmailSummaryResponseDto: {
       /** @example Ma1f09b… */
       id: string;
@@ -306,6 +379,8 @@ export interface components {
        * @example 4096
        */
       size: number;
+      /** @description Present only for encrypted emails. Carries the encrypted preview and the de-identified wrapped keys for inline client-side decryption. */
+      encryption?: components['schemas']['EncryptedSummaryDto'] | null;
     };
     EmailListResponseDto: {
       emails: components['schemas']['EmailSummaryResponseDto'][];
@@ -385,6 +460,8 @@ export interface components {
        * @example 4096
        */
       size: number;
+      /** @description Present only for encrypted emails. Carries the encrypted preview and the de-identified wrapped keys for inline client-side decryption. */
+      encryption?: components['schemas']['EncryptedSummaryDto'] | null;
       cc: components['schemas']['EmailAddressDto'][];
       bcc: components['schemas']['EmailAddressDto'][];
       replyTo: components['schemas']['EmailAddressDto'][];
@@ -394,6 +471,35 @@ export interface components {
       textBody: string | null;
       /** @example <p>Hi team, here are the notes…</p> */
       htmlBody: string | null;
+    };
+    LookupRecipientKeysRequestDto: {
+      /**
+       * @description 1-50 email addresses to look up
+       * @example [
+       *       "alice@internxt.me",
+       *       "bob@internxt.com"
+       *     ]
+       */
+      addresses: string[];
+    };
+    RecipientKeyDto: {
+      /** @example alice@internxt.me */
+      address: string;
+      /** @example base64encodedpublickey== */
+      publicKey: string | null;
+    };
+    LookupRecipientKeysResponseDto: {
+      recipients: components['schemas']['RecipientKeyDto'][];
+    };
+    EncryptionBlockDto: {
+      /** @example v1 */
+      version: string;
+      /** @description Encrypted preview snippet (base64), ~256 chars plaintext */
+      encryptedPreview: string;
+      /** @description Encrypted text body (base64) */
+      encryptedText: string;
+      /** @description De-identified wrapped keys, one per recipient */
+      wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     SendEmailRequestDto: {
       /** @description Primary recipients (at least one required) */
@@ -412,6 +518,7 @@ export interface components {
        * @example <p>Hi team, here are the notes from today…</p>
        */
       htmlBody?: string;
+      encryption?: components['schemas']['EncryptionBlockDto'];
     };
     EmailCreatedResponseDto: {
       /**
@@ -449,27 +556,63 @@ export interface components {
        */
       isFlagged?: boolean;
     };
-    ProvisionAccountRequestDto: {
+    /** @enum {string} */
+    MailAccountState: 'active' | 'suspended';
+    MailAccountStatusResponseDto: {
+      /** @example f3a1b2c4-1234-4abc-9def-0123456789ab */
+      id: string;
       /**
-       * @description User id
-       * @example d7ffe6b1-434d-4eae-86a5-029f76d1aa80
+       * @description Default address of the account, null if none is set
+       * @example alice@inxt.eu
        */
-      userId: string;
+      defaultAddress?: string | null;
+      /** @example active */
+      status: components['schemas']['MailAccountState'];
       /**
-       * @description Full email address
-       * @example alice@internxt.com
+       * @description When the account was suspended; null when active
+       * @example 2026-05-01T10:29:55.000Z
        */
+      suspendedAt?: string | null;
+      /**
+       * @description Scheduled deletion date for suspended accounts; null when active
+       * @example 2026-05-31T10:29:55.000Z
+       */
+      deletionAt?: string | null;
+    };
+    MailAddressKeyBundleDto: {
+      /** @description Hybrid (X25519 + ML-KEM-768) public key, base64-encoded */
+      publicKey: string;
+      /** @description Private key encrypted with the encryption keystore key (base64) */
+      encryptionPrivateKey: string;
+      /** @description Private key encrypted with the recovery keystore key (base64) */
+      recoveryPrivateKey: string;
+    };
+    CreateMailAccountDto: {
+      /** @example alice */
       address: string;
-      /**
-       * @description Email domain
-       * @example internxt.com
-       */
+      /** @example inxt.eu */
       domain: string;
-      /**
-       * @description User display name
-       * @example Alice Smith
-       */
+      /** @example Alice Smith */
       displayName: string;
+      keys: components['schemas']['MailAddressKeyBundleDto'];
+    };
+    CreateMailAccountResponseDto: {
+      /** @example f3a1b2c4-1234-4abc-9def-0123456789ab */
+      id: string;
+      /** @example alice@inxt.eu */
+      address: string;
+      /** @example inxt.eu */
+      domain: string;
+    };
+    MailAccountKeysResponseDto: {
+      /** @example alice@inxt.eu */
+      address: string;
+      /** @description Hybrid (X25519 + ML-KEM-768) public key, base64-encoded */
+      publicKey: string;
+      /** @description Private key encrypted with the encryption keystore key (base64) */
+      encryptionPrivateKey: string;
+      /** @description Private key encrypted with the recovery keystore key (base64) */
+      recoveryPrivateKey: string;
     };
   };
   responses: never;
@@ -677,6 +820,36 @@ export interface operations {
       };
     };
   };
+  EmailController_lookupRecipientKeys: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LookupRecipientKeysRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['LookupRecipientKeysResponseDto'];
+        };
+      };
+      /** @description Invalid request: 1-50 valid emails required */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   EmailController_send: {
     parameters: {
       query?: never;
@@ -725,7 +898,33 @@ export interface operations {
       };
     };
   };
-  GatewayController_provisionAccount: {
+  UserController_getMailAccount: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MailAccountStatusResponseDto'];
+        };
+      };
+      /** @description No mail account exists for the caller */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UserController_createMailAccount: {
     parameters: {
       query?: never;
       header?: never;
@@ -734,7 +933,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['ProvisionAccountRequestDto'];
+        'application/json': components['schemas']['CreateMailAccountDto'];
       };
     };
     responses: {
@@ -742,15 +941,91 @@ export interface operations {
         headers: {
           [name: string]: unknown;
         };
+        content: {
+          'application/json': components['schemas']['CreateMailAccountResponseDto'];
+        };
+      };
+      /** @description Caller`s tier does not include mail access */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Requested domain does not exist */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Caller already has an account, or the address is taken */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
         content?: never;
       };
     };
   };
-  GatewayController_listDomains: {
+  UserController_getMailAccountKeys: {
+    parameters: {
+      query?: {
+        /** @description Address whose keys to fetch. Defaults to the caller`s primary address. */
+        address?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MailAccountKeysResponseDto'];
+        };
+      };
+      /** @description Address not found on this account, or keys not set */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  AddressesController_checkAvailability: {
+    parameters: {
+      query: {
+        /** @description Local part of the email address (before the @) */
+        username: string;
+        /** @description Email domain */
+        domain: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  GatewayController_getAddress: {
     parameters: {
       query?: never;
       header?: never;
-      path?: never;
+      path: {
+        address: string;
+      };
       cookie?: never;
     };
     requestBody?: never;

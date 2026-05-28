@@ -15,6 +15,7 @@ import {
   SearchFiltersQuery,
   MailAccountKeysResponse,
   MailAccountResponse,
+  LookupRecipientKeysResponse,
   EncryptedKeystore,
   KeystoreType,
   RecipientWithPublicKey,
@@ -153,6 +154,18 @@ export class MailApi {
    */
   sendEmail(body: SendEmailRequest): Promise<EmailCreatedResponse> {
     return this.client.post('/email/send', body, this.headers());
+  }
+
+  /**
+   * Looks up the public encryption keys for one or more recipient addresses.
+   * For each address, returns the public key if it belongs to an active
+   * Internxt domain, or `null` for external or unknown addresses.
+   *
+   * @param addresses - 1-50 email addresses to look up
+   * @returns Recipients with their public keys (or null)
+   */
+  lookupRecipientKeys(addresses: string[]): Promise<LookupRecipientKeysResponse> {
+    return this.client.post('/email/keys/lookup', { addresses }, this.headers());
   }
 
   /**
