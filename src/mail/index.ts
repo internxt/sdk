@@ -1,6 +1,6 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { headersWithToken } from '../shared/headers';
-import { HttpClient } from '../shared/http/client';
+import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
   MailboxResponse,
   EmailListResponse,
@@ -222,11 +222,24 @@ export class MailApi {
     return this.client.getWithParams('/users/me/mail-account/keys', params, this.headers());
   }
 
-  uploadAttachment(file: File): Promise<UploadAttachmentResponse> {
+  /**
+   * Uploading an attachment to the S3 so we can attach it to an email
+   * @param file - File to upload
+   * @returns
+   *    - `blobId` - The blob id of the attachment
+   *    - `name` - The name of the attachment
+   *    - `type` - The content type of the attachment
+   *    - `size` - The size of the attachment
+   *
+   */
+  uploadAttachment(file: File): {
+    promise: Promise<UploadAttachmentResponse>;
+    requestCanceler: RequestCanceler;
+  } {
     const formData = new FormData();
     formData.append('attachments', file, file.name);
 
-    return this.client.postForm('/email/attachment', formData, this.headers());
+    return this.client.postCancellable('/email/attachment', formData, this.headers());
   }
 
   /**
