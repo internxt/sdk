@@ -308,7 +308,96 @@ describe('HttpClient', () => {
           },
         );
       });
+    });
 
+    describe('binary downloads', () => {
+      it('when downloading a binary resource then forwards the path, query and headers to the server', async () => {
+        const callStub = vi.spyOn(axios, 'get').mockResolvedValue({
+          data: new ArrayBuffer(8),
+          headers: { 'content-type': 'image/png' },
+        });
+        const client = HttpClient.create('https://api.example.com');
+
+        await client.getBinary('/some-path', { name: 'photo.jpg', type: 'image/jpeg' }, { some: 'header' });
+
+        expect(callStub).toHaveBeenCalledWith('/some-path', {
+          baseURL: 'https://api.example.com',
+          params: { name: 'photo.jpg', type: 'image/jpeg' },
+          headers: { some: 'header' },
+          responseType: 'arraybuffer',
+          transformResponse: expect.any(Function),
+        });
+      });
+
+      it('when the server responds then returns both the raw bytes and the response headers', async () => {
+        const buffer = new ArrayBuffer(16);
+        const responseHeaders = {
+          'content-type': 'application/pdf',
+          'content-length': '16',
+          'content-disposition': 'attachment; filename="doc.pdf"',
+        };
+        vi.spyOn(axios, 'get').mockResolvedValue({ data: buffer, headers: responseHeaders });
+        const client = HttpClient.create('');
+
+        const result = await client.getBinary('/some-path', {}, {});
+
+        expect(result).toEqual({ data: buffer, headers: responseHeaders });
+      });
+
+      it('when the server returns the body then the raw bytes are not parsed or transformed', async () => {
+        const callStub = vi.spyOn(axios, 'get').mockResolvedValue({
+          data: new ArrayBuffer(0),
+          headers: {},
+        });
+        const client = HttpClient.create('');
+
+        await client.getBinary('/some-path', {}, {});
+
+        const config = callStub.mock.calls[0][1] as { transformResponse: (raw: unknown) => unknown };
+        const raw = new ArrayBuffer(4);
+        expect(config.transformResponse(raw)).toBe(raw);
+      });
+
+      it('when the server returns a generic error then it is rethrown as a normalized error', async () => {
+        const unauthorizedSpy = vi.fn();
+        const axiosError = getAxiosError();
+        axiosError.message = 'boom';
+        axiosError.response = <AxiosResponse>{ data: { error: 'nope' }, status: 500 };
+        vi.spyOn(axios, 'get').mockRejectedValue(axiosError);
+        const client = HttpClient.create('', unauthorizedSpy);
+
+        await expect(client.getBinary('/some-path', {}, {})).rejects.toMatchObject({
+          message: 'boom',
+          status: 500,
+        });
+        expect(unauthorizedSpy).not.toHaveBeenCalled();
+      });
+
+      it('when the server responds with unauthorized then the unauthorized callback is invoked', async () => {
+        const unauthorizedSpy = vi.fn();
+        const axiosError = getAxiosError();
+        axiosError.message = 'unauthorized';
+        axiosError.response = <AxiosResponse>{ data: { error: 'nope' }, status: 401 };
+        vi.spyOn(axios, 'get').mockRejectedValue(axiosError);
+        const client = HttpClient.create('', unauthorizedSpy);
+
+        await expect(client.getBinary('/some-path', {}, {})).rejects.toMatchObject({ status: 401 });
+        expect(unauthorizedSpy).toHaveBeenCalledOnce();
+      });
+
+      it('when retry options are configured then the binary download is retried through the same backoff path', async () => {
+        const retrySpy = vi.spyOn(retryModule, 'retryWithBackoff').mockImplementation((fn) => fn());
+        vi.spyOn(axios, 'get').mockResolvedValue({ data: new ArrayBuffer(0), headers: {} });
+        const instanceOptions = { maxRetries: 2 };
+        const client = HttpClient.create('', undefined, instanceOptions);
+
+        await client.getBinary('/some-path', {}, {});
+
+        expect(retrySpy).toHaveBeenCalledWith(expect.any(Function), instanceOptions);
+      });
+    });
+
+    describe('calls (continued)', () => {
       it('should execute DELETE request with correct parameters', async () => {
         // Arrange
         const callStub = vi.spyOn(axios.Axios.prototype, 'delete').mockResolvedValue({});

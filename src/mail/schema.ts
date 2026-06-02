@@ -188,6 +188,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/email/attachment': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Upload an attachment
+     * @description Uploads an attachment and get the info to attach it to an user email.
+     */
+    post: operations['EmailController_uploadAttachment'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/email/{id}/attachment/{blobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download an attachment
+     * @description Streams the bytes of an attachment from the given email. Optional `name` and `type` query params set the response filename and content-type.
+     */
+    get: operations['EmailController_downloadAttachment'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/users/me/mail-account': {
     parameters: {
       query?: never;
@@ -429,6 +469,19 @@ export interface components {
       /** @description Filter by attachment presence */
       hasAttachment?: boolean;
     };
+    EmailAttachmentDto: {
+      /** @example T1a2b3c… */
+      blobId: string;
+      /** @example photo.jpg */
+      name: string;
+      /** @example image/jpeg */
+      type: string;
+      /**
+       * @description Size in bytes
+       * @example 4096
+       */
+      size: number;
+    };
     EmailResponseDto: {
       /** @example Ma1f09b… */
       id: string;
@@ -471,6 +524,7 @@ export interface components {
       textBody: string | null;
       /** @example <p>Hi team, here are the notes…</p> */
       htmlBody: string | null;
+      attachments: components['schemas']['EmailAttachmentDto'][];
     };
     LookupRecipientKeysRequestDto: {
       /**
@@ -501,6 +555,19 @@ export interface components {
       /** @description De-identified wrapped keys, one per recipient */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
     };
+    AttachmentRefDto: {
+      /** @example T1a2b3c… */
+      blobId: string;
+      /** @example photo.jpg */
+      name: string;
+      /** @example image/jpeg */
+      type: string;
+      /**
+       * @description Size in bytes
+       * @example 4096
+       */
+      size: number;
+    };
     SendEmailRequestDto: {
       /** @description Primary recipients (at least one required) */
       to: components['schemas']['EmailAddressDto'][];
@@ -519,6 +586,8 @@ export interface components {
        */
       htmlBody?: string;
       encryption?: components['schemas']['EncryptionBlockDto'];
+      /** @description Attachments to include, referenced by blobId previously obtained from POST /email/attachment */
+      attachments?: components['schemas']['AttachmentRefDto'][];
     };
     EmailCreatedResponseDto: {
       /**
@@ -537,6 +606,21 @@ export interface components {
       textBody?: string;
       /** @example <p>Still working on this…</p> */
       htmlBody?: string;
+      /** @description Attachments to include, referenced by blobId previously obtained from POST /email/attachment */
+      attachments?: components['schemas']['AttachmentRefDto'][];
+    };
+    UploadAttachmentResponseDto: {
+      /** @example T1a2b3c… */
+      blobId: string;
+      /**
+       * @description Size in bytes
+       * @example 4096
+       */
+      size: number;
+      /** @example image/jpeg */
+      type: string;
+      /** @example photo.jpg */
+      name: string;
     };
     UpdateEmailRequestDto: {
       /**
@@ -895,6 +979,51 @@ export interface operations {
         content: {
           'application/json': components['schemas']['EmailCreatedResponseDto'];
         };
+      };
+    };
+  };
+  EmailController_uploadAttachment: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Upload attachment successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UploadAttachmentResponseDto'];
+        };
+      };
+    };
+  };
+  EmailController_downloadAttachment: {
+    parameters: {
+      query?: {
+        type?: unknown;
+        name?: unknown;
+      };
+      header?: never;
+      path: {
+        /** @description Email ID */
+        id: string;
+        /** @description Attachment blob ID */
+        blobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

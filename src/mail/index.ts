@@ -22,6 +22,9 @@ import {
   HybridEncryptedEmail,
   EmailPublicParameters,
   PwdProtectedEmail,
+  UploadAttachmentResponse,
+  DownloadAttachmentResponse,
+  DownloadAttachmentPayload,
 } from './types';
 
 export class MailApi {
@@ -219,6 +222,42 @@ export class MailApi {
     return this.client.getWithParams('/users/me/mail-account/keys', params, this.headers());
   }
 
+  uploadAttachment(file: File): Promise<UploadAttachmentResponse> {
+    const formData = new FormData();
+    formData.append('attachments', file, file.name);
+
+    return this.client.postForm('/email/attachment', formData, this.headers());
+  }
+
+  /**
+   * Downloads an attachment of the given email as raw bytes, together with the
+   * metadata exposed by the response headers (filename, content type and
+   * content length). The caller decides how to consume the bytes (write them
+   * to disk, wrap them in a `Blob`, etc.).
+   *
+   * @param id - The id of the email that owns the attachment
+   * @param blobId - The blob id of the attachment
+   * @param query - Optional `name` and `type` overrides forwarded to the backend
+   * @returns The attachment bytes plus filename, content type and length
+   */
+  async downloadAttachment(
+    id: string,
+    blobId: string,
+    query: DownloadAttachmentPayload = {},
+  ): Promise<DownloadAttachmentResponse> {
+    const { data, headers } = await this.client.getBinary(`/email/${id}/attachment/${blobId}`, query, this.headers());
+
+    const contentLengthHeader = headers['content-length'];
+    const contentLength = contentLengthHeader ? Number(contentLengthHeader) : undefined;
+
+    return {
+      data,
+      contentType: headers['content-type'] ?? 'application/octet-stream',
+      contentLength: Number.isFinite(contentLength) ? contentLength : undefined,
+      fileName: parseContentDispositionFilename(headers['content-disposition']),
+    };
+  }
+
   /**
    * Returns the needed headers for the module requests
    * @private
@@ -232,4 +271,20 @@ export class MailApi {
       customHeaders: this.appDetails.customHeaders,
     });
   }
+}
+
+function parseContentDispositionFilename(header: string | undefined): string | undefined {
+  if (!header) return undefined;
+
+  const utf8Match = /filename\*\s*=\s*(?:UTF-8|utf-8)''([^;]+)/i.exec(header);
+  if (utf8Match) {
+    try {
+      return decodeURIComponent(utf8Match[1].trim());
+    } catch {
+      return utf8Match[1].trim();
+    }
+  }
+
+  const asciiMatch = /filename\s*=\s*"?([^";]+)"?/i.exec(header);
+  return asciiMatch ? asciiMatch[1].trim() : undefined;
 }
