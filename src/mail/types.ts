@@ -17,6 +17,15 @@ export type EmailAddress = components['schemas']['EmailAddressDto'];
 export type ListEmailsQuery = operations['EmailController_list']['parameters']['query'];
 export type SearchFiltersQuery = operations['EmailController_search']['requestBody']['content']['application/json'];
 export type EmailDomainsResponse = components['schemas']['MailDomainDto'][];
+export type UploadAttachmentResponse = components['schemas']['UploadAttachmentResponseDto'];
+export type DownloadAttachmentPayload = operations['EmailController_downloadAttachment']['parameters']['query'];
+export type AttachmentRef = components['schemas']['EmailAttachmentDto'];
+export type DownloadAttachmentResponse = {
+  data: ArrayBuffer;
+  contentType: string;
+  contentLength?: number;
+  fileName?: string;
+};
 export type SetupMailAccountPayload = {
   address: string;
   domain: string;

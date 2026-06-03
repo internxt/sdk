@@ -100,6 +100,42 @@ export class HttpClient {
   }
 
   /**
+   * Requests a GET that returns raw binary bytes together with the response
+   * headers. Useful for endpoints that stream files where the caller needs
+   * `Content-Type`, `Content-Length` or `Content-Disposition`.
+   *
+   * Bypasses the response interceptor so headers are preserved.
+   *
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public async getBinary(
+    url: URL,
+    params: Parameters,
+    headers: Headers,
+  ): Promise<{ data: ArrayBuffer; headers: Record<string, string> }> {
+    return await this.execute(async () => {
+      try {
+        const response = await axios.get<ArrayBuffer>(url, {
+          baseURL: this.axios.defaults.baseURL,
+          params,
+          headers,
+          responseType: 'arraybuffer',
+          transformResponse: (raw) => raw,
+        });
+        return {
+          data: response.data,
+          headers: response.headers as unknown as Record<string, string>,
+        };
+      } catch (error) {
+        this.normalizeError(error as AxiosError);
+        throw error;
+      }
+    });
+  }
+
+  /**
    * Requests a GET with option to cancel
    * @param url
    * @param headers
@@ -159,6 +195,32 @@ export class HttpClient {
    */
   public async postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
     return await this.execute(() => this.axios.postForm(url, params, { headers }));
+  }
+
+  /**
+   * Requests a POST FORM with option to cancel
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public postFormCancellable<Response>(
+    url: URL,
+    params: Parameters,
+    headers: Headers,
+  ): {
+    promise: Promise<Response>;
+    requestCanceler: RequestCanceler;
+  } {
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.execute(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.postForm<never, Response>(url, params, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
   }
 
   /**
