@@ -6,3 +6,4 @@ export * from './payments';
 export * from './payments/object-storage';
 export * from './backups';
 export * from './trash';
+export * from './photos';
