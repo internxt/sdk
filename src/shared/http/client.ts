@@ -198,6 +198,32 @@ export class HttpClient {
   }
 
   /**
+   * Requests a POST FORM with option to cancel
+   * @param url
+   * @param params
+   * @param headers
+   */
+  public postFormCancellable<Response>(
+    url: URL,
+    params: Parameters,
+    headers: Headers,
+  ): {
+    promise: Promise<Response>;
+    requestCanceler: RequestCanceler;
+  } {
+    let currentCancel: RequestCanceler['cancel'] = () => {};
+    const requestCanceler: RequestCanceler = { cancel: (message) => currentCancel(message) };
+
+    const promise = this.execute(() => {
+      const source = axios.CancelToken.source();
+      currentCancel = source.cancel;
+      return this.axios.postForm<never, Response>(url, params, { headers, cancelToken: source.token });
+    });
+
+    return { promise, requestCanceler };
+  }
+
+  /**
    * Requests a POST with option to cancel
    * @param url
    * @param params

@@ -239,7 +239,7 @@ export class MailApi {
     const formData = new FormData();
     formData.append('attachments', file, file.name);
 
-    return this.client.postCancellable('/email/attachment', formData, this.headers());
+    return this.client.postFormCancellable('/email/attachment', formData, this.headers());
   }
 
   /**
