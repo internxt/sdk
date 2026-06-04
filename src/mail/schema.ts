@@ -388,7 +388,7 @@ export interface components {
       /** @description De-identified wrapped keys; the client trial-decrypts to read */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
       /** @description De-identified wrapped keys for the symmetric key that encrypts the email's attachments. Present only when the email has encrypted attachments. */
-      attachmentWrappedKey?: components['schemas']['EncryptedWrappedKeyDto'][];
+      attachmentWrappedKeys?: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     EmailSummaryResponseDto: {
       /** @example Ma1f09b… */
@@ -557,7 +557,7 @@ export interface components {
       /** @description De-identified wrapped keys, one per recipient */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
       /** @description De-identified attachment wrapped keys, one per recipient */
-      attachmentWrappedKey: components['schemas']['EncryptedWrappedKeyDto'][];
+      attachmentWrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     AttachmentRefDto: {
       /** @example T1a2b3c… */
