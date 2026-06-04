@@ -387,6 +387,8 @@ export interface components {
       encryptedPreview: string;
       /** @description De-identified wrapped keys; the client trial-decrypts to read */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
+      /** @description De-identified wrapped keys for the symmetric key that encrypts the email's attachments. Present only when the email has encrypted attachments. */
+      attachmentWrappedKey?: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     EmailSummaryResponseDto: {
       /** @example Ma1f09b… */
@@ -554,6 +556,8 @@ export interface components {
       encryptedText: string;
       /** @description De-identified wrapped keys, one per recipient */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
+      /** @description De-identified attachment wrapped keys, one per recipient */
+      attachmentWrappedKey: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     AttachmentRefDto: {
       /** @example T1a2b3c… */
@@ -586,7 +590,6 @@ export interface components {
        */
       htmlBody?: string;
       encryption?: components['schemas']['EncryptionBlockDto'];
-      /** @description Attachments to include, referenced by blobId previously obtained from POST /email/attachment */
       attachments?: components['schemas']['AttachmentRefDto'][];
     };
     EmailCreatedResponseDto: {
@@ -606,7 +609,6 @@ export interface components {
       textBody?: string;
       /** @example <p>Still working on this…</p> */
       htmlBody?: string;
-      /** @description Attachments to include, referenced by blobId previously obtained from POST /email/attachment */
       attachments?: components['schemas']['AttachmentRefDto'][];
     };
     UploadAttachmentResponseDto: {
