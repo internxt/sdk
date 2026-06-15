@@ -15,6 +15,7 @@ export type DraftEmailRequest = components['schemas']['DraftEmailRequestDto'];
 export type UpdateEmailRequest = components['schemas']['UpdateEmailRequestDto'];
 export type EmailAddress = components['schemas']['EmailAddressDto'];
 export type ListEmailsQuery = operations['EmailController_list']['parameters']['query'];
+export type ThreadsQuery = operations['EmailController_getThread']['parameters']['query'];
 export type SearchFiltersQuery = operations['EmailController_search']['requestBody']['content']['application/json'];
 export type EmailDomainsResponse = components['schemas']['MailDomainDto'][];
 export type UploadAttachmentResponse = components['schemas']['UploadAttachmentResponseDto'];

@@ -128,6 +128,10 @@ export class MailApi {
     return this.client.get(`/email/${id}`, this.headers());
   }
 
+  getThreads(parentMessageId: string): Promise<EmailResponse[]> {
+    return this.client.get(`/email/threads/${parentMessageId}`, this.headers());
+  }
+
   /**
    * Deletes the email with the corresponding id
    *
