@@ -125,6 +125,84 @@ describe('network/upload', () => {
       expect(receivedFileId).toEqual(fileId);
     });
 
+    it('Should include hmac in finishUpload payload when computeHmac is provided', async () => {
+      const bucketId = fakeBucketId;
+      const mnemonic = fakeMnemonic;
+      const fileSize = 1000;
+      const fakeUrl = 'http://x.com';
+      const fakeUuid = 'b541b138-a6f2-4729-8d20-8e6011cb8216';
+      const index = 'aabdfb3018eb9e93bd9a31936aad979bed83abcc60fd79c15c15f44321024f46';
+      const bufferizedIndex = Buffer.from(index, 'hex');
+      const key = Buffer.from('');
+      const fakeHmac = { type: 'sha512' as const, value: 'deadbeef' };
+
+      const computeHmacMock = vi.fn().mockResolvedValue(fakeHmac);
+      const cryptoWithHmac: Crypto = { ...crypto, computeHmac: computeHmacMock };
+
+      vi.spyOn(cryptoWithHmac, 'randomBytes').mockReturnValue(bufferizedIndex);
+      vi.spyOn(cryptoWithHmac, 'generateFileKey').mockResolvedValue(key);
+      vi.spyOn(cryptoWithHmac, 'validateMnemonic').mockReturnValue(true);
+      vi.spyOn(network, 'startUpload').mockResolvedValue({
+        uploads: [{ url: fakeUrl, uuid: fakeUuid, index: 0, urls: null }],
+      });
+      const finishUploadStub = vi.spyOn(network, 'finishUpload').mockResolvedValue({
+        bucket: '',
+        created: new Date(),
+        id: fakeFileId,
+        index,
+        mimetype: 'application/octet-stream',
+        name: '',
+      });
+
+      const uploadFileMock = vi.fn().mockReturnValue(fakeHash);
+
+      await uploadFile(network, cryptoWithHmac, bucketId, mnemonic, fileSize, vi.fn(), uploadFileMock, abortSignal);
+
+      expect(computeHmacMock).toHaveBeenCalledOnce();
+      expect(computeHmacMock).toHaveBeenCalledWith(key, [fakeHash]);
+      expect(finishUploadStub).toHaveBeenCalledWith(bucketId, expect.objectContaining({ hmac: fakeHmac }), abortSignal);
+    });
+
+    it('Should not include hmac in finishUpload payload when computeHmac is not provided', async () => {
+      const bucketId = fakeBucketId;
+      const mnemonic = fakeMnemonic;
+      const fileSize = 1000;
+      const fakeUrl = 'http://x.com';
+      const fakeUuid = 'b541b138-a6f2-4729-8d20-8e6011cb8216';
+      const index = 'aabdfb3018eb9e93bd9a31936aad979bed83abcc60fd79c15c15f44321024f46';
+      const bufferizedIndex = Buffer.from(index, 'hex');
+      const key = Buffer.from('');
+
+      vi.spyOn(crypto, 'randomBytes').mockReturnValue(bufferizedIndex);
+      vi.spyOn(crypto, 'generateFileKey').mockResolvedValue(key);
+      vi.spyOn(crypto, 'validateMnemonic').mockReturnValue(true);
+      vi.spyOn(network, 'startUpload').mockResolvedValue({
+        uploads: [{ url: fakeUrl, uuid: fakeUuid, index: 0, urls: null }],
+      });
+      const finishUploadStub = vi.spyOn(network, 'finishUpload').mockResolvedValue({
+        bucket: '',
+        created: new Date(),
+        id: fakeFileId,
+        index,
+        mimetype: 'application/octet-stream',
+        name: '',
+      });
+
+      await uploadFile(
+        network,
+        crypto,
+        bucketId,
+        mnemonic,
+        fileSize,
+        vi.fn(),
+        vi.fn().mockReturnValue(fakeHash),
+        abortSignal,
+      );
+
+      const payload = finishUploadStub.mock.calls[0][1];
+      expect(payload.hmac).toBeUndefined();
+    });
+
     it('Should throw if the mnemonic is invalid', async () => {
       const bucketId = fakeBucketId;
       const mnemonic = fakeMnemonic;

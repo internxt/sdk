@@ -66,14 +66,21 @@ export type StartUploadPayload = {
   uploads: UploadPayload[];
 };
 
+export type HmacPayload = {
+  type: 'sha512';
+  value: string;
+};
+
 export type FinishUploadPayload = {
   index: string;
   shards: Shard[];
+  hmac?: HmacPayload;
 };
 
 export type FinishMultipartUploadPayload = {
   index: string;
   shards: ShardForMultipart[];
+  hmac?: HmacPayload;
 };
 
 export type UploadFileFunction = (url: string) => Promise<Hash>;
@@ -117,6 +124,7 @@ export type Crypto = {
   validateMnemonic: (mnemonic: string) => boolean;
   randomBytes: (bytesLength: number) => BinaryData;
   generateFileKey: (mnemonic: string, bucketId: string, index: BinaryData | string) => Promise<BinaryData>;
+  computeHmac?: (key: BinaryData, shardHashes: string[]) => Promise<HmacPayload>;
 };
 
 export type EncryptFileFunction = (
