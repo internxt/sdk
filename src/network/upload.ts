@@ -44,10 +44,12 @@ export async function uploadFile(
 
     await encryptFile(crypto.algorithm.type, key, iv);
     const hash = await uploadFile(url);
+    const hmac = crypto.computeHmac ? await crypto.computeHmac(key, [hash]) : undefined;
 
     const finishUploadPayload = {
       index: index.toString('hex'),
       shards: [{ hash, uuid }],
+      hmac,
     };
 
     const finishUploadResponse = await network.finishUpload(bucketId, finishUploadPayload, signal);
@@ -106,10 +108,12 @@ export async function uploadMultipartFile(
 
   await encryptFile(crypto.algorithm.type, key, iv);
   const { hash, parts: uploadedPartsReference } = await uploadMultiparts(urls);
+  const hmac = crypto.computeHmac ? await crypto.computeHmac(key, [hash]) : undefined;
 
   const finishUploadPayload = {
     index: index.toString('hex'),
     shards: [{ hash, uuid, UploadId, parts: uploadedPartsReference }],
+    hmac,
   };
 
   const finishUploadResponse = await network.finishMultipartUpload(bucketId, finishUploadPayload, signal);
