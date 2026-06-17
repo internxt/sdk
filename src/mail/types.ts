@@ -21,6 +21,7 @@ export type EmailDomainsResponse = components['schemas']['MailDomainDto'][];
 export type UploadAttachmentResponse = components['schemas']['UploadAttachmentResponseDto'];
 export type DownloadAttachmentPayload = operations['EmailController_downloadAttachment']['parameters']['query'];
 export type AttachmentRef = components['schemas']['EmailAttachmentDto'];
+export type DeliveryMode = components['schemas']['SendEmailRequestDto']['deliveryMode'];
 export type DownloadAttachmentResponse = {
   data: ArrayBuffer;
   contentType: string;
