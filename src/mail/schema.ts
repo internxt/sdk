@@ -100,7 +100,7 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
-  '/email/{id}': {
+  '/email/threads/{id}': {
     parameters: {
       query?: never;
       header?: never;
@@ -108,24 +108,16 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Get email by ID
-     * @description Returns the full email including body content, headers, and metadata.
+     * Get email thread by id
+     * @description Returns all emails in the same thread as the given id, ordered chronologically. If the email has no replies, returns a single-element array.
      */
-    get: operations['EmailController_get'];
+    get: operations['EmailController_getThread'];
     put?: never;
     post?: never;
-    /**
-     * Delete an email
-     * @description Permanently deletes an email by ID.
-     */
-    delete: operations['EmailController_delete'];
+    delete?: never;
     options?: never;
     head?: never;
-    /**
-     * Update an email
-     * @description Partially update an email: move it to another mailbox, mark as read/unread, or flag/unflag. Multiple operations can be combined in a single request.
-     */
-    patch: operations['EmailController_update'];
+    patch?: never;
     trace?: never;
   };
   '/email/keys/lookup': {
@@ -226,6 +218,30 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/email/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Delete an email
+     * @description Permanently deletes an email by ID.
+     */
+    delete: operations['EmailController_delete'];
+    options?: never;
+    head?: never;
+    /**
+     * Update an email
+     * @description Partially update an email: move it to another mailbox, mark as read/unread, or flag/unflag. Multiple operations can be combined in a single request.
+     */
+    patch: operations['EmailController_update'];
     trace?: never;
   };
   '/users/me/mail-account': {
@@ -596,6 +612,11 @@ export interface components {
        * @enum {string}
        */
       deliveryMode?: 'INTERNXT' | 'EXTERNAL';
+      /**
+       * @description JMAP id of the email being replied to (for threading)
+       * @example Ma1f09b…
+       */
+      inReplyToEmailId?: string;
     };
     EmailCreatedResponseDto: {
       /**
@@ -822,12 +843,12 @@ export interface operations {
       };
     };
   };
-  EmailController_get: {
+  EmailController_getThread: {
     parameters: {
       query?: never;
       header?: never;
       path: {
-        /** @description Email ID */
+        /** @description Any email id in the thread */
         id: string;
       };
       cookie?: never;
@@ -839,68 +860,8 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['EmailResponseDto'];
+          'application/json': components['schemas']['EmailResponseDto'][];
         };
-      };
-      /** @description Email not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EmailController_delete: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Email ID */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Email deleted successfully */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Email not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EmailController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        /** @description Email ID */
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        'application/json': components['schemas']['UpdateEmailRequestDto'];
-      };
-    };
-    responses: {
-      /** @description Email updated successfully */
-      204: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
       };
       /** @description Email not found */
       404: {
@@ -1027,6 +988,66 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EmailController_delete: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Email ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Email deleted successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Email not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EmailController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Email ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEmailRequestDto'];
+      };
+    };
+    responses: {
+      /** @description Email updated successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Email not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };
