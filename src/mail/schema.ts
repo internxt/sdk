@@ -591,6 +591,11 @@ export interface components {
       htmlBody?: string;
       encryption?: components['schemas']['EncryptionBlockDto'];
       attachments?: components['schemas']['AttachmentRefDto'][];
+      /**
+       * @example INTERNXT
+       * @enum {string}
+       */
+      deliveryMode?: 'INTERNXT' | 'EXTERNAL';
     };
     EmailCreatedResponseDto: {
       /**
