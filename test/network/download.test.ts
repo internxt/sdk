@@ -105,7 +105,7 @@ describe('network/download', () => {
           expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
           expect(downloadFileMock).toHaveBeenCalledTimes(1);
-          expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
+          expect(downloadFileMock).toHaveBeenCalledWith(shards, expect.objectContaining({ size: fileSize }));
 
           expect(decryptFileMock).toHaveBeenCalledTimes(1);
           expect(decryptFileMock).toHaveBeenCalledWith(
@@ -185,7 +185,7 @@ describe('network/download', () => {
           expect(generateFileKeyStub).toHaveBeenCalledWith(mnemonic, bucketId, bufferizedIndex);
 
           expect(downloadFileMock).toHaveBeenCalledTimes(1);
-          expect(downloadFileMock).toHaveBeenCalledWith(shards, fileSize);
+          expect(downloadFileMock).toHaveBeenCalledWith(shards, expect.objectContaining({ size: fileSize }));
 
           expect(decryptFileMock).toHaveBeenCalledTimes(1);
           expect(decryptFileMock).toHaveBeenCalledWith(
