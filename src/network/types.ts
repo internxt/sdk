@@ -45,6 +45,10 @@ export interface GetDownloadLinksResponse {
   shards: DownloadableShard[];
   version?: number;
   size: number;
+  hmac?: {
+    value: string;
+    type: 'sha512';
+  };
 }
 
 export interface NetworkRequestConfig {
@@ -76,7 +80,10 @@ export type UploadFileFunction = (url: string) => Promise<Hash>;
 export type UploadFileMultipartFunction = (
   urls: string[],
 ) => Promise<{ hash: Hash; parts: { PartNumber: number; ETag: string }[] }>;
-export type DownloadFileFunction = (downloadables: DownloadableShard[], fileSize: number) => Promise<void>;
+export type DownloadFileFunction = (
+  downloadables: DownloadableShard[],
+  fileInfo: GetDownloadLinksResponse,
+) => Promise<void>;
 
 export type BinaryData = {
   slice: (from: number, to: number) => BinaryData;

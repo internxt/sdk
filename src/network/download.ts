@@ -40,7 +40,8 @@ export async function downloadFile(
       }
     }
 
-    const { index, shards, version, size } = await network.getDownloadLinks(bucketId, fileId, opts?.token);
+    const fileInfo = await network.getDownloadLinks(bucketId, fileId, opts?.token);
+    const { index, shards, version, size } = fileInfo;
 
     if (!version || version === 1) {
       throw new FileVersionOneError();
@@ -50,7 +51,7 @@ export async function downloadFile(
     key = await crypto.generateFileKey(mnemonic, bucketId, toBinaryData(index, BinaryDataEncoding.HEX));
     const downloadables = shards.sort((sA, sB) => sA.index - sB.index);
 
-    await downloadFile(downloadables, size);
+    await downloadFile(downloadables, fileInfo);
     await decryptFile(crypto.algorithm.type, key, iv, size);
   } catch (err) {
     const context = getNetworkErrorContext(
