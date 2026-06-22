@@ -194,7 +194,11 @@ export interface paths {
     get: operations['EmailController_getDraft'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Discard a draft
+     * @description Permanently discards a draft by ID. Returns 404 if the email exists but is not a draft.
+     */
+    delete: operations['EmailController_discardDraft'];
     options?: never;
     head?: never;
     /**
@@ -672,10 +676,6 @@ export interface components {
       encryption?: components['schemas']['EncryptionBlockDto'];
       attachments?: components['schemas']['AttachmentRefDto'][];
     };
-    UpdateDraftResponseDto: {
-      /** @example f3a1b2c4-… */
-      newDraftId: string;
-    };
     UploadAttachmentResponseDto: {
       /** @example T1a2b3c… */
       blobId: string;
@@ -984,7 +984,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['EmailCreatedResponseDto'];
+          'application/json': components['schemas']['EmailResponseDto'];
         };
       };
     };
@@ -1018,6 +1018,34 @@ export interface operations {
       };
     };
   };
+  EmailController_discardDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Draft ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Draft discarded successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Draft not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   EmailController_updateDraft: {
     parameters: {
       query?: never;
@@ -1033,14 +1061,21 @@ export interface operations {
       };
     };
     responses: {
-      /** @description Draft saved successfully */
+      /** @description Draft updated successfully */
       200: {
         headers: {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['UpdateDraftResponseDto'];
+          'application/json': components['schemas']['EmailResponseDto'];
         };
+      };
+      /** @description Draft not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };
