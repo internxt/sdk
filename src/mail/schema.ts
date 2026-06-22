@@ -171,13 +171,41 @@ export interface paths {
     put?: never;
     /**
      * Save a draft
-     * @description Creates a new draft email. All fields are optional so partial drafts can be saved.
+     * @description Creates a new draft email. All fields are optional so partial drafts can be saved. Pass `encryption` to store the body encrypted only with the sender's key — the sender is the only reader and can decrypt it on retrieval.
      */
     post: operations['EmailController_saveDraft'];
     delete?: never;
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  '/email/drafts/{id}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a draft
+     * @description Returns a draft
+     */
+    get: operations['EmailController_getDraft'];
+    put?: never;
+    post?: never;
+    /**
+     * Discard a draft
+     * @description Permanently discards a draft by ID. Returns 404 if the email exists but is not a draft.
+     */
+    delete: operations['EmailController_discardDraft'];
+    options?: never;
+    head?: never;
+    /**
+     * Update a draft
+     * @description Updates a draft email. All fields are optional so partial drafts can be saved. Pass `encryption` with a fresh envelope to replace the stored body — the previous envelope is dropped together with the destroyed draft.
+     */
+    patch: operations['EmailController_updateDraft'];
     trace?: never;
   };
   '/email/attachment': {
@@ -431,6 +459,8 @@ export interface components {
       /** @example false */
       isFlagged: boolean;
       /** @example false */
+      isDraft: boolean;
+      /** @example false */
       hasAttachment: boolean;
       /**
        * @description Size in bytes
@@ -525,6 +555,8 @@ export interface components {
       /** @example false */
       isFlagged: boolean;
       /** @example false */
+      isDraft: boolean;
+      /** @example false */
       hasAttachment: boolean;
       /**
        * @description Size in bytes
@@ -617,6 +649,11 @@ export interface components {
        * @example Ma1f09b…
        */
       inReplyToEmailId?: string;
+      /**
+       * @description JMAP id of the draft being sent. When present, the draft is destroyed after the email is sent so it no longer appears in the Drafts folder.
+       * @example Ma1f09b…
+       */
+      draftId?: string;
     };
     EmailCreatedResponseDto: {
       /**
@@ -635,6 +672,8 @@ export interface components {
       textBody?: string;
       /** @example <p>Still working on this…</p> */
       htmlBody?: string;
+      /** @description When present, the draft body is stored encrypted. Only the sender can decrypt it later, so wrappedKeys / attachmentWrappedKeys should contain a single entry built from the sender's own public key. */
+      encryption?: components['schemas']['EncryptionBlockDto'];
       attachments?: components['schemas']['AttachmentRefDto'][];
     };
     UploadAttachmentResponseDto: {
@@ -945,8 +984,98 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          'application/json': components['schemas']['EmailCreatedResponseDto'];
+          'application/json': components['schemas']['EmailResponseDto'];
         };
+      };
+    };
+  };
+  EmailController_getDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Draft ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailResponseDto'];
+        };
+      };
+      /** @description Draft not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EmailController_discardDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description Draft ID */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Draft discarded successfully */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Draft not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EmailController_updateDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DraftEmailRequestDto'];
+      };
+    };
+    responses: {
+      /** @description Draft updated successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailResponseDto'];
+        };
+      };
+      /** @description Draft not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

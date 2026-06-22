@@ -179,10 +179,40 @@ export class MailApi {
    * Saves a draft email
    *
    * @param body - The body of the draft email to save
-   * @returns The created email - `EmailCreatedResponse`
+   * @returns The created email - `EmailResponse`
    */
-  saveDraft(body: DraftEmailRequest): Promise<EmailCreatedResponse> {
+  saveDraft(body: DraftEmailRequest): Promise<EmailResponse> {
     return this.client.post('/email/drafts', body, this.headers());
+  }
+
+  /**
+   * Updates the draft with the corresponding id
+   *
+   * @param id - The id of the draft to update
+   * @param body - The new body of the draft
+   * @returns The new Draft Id for this email
+   */
+  updateDraft(id: string, body: DraftEmailRequest): Promise<EmailResponse> {
+    return this.client.patch(`/email/drafts/${id}`, body, this.headers());
+  }
+
+  /**
+   * Gets the draft with the corresponding id
+   *
+   * @param id - The id of the draft
+   * @returns The draft with the corresponding id - `EmailResponse`
+   */
+  getDraft(id: string): Promise<EmailResponse> {
+    return this.client.get(`/email/drafts/${id}`, this.headers());
+  }
+
+  /**
+   * Discards an existent mail draft
+   * @param id - The id of the draft we want to discard
+   * @returns A promise that resolves when the draft is discarded
+   */
+  discardDraft(id: string): Promise<void> {
+    return this.client.delete(`/email/drafts/${id}`, this.headers());
   }
 
   /**
