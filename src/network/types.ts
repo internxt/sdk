@@ -127,6 +127,13 @@ export type Crypto = {
   computeHmac?: (key: BinaryData, shardHashes: string[]) => Promise<HmacPayload>;
 };
 
+export type CryptoV3 = {
+  algorithm: Algorithm;
+  randomBytes: (bytesLength: number) => BinaryData;
+  generateFileKeyFromBucketKey: (bucketKey: Buffer, index: BinaryData) => Promise<BinaryData>;
+  computeHmac?: (key: BinaryData, shardHashes: string[]) => Promise<HmacPayload>;
+};
+
 export type EncryptFileFunction = (
   algorithm: SymmetricCryptoAlgorithm,
   key: BinaryData,

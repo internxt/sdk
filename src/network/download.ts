@@ -7,6 +7,7 @@ import {
   DownloadFileFunction,
   ToBinaryDataFunction,
   BinaryData,
+  CryptoV3,
 } from './types';
 
 export class FileVersionOneError extends Error {
@@ -61,6 +62,53 @@ export async function downloadFile(
         user: network.credentials.username,
         crypto: {
           mnemonic,
+        },
+      },
+      err,
+    );
+
+    (err as ErrorWithContext).context = context;
+
+    throw err;
+  }
+}
+
+export async function downloadFileWithBucketKey(
+  fileId: string,
+  bucketId: string,
+  bucketKey: Buffer,
+  network: Network,
+  crypto: CryptoV3,
+  toBinaryData: ToBinaryDataFunction,
+  downloadFile: DownloadFileFunction,
+  decryptFile: DecryptFileFunction,
+  opts?: { token: string },
+): Promise<void> {
+  let iv: BinaryData;
+  let key: BinaryData;
+
+  try {
+    const fileInfo = await network.getDownloadLinks(bucketId, fileId, opts?.token);
+    const { index, shards, version, size } = fileInfo;
+
+    if (!version || version === 1) {
+      throw new FileVersionOneError();
+    }
+
+    iv = toBinaryData(index, BinaryDataEncoding.HEX).slice(0, 16);
+    key = await crypto.generateFileKeyFromBucketKey(bucketKey, toBinaryData(index, BinaryDataEncoding.HEX));
+    const downloadables = shards.sort((sA, sB) => sA.index - sB.index);
+
+    await downloadFile(downloadables, fileInfo);
+    await decryptFile(crypto.algorithm.type, key, iv, size);
+  } catch (err) {
+    const context = getNetworkErrorContext(
+      {
+        bucketId,
+        fileId,
+        user: network.credentials.username,
+        crypto: {
+          bucketKey,
         },
       },
       err,
