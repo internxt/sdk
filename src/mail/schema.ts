@@ -69,7 +69,7 @@ export interface paths {
     };
     /**
      * List emails
-     * @description Paginated list of email summaries. Filter by mailbox or omit to list all.
+     * @description Paginated list of email summaries. Filter by mailbox or omit to list all. Responses collapse by thread in every mailbox except `drafts`: each row represents the most recent email of the thread in that mailbox and carries `threadSize`, `lastReceivedAt` and `participants` (cross-mailbox).
      */
     get: operations['EmailController_list'];
     put?: never;
@@ -469,6 +469,18 @@ export interface components {
       size: number;
       /** @description Present only for encrypted emails. Carries the encrypted preview and the de-identified wrapped keys for inline client-side decryption. */
       encryption?: components['schemas']['EncryptedSummaryDto'] | null;
+      /**
+       * @description Total number of emails in the thread (cross-mailbox). Set only when the list collapses threads.
+       * @example 3
+       */
+      threadSize?: number;
+      /**
+       * @description receivedAt of the most recent email in the thread (cross-mailbox). Set only when the list collapses threads.
+       * @example 2025-06-15T10:30:00Z
+       */
+      lastReceivedAt?: string;
+      /** @description Unique senders that have written in the thread (cross-mailbox), deduplicated by email. Set only when the list collapses threads. */
+      participants?: components['schemas']['EmailAddressDto'][];
     };
     EmailListResponseDto: {
       emails: components['schemas']['EmailSummaryResponseDto'][];
@@ -565,6 +577,18 @@ export interface components {
       size: number;
       /** @description Present only for encrypted emails. Carries the encrypted preview and the de-identified wrapped keys for inline client-side decryption. */
       encryption?: components['schemas']['EncryptedSummaryDto'] | null;
+      /**
+       * @description Total number of emails in the thread (cross-mailbox). Set only when the list collapses threads.
+       * @example 3
+       */
+      threadSize?: number;
+      /**
+       * @description receivedAt of the most recent email in the thread (cross-mailbox). Set only when the list collapses threads.
+       * @example 2025-06-15T10:30:00Z
+       */
+      lastReceivedAt?: string;
+      /** @description Unique senders that have written in the thread (cross-mailbox), deduplicated by email. Set only when the list collapses threads. */
+      participants?: components['schemas']['EmailAddressDto'][];
       cc: components['schemas']['EmailAddressDto'][];
       bcc: components['schemas']['EmailAddressDto'][];
       replyTo: components['schemas']['EmailAddressDto'][];
