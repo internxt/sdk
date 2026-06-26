@@ -119,19 +119,19 @@ export const ALGORITHMS: Record<SymmetricCryptoAlgorithm, Algorithm> = {
   },
 };
 
-export type Crypto = {
+type CryptoBase = {
   algorithm: Algorithm;
-  validateMnemonic: (mnemonic: string) => boolean;
   randomBytes: (bytesLength: number) => BinaryData;
-  generateFileKey: (mnemonic: string, bucketId: string, index: BinaryData | string) => Promise<BinaryData>;
   computeHmac?: (key: BinaryData, shardHashes: string[]) => Promise<HmacPayload>;
 };
 
-export type CryptoV3 = {
-  algorithm: Algorithm;
-  randomBytes: (bytesLength: number) => BinaryData;
+export type Crypto = CryptoBase & {
+  validateMnemonic: (mnemonic: string) => boolean;
+  generateFileKey: (mnemonic: string, bucketId: string, index: BinaryData | string) => Promise<BinaryData>;
+};
+
+export type CryptoWithBucketKey = CryptoBase & {
   generateFileKeyFromBucketKey: (bucketKey: Buffer, index: BinaryData) => Promise<BinaryData>;
-  computeHmac?: (key: BinaryData, shardHashes: string[]) => Promise<HmacPayload>;
 };
 
 export type EncryptFileFunction = (

@@ -7,7 +7,7 @@ import {
   DownloadFileFunction,
   ToBinaryDataFunction,
   BinaryData,
-  CryptoV3,
+  CryptoWithBucketKey,
 } from './types';
 
 export class FileVersionOneError extends Error {
@@ -78,7 +78,7 @@ export async function downloadFileWithBucketKey(
   bucketId: string,
   bucketKey: Buffer,
   network: Network,
-  crypto: CryptoV3,
+  crypto: CryptoWithBucketKey,
   toBinaryData: ToBinaryDataFunction,
   downloadFile: DownloadFileFunction,
   decryptFile: DecryptFileFunction,
