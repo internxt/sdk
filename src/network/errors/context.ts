@@ -7,6 +7,7 @@ export type NetworkUploadContext = {
   user: string;
   crypto: {
     mnemonic?: string;
+    bucketKey?: Buffer;
   };
 };
 export type NetworkDownloadContext = {
@@ -15,6 +16,7 @@ export type NetworkDownloadContext = {
   user: string;
   crypto: {
     mnemonic?: string;
+    bucketKey?: Buffer;
   };
 };
 
@@ -30,9 +32,11 @@ export function getNetworkErrorContext(input: NetworkContext, err: unknown): Net
   const output = Object.assign({}, input);
 
   delete output.crypto.mnemonic;
+  delete output.crypto.bucketKey;
 
   if (err instanceof UploadInvalidMnemonicError || err instanceof DownloadInvalidMnemonicError) {
     output.crypto.mnemonic = input.crypto.mnemonic;
+    output.crypto.bucketKey = input.crypto.bucketKey;
   }
 
   return output;
