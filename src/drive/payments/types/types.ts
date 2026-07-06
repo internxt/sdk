@@ -69,6 +69,13 @@ export enum UserType {
   Business = 'business',
 }
 
+export type Commitment = {
+  enabled: boolean;
+  remainingMonths?: number;
+  cancellationDate?: string;
+  isElegibleForCancellation?: boolean;
+};
+
 export type StoragePlan = {
   planId: string;
   productId: string;
@@ -81,11 +88,9 @@ export type StoragePlan = {
   isTeam: boolean;
   isLifetime: boolean;
   renewalPeriod: RenewalPeriod;
-  commitment: {
-    enabled: boolean;
-    isFirstMonth?: boolean;
-    remainingMonths?: number;
-    cancellationDate?: string | null;
+  commitment: Commitment;
+  cancellationTrial: {
+    redeemed: boolean;
   };
   storageLimit: number;
   amountOfSeats: number;

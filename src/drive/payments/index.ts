@@ -127,6 +127,10 @@ export class Payments {
     );
   }
 
+  public applyCancellationTrial(subscriptionId: string): Promise<void> {
+    return this.client.post('/customer/cancellation-trial', { subscriptionId }, this.headers());
+  }
+
   public cancelSubscription(userType?: UserType): Promise<void> {
     const query = new URLSearchParams();
     if (userType) query.set('userType', userType);
