@@ -18,9 +18,6 @@ export interface UserSettings {
   sharedWorkspace: boolean;
   credit: number;
   mnemonic: string;
-  privateKey: string;
-  publicKey: string;
-  revocationKey: string;
   keys: {
     ecc: {
       publicKey: string;
