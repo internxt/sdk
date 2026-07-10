@@ -74,6 +74,7 @@ export type Commitment = {
   remainingMonths?: number;
   cancellationDate?: string;
   isElegibleForCancellation?: boolean;
+  earlyCancellationFee?: number;
 };
 
 export type StoragePlan = {
@@ -91,6 +92,10 @@ export type StoragePlan = {
   commitment: Commitment;
   cancellationTrial: {
     redeemed: boolean;
+  };
+  cancellation: {
+    scheduled: boolean;
+    cancelAt?: number;
   };
   storageLimit: number;
   amountOfSeats: number;
