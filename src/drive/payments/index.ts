@@ -127,8 +127,12 @@ export class Payments {
     );
   }
 
-  public applyCancellationTrial(subscriptionId: string): Promise<void> {
-    return this.client.post('/customer/cancellation-trial', { subscriptionId }, this.headers());
+  public applyCancellationTrial(): Promise<void> {
+    return this.client.post('/customer/cancellation-trial', {}, this.headers());
+  }
+
+  public cancelSubscriptionEarly(): Promise<{ clientSecret: string }> {
+    return this.client.post('/subscriptions/cancel-early-charge', {}, this.headers());
   }
 
   public cancelSubscription(userType?: UserType): Promise<void> {
