@@ -725,6 +725,172 @@ describe('# storage service tests', () => {
     });
   });
 
+  describe('-> favorites', () => {
+    describe('mark file as favorite', () => {
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const fileUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({ favorited: true });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.markFileAsFavorite(fileUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/files/${fileUuid}/favorite`, {}, headers);
+        expect(body).toEqual({ favorited: true });
+      });
+    });
+
+    describe('unmark file as favorite', () => {
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const fileUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({ favorited: false });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.unmarkFileAsFavorite(fileUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/files/${fileUuid}/favorite`, headers);
+        expect(body).toEqual({ favorited: false });
+      });
+    });
+
+    describe('get favorite files', () => {
+      it('Should be called with only the required pagination params when no optional params are given', async () => {
+        // Arrange
+        const response: Array<unknown> = [];
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const [promise] = client.getFavoriteFiles({ limit: 50, offset: 0 });
+        const body = await promise;
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith('/files/favorites?limit=50&offset=0', headers);
+        expect(body).toEqual(response);
+      });
+
+      it('Should include sort, order and updatedAt in the query when given', async () => {
+        // Arrange
+        const updatedAt = '2024-01-01T00:00:00.000Z';
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+          promise: Promise.resolve([]),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const [promise] = client.getFavoriteFiles({
+          limit: 10,
+          offset: 20,
+          sort: 'updatedAt',
+          order: 'DESC',
+          updatedAt,
+        });
+        await promise;
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(
+          `/files/favorites?limit=10&offset=20&sort=updatedAt&order=DESC&updatedAt=${encodeURIComponent(updatedAt)}`,
+          headers,
+        );
+      });
+    });
+
+    describe('mark folder as favorite', () => {
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const folderUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({ favorited: true });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.markFolderAsFavorite(folderUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/folders/${folderUuid}/favorite`, {}, headers);
+        expect(body).toEqual({ favorited: true });
+      });
+    });
+
+    describe('unmark folder as favorite', () => {
+      it('Should be called with right arguments & return content', async () => {
+        // Arrange
+        const folderUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({ favorited: false });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.unmarkFolderAsFavorite(folderUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/folders/${folderUuid}/favorite`, headers);
+        expect(body).toEqual({ favorited: false });
+      });
+    });
+
+    describe('get favorite folders', () => {
+      it('Should be called with only the required pagination params when no optional params are given', async () => {
+        // Arrange
+        const response: Array<unknown> = [];
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+          promise: Promise.resolve(response),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const [promise] = client.getFavoriteFolders({ limit: 50, offset: 0 });
+        const body = await promise;
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith('/folders/favorites?limit=50&offset=0', headers);
+        expect(body).toEqual(response);
+      });
+
+      it('Should include sort, order and updatedAt in the query when given', async () => {
+        // Arrange
+        const updatedAt = '2024-01-01T00:00:00.000Z';
+        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+          promise: Promise.resolve([]),
+          requestCanceler: {
+            cancel: () => null,
+          },
+        });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const [promise] = client.getFavoriteFolders({
+          limit: 10,
+          offset: 20,
+          sort: 'plainName',
+          order: 'ASC',
+          updatedAt,
+        });
+        await promise;
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(
+          `/folders/favorites?limit=10&offset=20&sort=plainName&order=ASC&updatedAt=${encodeURIComponent(updatedAt)}`,
+          headers,
+        );
+      });
+    });
+  });
+
   describe('-> quotas', () => {
     describe('space usage', () => {
       it('should call with right params & return response', async () => {

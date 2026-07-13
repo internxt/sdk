@@ -1,4 +1,4 @@
-import { paths } from '../../schema';
+import { components, paths } from '../../schema';
 import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
@@ -22,6 +22,7 @@ export interface DriveFolderData {
   user_id: number;
   uuid: string;
   user?: UserResumeData;
+  isFavorite?: boolean;
 }
 
 export interface DriveFileData {
@@ -51,6 +52,7 @@ export interface DriveFileData {
   user?: UserResumeData;
   creationTime?: string;
   modificationTime?: string;
+  isFavorite?: boolean;
 }
 
 export interface Thumbnail {
@@ -84,6 +86,7 @@ export interface FolderChild {
   user_id: number;
   uuid: string;
   plainName?: string;
+  isFavorite?: boolean;
 }
 
 export interface FetchFolderContentResponse {
@@ -165,16 +168,28 @@ export enum FileStatus {
 }
 
 export type FetchPaginatedFile =
-  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json']['files'][0];
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json']['files'][0] & {
+    isFavorite?: boolean;
+  };
 
 export type FetchPaginatedFolder =
-  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json']['folders'][0];
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json']['folders'][0] & {
+    isFavorite?: boolean;
+  };
 
-export type FetchPaginatedFilesContent =
-  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json'];
+export type FetchPaginatedFilesContent = Omit<
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json'],
+  'files'
+> & {
+  files: FetchPaginatedFile[];
+};
 
-export type FetchPaginatedFoldersContent =
-  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'];
+export type FetchPaginatedFoldersContent = Omit<
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'],
+  'folders'
+> & {
+  folders: FetchPaginatedFolder[];
+};
 
 export interface FetchTrashContentResponse {
   result: {
@@ -467,6 +482,32 @@ export interface CheckDuplicatedFolderPayload {
 
 export interface CheckDuplicatedFoldersResponse {
   existentFolders: DriveFolderData[];
+}
+
+// Favorites
+
+export type FavoriteFileDto = components['schemas']['FileDto'] & { isFavorite?: boolean };
+
+export type FavoriteFolderDto = components['schemas']['FolderDto'] & { isFavorite?: boolean };
+
+export interface FavoriteStatusResponse {
+  favorited: boolean;
+}
+
+export interface GetFavoriteFilesPayload {
+  limit: number;
+  offset: number;
+  sort?: 'updatedAt' | 'uuid';
+  order?: 'ASC' | 'DESC';
+  updatedAt?: string;
+}
+
+export interface GetFavoriteFoldersPayload {
+  limit: number;
+  offset: number;
+  sort?: 'uuid' | 'plainName' | 'updatedAt';
+  order?: 'ASC' | 'DESC';
+  updatedAt?: string;
 }
 
 export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];
