@@ -425,14 +425,14 @@ export interface components {
       hybridCiphertext: string;
       /** @description Encrypted symmetric key (base64) */
       encryptedKey: string;
+      /** @description Recipient address this key was wrapped for */
+      encryptedForEmail: string;
     };
     EncryptedSummaryDto: {
       /** @description Encrypted preview snippet (base64) */
       encryptedPreview: string;
-      /** @description De-identified wrapped keys; the client trial-decrypts to read */
+      /** @description Wrapped keys that unlock the preview, labeled per recipient; the caller picks theirs by address */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
-      /** @description De-identified wrapped keys for the symmetric key that encrypts the email's attachments. Present only when the email has encrypted attachments. */
-      attachmentWrappedKeys?: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     EmailSummaryResponseDto: {
       /** @example Ma1f09b… */
@@ -620,16 +620,16 @@ export interface components {
       recipients: components['schemas']['RecipientKeyDto'][];
     };
     EncryptionBlockDto: {
-      /** @example v1 */
+      /** @example v2 */
       version: string;
-      /** @description Encrypted preview snippet (base64), ~256 chars plaintext */
-      encryptedPreview: string;
-      /** @description Encrypted text body (base64) */
+      /** @description Encrypted body payload (base64); decrypts to JSON { body, attachmentsSessionKey } */
       encryptedText: string;
-      /** @description De-identified wrapped keys, one per recipient */
+      /** @description Wrapped keys that unlock the body payload, labeled per recipient */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
-      /** @description De-identified attachment wrapped keys, one per recipient */
-      attachmentWrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
+      /** @description Encrypted preview snippet (base64), ~256 chars plaintext, sealed separately from the body */
+      encryptedPreview: string;
+      /** @description Wrapped keys that unlock the preview, labeled per recipient */
+      previewWrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     AttachmentRefDto: {
       /** @example T1a2b3c… */
@@ -696,7 +696,7 @@ export interface components {
       textBody?: string;
       /** @example <p>Still working on this…</p> */
       htmlBody?: string;
-      /** @description When present, the draft body is stored encrypted. Only the sender can decrypt it later, so wrappedKeys / attachmentWrappedKeys should contain a single entry built from the sender's own public key. */
+      /** @description When present, the draft body is stored encrypted. Only the sender can decrypt it later, so wrappedKeys / previewWrappedKeys should contain a single entry built from the sender's own public key. */
       encryption?: components['schemas']['EncryptionBlockDto'];
       attachments?: components['schemas']['AttachmentRefDto'][];
     };
