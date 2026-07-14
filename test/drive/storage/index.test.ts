@@ -726,40 +726,68 @@ describe('# storage service tests', () => {
   });
 
   describe('-> favorites', () => {
-    describe('mark file as favorite', () => {
-      it('Should be called with right arguments & return content', async () => {
+    describe('mark item as favorite', () => {
+      it('Should be called with the file route & return content when marking a file', async () => {
         // Arrange
         const fileUuid = crypto.randomUUID();
         const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({ favorited: true });
         const { client, headers } = clientAndHeaders({});
 
         // Act
-        const body = await client.markFileAsFavorite(fileUuid);
+        const body = await client.markItemAsFavorite('file', fileUuid);
 
         // Assert
-        expect(callStub).toHaveBeenCalledWith(`/files/${fileUuid}/favorite`, {}, headers);
+        expect(callStub).toHaveBeenCalledWith(`/favorites/file/${fileUuid}`, {}, headers);
+        expect(body).toEqual({ favorited: true });
+      });
+
+      it('Should be called with the folder route & return content when marking a folder', async () => {
+        // Arrange
+        const folderUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({ favorited: true });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.markItemAsFavorite('folder', folderUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/favorites/folder/${folderUuid}`, {}, headers);
         expect(body).toEqual({ favorited: true });
       });
     });
 
-    describe('unmark file as favorite', () => {
-      it('Should be called with right arguments & return content', async () => {
+    describe('unmark item as favorite', () => {
+      it('Should be called with the file route & return content when unmarking a file', async () => {
         // Arrange
         const fileUuid = crypto.randomUUID();
         const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({ favorited: false });
         const { client, headers } = clientAndHeaders({});
 
         // Act
-        const body = await client.unmarkFileAsFavorite(fileUuid);
+        const body = await client.unmarkItemAsFavorite('file', fileUuid);
 
         // Assert
-        expect(callStub).toHaveBeenCalledWith(`/files/${fileUuid}/favorite`, headers);
+        expect(callStub).toHaveBeenCalledWith(`/favorites/file/${fileUuid}`, headers);
+        expect(body).toEqual({ favorited: false });
+      });
+
+      it('Should be called with the folder route & return content when unmarking a folder', async () => {
+        // Arrange
+        const folderUuid = crypto.randomUUID();
+        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({ favorited: false });
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.unmarkItemAsFavorite('folder', folderUuid);
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith(`/favorites/folder/${folderUuid}`, headers);
         expect(body).toEqual({ favorited: false });
       });
     });
 
-    describe('get favorite files', () => {
-      it('Should be called with only the required pagination params when no optional params are given', async () => {
+    describe('get favorites', () => {
+      it('Should be called with only type and the required pagination params when no optional params are given', async () => {
         // Arrange
         const response: Array<unknown> = [];
         const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
@@ -771,17 +799,16 @@ describe('# storage service tests', () => {
         const { client, headers } = clientAndHeaders({});
 
         // Act
-        const [promise] = client.getFavoriteFiles({ limit: 50, offset: 0 });
+        const [promise] = client.getFavorites('file', { limit: 50, offset: 0 });
         const body = await promise;
 
         // Assert
-        expect(callStub).toHaveBeenCalledWith('/files/favorites?limit=50&offset=0', headers);
+        expect(callStub).toHaveBeenCalledWith('/favorites?type=file&limit=50&offset=0', headers);
         expect(body).toEqual(response);
       });
 
-      it('Should include sort, order and updatedAt in the query when given', async () => {
+      it('Should include sort and order in the query when given', async () => {
         // Arrange
-        const updatedAt = '2024-01-01T00:00:00.000Z';
         const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
           promise: Promise.resolve([]),
           requestCanceler: {
@@ -791,100 +818,17 @@ describe('# storage service tests', () => {
         const { client, headers } = clientAndHeaders({});
 
         // Act
-        const [promise] = client.getFavoriteFiles({
-          limit: 10,
-          offset: 20,
-          sort: 'updatedAt',
-          order: 'DESC',
-          updatedAt,
-        });
-        await promise;
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith(
-          `/files/favorites?limit=10&offset=20&sort=updatedAt&order=DESC&updatedAt=${encodeURIComponent(updatedAt)}`,
-          headers,
-        );
-      });
-    });
-
-    describe('mark folder as favorite', () => {
-      it('Should be called with right arguments & return content', async () => {
-        // Arrange
-        const folderUuid = crypto.randomUUID();
-        const callStub = vi.spyOn(HttpClient.prototype, 'put').mockResolvedValue({ favorited: true });
-        const { client, headers } = clientAndHeaders({});
-
-        // Act
-        const body = await client.markFolderAsFavorite(folderUuid);
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith(`/folders/${folderUuid}/favorite`, {}, headers);
-        expect(body).toEqual({ favorited: true });
-      });
-    });
-
-    describe('unmark folder as favorite', () => {
-      it('Should be called with right arguments & return content', async () => {
-        // Arrange
-        const folderUuid = crypto.randomUUID();
-        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({ favorited: false });
-        const { client, headers } = clientAndHeaders({});
-
-        // Act
-        const body = await client.unmarkFolderAsFavorite(folderUuid);
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith(`/folders/${folderUuid}/favorite`, headers);
-        expect(body).toEqual({ favorited: false });
-      });
-    });
-
-    describe('get favorite folders', () => {
-      it('Should be called with only the required pagination params when no optional params are given', async () => {
-        // Arrange
-        const response: Array<unknown> = [];
-        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
-          promise: Promise.resolve(response),
-          requestCanceler: {
-            cancel: () => null,
-          },
-        });
-        const { client, headers } = clientAndHeaders({});
-
-        // Act
-        const [promise] = client.getFavoriteFolders({ limit: 50, offset: 0 });
-        const body = await promise;
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith('/folders/favorites?limit=50&offset=0', headers);
-        expect(body).toEqual(response);
-      });
-
-      it('Should include sort, order and updatedAt in the query when given', async () => {
-        // Arrange
-        const updatedAt = '2024-01-01T00:00:00.000Z';
-        const callStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
-          promise: Promise.resolve([]),
-          requestCanceler: {
-            cancel: () => null,
-          },
-        });
-        const { client, headers } = clientAndHeaders({});
-
-        // Act
-        const [promise] = client.getFavoriteFolders({
+        const [promise] = client.getFavorites('folder', {
           limit: 10,
           offset: 20,
           sort: 'plainName',
           order: 'ASC',
-          updatedAt,
         });
         await promise;
 
         // Assert
         expect(callStub).toHaveBeenCalledWith(
-          `/folders/favorites?limit=10&offset=20&sort=plainName&order=ASC&updatedAt=${encodeURIComponent(updatedAt)}`,
+          '/favorites?type=folder&limit=10&offset=20&sort=plainName&order=ASC',
           headers,
         );
       });

@@ -486,6 +486,8 @@ export interface CheckDuplicatedFoldersResponse {
 
 // Favorites
 
+export type FavoriteItemType = 'file' | 'folder';
+
 export type FavoriteFileDto = components['schemas']['FileDto'] & { isFavorite?: boolean };
 
 export type FavoriteFolderDto = components['schemas']['FolderDto'] & { isFavorite?: boolean };
@@ -494,20 +496,11 @@ export interface FavoriteStatusResponse {
   favorited: boolean;
 }
 
-export interface GetFavoriteFilesPayload {
-  limit: number;
-  offset: number;
-  sort?: 'updatedAt' | 'uuid';
-  order?: 'ASC' | 'DESC';
-  updatedAt?: string;
-}
-
-export interface GetFavoriteFoldersPayload {
+export interface GetFavoritesPayload {
   limit: number;
   offset: number;
   sort?: 'uuid' | 'plainName' | 'updatedAt';
   order?: 'ASC' | 'DESC';
-  updatedAt?: string;
 }
 
 export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];

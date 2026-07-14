@@ -18,6 +18,7 @@ import {
   DriveFileData,
   FavoriteFileDto,
   FavoriteFolderDto,
+  FavoriteItemType,
   FavoriteStatusResponse,
   FetchFolderContentResponse,
   FetchLimitResponse,
@@ -34,8 +35,7 @@ import {
   FolderStatsResponse,
   FolderTreeResponse,
   FileLimitsResponse,
-  GetFavoriteFilesPayload,
-  GetFavoriteFoldersPayload,
+  GetFavoritesPayload,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -918,89 +918,52 @@ export class Storage {
   }
 
   /**
-   * Marks a file as favorite. The operation is idempotent: marking an already
-   * favorited file succeeds without creating duplicates.
+   * Marks a file or folder as favorite. The operation is idempotent: marking an
+   * already favorited item succeeds without creating duplicates.
    *
-   * @param {string} uuid - The UUID of the file.
+   * @param {FavoriteItemType} itemType - The type of the item ('file' | 'folder').
+   * @param {string} uuid - The UUID of the item.
    * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
    */
-  public markFileAsFavorite(uuid: string): Promise<FavoriteStatusResponse> {
-    return this.client.put(`/files/${uuid}/favorite`, {}, this.headers());
+  public markItemAsFavorite(itemType: FavoriteItemType, uuid: string): Promise<FavoriteStatusResponse> {
+    return this.client.put(`/favorites/${itemType}/${uuid}`, {}, this.headers());
   }
 
   /**
-   * Unmarks a file as favorite. The operation is idempotent: unmarking a file
-   * that is not favorited succeeds as a no-op.
+   * Unmarks a file or folder as favorite. The operation is idempotent: unmarking
+   * an item that is not favorited succeeds as a no-op.
    *
-   * @param {string} uuid - The UUID of the file.
+   * @param {FavoriteItemType} itemType - The type of the item ('file' | 'folder').
+   * @param {string} uuid - The UUID of the item.
    * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
    */
-  public unmarkFileAsFavorite(uuid: string): Promise<FavoriteStatusResponse> {
-    return this.client.delete(`/files/${uuid}/favorite`, this.headers());
+  public unmarkItemAsFavorite(itemType: FavoriteItemType, uuid: string): Promise<FavoriteStatusResponse> {
+    return this.client.delete(`/favorites/${itemType}/${uuid}`, this.headers());
   }
 
   /**
-   * Gets the list of files marked as favorite by the user.
+   * Gets the list of files or folders marked as favorite by the user.
    *
-   * @param {GetFavoriteFilesPayload} payload - Pagination (limit/offset required) plus optional sort, order and updatedAt filter.
-   * @returns {[Promise<FavoriteFileDto[]>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   * @param {FavoriteItemType} type - The type of favorite items to list ('file' | 'folder').
+   * @param {GetFavoritesPayload} payload - Pagination (limit/offset required) plus optional sort and order.
+   * @returns {[Promise<FavoriteFileDto[] | FavoriteFolderDto[]>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
-  public getFavoriteFiles(payload: GetFavoriteFilesPayload): [Promise<FavoriteFileDto[]>, RequestCanceler] {
-    const { limit, offset, sort, order, updatedAt } = payload;
+  public getFavorites(type: 'file', payload: GetFavoritesPayload): [Promise<FavoriteFileDto[]>, RequestCanceler];
+  public getFavorites(type: 'folder', payload: GetFavoritesPayload): [Promise<FavoriteFolderDto[]>, RequestCanceler];
+  public getFavorites(
+    type: FavoriteItemType,
+    payload: GetFavoritesPayload,
+  ): [Promise<FavoriteFileDto[] | FavoriteFolderDto[]>, RequestCanceler] {
+    const { limit, offset, sort, order } = payload;
     const query = new URLSearchParams();
+    query.set('type', type);
     query.set('limit', String(limit));
     query.set('offset', String(offset));
     if (sort !== undefined) query.set('sort', sort);
     if (order !== undefined) query.set('order', order);
-    if (updatedAt !== undefined) query.set('updatedAt', updatedAt);
 
-    const { promise, requestCanceler } = this.client.getCancellable<FavoriteFileDto[]>(
-      `/files/favorites?${query}`,
-      this.headers(),
-    );
-
-    return [promise, requestCanceler];
-  }
-
-  /**
-   * Marks a folder as favorite. The operation is idempotent: marking an already
-   * favorited folder succeeds without creating duplicates.
-   *
-   * @param {string} uuid - The UUID of the folder.
-   * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
-   */
-  public markFolderAsFavorite(uuid: string): Promise<FavoriteStatusResponse> {
-    return this.client.put(`/folders/${uuid}/favorite`, {}, this.headers());
-  }
-
-  /**
-   * Unmarks a folder as favorite. The operation is idempotent: unmarking a folder
-   * that is not favorited succeeds as a no-op.
-   *
-   * @param {string} uuid - The UUID of the folder.
-   * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
-   */
-  public unmarkFolderAsFavorite(uuid: string): Promise<FavoriteStatusResponse> {
-    return this.client.delete(`/folders/${uuid}/favorite`, this.headers());
-  }
-
-  /**
-   * Gets the list of folders marked as favorite by the user.
-   *
-   * @param {GetFavoriteFoldersPayload} payload - Pagination (limit/offset required) plus optional sort, order and updatedAt filter.
-   * @returns {[Promise<FavoriteFolderDto[]>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
-   */
-  public getFavoriteFolders(payload: GetFavoriteFoldersPayload): [Promise<FavoriteFolderDto[]>, RequestCanceler] {
-    const { limit, offset, sort, order, updatedAt } = payload;
-    const query = new URLSearchParams();
-    query.set('limit', String(limit));
-    query.set('offset', String(offset));
-    if (sort !== undefined) query.set('sort', sort);
-    if (order !== undefined) query.set('order', order);
-    if (updatedAt !== undefined) query.set('updatedAt', updatedAt);
-
-    const { promise, requestCanceler } = this.client.getCancellable<FavoriteFolderDto[]>(
-      `/folders/favorites?${query}`,
+    const { promise, requestCanceler } = this.client.getCancellable<FavoriteFileDto[] | FavoriteFolderDto[]>(
+      `/favorites?${query}`,
       this.headers(),
     );
 
