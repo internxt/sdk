@@ -29,14 +29,13 @@ export class Checkout {
 
   /**
    * @description Creates a customer or gets the existing one if it already exists
-   * @param customerName - The name of the customer
-   * @param lineAddress1 - The address of the user
-   * @param lineAddress2 - The address of the user
-   * @param postalCode - The postal code of the city where the user lives
-   * @param city - The city of the user
    * @param country - The country of the customer
-   * @param postalCode - The postal code of the customer
    * @param captchaToken - The captcha token to verify the call
+   * @param customerName - The name of the customer (optional)
+   * @param lineAddress1 - The address of the user (optional)
+   * @param lineAddress2 - The second address line of the user (optional)
+   * @param city - The city of the user (optional)
+   * @param postalCode - The postal code of the customer (optional)
    * @param companyVatId - The VAT ID of the company (optional)
    * @param metadata - Additional metadata to attach to the customer (optional)
    * @returns The customer ID and the user token used to create a subscription or payment intent
