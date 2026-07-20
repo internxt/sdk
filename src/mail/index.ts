@@ -2,6 +2,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { headersWithToken } from '../shared/headers';
 import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
+  AddressAvailabilityResponse,
   MailboxResponse,
   EmailListResponse,
   EmailResponse,
@@ -222,6 +223,18 @@ export class MailApi {
    */
   getActiveDomains(): Promise<EmailDomainsResponse> {
     return this.client.get('/email/domains', this.headers());
+  }
+
+  /**
+   * Checks whether an email address is free to claim
+   *
+   * @param username - Local part of the address (before the @)
+   * @param domain - Email domain to check the username against
+   * @returns Whether the address is available and, when taken, a suggested
+   * alternative full address - `AddressAvailabilityResponse`
+   */
+  checkAddressAvailability(username: string, domain: string): Promise<AddressAvailabilityResponse> {
+    return this.client.getWithParams('/addresses/availability', { username, domain }, this.headers());
   }
 
   /**
