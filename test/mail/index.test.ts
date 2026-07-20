@@ -105,6 +105,40 @@ describe('Mail service tests', () => {
       expect(result).toEqual(expectedKeys);
     });
   });
+
+  describe('checkAddressAvailability', () => {
+    it('When the address is free, then it should GET /addresses/availability with username and domain', async () => {
+      const { client, headers } = clientAndHeadersWithToken();
+      const response = { available: true, suggestion: null };
+      const getStub = vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(response);
+
+      const result = await client.checkAddressAvailability('jane.doe', 'inxt.me');
+
+      expect(getStub).toHaveBeenCalledWith(
+        '/addresses/availability',
+        { username: 'jane.doe', domain: 'inxt.me' },
+        headers,
+      );
+      expect(result).toEqual(response);
+    });
+
+    it('When the address is taken, then it should return the suggested alternative address', async () => {
+      const { client } = clientAndHeadersWithToken();
+      const response = { available: false, suggestion: 'jane.doe1@inxt.me' };
+      vi.spyOn(HttpClient.prototype, 'getWithParams').mockResolvedValue(response);
+
+      const result = await client.checkAddressAvailability('jane.doe', 'inxt.me');
+
+      expect(result).toEqual(response);
+    });
+
+    it('When the HTTP client throws, then the error should propagate', async () => {
+      const { client } = clientAndHeadersWithToken();
+      vi.spyOn(HttpClient.prototype, 'getWithParams').mockRejectedValue(new Error('Too Many Requests'));
+
+      await expect(client.checkAddressAvailability('jane.doe', 'inxt.me')).rejects.toThrow('Too Many Requests');
+    });
+  });
 });
 
 function clientAndHeadersWithToken(
