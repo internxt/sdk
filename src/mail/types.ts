@@ -6,6 +6,7 @@ export type EmailListResponse = components['schemas']['EmailListResponseDto'];
 export type EmailResponse = components['schemas']['EmailResponseDto'];
 export type EmailCreatedResponse = components['schemas']['EmailCreatedResponseDto'];
 export type SendEmailRequest = components['schemas']['SendEmailRequestDto'];
+export type ReplyEmailRequest = components['schemas']['ReplyEmailRequestDto'];
 export type EncryptionBlock = components['schemas']['EncryptionBlockDto'];
 export type EncryptedWrappedKey = components['schemas']['EncryptedWrappedKeyDto'];
 export type LookupRecipientKeysRequest = components['schemas']['LookupRecipientKeysRequestDto'];

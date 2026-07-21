@@ -160,6 +160,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/email/{id}/reply': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reply to an email
+     * @description Sends a reply to a given email
+     */
+    post: operations['EmailController_reply'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/email/drafts': {
     parameters: {
       query?: never;
@@ -381,6 +401,39 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/stalwart-events': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations['StalwartEventsController_handleEvents'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/mta-hooks/rcpt': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** RCPT-stage hook */
+    post: operations['MtaHooksController_rcpt'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -431,7 +484,7 @@ export interface components {
     EncryptedSummaryDto: {
       /** @description Encrypted preview snippet (base64) */
       encryptedPreview: string;
-      /** @description Wrapped session keys, labeled per recipient; the caller picks theirs by address */
+      /** @description Wrapped keys that unlock the preview, labeled per recipient; the caller picks theirs by address */
       wrappedKeys: components['schemas']['EncryptedWrappedKeyDto'][];
     };
     EmailSummaryResponseDto: {
@@ -685,6 +738,39 @@ export interface components {
        * @example Ma1f09b…
        */
       id: string;
+    };
+    ReplyEmailRequestDto: {
+      /** @description Primary recipients (at least one required) */
+      to: components['schemas']['EmailAddressDto'][];
+      cc?: components['schemas']['EmailAddressDto'][];
+      bcc?: components['schemas']['EmailAddressDto'][];
+      /**
+       * @description Plain-text version of the email body
+       * @example Hi team, here are the notes from today…
+       */
+      textBody?: string;
+      /**
+       * @description HTML version of the email body
+       * @example <p>Hi team, here are the notes from today…</p>
+       */
+      htmlBody?: string;
+      encryption?: components['schemas']['EncryptionBlockDto'];
+      attachments?: components['schemas']['AttachmentRefDto'][];
+      /**
+       * @example INTERNXT
+       * @enum {string}
+       */
+      deliveryMode?: 'INTERNXT' | 'EXTERNAL';
+      /**
+       * @description JMAP id of the draft being sent. When present, the draft is destroyed after the email is sent so it no longer appears in the Drafts folder.
+       * @example Ma1f09b…
+       */
+      draftId?: string;
+      /**
+       * @description Subject of the reply. Optional — when omitted, a `Re:`-prefixed subject is derived from the original email.
+       * @example Re: Weekly sync notes
+       */
+      subject?: string;
     };
     DraftEmailRequestDto: {
       to?: components['schemas']['EmailAddressDto'][];
@@ -989,6 +1075,40 @@ export interface operations {
       };
     };
   };
+  EmailController_reply: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description JMAP id of the email being replied to */
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReplyEmailRequestDto'];
+      };
+    };
+    responses: {
+      /** @description Reply sent successfully */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['EmailCreatedResponseDto'];
+        };
+      };
+      /** @description Original email not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   EmailController_saveDraft: {
     parameters: {
       query?: never;
@@ -1096,6 +1216,13 @@ export interface operations {
       };
       /** @description Draft not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Draft was modified concurrently; retry the save */
+      409: {
         headers: {
           [name: string]: unknown;
         };
@@ -1353,6 +1480,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        /** @description The UUID of the account */
         uuid: string;
       };
       cookie?: never;
@@ -1365,6 +1493,13 @@ export interface operations {
         };
         content?: never;
       };
+      /** @description Account not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
     };
   };
   GatewayController_reactivateAccount: {
@@ -1372,6 +1507,7 @@ export interface operations {
       query?: never;
       header?: never;
       path: {
+        /** @description The UUID of the account */
         uuid: string;
       };
       cookie?: never;
@@ -1379,6 +1515,47 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Account not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StalwartEventsController_handleEvents: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MtaHooksController_rcpt: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      201: {
         headers: {
           [name: string]: unknown;
         };
