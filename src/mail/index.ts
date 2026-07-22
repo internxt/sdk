@@ -26,6 +26,7 @@ import {
   UploadAttachmentResponse,
   DownloadAttachmentResponse,
   DownloadAttachmentPayload,
+  ReplyEmailRequest,
 } from './types';
 
 export class MailApi {
@@ -162,6 +163,16 @@ export class MailApi {
    */
   sendEmail(body: SendEmailRequest): Promise<EmailCreatedResponse> {
     return this.client.post('/email/send', body, this.headers());
+  }
+
+  /**
+   * Reply a message to the sender
+   * @param messageId - The ID of the message we want to reply
+   * @param body - The body of the reply
+   * @returns The created email
+   */
+  replyEmail(messageId: string, body: ReplyEmailRequest): Promise<EmailCreatedResponse> {
+    return this.client.post(`/email/${messageId}/reply`, body, this.headers());
   }
 
   /**
