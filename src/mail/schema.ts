@@ -740,8 +740,6 @@ export interface components {
       id: string;
     };
     ReplyEmailRequestDto: {
-      /** @description Primary recipients (at least one required) */
-      to: components['schemas']['EmailAddressDto'][];
       cc?: components['schemas']['EmailAddressDto'][];
       bcc?: components['schemas']['EmailAddressDto'][];
       /**
@@ -771,6 +769,11 @@ export interface components {
        * @example Re: Weekly sync notes
        */
       subject?: string;
+      /**
+       * @description When true, replies to everyone: the other participants of the original (its To and Cc, minus yourself) are added to Cc. The recipient (To) is always derived from the original message — the caller never sends it.
+       * @example false
+       */
+      replyAll?: boolean;
     };
     DraftEmailRequestDto: {
       to?: components['schemas']['EmailAddressDto'][];
