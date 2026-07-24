@@ -360,6 +360,31 @@ export interface SearchResultData {
   data: [SearchResult];
 }
 
+export type SearchFileCategory =
+  | 'folder'
+  | 'audio'
+  | 'code'
+  | 'csv'
+  | 'figma'
+  | 'image'
+  | 'pdf'
+  | 'ppt'
+  | 'txt'
+  | 'video'
+  | 'word'
+  | 'xls'
+  | 'xml'
+  | 'zip';
+
+export interface GlobalSearchOptions {
+  offset?: number;
+  type?: SearchFileCategory[];
+  minSize?: number;
+  maxSize?: number;
+  modifiedAfter?: string;
+  modifiedBefore?: string;
+}
+
 export interface FolderAncestor {
   bucket: null | string;
   createdAt: string;
