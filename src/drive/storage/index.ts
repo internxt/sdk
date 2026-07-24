@@ -27,6 +27,7 @@ import {
   FileVersion,
   FolderAncestor,
   FolderAncestorWorkspace,
+  GlobalSearchOptions,
   FolderMeta,
   FolderStatsResponse,
   FolderTreeResponse,
@@ -655,16 +656,27 @@ export class Storage {
    *
    * @param {string} search - The name of the item.
    * @param {string} workspaceId - The ID of the workspace (optional).
-   * @param {number} offset - The position of the first item to return (optional).
+   * @param {number | GlobalSearchOptions} offsetOrOptions - The position of the first item to return, or an options
+   * object (optional) with the offset and the search filters: `type` (file categories, combined with OR),
+   * `minSize`/`maxSize` (bytes, files only) and `modifiedAfter`/`modifiedBefore` (ISO 8601 dates). Filters are
+   * combined with AND.
    * @returns {[Promise<SearchResultData>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getGlobalSearchItems(
     search: string,
     workspaceId?: string,
-    offset?: number,
+    offsetOrOptions?: number | GlobalSearchOptions,
   ): [Promise<SearchResultData>, RequestCanceler] {
+    const options: GlobalSearchOptions =
+      typeof offsetOrOptions === 'number' ? { offset: offsetOrOptions } : (offsetOrOptions ?? {});
+
     const query = new URLSearchParams();
-    if (offset !== undefined) query.set('offset', String(offset));
+    if (options.offset !== undefined) query.set('offset', String(options.offset));
+    options.type?.forEach((category) => query.append('type', category));
+    if (options.minSize !== undefined) query.set('minSize', String(options.minSize));
+    if (options.maxSize !== undefined) query.set('maxSize', String(options.maxSize));
+    if (options.modifiedAfter !== undefined) query.set('modifiedAfter', options.modifiedAfter);
+    if (options.modifiedBefore !== undefined) query.set('modifiedBefore', options.modifiedBefore);
 
     const { promise, requestCanceler } = workspaceId
       ? this.client.getCancellable<SearchResultData>(
