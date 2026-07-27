@@ -6,6 +6,7 @@ export type EmailListResponse = components['schemas']['EmailListResponseDto'];
 export type EmailResponse = components['schemas']['EmailResponseDto'];
 export type EmailCreatedResponse = components['schemas']['EmailCreatedResponseDto'];
 export type SendEmailRequest = components['schemas']['SendEmailRequestDto'];
+export type ReplyEmailRequest = components['schemas']['ReplyEmailRequestDto'];
 export type EncryptionBlock = components['schemas']['EncryptionBlockDto'];
 export type EncryptedWrappedKey = components['schemas']['EncryptedWrappedKeyDto'];
 export type LookupRecipientKeysRequest = components['schemas']['LookupRecipientKeysRequestDto'];
@@ -20,6 +21,12 @@ export type ListEmailsQuery = operations['EmailController_list']['parameters']['
 export type ThreadsQuery = operations['EmailController_getThread']['parameters']['query'];
 export type SearchFiltersQuery = operations['EmailController_search']['requestBody']['content']['application/json'];
 export type EmailDomainsResponse = components['schemas']['MailDomainDto'][];
+export type AddressAvailabilityQuery = operations['AddressesController_checkAvailability']['parameters']['query'];
+// Declared manually until the backend annotates the endpoint response in its OpenAPI spec.
+export type AddressAvailabilityResponse = {
+  available: boolean;
+  suggestion: string | null;
+};
 export type UploadAttachmentResponse = components['schemas']['UploadAttachmentResponseDto'];
 export type DownloadAttachmentPayload = operations['EmailController_downloadAttachment']['parameters']['query'];
 export type AttachmentRef = components['schemas']['EmailAttachmentDto'];

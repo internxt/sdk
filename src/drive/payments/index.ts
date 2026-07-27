@@ -141,6 +141,10 @@ export class Payments {
     return this.client.delete(`/subscriptions?${query.toString()}`, this.headers());
   }
 
+  public reactivateUserSubscription(): Promise<void> {
+    return this.client.post('/subscriptions/reactivate', {}, this.headers());
+  }
+
   public updateCustomerBillingInfo(payload: CustomerBillingInfo): Promise<void> {
     return this.client.patch('/billing', { ...payload }, this.headers());
   }

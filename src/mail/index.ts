@@ -2,6 +2,7 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { headersWithToken } from '../shared/headers';
 import { HttpClient, RequestCanceler } from '../shared/http/client';
 import {
+  AddressAvailabilityResponse,
   MailboxResponse,
   EmailListResponse,
   EmailResponse,
@@ -25,6 +26,7 @@ import {
   UploadAttachmentResponse,
   DownloadAttachmentResponse,
   DownloadAttachmentPayload,
+  ReplyEmailRequest,
 } from './types';
 
 export class MailApi {
@@ -164,6 +166,16 @@ export class MailApi {
   }
 
   /**
+   * Reply a message to the sender
+   * @param messageId - The ID of the message we want to reply
+   * @param body - The body of the reply
+   * @returns The created email
+   */
+  replyEmail(messageId: string, body: ReplyEmailRequest): Promise<EmailCreatedResponse> {
+    return this.client.post(`/email/${messageId}/reply`, body, this.headers());
+  }
+
+  /**
    * Looks up the public encryption keys for one or more recipient addresses.
    * For each address, returns the public key if it belongs to an active
    * Internxt domain, or `null` for external or unknown addresses.
@@ -222,6 +234,18 @@ export class MailApi {
    */
   getActiveDomains(): Promise<EmailDomainsResponse> {
     return this.client.get('/email/domains', this.headers());
+  }
+
+  /**
+   * Checks whether an email address is free to claim
+   *
+   * @param username - Local part of the address (before the @)
+   * @param domain - Email domain to check the username against
+   * @returns Whether the address is available and, when taken, a suggested
+   * alternative full address - `AddressAvailabilityResponse`
+   */
+  checkAddressAvailability(username: string, domain: string): Promise<AddressAvailabilityResponse> {
+    return this.client.getWithParams('/addresses/availability', { username, domain }, this.headers());
   }
 
   /**

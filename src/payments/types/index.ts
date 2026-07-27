@@ -1,12 +1,12 @@
 import { UserType } from '../../drive/payments/types/types';
 
 export interface CreateCustomerPayload {
-  customerName: string;
-  lineAddress1: string;
+  customerName?: string;
+  lineAddress1?: string;
   lineAddress2?: string;
-  city: string;
+  city?: string;
   country: string;
-  postalCode: string;
+  postalCode?: string;
   captchaToken: string;
   companyVatId?: string;
   metadata?: Record<string, string>;
