@@ -16,6 +16,10 @@ import {
   CreateThumbnailEntryPayload,
   DeleteFilePayload,
   DriveFileData,
+  FavoriteFileDto,
+  FavoriteFolderDto,
+  FavoriteItemType,
+  FavoriteStatusResponse,
   FetchFolderContentResponse,
   FetchLimitResponse,
   FetchPaginatedFilesContent,
@@ -31,6 +35,7 @@ import {
   FolderStatsResponse,
   FolderTreeResponse,
   FileLimitsResponse,
+  GetFavoritesPayload,
   MoveFilePayload,
   MoveFileResponse,
   MoveFileUuidPayload,
@@ -910,5 +915,58 @@ export class Storage {
    */
   public getFileVersionLimits(): Promise<FileLimitsResponse> {
     return this.client.get<FileLimitsResponse>('/files/limits', this.headers());
+  }
+
+  /**
+   * Marks a file or folder as favorite. The operation is idempotent: marking an
+   * already favorited item succeeds without creating duplicates.
+   *
+   * @param {FavoriteItemType} itemType - The type of the item ('file' | 'folder').
+   * @param {string} uuid - The UUID of the item.
+   * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
+   */
+  public markItemAsFavorite(itemType: FavoriteItemType, uuid: string): Promise<FavoriteStatusResponse> {
+    return this.client.put(`/favorites/${itemType}/${uuid}`, {}, this.headers());
+  }
+
+  /**
+   * Unmarks a file or folder as favorite. The operation is idempotent: unmarking
+   * an item that is not favorited succeeds as a no-op.
+   *
+   * @param {FavoriteItemType} itemType - The type of the item ('file' | 'folder').
+   * @param {string} uuid - The UUID of the item.
+   * @returns {Promise<FavoriteStatusResponse>} A promise that resolves with the favorite status.
+   */
+  public unmarkItemAsFavorite(itemType: FavoriteItemType, uuid: string): Promise<FavoriteStatusResponse> {
+    return this.client.delete(`/favorites/${itemType}/${uuid}`, this.headers());
+  }
+
+  /**
+   * Gets the list of files or folders marked as favorite by the user.
+   *
+   * @param {FavoriteItemType} type - The type of favorite items to list ('file' | 'folder').
+   * @param {GetFavoritesPayload} payload - Pagination (limit/offset required) plus optional sort and order.
+   * @returns {[Promise<FavoriteFileDto[] | FavoriteFolderDto[]>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFavorites(type: 'file', payload: GetFavoritesPayload): [Promise<FavoriteFileDto[]>, RequestCanceler];
+  public getFavorites(type: 'folder', payload: GetFavoritesPayload): [Promise<FavoriteFolderDto[]>, RequestCanceler];
+  public getFavorites(
+    type: FavoriteItemType,
+    payload: GetFavoritesPayload,
+  ): [Promise<FavoriteFileDto[] | FavoriteFolderDto[]>, RequestCanceler] {
+    const { limit, offset, sort, order } = payload;
+    const query = new URLSearchParams();
+    query.set('type', type);
+    query.set('limit', String(limit));
+    query.set('offset', String(offset));
+    if (sort !== undefined) query.set('sort', sort);
+    if (order !== undefined) query.set('order', order);
+
+    const { promise, requestCanceler } = this.client.getCancellable<FavoriteFileDto[] | FavoriteFolderDto[]>(
+      `/favorites?${query}`,
+      this.headers(),
+    );
+
+    return [promise, requestCanceler];
   }
 }

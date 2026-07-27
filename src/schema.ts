@@ -2599,6 +2599,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/photos/devices': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get all photo devices as folder */
+    get: operations['PhotosController_getPhotoDevicesAsFolder'];
+    put?: never;
+    /** Create a photo device as folder */
+    post: operations['PhotosController_createPhotoDeviceAsFolder'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/photos/devices/{uuid}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get photo device as folder by uuid */
+    get: operations['PhotosController_getPhotoDeviceAsFolder'];
+    put?: never;
+    post?: never;
+    /** Delete photo device as folder by uuid */
+    delete: operations['PhotosController_deletePhotoDeviceAsFolder'];
+    options?: never;
+    head?: never;
+    /** Update photo device as folder by uuid */
+    patch: operations['PhotosController_updatePhotoDeviceAsFolder'];
+    trace?: never;
+  };
   '/storage/trash/paginated': {
     parameters: {
       query?: never;
@@ -2712,6 +2749,44 @@ export interface paths {
     post?: never;
     /** Deletes a single file form user's trash */
     delete: operations['TrashController_deleteFolder'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/favorites': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Gets favorite items
+     * @description Returns the favorite files or folders of the user, depending on the `type` query param.
+     */
+    get: operations['FavoriteController_getFavorites'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/favorites/{itemType}/{itemId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /** Mark an item as favorite */
+    put: operations['FavoriteController_markItemAsFavorite'];
+    post?: never;
+    /** Unmark an item as favorite */
+    delete: operations['FavoriteController_unmarkItemAsFavorite'];
     options?: never;
     head?: never;
     patch?: never;
@@ -2866,23 +2941,6 @@ export interface paths {
     put?: never;
     /** Get Device Context */
     post: operations['DeviceController_getDevice'];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  '/device/geolocation': {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Get Geolocation by ip */
-    post: operations['DeviceController_getLocation'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3802,6 +3860,7 @@ export interface components {
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       removed: boolean;
       deleted: boolean;
+      isFavorite?: boolean;
     };
     CreateBulkFoldersConflictResponseDto: {
       /** @example Folders already exist */
@@ -3837,6 +3896,7 @@ export interface components {
       plainName: string;
       /** @enum {string} */
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
+      isFavorite?: boolean;
     };
     FilesDto: {
       files: components['schemas']['FileDto'][];
@@ -3903,6 +3963,7 @@ export interface components {
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       removed: boolean;
       deleted: boolean;
+      isFavorite?: boolean;
       children: components['schemas']['FolderDto'][];
       files: components['schemas']['FileDto'][];
     };
@@ -4026,6 +4087,8 @@ export interface components {
     GetFileLimitsDto: {
       versioning: components['schemas']['VersioningLimitsDto'];
       maxUploadFileSize: number | null;
+      /** @description Whether photos access is enabled for this tier */
+      photosAccess: boolean;
     };
     FileVersionDto: {
       id: string;
@@ -4339,6 +4402,7 @@ export interface components {
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       removed: boolean;
       deleted: boolean;
+      isFavorite?: boolean;
       /** @description Owner of the folder */
       user: components['schemas']['SharingOwnerInfoDto'] | null;
     };
@@ -4399,6 +4463,7 @@ export interface components {
       plainName: string;
       /** @enum {string} */
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
+      isFavorite?: boolean;
       /** @description Owner of the file */
       user: components['schemas']['SharingOwnerInfoDto'] | null;
     };
@@ -4772,6 +4837,7 @@ export interface components {
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       removed: boolean;
       deleted: boolean;
+      isFavorite?: boolean;
       hasBackups: boolean;
       /** Format: date-time */
       lastBackupAt: string;
@@ -5042,6 +5108,36 @@ export interface components {
        * @example 123456
        */
       code?: string;
+    };
+    CliEccKeysDto: {
+      /** @example publicKeyExample */
+      publicKey?: string;
+      /** @example privateKeyExample */
+      privateKey?: string;
+      /** @example revocationKeyExample */
+      revocationKey?: string;
+    };
+    CliKeysDto: {
+      ecc?: components['schemas']['CliEccKeysDto'];
+    };
+    CliLoginAccessDto: {
+      /**
+       * @description The email of the user
+       * @example user@internxt.com
+       */
+      email: string;
+      /**
+       * @description User password
+       * @example some_hashed_pass
+       */
+      password: string;
+      /**
+       * @description TFA
+       * @example two_factor_authentication_code
+       */
+      tfa?: string;
+      /** @description keys */
+      keys?: components['schemas']['CliKeysDto'];
     };
     CreateSendLinkDto: {
       /**
@@ -9302,6 +9398,113 @@ export interface operations {
       };
     };
   };
+  PhotosController_getPhotoDevicesAsFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeviceAsFolder'][];
+        };
+      };
+    };
+  };
+  PhotosController_createPhotoDeviceAsFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDeviceAsFolderDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeviceAsFolder'];
+        };
+      };
+    };
+  };
+  PhotosController_getPhotoDeviceAsFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeviceAsFolder'];
+        };
+      };
+    };
+  };
+  PhotosController_deletePhotoDeviceAsFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PhotosController_updatePhotoDeviceAsFolder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateDeviceAsFolderDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['DeviceAsFolder'];
+        };
+      };
+    };
+  };
   TrashController_getTrashedFilesPaginated: {
     parameters: {
       query: {
@@ -9443,6 +9646,83 @@ export interface operations {
     requestBody?: never;
     responses: {
       204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  FavoriteController_getFavorites: {
+    parameters: {
+      query: {
+        /** @description Items per page */
+        limit: number;
+        /** @description Offset for pagination */
+        offset: number;
+        /** @description Type of favorite items to list */
+        type: 'file' | 'folder';
+        /** @description Field to sort by */
+        sort?: 'uuid' | 'plainName' | 'updatedAt';
+        /** @description Sort order */
+        order?: 'ASC' | 'DESC';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Favorite files or folders, depending on `type` */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': (components['schemas']['FileDto'] | components['schemas']['FolderDto'])[];
+        };
+      };
+    };
+  };
+  FavoriteController_markItemAsFavorite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description file | folder */
+        itemType: string;
+        /** @description UUID of the item to mark as favorite */
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Item marked as favorite */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  FavoriteController_unmarkItemAsFavorite: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        /** @description file | folder */
+        itemType: string;
+        /** @description UUID of the item to unmark as favorite */
+        itemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Item unmarked as favorite */
+      200: {
         headers: {
           [name: string]: unknown;
         };
@@ -9608,7 +9888,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['LoginAccessDto'];
+        'application/json': components['schemas']['CliLoginAccessDto'];
       };
     };
     responses: {
@@ -9686,24 +9966,6 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Get Device Context by user agent */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  DeviceController_getLocation: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Get geolocation by ip */
       200: {
         headers: {
           [name: string]: unknown;

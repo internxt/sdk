@@ -1,4 +1,4 @@
-import { paths } from '../../schema';
+import { components, paths } from '../../schema';
 import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
@@ -22,6 +22,7 @@ export interface DriveFolderData {
   user_id: number;
   uuid: string;
   user?: UserResumeData;
+  isFavorite?: boolean;
 }
 
 export interface DriveFileData {
@@ -51,6 +52,7 @@ export interface DriveFileData {
   user?: UserResumeData;
   creationTime?: string;
   modificationTime?: string;
+  isFavorite?: boolean;
 }
 
 export interface Thumbnail {
@@ -84,6 +86,7 @@ export interface FolderChild {
   user_id: number;
   uuid: string;
   plainName?: string;
+  isFavorite?: boolean;
 }
 
 export interface FetchFolderContentResponse {
@@ -467,6 +470,25 @@ export interface CheckDuplicatedFolderPayload {
 
 export interface CheckDuplicatedFoldersResponse {
   existentFolders: DriveFolderData[];
+}
+
+// Favorites
+
+export type FavoriteItemType = 'file' | 'folder';
+
+export type FavoriteFileDto = components['schemas']['FileDto'];
+
+export type FavoriteFolderDto = components['schemas']['FolderDto'];
+
+export interface FavoriteStatusResponse {
+  favorited: boolean;
+}
+
+export interface GetFavoritesPayload {
+  limit: number;
+  offset: number;
+  sort?: 'uuid' | 'plainName' | 'updatedAt';
+  order?: 'ASC' | 'DESC';
 }
 
 export type FileVersion = paths['/files/{uuid}/versions']['get']['responses']['200']['content']['application/json'][0];
