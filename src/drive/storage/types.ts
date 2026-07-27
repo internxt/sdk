@@ -168,28 +168,16 @@ export enum FileStatus {
 }
 
 export type FetchPaginatedFile =
-  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json']['files'][0] & {
-    isFavorite?: boolean;
-  };
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json']['files'][0];
 
 export type FetchPaginatedFolder =
-  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json']['folders'][0] & {
-    isFavorite?: boolean;
-  };
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json']['folders'][0];
 
-export type FetchPaginatedFilesContent = Omit<
-  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json'],
-  'files'
-> & {
-  files: FetchPaginatedFile[];
-};
+export type FetchPaginatedFilesContent =
+  paths['/folders/content/{uuid}/files']['get']['responses']['200']['content']['application/json'];
 
-export type FetchPaginatedFoldersContent = Omit<
-  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'],
-  'folders'
-> & {
-  folders: FetchPaginatedFolder[];
-};
+export type FetchPaginatedFoldersContent =
+  paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'];
 
 export interface FetchTrashContentResponse {
   result: {
@@ -488,9 +476,9 @@ export interface CheckDuplicatedFoldersResponse {
 
 export type FavoriteItemType = 'file' | 'folder';
 
-export type FavoriteFileDto = components['schemas']['FileDto'] & { isFavorite?: boolean };
+export type FavoriteFileDto = components['schemas']['FileDto'];
 
-export type FavoriteFolderDto = components['schemas']['FolderDto'] & { isFavorite?: boolean };
+export type FavoriteFolderDto = components['schemas']['FolderDto'];
 
 export interface FavoriteStatusResponse {
   favorited: boolean;
