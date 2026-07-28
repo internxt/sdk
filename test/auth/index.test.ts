@@ -43,9 +43,6 @@ describe('# auth service tests', () => {
           password: registerDetails.password,
           mnemonic: registerDetails.mnemonic,
           salt: registerDetails.salt,
-          privateKey: registerDetails.keys.privateKeyEncrypted,
-          publicKey: registerDetails.keys.publicKey,
-          revocationKey: registerDetails.keys.revocationCertificate,
           keys: {
             ecc: {
               publicKey: registerDetails.keys.ecc.publicKey,
@@ -176,9 +173,6 @@ describe('# auth service tests', () => {
           password: registerDetails.password,
           mnemonic: registerDetails.mnemonic,
           salt: registerDetails.salt,
-          privateKey: registerDetails.keys.privateKeyEncrypted,
-          publicKey: registerDetails.keys.publicKey,
-          revocationKey: registerDetails.keys.revocationCertificate,
           keys: {
             ecc: {
               publicKey: registerDetails.keys.ecc.publicKey,
@@ -374,9 +368,6 @@ describe('# auth service tests', () => {
         encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
         generateKeys: (password: Password) => {
           const keys: Keys = {
-            privateKeyEncrypted: 'priv',
-            publicKey: 'pub',
-            revocationCertificate: 'rev',
             ecc: {
               publicKey: 'pub',
               privateKeyEncrypted: 'priv',
@@ -395,13 +386,11 @@ describe('# auth service tests', () => {
           sKey: 'encrypted_salt',
         })
         .mockResolvedValueOnce({
-          user: {
-            revocateKey: 'key',
-          },
+          user: {},
         });
 
       // Act
-      const body = await client.login(loginDetails, cryptoProvider);
+      await client.login(loginDetails, cryptoProvider);
 
       // Assert
       expect(postStub).toHaveBeenCalledTimes(2);
@@ -418,9 +407,6 @@ describe('# auth service tests', () => {
           email: loginDetails.email,
           password: 'password-encrypted_salt',
           tfa: loginDetails.tfaCode,
-          privateKey: 'priv',
-          publicKey: 'pub',
-          revocateKey: 'rev',
           keys: {
             ecc: {
               publicKey: 'pub',
@@ -434,12 +420,6 @@ describe('# auth service tests', () => {
         },
         headers,
       );
-      expect(body).toEqual({
-        user: {
-          revocateKey: 'key',
-          revocationKey: 'key',
-        },
-      });
     });
   });
 
@@ -456,9 +436,6 @@ describe('# auth service tests', () => {
         encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
         generateKeys: (password: Password) => {
           const keys: Keys = {
-            privateKeyEncrypted: 'priv',
-            publicKey: 'pub',
-            revocationCertificate: 'rev',
             ecc: {
               publicKey: 'pub',
               privateKeyEncrypted: 'priv',
@@ -477,13 +454,11 @@ describe('# auth service tests', () => {
           sKey: 'encrypted_salt',
         })
         .mockResolvedValueOnce({
-          user: {
-            revocateKey: 'key',
-          },
+          user: {},
         });
 
       // Act
-      const body = await client.loginWithoutKeys(loginDetails, cryptoProvider);
+      await client.loginWithoutKeys(loginDetails, cryptoProvider);
 
       // Assert
       expect(postStub).toHaveBeenCalledTimes(2);
@@ -503,12 +478,6 @@ describe('# auth service tests', () => {
         },
         headers,
       );
-      expect(body).toEqual({
-        user: {
-          revocateKey: 'key',
-          revocationKey: 'key',
-        },
-      });
     });
 
     it('Should bubble up the error on first call failure', async () => {
@@ -525,9 +494,6 @@ describe('# auth service tests', () => {
         encryptPasswordHash: () => '',
         generateKeys: (password: Password) => {
           const keys: Keys = {
-            privateKeyEncrypted: '',
-            publicKey: '',
-            revocationCertificate: '',
             ecc: {
               publicKey: '',
               privateKeyEncrypted: '',
@@ -555,9 +521,6 @@ describe('# auth service tests', () => {
       const token: Token = 'my-secure-token';
       const { client, headers } = clientAndHeadersWithToken('', 'name', '0.1', token);
       const keys: Keys = {
-        privateKeyEncrypted: 'prik',
-        publicKey: 'pubk',
-        revocationCertificate: 'crt',
         ecc: {
           publicKey: 'pub',
           privateKeyEncrypted: 'priv',
@@ -576,9 +539,6 @@ describe('# auth service tests', () => {
       expect(axiosStub).toHaveBeenCalledWith(
         '/user/keys',
         {
-          publicKey: 'pubk',
-          privateKey: 'prik',
-          revocationKey: 'crt',
           ecc: {
             publicKey: 'pub',
             privateKey: 'priv',
@@ -955,7 +915,6 @@ describe('# auth service tests', () => {
           ecc: {
             public: 'ecc-public-key',
             private: 'ecc-private-key',
-            revocationKey: 'ecc-revocation-key',
           },
           kyber: {
             public: 'kyber-public-key',

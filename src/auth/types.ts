@@ -56,9 +56,6 @@ export interface RegisterPreCreatedUserResponse {
   uuid: UUID;
 }
 export interface Keys {
-  privateKeyEncrypted: string;
-  publicKey: string;
-  revocationCertificate: string;
   ecc: {
     publicKey: string;
     privateKeyEncrypted: string;
@@ -111,7 +108,6 @@ export interface PrivateKeysExtended {
   ecc: {
     public: string;
     private: string;
-    revocationKey: string;
   };
   kyber: {
     public: string;
