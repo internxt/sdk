@@ -118,12 +118,6 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
-        privateKey: registerDetails.keys.privateKeyEncrypted,
-        publicKey: registerDetails.keys.publicKey,
-        revocationKey: registerDetails.keys.revocationCertificate,
         keys: {
           ecc: {
             publicKey: registerDetails.keys.ecc.publicKey,
@@ -181,12 +175,6 @@ export class Auth {
         password: registerDetails.password,
         mnemonic: registerDetails.mnemonic,
         salt: registerDetails.salt,
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
-        privateKey: registerDetails.keys.privateKeyEncrypted,
-        publicKey: registerDetails.keys.publicKey,
-        revocationKey: registerDetails.keys.revocationCertificate,
         keys: {
           ecc: {
             publicKey: registerDetails.keys.ecc.publicKey,
@@ -330,43 +318,30 @@ export class Auth {
     const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
 
-    return this.client
-      .post<{
-        token: Token;
-        newToken: Token;
-        user: UserSettings;
-        userTeam: TeamsSettings | null;
-      }>(
-        '/auth/login/access',
-        {
-          email: details.email,
-          password: encryptedPasswordHash,
-          tfa: details.tfaCode,
-          /**
-          / @deprecated The individual fields for keys should not be used
-          */
-          privateKey: keys.privateKeyEncrypted,
-          publicKey: keys.publicKey,
-          revocateKey: keys.revocationCertificate,
-          keys: {
-            ecc: {
-              publicKey: keys.ecc.publicKey,
-              privateKey: keys.ecc.privateKeyEncrypted,
-            },
-            kyber: {
-              publicKey: keys.kyber.publicKey,
-              privateKey: keys.kyber.privateKeyEncrypted,
-            },
+    return this.client.post<{
+      token: Token;
+      newToken: Token;
+      user: UserSettings;
+      userTeam: TeamsSettings | null;
+    }>(
+      '/auth/login/access',
+      {
+        email: details.email,
+        password: encryptedPasswordHash,
+        tfa: details.tfaCode,
+        keys: {
+          ecc: {
+            publicKey: keys.ecc.publicKey,
+            privateKey: keys.ecc.privateKeyEncrypted,
+          },
+          kyber: {
+            publicKey: keys.kyber.publicKey,
+            privateKey: keys.kyber.privateKeyEncrypted,
           },
         },
-        this.basicHeaders(),
-      )
-      .then((data) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
-        return data;
-      });
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
@@ -422,27 +397,20 @@ export class Auth {
     const encryptedSalt = securityDetails.encryptedSalt;
     const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
 
-    return this.client
-      .post<{
-        token: Token;
-        newToken: Token;
-        user: UserSettings;
-        userTeam: TeamsSettings | null;
-      }>(
-        '/auth/login/access',
-        {
-          email: details.email,
-          password: encryptedPasswordHash,
-          tfa: details.tfaCode,
-        },
-        this.basicHeaders(),
-      )
-      .then((data) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        data.user.revocationKey = data.user.revocateKey; // TODO : remove when all projects use SDK
-        return data;
-      });
+    return this.client.post<{
+      token: Token;
+      newToken: Token;
+      user: UserSettings;
+      userTeam: TeamsSettings | null;
+    }>(
+      '/auth/login/access',
+      {
+        email: details.email,
+        password: encryptedPasswordHash,
+        tfa: details.tfaCode,
+      },
+      this.basicHeaders(),
+    );
   }
 
   /**
@@ -454,12 +422,6 @@ export class Auth {
     return this.client.patch(
       '/user/keys',
       {
-        /**
-        / @deprecated The individual fields for keys should not be used
-        */
-        publicKey: keys.publicKey,
-        privateKey: keys.privateKeyEncrypted,
-        revocationKey: keys.revocationCertificate,
         ecc: {
           publicKey: keys.ecc.publicKey,
           privateKey: keys.ecc.privateKeyEncrypted,
