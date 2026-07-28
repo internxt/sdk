@@ -1,4 +1,4 @@
-import { paths } from '../../schema';
+import { operations, paths } from '../../schema';
 import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
@@ -360,30 +360,9 @@ export interface SearchResultData {
   data: [SearchResult];
 }
 
-export type SearchFileCategory =
-  | 'folder'
-  | 'audio'
-  | 'code'
-  | 'csv'
-  | 'figma'
-  | 'image'
-  | 'pdf'
-  | 'ppt'
-  | 'txt'
-  | 'video'
-  | 'word'
-  | 'xls'
-  | 'xml'
-  | 'zip';
+export type GlobalSearchOptions = NonNullable<operations['FuzzySearchController_fuzzySearch']['parameters']['query']>;
 
-export interface GlobalSearchOptions {
-  offset?: number;
-  type?: SearchFileCategory[];
-  minSize?: number;
-  maxSize?: number;
-  modifiedAfter?: string;
-  modifiedBefore?: string;
-}
+export type SearchFileCategory = NonNullable<GlobalSearchOptions['type']>[number];
 
 export interface FolderAncestor {
   bucket: null | string;

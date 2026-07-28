@@ -8850,8 +8850,34 @@ export interface operations {
   };
   WorkspacesController_searchWorkspace: {
     parameters: {
-      query: {
-        offset: number;
+      query?: {
+        /** @description Offset for pagination */
+        offset?: number;
+        /** @description File categories to filter by (single value or repeated param) */
+        type?: (
+          | 'folder'
+          | 'audio'
+          | 'code'
+          | 'csv'
+          | 'figma'
+          | 'image'
+          | 'pdf'
+          | 'ppt'
+          | 'txt'
+          | 'video'
+          | 'word'
+          | 'xls'
+          | 'xml'
+          | 'zip'
+        )[];
+        /** @description Minimum file size in bytes (folders are excluded) */
+        minSize?: number;
+        /** @description Maximum file size in bytes (folders are excluded) */
+        maxSize?: number;
+        /** @description Filter items modified after this date */
+        modifiedAfter?: string;
+        /** @description Filter items modified before this date */
+        modifiedBefore?: string;
       };
       header?: never;
       path: {
@@ -8936,8 +8962,34 @@ export interface operations {
   };
   FuzzySearchController_fuzzySearch: {
     parameters: {
-      query: {
-        offset: number;
+      query?: {
+        /** @description Offset for pagination */
+        offset?: number;
+        /** @description File categories to filter by (single value or repeated param) */
+        type?: (
+          | 'folder'
+          | 'audio'
+          | 'code'
+          | 'csv'
+          | 'figma'
+          | 'image'
+          | 'pdf'
+          | 'ppt'
+          | 'txt'
+          | 'video'
+          | 'word'
+          | 'xls'
+          | 'xml'
+          | 'zip'
+        )[];
+        /** @description Minimum file size in bytes (folders are excluded) */
+        minSize?: number;
+        /** @description Maximum file size in bytes (folders are excluded) */
+        maxSize?: number;
+        /** @description Filter items modified after this date */
+        modifiedAfter?: string;
+        /** @description Filter items modified before this date */
+        modifiedBefore?: string;
       };
       header?: never;
       path: {
