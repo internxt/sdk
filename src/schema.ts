@@ -8949,23 +8949,8 @@ export interface operations {
       query?: {
         /** @description Offset for pagination */
         offset?: number;
-        /** @description File categories to filter by (single value or repeated param) */
-        type?: (
-          | 'folder'
-          | 'audio'
-          | 'code'
-          | 'csv'
-          | 'figma'
-          | 'image'
-          | 'pdf'
-          | 'ppt'
-          | 'txt'
-          | 'video'
-          | 'word'
-          | 'xls'
-          | 'xml'
-          | 'zip'
-        )[];
+        /** @description File extensions to filter by, or the reserved value "folder" to include folders (single value or repeated param) */
+        type?: string[];
         /** @description Minimum file size in bytes (folders are excluded) */
         minSize?: number;
         /** @description Maximum file size in bytes (folders are excluded) */
@@ -9061,23 +9046,8 @@ export interface operations {
       query?: {
         /** @description Offset for pagination */
         offset?: number;
-        /** @description File categories to filter by (single value or repeated param) */
-        type?: (
-          | 'folder'
-          | 'audio'
-          | 'code'
-          | 'csv'
-          | 'figma'
-          | 'image'
-          | 'pdf'
-          | 'ppt'
-          | 'txt'
-          | 'video'
-          | 'word'
-          | 'xls'
-          | 'xml'
-          | 'zip'
-        )[];
+        /** @description File extensions to filter by, or the reserved value "folder" to include folders (single value or repeated param) */
+        type?: string[];
         /** @description Minimum file size in bytes (folders are excluded) */
         minSize?: number;
         /** @description Maximum file size in bytes (folders are excluded) */

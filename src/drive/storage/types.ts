@@ -365,8 +365,6 @@ export interface SearchResultData {
 
 export type GlobalSearchOptions = NonNullable<operations['FuzzySearchController_fuzzySearch']['parameters']['query']>;
 
-export type SearchFileCategory = NonNullable<GlobalSearchOptions['type']>[number];
-
 export interface FolderAncestor {
   bucket: null | string;
   createdAt: string;
