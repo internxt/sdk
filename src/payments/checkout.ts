@@ -30,8 +30,8 @@ export class Checkout {
   /**
    * @description Creates a customer or gets the existing one if it already exists
    * @param country - The country of the customer
-   * @param captchaToken - The reCAPTCHA token to verify the call (fallback provider)
-   * @param turnstileToken - The Cloudflare Turnstile token to verify the call (primary provider, optional)
+   * @param captchaToken - The reCAPTCHA token to verify the call (fallback provider, optional)
+   * @param turnstileToken - The Cloudflare Turnstile token to verify the call (primary provider)
    * @param customerName - The name of the customer (optional)
    * @param lineAddress1 - The address of the user (optional)
    * @param lineAddress2 - The second address line of the user (optional)
