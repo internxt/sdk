@@ -22,17 +22,6 @@ export type UserKeys = {
   };
 };
 
-export interface RegisterOpaqueDetails {
-  name: string;
-  lastname: string;
-  email: Email;
-  mnemonic: string;
-  keys: UserKeys;
-  captcha: string;
-  referrer?: string;
-  referral?: string;
-}
-
 export interface RegisterDetails {
   name: string;
   lastname: string;
@@ -76,7 +65,6 @@ export class UserAccessError extends Error {}
 export interface SecurityDetails {
   encryptedSalt: string;
   tfaEnabled: boolean;
-  useOpaqueLogin: boolean;
 }
 
 export interface TwoFactorAuthQR {

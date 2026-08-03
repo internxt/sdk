@@ -3,7 +3,7 @@ import { emptyRegisterDetails } from './registerDetails.mother';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
-import { Auth, CryptoProvider, Keys, LoginDetails, Password, RegisterDetails, Token } from '../../src';
+import { Auth, CryptoProvider, Keys, LoginDetails, RegisterDetails, Token } from '../../src';
 
 describe('# auth service tests', () => {
   beforeEach(() => {
@@ -24,8 +24,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.ecc.publicKey = '8';
       registerDetails.keys.kyber.privateKeyEncrypted = '9';
       registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.captcha = '11';
 
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
@@ -93,8 +92,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.ecc.publicKey = '8';
       registerDetails.keys.kyber.privateKeyEncrypted = '9';
       registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.captcha = '11';
 
       const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
       const { client, headers } = clientAndHeaders();
@@ -152,8 +150,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.ecc.publicKey = '8';
       registerDetails.keys.kyber.privateKeyEncrypted = '9';
       registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.captcha = '11';
 
       const mockInvitatioId = 'invitationId';
 
@@ -224,8 +221,7 @@ describe('# auth service tests', () => {
       registerDetails.keys.ecc.publicKey = '8';
       registerDetails.keys.kyber.privateKeyEncrypted = '9';
       registerDetails.keys.kyber.publicKey = '10';
-      registerDetails.keys.revocationCertificate = '11';
-      registerDetails.captcha = '12';
+      registerDetails.captcha = '11';
 
       const mockInvitatioId = 'invitationId';
 
@@ -289,11 +285,8 @@ describe('# auth service tests', () => {
       };
       const cryptoProvider: CryptoProvider = {
         encryptPasswordHash: () => '',
-        generateKeys: (password: Password) => {
+        generateKeys: () => {
           const keys: Keys = {
-            privateKeyEncrypted: '',
-            publicKey: '',
-            revocationCertificate: '',
             ecc: {
               publicKey: '',
               privateKeyEncrypted: '',
@@ -325,11 +318,8 @@ describe('# auth service tests', () => {
       };
       const cryptoProvider: CryptoProvider = {
         encryptPasswordHash: () => '',
-        generateKeys: (password: Password) => {
+        generateKeys: () => {
           const keys: Keys = {
-            privateKeyEncrypted: '',
-            publicKey: '',
-            revocationCertificate: '',
             ecc: {
               publicKey: '',
               privateKeyEncrypted: '',
@@ -366,7 +356,7 @@ describe('# auth service tests', () => {
       };
       const cryptoProvider: CryptoProvider = {
         encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
-        generateKeys: (password: Password) => {
+        generateKeys: () => {
           const keys: Keys = {
             ecc: {
               publicKey: 'pub',
@@ -434,7 +424,7 @@ describe('# auth service tests', () => {
       };
       const cryptoProvider: CryptoProvider = {
         encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
-        generateKeys: (password: Password) => {
+        generateKeys: () => {
           const keys: Keys = {
             ecc: {
               publicKey: 'pub',
@@ -492,7 +482,7 @@ describe('# auth service tests', () => {
       };
       const cryptoProvider: CryptoProvider = {
         encryptPasswordHash: () => '',
-        generateKeys: (password: Password) => {
+        generateKeys: () => {
           const keys: Keys = {
             ecc: {
               publicKey: '',
@@ -560,7 +550,6 @@ describe('# auth service tests', () => {
         hasKeys: true,
         sKey: 'gibberish',
         tfa: true,
-        useOpaqueLogin: true,
       });
       const { client, headers } = clientAndHeaders();
       const email = 'my@email.com';
@@ -579,7 +568,6 @@ describe('# auth service tests', () => {
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
         tfaEnabled: true,
-        useOpaqueLogin: true,
       });
     });
 
@@ -600,7 +588,6 @@ describe('# auth service tests', () => {
       expect(body).toEqual({
         encryptedSalt: 'gibberish',
         tfaEnabled: false,
-        useOpaqueLogin: false,
       });
     });
   });
