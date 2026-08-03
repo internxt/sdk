@@ -1,4 +1,4 @@
-import { components, operations, paths } from '../../schema';
+import { components, paths } from '../../schema';
 import { UserResumeData } from '../users/types';
 
 export interface DriveFolderData {
@@ -363,7 +363,7 @@ export interface SearchResultData {
   data: [SearchResult];
 }
 
-export type GlobalSearchOptions = NonNullable<operations['FuzzySearchController_fuzzySearch']['parameters']['query']>;
+export type GlobalSearchOptions = paths['/fuzzy/{search}']['post']['requestBody']['content']['application/json'];
 
 export interface FolderAncestor {
   bucket: null | string;

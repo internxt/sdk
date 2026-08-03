@@ -675,20 +675,13 @@ export class Storage {
     const options: GlobalSearchOptions =
       typeof offsetOrOptions === 'number' ? { offset: offsetOrOptions } : (offsetOrOptions ?? {});
 
-    const query = new URLSearchParams();
-    if (options.offset !== undefined) query.set('offset', String(options.offset));
-    options.type?.forEach((category) => query.append('type', category));
-    if (options.minSize !== undefined) query.set('minSize', String(options.minSize));
-    if (options.maxSize !== undefined) query.set('maxSize', String(options.maxSize));
-    if (options.modifiedAfter !== undefined) query.set('modifiedAfter', options.modifiedAfter);
-    if (options.modifiedBefore !== undefined) query.set('modifiedBefore', options.modifiedBefore);
-
     const { promise, requestCanceler } = workspaceId
-      ? this.client.getCancellable<SearchResultData>(
-          `workspaces/${workspaceId}/fuzzy/${search}?${query}`,
+      ? this.client.postCancellable<SearchResultData>(
+          `workspaces/${workspaceId}/fuzzy/${search}`,
+          options,
           this.headers(),
         )
-      : this.client.getCancellable<SearchResultData>(`fuzzy/${search}?${query}`, this.headers());
+      : this.client.postCancellable<SearchResultData>(`fuzzy/${search}`, options, this.headers());
 
     return [promise, requestCanceler];
   }

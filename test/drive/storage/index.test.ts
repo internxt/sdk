@@ -1032,9 +1032,9 @@ describe('# storage service tests', () => {
   describe('-> global search', () => {
     const emptySearchResponse: SearchResultData = { data: [] as unknown as SearchResultData['data'] };
 
-    it('Should call the personal fuzzy endpoint without query params, when no options are passed', async () => {
+    it('Should post to the personal fuzzy endpoint with an empty body, when no options are passed', async () => {
       const { client, headers } = clientAndHeaders({});
-      const getCancellableStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+      const postCancellableStub = vi.spyOn(HttpClient.prototype, 'postCancellable').mockReturnValue({
         promise: Promise.resolve(emptySearchResponse),
         requestCanceler: { cancel: () => null },
       });
@@ -1042,13 +1042,13 @@ describe('# storage service tests', () => {
       const [promise] = client.getGlobalSearchItems('report');
       await promise;
 
-      expect(getCancellableStub).toHaveBeenCalledWith('fuzzy/report?', headers);
+      expect(postCancellableStub).toHaveBeenCalledWith('fuzzy/report', {}, headers);
     });
 
-    it('Should call the workspace fuzzy endpoint, when a workspaceId is passed', async () => {
+    it('Should post to the workspace fuzzy endpoint, when a workspaceId is passed', async () => {
       const workspaceId = 'workspace-id';
       const { client, headers } = clientAndHeaders({});
-      const getCancellableStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+      const postCancellableStub = vi.spyOn(HttpClient.prototype, 'postCancellable').mockReturnValue({
         promise: Promise.resolve(emptySearchResponse),
         requestCanceler: { cancel: () => null },
       });
@@ -1056,12 +1056,12 @@ describe('# storage service tests', () => {
       const [promise] = client.getGlobalSearchItems('report', workspaceId);
       await promise;
 
-      expect(getCancellableStub).toHaveBeenCalledWith(`workspaces/${workspaceId}/fuzzy/report?`, headers);
+      expect(postCancellableStub).toHaveBeenCalledWith(`workspaces/${workspaceId}/fuzzy/report`, {}, headers);
     });
 
     it('Should keep supporting a numeric offset as third argument', async () => {
       const { client, headers } = clientAndHeaders({});
-      const getCancellableStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+      const postCancellableStub = vi.spyOn(HttpClient.prototype, 'postCancellable').mockReturnValue({
         promise: Promise.resolve(emptySearchResponse),
         requestCanceler: { cancel: () => null },
       });
@@ -1069,31 +1069,29 @@ describe('# storage service tests', () => {
       const [promise] = client.getGlobalSearchItems('report', undefined, 10);
       await promise;
 
-      expect(getCancellableStub).toHaveBeenCalledWith('fuzzy/report?offset=10', headers);
+      expect(postCancellableStub).toHaveBeenCalledWith('fuzzy/report', { offset: 10 }, headers);
     });
 
-    it('Should serialize all search filters as query params, when options are passed', async () => {
+    it('Should send all search filters in the request body, when options are passed', async () => {
       const { client, headers } = clientAndHeaders({});
-      const getCancellableStub = vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+      const postCancellableStub = vi.spyOn(HttpClient.prototype, 'postCancellable').mockReturnValue({
         promise: Promise.resolve(emptySearchResponse),
         requestCanceler: { cancel: () => null },
       });
 
-      const [promise] = client.getGlobalSearchItems('report', undefined, {
+      const filters = {
         offset: 0,
         type: ['pdf', 'image'],
         minSize: 1024,
         maxSize: 5242880,
         modifiedAfter: '2026-01-01T00:00:00.000Z',
         modifiedBefore: '2026-06-30T23:59:59.999Z',
-      });
+      };
+
+      const [promise] = client.getGlobalSearchItems('report', undefined, filters);
       await promise;
 
-      expect(getCancellableStub).toHaveBeenCalledWith(
-        'fuzzy/report?offset=0&type=pdf&type=image&minSize=1024&maxSize=5242880' +
-          '&modifiedAfter=2026-01-01T00%3A00%3A00.000Z&modifiedBefore=2026-06-30T23%3A59%3A59.999Z',
-        headers,
-      );
+      expect(postCancellableStub).toHaveBeenCalledWith('fuzzy/report', filters, headers);
     });
   });
 });
