@@ -363,6 +363,8 @@ export interface SearchResultData {
   data: [SearchResult];
 }
 
+export type GlobalSearchOptions = paths['/fuzzy/{search}']['post']['requestBody']['content']['application/json'];
+
 export interface FolderAncestor {
   bucket: null | string;
   createdAt: string;

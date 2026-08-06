@@ -2305,10 +2305,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Search by name inside workspace */
-    get: operations['WorkspacesController_searchWorkspace'];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Search by name inside workspace */
+    post: operations['WorkspacesController_searchWorkspace'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2376,10 +2376,10 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
-    /** Search for items from a part of the name */
-    get: operations['FuzzySearchController_fuzzySearch'];
+    get?: never;
     put?: never;
-    post?: never;
+    /** Search for items from a part of the name */
+    post: operations['FuzzySearchController_fuzzySearch'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4797,6 +4797,42 @@ export interface components {
        * @example +34 622 111 333
        */
       phoneNumber: Record<string, never>;
+    };
+    FuzzySearchQueryDto: {
+      /**
+       * @description Offset for pagination
+       * @example 0
+       */
+      offset?: number;
+      /**
+       * @description File extensions to filter by, or the reserved value "folder" to include folders (a single string is also accepted)
+       * @example [
+       *       "jpg",
+       *       "pdf",
+       *       "folder"
+       *     ]
+       */
+      type?: string[];
+      /**
+       * @description Minimum file size in bytes (folders are excluded)
+       * @example 5242880
+       */
+      minSize?: number;
+      /**
+       * @description Maximum file size in bytes (folders are excluded)
+       * @example 1073741824
+       */
+      maxSize?: number;
+      /**
+       * @description Filter items modified after this date
+       * @example 2026-01-01T00:00:00.000Z
+       */
+      modifiedAfter?: string;
+      /**
+       * @description Filter items modified before this date
+       * @example 2026-06-30T23:59:59.999Z
+       */
+      modifiedBefore?: string;
     };
     FuzzySearchResult: {
       id: string;
@@ -8946,9 +8982,7 @@ export interface operations {
   };
   WorkspacesController_searchWorkspace: {
     parameters: {
-      query: {
-        offset: number;
-      };
+      query?: never;
       header?: never;
       path: {
         search: string;
@@ -8956,7 +8990,11 @@ export interface operations {
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FuzzySearchQueryDto'];
+      };
+    };
     responses: {
       /** @description Search results */
       200: {
@@ -9032,16 +9070,18 @@ export interface operations {
   };
   FuzzySearchController_fuzzySearch: {
     parameters: {
-      query: {
-        offset: number;
-      };
+      query?: never;
       header?: never;
       path: {
         search: string;
       };
       cookie?: never;
     };
-    requestBody?: never;
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['FuzzySearchQueryDto'];
+      };
+    };
     responses: {
       /** @description Elements found */
       200: {
