@@ -97,6 +97,9 @@ export type StoragePlan = {
     scheduled: boolean;
     cancelAt?: number;
   };
+  tax: {
+    enabled: boolean;
+  };
   storageLimit: number;
   amountOfSeats: number;
   isAppSumo?: boolean;
