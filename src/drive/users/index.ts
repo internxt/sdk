@@ -317,7 +317,7 @@ export class Users {
 
   /**
    * Get public key of given email, if not exists it pre-create user with this email
-   * and returns public key
+   * and returns public keys (kyber and ecc) of this user
    * @param email
    * @returns {Promise<UserPublicKeyWithCreationResponse>} A promise that returns the public keys of given user
    */

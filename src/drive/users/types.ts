@@ -56,7 +56,7 @@ export type FriendInvite = { guestEmail: string; host: number; accepted: boolean
 
 export type UserPublicKeyResponse = { publicKey: string; keys?: { ecc: string; kyber: string } };
 
-export type UserPublicKeyWithCreationResponse = { publicKey: string; publicKyberKey: string | undefined };
+export type UserPublicKeyWithCreationResponse = { publicKey: string; publicKyberKey: string };
 
 export type VerifyEmailChangeResponse = {
   oldEmail: string;
