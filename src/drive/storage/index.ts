@@ -31,6 +31,7 @@ import {
   FileVersion,
   FolderAncestor,
   FolderAncestorWorkspace,
+  GlobalSearchOptions,
   FolderMeta,
   FolderStatsResponse,
   FolderTreeResponse,
@@ -660,23 +661,27 @@ export class Storage {
    *
    * @param {string} search - The name of the item.
    * @param {string} workspaceId - The ID of the workspace (optional).
-   * @param {number} offset - The position of the first item to return (optional).
+   * @param {number | GlobalSearchOptions} offsetOrOptions - The position of the first item to return, or an options
+   * object (optional) with the offset and the search filters: `type` (file categories, combined with OR),
+   * `minSize`/`maxSize` (bytes, files only) and `modifiedAfter`/`modifiedBefore` (ISO 8601 dates). Filters are
+   * combined with AND.
    * @returns {[Promise<SearchResultData>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
    */
   public getGlobalSearchItems(
     search: string,
     workspaceId?: string,
-    offset?: number,
+    offsetOrOptions?: number | GlobalSearchOptions,
   ): [Promise<SearchResultData>, RequestCanceler] {
-    const query = new URLSearchParams();
-    if (offset !== undefined) query.set('offset', String(offset));
+    const options: GlobalSearchOptions =
+      typeof offsetOrOptions === 'number' ? { offset: offsetOrOptions } : (offsetOrOptions ?? {});
 
     const { promise, requestCanceler } = workspaceId
-      ? this.client.getCancellable<SearchResultData>(
-          `workspaces/${workspaceId}/fuzzy/${search}?${query}`,
+      ? this.client.postCancellable<SearchResultData>(
+          `workspaces/${workspaceId}/fuzzy/${search}`,
+          options,
           this.headers(),
         )
-      : this.client.getCancellable<SearchResultData>(`fuzzy/${search}?${query}`, this.headers());
+      : this.client.postCancellable<SearchResultData>(`fuzzy/${search}`, options, this.headers());
 
     return [promise, requestCanceler];
   }
