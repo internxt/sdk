@@ -7,7 +7,8 @@ export interface CreateCustomerPayload {
   city?: string;
   country: string;
   postalCode?: string;
-  captchaToken: string;
+  captchaToken?: string;
+  turnstileToken: string;
   companyVatId?: string;
   metadata?: Record<string, string>;
 }
@@ -16,7 +17,8 @@ export interface CreateSubscriptionPayload {
   customerId: string;
   priceId: string;
   token: string;
-  captchaToken: string;
+  captchaToken?: string;
+  turnstileToken: string;
   currency?: string;
   promoCodeId?: string;
 }
@@ -26,7 +28,8 @@ export interface CreatePaymentIntentPayload {
   priceId: string;
   token: string;
   currency: string;
-  captchaToken: string;
+  captchaToken?: string;
+  turnstileToken: string;
   userAddress: string;
   promoCodeId?: string;
 }
