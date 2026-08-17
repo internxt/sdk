@@ -19,6 +19,7 @@ export interface CreateSubscriptionPayload {
   captchaToken: string;
   currency?: string;
   promoCodeId?: string;
+  impactClickId?: string;
 }
 
 export interface CreatePaymentIntentPayload {
@@ -29,6 +30,7 @@ export interface CreatePaymentIntentPayload {
   captchaToken: string;
   userAddress: string;
   promoCodeId?: string;
+  impactClickId?: string;
 }
 
 export interface PaymentMethodVerificationPayload {
