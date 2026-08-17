@@ -92,6 +92,7 @@ export class Checkout {
     currency,
     captchaToken,
     promoCodeId,
+    impactClickId,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/checkout/subscription',
@@ -102,6 +103,7 @@ export class Checkout {
         currency,
         captchaToken,
         promoCodeId,
+        impactClickId,
       },
       this.authHeaders(),
     );
@@ -132,6 +134,7 @@ export class Checkout {
     captchaToken,
     userAddress,
     promoCodeId,
+    impactClickId,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
@@ -143,6 +146,7 @@ export class Checkout {
         captchaToken,
         userAddress,
         promoCodeId,
+        impactClickId,
       },
       this.authHeaders(),
     );
