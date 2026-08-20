@@ -39,10 +39,10 @@ export interface RegisterPreCreatedUser extends RegisterDetails {
   invitationId: string;
 }
 export interface RegisterPreCreatedUserResponse {
-  token: Token;
   newToken: Token;
   user: UserSettings & { referralCode: string };
   uuid: UUID;
+  tmpKeys: UserKeys;
 }
 export interface Keys {
   ecc: {
