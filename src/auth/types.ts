@@ -42,7 +42,7 @@ export interface RegisterPreCreatedUserResponse {
   newToken: Token;
   user: UserSettings & { referralCode: string };
   uuid: UUID;
-  tmpKeys: UserKeys;
+  tmpKeys?: UserKeys;
 }
 export interface Keys {
   ecc: {
