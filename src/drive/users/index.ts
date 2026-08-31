@@ -170,8 +170,8 @@ export class Users {
     return this.client.patch(
       '/users/v2/password',
       {
-        currentPassword: payload.currentPasswordHash,
-        newPassword: payload.newPasswordHash,
+        currentPasswordHash: payload.currentPasswordHash,
+        newPasswordHash: payload.newPasswordHash,
         newSalt: payload.newSalt,
         mnemonic: payload.encryptedMnemonic,
         privateKey: payload.keys.encryptedPrivateKey,
