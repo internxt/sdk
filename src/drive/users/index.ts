@@ -17,6 +17,7 @@ import {
   UserPublicKeyResponse,
   UserPublicKeyWithCreationResponse,
   VerifyEmailChangeResponse,
+  ChangePasswordArgon2Payload,
 } from './types';
 
 export * as UserTypes from './types';
@@ -154,6 +155,27 @@ export class Users {
         privateKey: payload.keys.encryptedPrivateKey,
         privateKyberKey: payload.keys.encryptedPrivateKyberKey,
         encryptVersion: payload.encryptVersion,
+      },
+      this.headers(),
+    );
+  }
+
+  /**
+   * Updates the authentication credentials with argon2 and invalidates previous tokens
+   * @param payload
+   *
+   * @returns {Promise<string>} A promise that returns new tokens for this user.
+   */
+  public changePasswordArgon2(payload: ChangePasswordArgon2Payload): Promise<string> {
+    return this.client.patch(
+      '/users/password-argon2',
+      {
+        currentPassword: payload.currentPasswordHash,
+        newPassword: payload.newPasswordHash,
+        newSalt: payload.newSalt,
+        mnemonic: payload.encryptedMnemonic,
+        privateKey: payload.keys.encryptedPrivateKey,
+        privateKyberKey: payload.keys.encryptedPrivateKyberKey,
       },
       this.headers(),
     );

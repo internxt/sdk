@@ -231,6 +231,34 @@ export class Auth {
   }
 
   /**
+   * Tries to log in a user with Argon2
+   * @param email - The user email address
+   * @param passwordHash - The argon2id hash of the user's password
+   * @param tfaCode - The 2 factor authentication code (if 2FA is enabled)
+   */
+  public loginArgon2(
+    email: string,
+    passwordHash: string,
+    tfaCode?: string,
+  ): Promise<{
+    token: Token;
+    user: UserSettings;
+  }> {
+    return this.client.post<{
+      token: Token;
+      user: UserSettings;
+    }>(
+      '/auth/login-argon2/access',
+      {
+        email,
+        passwordHash,
+        tfa: tfaCode,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
    * Tries to log in a user given its cli login details
    * @param details
    * @param cryptoProvider
@@ -330,6 +358,7 @@ export class Auth {
       .post<{
         sKey: string;
         tfa: boolean | null;
+        saltArgon2: string;
       }>(
         '/auth/login',
         {
@@ -341,6 +370,7 @@ export class Auth {
         return {
           encryptedSalt: data.sKey,
           tfaEnabled: data.tfa === true,
+          saltArgon2: data.saltArgon2,
         };
       });
   }
