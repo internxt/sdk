@@ -25,6 +25,17 @@ export interface ChangePasswordPayload {
   encryptedPrivateKey: string;
 }
 
+export interface ChangePasswordArgon2Payload {
+  currentPasswordHash: string;
+  newPasswordHash: string;
+  newSalt: string;
+  encryptedMnemonic: string;
+  keys: {
+    encryptedPrivateKey: string;
+    encryptedPrivateKyberKey: string;
+  };
+}
+
 export interface ChangePasswordPayloadNew {
   currentEncryptedPassword: string;
   newEncryptedPassword: string;

@@ -65,6 +65,7 @@ export class UserAccessError extends Error {}
 export interface SecurityDetails {
   encryptedSalt: string;
   tfaEnabled: boolean;
+  saltArgon2: string;
 }
 
 export interface TwoFactorAuthQR {
