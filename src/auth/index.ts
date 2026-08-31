@@ -248,7 +248,7 @@ export class Auth {
       token: Token;
       user: UserSettings;
     }>(
-      '/auth/login-argon2/access',
+      '/auth/login/access?argon2=true',
       {
         email,
         passwordHash,

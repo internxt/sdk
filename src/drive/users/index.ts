@@ -168,7 +168,7 @@ export class Users {
    */
   public changePasswordArgon2(payload: ChangePasswordArgon2Payload): Promise<string> {
     return this.client.patch(
-      '/users/password-argon2',
+      '/users/password?argon2=true',
       {
         currentPassword: payload.currentPasswordHash,
         newPassword: payload.newPasswordHash,
