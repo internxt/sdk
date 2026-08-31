@@ -173,9 +173,9 @@ export class Users {
         currentPasswordHash: payload.currentPasswordHash,
         newPasswordHash: payload.newPasswordHash,
         newSalt: payload.newSalt,
-        mnemonic: payload.encryptedMnemonic,
-        privateKey: payload.keys.encryptedPrivateKey,
-        privateKyberKey: payload.keys.encryptedPrivateKyberKey,
+        encryptedMnemonic: payload.encryptedMnemonic,
+        encryptedPrivateKey: payload.keys.encryptedPrivateKey,
+        encryptedPrivateKyberKey: payload.keys.encryptedPrivateKyberKey,
       },
       this.headers(),
     );
