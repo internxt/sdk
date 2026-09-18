@@ -27,6 +27,15 @@ import { randomMoveFolderPayload } from './mothers/moveFolderPayload.mother';
 import { randomUpdateFolderMetadataPayload } from './mothers/updateFolderMetadataPayload.mother';
 
 describe('# storage service tests', () => {
+  const pathEncodingCases = [
+    ['/report 50%.txt', '%2Freport+50%25.txt'],
+    ['/a&b/c#d.txt', '%2Fa%26b%2Fc%23d.txt'],
+    ['/tom+jerry/note.txt', '%2Ftom%2Bjerry%2Fnote.txt'],
+    ['/literal%2Fescape.txt', '%2Fliteral%252Fescape.txt'],
+    ['/ñ émoji 🎉.txt', '%2F%C3%B1+%C3%A9moji+%F0%9F%8E%89.txt'],
+    ['/plain/path.txt', '%2Fplain%2Fpath.txt'],
+  ];
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -481,6 +490,37 @@ describe('# storage service tests', () => {
         expect(body).toEqual(mockResponse);
       });
     });
+
+    describe('get folder by path', () => {
+      it('When a folder path is provided then it should be sent as an encoded query param', async () => {
+        // Arrange
+        const response = { uuid: 'folder-uuid' };
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.getFolderByPath('/folder1/folder2');
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith('folders/meta?path=%2Ffolder1%2Ffolder2', headers);
+        expect(body).toEqual(response);
+      });
+
+      it.each(pathEncodingCases)(
+        'When the folder path is %j then it should encode it as %s',
+        async (folderPath, encodedPath) => {
+          // Arrange
+          const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
+          const { client, headers } = clientAndHeaders({});
+
+          // Act
+          await client.getFolderByPath(folderPath);
+
+          // Assert
+          expect(callStub).toHaveBeenCalledWith(`folders/meta?path=${encodedPath}`, headers);
+        },
+      );
+    });
   });
 
   describe('-> files', () => {
@@ -723,6 +763,37 @@ describe('# storage service tests', () => {
         expect(callStub).toHaveBeenCalledWith(`/files/${fileUUID}/meta`, headers);
         expect(body).toEqual(response);
       });
+    });
+
+    describe('get file by path', () => {
+      it('When a file path is provided then it should be sent as an encoded query param', async () => {
+        // Arrange
+        const response = randomFileMetaData();
+        const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue(response);
+        const { client, headers } = clientAndHeaders({});
+
+        // Act
+        const body = await client.getFileByPath('/folder1/file.png');
+
+        // Assert
+        expect(callStub).toHaveBeenCalledWith('files/meta?path=%2Ffolder1%2Ffile.png', headers);
+        expect(body).toEqual(response);
+      });
+
+      it.each(pathEncodingCases)(
+        'When the file path is %j then it should encode it as %s',
+        async (filePath, encodedPath) => {
+          // Arrange
+          const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
+          const { client, headers } = clientAndHeaders({});
+
+          // Act
+          await client.getFileByPath(filePath);
+
+          // Assert
+          expect(callStub).toHaveBeenCalledWith(`files/meta?path=${encodedPath}`, headers);
+        },
+      );
     });
   });
 

@@ -864,7 +864,8 @@ export class Storage {
    * @returns {Promise<FolderMeta>} A promise that resolves the folder on that path.
    */
   public getFolderByPath(folderPath: string): Promise<FolderMeta> {
-    return this.client.get<FolderMeta>(`folders/meta?path=${folderPath}`, this.headers());
+    const query = new URLSearchParams({ path: folderPath });
+    return this.client.get<FolderMeta>(`folders/meta?${query}`, this.headers());
   }
 
   /**
@@ -874,7 +875,8 @@ export class Storage {
    * @returns {Promise<FileMeta>} A promise that resolves the file on that path.
    */
   public getFileByPath(filePath: string): Promise<FileMeta> {
-    return this.client.get<FileMeta>(`files/meta?path=${filePath}`, this.headers());
+    const query = new URLSearchParams({ path: filePath });
+    return this.client.get<FileMeta>(`files/meta?${query}`, this.headers());
   }
 
   /**
