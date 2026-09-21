@@ -411,6 +411,63 @@ describe('# auth service tests', () => {
         headers,
       );
     });
+
+    it('Should skip the securityDetails call when knownSecurityDetails is provided', async () => {
+      // Arrange
+      const { client, headers } = clientAndHeaders();
+      const loginDetails: LoginDetails = {
+        email: 'my_email',
+        password: 'password',
+        tfaCode: undefined,
+      };
+      const cryptoProvider: CryptoProvider = {
+        encryptPasswordHash: (password, encryptedSalt) => password + '-' + encryptedSalt,
+        generateKeys: () => {
+          const keys: Keys = {
+            ecc: {
+              publicKey: 'pub',
+              privateKeyEncrypted: 'priv',
+            },
+            kyber: {
+              publicKey: 'pubKyber',
+              privateKeyEncrypted: 'privKyber',
+            },
+          };
+          return Promise.resolve(keys);
+        },
+      };
+      const postStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValueOnce({
+        user: {},
+      });
+
+      // Act
+      await client.login(loginDetails, cryptoProvider, {
+        encryptedSalt: 'known_encrypted_salt',
+        tfaEnabled: false,
+      });
+
+      // Assert
+      expect(postStub).toHaveBeenCalledTimes(1);
+      expect(postStub).toHaveBeenCalledWith(
+        '/auth/login/access',
+        {
+          email: loginDetails.email,
+          password: 'password-known_encrypted_salt',
+          tfa: loginDetails.tfaCode,
+          keys: {
+            ecc: {
+              publicKey: 'pub',
+              privateKey: 'priv',
+            },
+            kyber: {
+              publicKey: 'pubKyber',
+              privateKey: 'privKyber',
+            },
+          },
+        },
+        headers,
+      );
+    });
   });
 
   describe('-> loginWithoutKeys use case', () => {
