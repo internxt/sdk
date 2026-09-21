@@ -189,17 +189,19 @@ export class Auth {
    * Tries to log in a user given its login details
    * @param details
    * @param cryptoProvider
+   * @param knownSecurityDetails Skips the internal `/auth/login` call if the caller already has it
    */
   public async login(
     details: LoginDetails,
     cryptoProvider: CryptoProvider,
+    knownSecurityDetails?: SecurityDetails,
   ): Promise<{
     token: Token;
     newToken: Token;
     user: UserSettings;
     userTeam: TeamsSettings | null;
   }> {
-    const securityDetails = await this.securityDetails(details.email);
+    const securityDetails = knownSecurityDetails ?? (await this.securityDetails(details.email));
     const encryptedSalt = securityDetails.encryptedSalt;
     const encryptedPasswordHash = cryptoProvider.encryptPasswordHash(details.password, encryptedSalt);
     const keys = await cryptoProvider.generateKeys(details.password);
@@ -325,24 +327,21 @@ export class Auth {
    * Returns general security details
    * @param email
    */
-  public securityDetails(email: string): Promise<SecurityDetails> {
-    return this.client
-      .post<{
-        sKey: string;
-        tfa: boolean | null;
-      }>(
-        '/auth/login',
-        {
-          email: email,
-        },
-        this.basicHeaders(),
-      )
-      .then((data) => {
-        return {
-          encryptedSalt: data.sKey,
-          tfaEnabled: data.tfa === true,
-        };
-      });
+  public async securityDetails(email: string): Promise<SecurityDetails> {
+    const data = await this.client.post<{
+      sKey: string;
+      tfa: boolean | null;
+    }>(
+      '/auth/login',
+      {
+        email: email,
+      },
+      this.basicHeaders(),
+    );
+    return {
+      encryptedSalt: data.sKey,
+      tfaEnabled: data.tfa === true,
+    };
   }
 
   /**
