@@ -179,6 +179,28 @@ export type FetchPaginatedFilesContent =
 export type FetchPaginatedFoldersContent =
   paths['/folders/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'];
 
+export type FolderFilesCursorQuery = NonNullable<
+  paths['/folders/v2/content/{uuid}/files']['get']['parameters']['query']
+>;
+
+export type FolderFoldersCursorQuery = NonNullable<
+  paths['/folders/v2/content/{uuid}/folders']['get']['parameters']['query']
+>;
+
+export type FetchFolderFilesCursorResponse =
+  paths['/folders/v2/content/{uuid}/files']['get']['responses']['200']['content']['application/json'];
+
+export type FetchFolderFoldersCursorResponse =
+  paths['/folders/v2/content/{uuid}/folders']['get']['responses']['200']['content']['application/json'];
+
+export type FilesSyncQuery = NonNullable<paths['/files/sync']['get']['parameters']['query']>;
+
+export type FoldersSyncQuery = NonNullable<paths['/folders/sync']['get']['parameters']['query']>;
+
+export type FetchFilesSyncResponse = paths['/files/sync']['get']['responses']['200']['content']['application/json'];
+
+export type FetchFoldersSyncResponse = paths['/folders/sync']['get']['responses']['200']['content']['application/json'];
+
 export interface FetchTrashContentResponse {
   result: {
     id: number;
