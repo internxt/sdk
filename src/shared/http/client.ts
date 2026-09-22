@@ -139,10 +139,12 @@ export class HttpClient {
    * Requests a GET with option to cancel
    * @param url
    * @param headers
+   * @param params
    */
   public getCancellable<Response>(
     url: URL,
     headers: Headers,
+    params?: Parameters,
   ): {
     promise: Promise<Response>;
     requestCanceler: RequestCanceler;
@@ -153,7 +155,7 @@ export class HttpClient {
     const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
-      return this.axios.get<never, Response>(url, { headers, cancelToken: source.token });
+      return this.axios.get<never, Response>(url, { headers, params, cancelToken: source.token });
     });
 
     return { promise, requestCanceler };

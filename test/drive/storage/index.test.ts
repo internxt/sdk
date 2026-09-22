@@ -41,6 +41,12 @@ describe('# storage service tests', () => {
   });
 
   describe('-> folders', () => {
+    const mockGetCancellable = (response: unknown) =>
+      vi.spyOn(HttpClient.prototype, 'getCancellable').mockReturnValue({
+        promise: Promise.resolve(response),
+        requestCanceler: { cancel: () => null },
+      });
+
     describe('get folder content', () => {
       it('Should return the expected elements, when getFolderContent is called', async () => {
         // Arrange
@@ -250,6 +256,77 @@ describe('# storage service tests', () => {
         expect(callStub).toHaveBeenCalledWith('/storage/v2/folder/1/?trash=true', headers);
         expect(body.files).toHaveLength(2);
         expect(body.children).toHaveLength(2);
+      });
+    });
+
+    describe('get folder content with cursor', () => {
+      it('When getting folder files without query, then it calls the v2 endpoint with empty params', async () => {
+        const folderUuid = crypto.randomUUID();
+        const response = { files: randomSubfilesResponse(3).files, nextCursor: 'next' };
+        const { client, headers } = clientAndHeaders({});
+        const getCancellableStub = mockGetCancellable(response);
+
+        const [promise] = client.getFolderFilesByUuidWithCursor(folderUuid);
+        const body = await promise;
+
+        expect(body).toStrictEqual(response);
+        expect(getCancellableStub).toHaveBeenCalledWith(`/folders/v2/content/${folderUuid}/files`, headers, {});
+      });
+
+      it('When getting folder files with a query, then it sends the query as params', async () => {
+        const folderUuid = crypto.randomUUID();
+        const { client, headers } = clientAndHeaders({});
+        const getCancellableStub = mockGetCancellable({ files: [], nextCursor: null });
+        const query = { limit: 1000, order: 'ASC', cursor: 'abc=', withThumbnails: true } as const;
+
+        const [promise] = client.getFolderFilesByUuidWithCursor(folderUuid, query);
+        await promise;
+
+        expect(getCancellableStub).toHaveBeenCalledWith(`/folders/v2/content/${folderUuid}/files`, headers, query);
+      });
+
+      it('When getting folder subfolders with a query, then it calls the v2 endpoint with the params', async () => {
+        const folderUuid = crypto.randomUUID();
+        const response = { folders: randomSubfoldersResponse(2).folders, nextCursor: null };
+        const { client, headers } = clientAndHeaders({});
+        const getCancellableStub = mockGetCancellable(response);
+
+        const [promise] = client.getFolderFoldersByUuidWithCursor(folderUuid, { limit: 50, order: 'DESC' });
+        const body = await promise;
+
+        expect(body).toStrictEqual(response);
+        expect(getCancellableStub).toHaveBeenCalledWith(`/folders/v2/content/${folderUuid}/folders`, headers, {
+          limit: 50,
+          order: 'DESC',
+        });
+      });
+    });
+
+    describe('sync', () => {
+      it('When getting the files delta, then it calls the sync endpoint with the params', async () => {
+        const response = { files: [], nextCursor: 'next' };
+        const { client, headers } = clientAndHeaders({});
+        const getCancellableStub = mockGetCancellable(response);
+
+        const query = { updatedAt: '2026-01-01T00:00:00.000Z', status: 'EXISTS', limit: 1000 } as const;
+
+        const [promise] = client.getFilesSync(query);
+        const body = await promise;
+
+        expect(body).toStrictEqual(response);
+        expect(getCancellableStub).toHaveBeenCalledWith('/files/sync', headers, query);
+      });
+
+      it('When getting the folders delta with a cursor, then it calls the sync endpoint with the cursor', async () => {
+        const response = { folders: [], nextCursor: null };
+        const { client, headers } = clientAndHeaders({});
+        const getCancellableStub = mockGetCancellable(response);
+
+        const [promise] = client.getFoldersSync({ cursor: 'abc', status: 'TRASHED' });
+        const body = await promise;
+
+        expect(body).toStrictEqual(response);
+        expect(getCancellableStub).toHaveBeenCalledWith('/folders/sync', headers, { cursor: 'abc', status: 'TRASHED' });
       });
     });
 

@@ -20,7 +20,11 @@ import {
   FavoriteFolderDto,
   FavoriteItemType,
   FavoriteStatusResponse,
+  FetchFilesSyncResponse,
   FetchFolderContentResponse,
+  FetchFolderFilesCursorResponse,
+  FetchFolderFoldersCursorResponse,
+  FetchFoldersSyncResponse,
   FetchLimitResponse,
   FetchPaginatedFilesContent,
   FetchPaginatedFolderContentResponse,
@@ -29,8 +33,12 @@ import {
   FileEntryByUuid,
   FileMeta,
   FileVersion,
+  FilesSyncQuery,
   FolderAncestor,
   FolderAncestorWorkspace,
+  FolderFilesCursorQuery,
+  FolderFoldersCursorQuery,
+  FoldersSyncQuery,
   GlobalSearchOptions,
   FolderMeta,
   FolderStatsResponse,
@@ -283,6 +291,7 @@ export class Storage {
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFilesContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   * @deprecated Use `getFolderFilesByUuidWithCursor` instead.
    */
   public getFolderFilesByUuid(
     folderUuid: UUID,
@@ -347,6 +356,7 @@ export class Storage {
    * @param {string} [sort=plainName] - The reference column to sort it.
    * @param {string} [order=ASC] - The order to be followed.
    * @returns {[Promise<FetchPaginatedFoldersContent>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   * @deprecated Use `getFolderFoldersByUuidWithCursor` instead.
    */
   public getFolderFoldersByUuid(
     folderUuid: UUID,
@@ -365,6 +375,82 @@ export class Storage {
     const { promise, requestCanceler } = this.client.getCancellable<FetchPaginatedFoldersContent>(
       `folders/content/${folderUuid}/folders/${query}`,
       this.headers(),
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets a page of the files in a folder using cursor based pagination, sorted by plain name.
+   * Follow `nextCursor` until it is null to get every file. Only existing files are returned.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {FolderFilesCursorQuery} [query] - Page size (50-1000), order, cursor and optional extra data.
+   * @returns {[Promise<FetchFolderFilesCursorResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFilesByUuidWithCursor(
+    folderUuid: UUID,
+    query: FolderFilesCursorQuery = {},
+  ): [Promise<FetchFolderFilesCursorResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderFilesCursorResponse>(
+      `/folders/v2/content/${folderUuid}/files`,
+      this.headers(),
+      query,
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets a page of the subfolders of a folder using cursor based pagination, sorted by plain name.
+   * Follow `nextCursor` until it is null to get every subfolder. Only existing folders are returned.
+   *
+   * @param {UUID} folderUuid - The UUID of the folder.
+   * @param {FolderFoldersCursorQuery} [query] - Page size (50-1000), order, cursor and optional extra data.
+   * @returns {[Promise<FetchFolderFoldersCursorResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFolderFoldersByUuidWithCursor(
+    folderUuid: UUID,
+    query: FolderFoldersCursorQuery = {},
+  ): [Promise<FetchFolderFoldersCursorResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFolderFoldersCursorResponse>(
+      `/folders/v2/content/${folderUuid}/folders`,
+      this.headers(),
+      query,
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets a page of the user's files updated after a date, using cursor based pagination.
+   * Pass `updatedAt` on the first request, then only `nextCursor` (with the same `status`) until it is null.
+   *
+   * @param {FilesSyncQuery} query - updatedAt or cursor, optional status filter and page size (max 1000).
+   * @returns {[Promise<FetchFilesSyncResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFilesSync(query: FilesSyncQuery): [Promise<FetchFilesSyncResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFilesSyncResponse>(
+      '/files/sync',
+      this.headers(),
+      query,
+    );
+
+    return [promise, requestCanceler];
+  }
+
+  /**
+   * Gets a page of the user's folders updated after a date, using cursor based pagination. Root folders are excluded.
+   * Pass `updatedAt` on the first request, then only `nextCursor` (with the same `status`) until it is null.
+   *
+   * @param {FoldersSyncQuery} query - updatedAt or cursor, optional status filter and page size (max 1000).
+   * @returns {[Promise<FetchFoldersSyncResponse>, RequestCanceler]} An array containing a promise to get the API response and a function to cancel the request.
+   */
+  public getFoldersSync(query: FoldersSyncQuery): [Promise<FetchFoldersSyncResponse>, RequestCanceler] {
+    const { promise, requestCanceler } = this.client.getCancellable<FetchFoldersSyncResponse>(
+      '/folders/sync',
+      this.headers(),
+      query,
     );
 
     return [promise, requestCanceler];
