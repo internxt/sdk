@@ -629,7 +629,25 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_getFolderContentFiles'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/folders/v2/content/{uuid}/files': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get files in a folder with cursor based pagination */
+    get: operations['FolderController_getFolderContentFilesV2'];
     put?: never;
     post?: never;
     delete?: never;
@@ -679,7 +697,25 @@ export interface paths {
       path?: never;
       cookie?: never;
     };
+    /** @deprecated */
     get: operations['FolderController_getFolderContentFolders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/folders/v2/content/{uuid}/folders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get folders in a folder with cursor based pagination */
+    get: operations['FolderController_getFolderContentFoldersV2'];
     put?: never;
     post?: never;
     delete?: never;
@@ -751,6 +787,23 @@ export interface paths {
     };
     /** @deprecated */
     get: operations['FolderController_getFolderFolders'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/folders/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get delta of folders since a date */
+    get: operations['FolderController_getFoldersSync'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1026,6 +1079,23 @@ export interface paths {
     options?: never;
     head?: never;
     patch: operations['FileController_moveFile'];
+    trace?: never;
+  };
+  '/files/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get delta of files since a date */
+    get: operations['FileController_getFilesSync'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
     trace?: never;
   };
   '/files/recents': {
@@ -2636,6 +2706,23 @@ export interface paths {
     patch: operations['PhotosController_updatePhotoDeviceAsFolder'];
     trace?: never;
   };
+  '/photos/folders/files/delta/search': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Get delta of files inside given folders */
+    post: operations['PhotosController_getFilesInFolders'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/storage/trash/paginated': {
     parameters: {
       query?: never;
@@ -3758,6 +3845,9 @@ export interface components {
     GetUserUsageDto: {
       drive: number;
       backup: number;
+      /** @description Mail storage charged to the shared plan counter, in bytes. Falls back to the last known cached value, or 0 if none is available, when the mail service cannot be reached. */
+      mail: number;
+      /** @description Sum of drive, backup and mail usage. */
       total: number;
     };
     GetUserLimitDto: {
@@ -3873,6 +3963,26 @@ export interface components {
        */
       existentFolders: string[];
     };
+    ThumbnailDto: {
+      id: number;
+      fileId: number;
+      fileUuid: string;
+      maxWidth: number;
+      maxHeight: number;
+      type: string;
+      size: number;
+      bucketId: string;
+      bucketFile: string;
+      encryptVersion: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    FileSharingDto: {
+      id: string;
+      type: string;
+    };
     FileDto: {
       id: number;
       uuid: string;
@@ -3897,15 +4007,25 @@ export interface components {
       /** @enum {string} */
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       isFavorite?: boolean;
+      thumbnails?: components['schemas']['ThumbnailDto'][];
+      sharings?: components['schemas']['FileSharingDto'][];
     };
     FilesDto: {
       files: components['schemas']['FileDto'][];
+    };
+    GetFolderContentFilesV2ResponseDto: {
+      files: components['schemas']['FileDto'][];
+      nextCursor: string | null;
     };
     ResultFilesDto: {
       result: components['schemas']['FileDto'][];
     };
     FoldersDto: {
       folders: components['schemas']['FolderDto'][];
+    };
+    GetFolderContentFoldersV2ResponseDto: {
+      folders: components['schemas']['FolderDto'][];
+      nextCursor: string | null;
     };
     CheckFoldersExistenceDto: {
       /**
@@ -3969,6 +4089,36 @@ export interface components {
     };
     ResultFoldersDto: {
       result: components['schemas']['FolderDto'][];
+    };
+    FolderSyncDto: {
+      type: string;
+      id: number;
+      parentId: number;
+      parentUuid: string;
+      name: string;
+      parent: components['schemas']['Folder'];
+      bucket: string;
+      userId: number;
+      encryptVersion: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+      uuid: string;
+      plainName: string;
+      size: number;
+      /** Format: date-time */
+      creationTime: string;
+      /** Format: date-time */
+      modificationTime: string;
+      /** @enum {string} */
+      status: 'EXISTS' | 'TRASHED' | 'DELETED';
+      removed: boolean;
+      deleted: boolean;
+    };
+    GetFoldersSyncResponseDto: {
+      folders: components['schemas']['FolderSyncDto'][];
+      nextCursor: string | null;
     };
     FolderStatsDto: {
       /**
@@ -4143,6 +4293,35 @@ export interface components {
        */
       type: string;
     };
+    FileSyncDto: {
+      id: number;
+      uuid: string;
+      fileId: string | null;
+      name: string;
+      type: string;
+      size: string;
+      bucket: string;
+      folderId: number;
+      folderUuid: string;
+      encryptVersion: string;
+      userId: number;
+      /** Format: date-time */
+      creationTime: string;
+      /** Format: date-time */
+      modificationTime: string;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+      plainName: string;
+      /** @enum {string} */
+      status: 'EXISTS' | 'TRASHED' | 'DELETED';
+      sharings?: components['schemas']['FileSharingDto'][];
+    };
+    GetFilesSyncResponseDto: {
+      files: components['schemas']['FileSyncDto'][];
+      nextCursor: string | null;
+    };
     MoveFileDto: {
       /**
        * @description New Destination Folder UUID
@@ -4207,22 +4386,6 @@ export interface components {
        * @example 03-aes
        */
       encryptVersion: string;
-    };
-    ThumbnailDto: {
-      id: number;
-      fileId: number;
-      fileUuid: string;
-      maxWidth: number;
-      maxHeight: number;
-      type: string;
-      size: number;
-      bucketId: string;
-      bucketFile: string;
-      encryptVersion: string;
-      /** Format: date-time */
-      createdAt: string;
-      /** Format: date-time */
-      updatedAt: string;
     };
     SetSharingPasswordDto: {
       /**
@@ -4464,6 +4627,8 @@ export interface components {
       /** @enum {string} */
       status: 'EXISTS' | 'TRASHED' | 'DELETED';
       isFavorite?: boolean;
+      thumbnails?: components['schemas']['ThumbnailDto'][];
+      sharings?: components['schemas']['FileSharingDto'][];
       /** @description Owner of the file */
       user: components['schemas']['SharingOwnerInfoDto'] | null;
     };
@@ -4971,6 +5136,20 @@ export interface components {
     };
     CreateDeviceAsFolderDto: {
       deviceName: string;
+    };
+    GetFilesInFoldersDto: {
+      /** @description Folder uuids to fetch children files from */
+      folderUuids: string[];
+      /** @description Filter files updated after this date. Required if cursor is not provided */
+      updatedAt?: string;
+      /** @description Cursor token to fetch the next page of results */
+      cursor?: string;
+      /** @description Page size, max 1000 */
+      limit?: number;
+    };
+    GetFilesInFoldersResponseDto: {
+      files: components['schemas']['FileDto'][];
+      nextCursor: string | null;
     };
     ItemToTrashDto: {
       /**
@@ -6299,6 +6478,40 @@ export interface operations {
       };
     };
   };
+  FolderController_getFolderContentFilesV2: {
+    parameters: {
+      query?: {
+        /** @description Sort direction */
+        order?: 'ASC' | 'DESC';
+        /** @description Cursor from a previous response to fetch the next page */
+        cursor?: string;
+        /** @description Page size */
+        limit?: number;
+        /** @description Whether to include each file favorite status */
+        withFavorites?: boolean;
+        /** @description Whether to include each file thumbnails */
+        withThumbnails?: boolean;
+        /** @description Whether to include each file sharing info */
+        withSharings?: boolean;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFolderContentFilesV2ResponseDto'];
+        };
+      };
+    };
+  };
   FolderController_getFolderFiles: {
     parameters: {
       query: {
@@ -6377,6 +6590,38 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['FoldersDto'];
+        };
+      };
+    };
+  };
+  FolderController_getFolderContentFoldersV2: {
+    parameters: {
+      query?: {
+        /** @description Sort direction */
+        order?: 'ASC' | 'DESC';
+        /** @description Cursor from a previous response to fetch the next page */
+        cursor?: string;
+        /** @description Page size */
+        limit?: number;
+        /** @description Whether to include each folder favorite status */
+        withFavorites?: boolean;
+        /** @description Whether to include each folder sharing info */
+        withSharings?: boolean;
+      };
+      header?: never;
+      path: {
+        uuid: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFolderContentFoldersV2ResponseDto'];
         };
       };
     };
@@ -6506,6 +6751,34 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ResultFoldersDto'];
+        };
+      };
+    };
+  };
+  FolderController_getFoldersSync: {
+    parameters: {
+      query?: {
+        /** @description Filter items updated after this date. Required if cursor is not provided */
+        updatedAt?: string;
+        /** @description Cursor token to fetch the next page of results */
+        cursor?: string;
+        /** @description Page size, max 1000 */
+        limit?: number;
+        /** @description Folder status filter */
+        status?: 'EXISTS' | 'TRASHED' | 'DELETED';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFoldersSyncResponseDto'];
         };
       };
     };
@@ -7013,6 +7286,34 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['FileDto'];
+        };
+      };
+    };
+  };
+  FileController_getFilesSync: {
+    parameters: {
+      query?: {
+        /** @description Filter items updated after this date. Required if cursor is not provided */
+        updatedAt?: string;
+        /** @description Cursor token to fetch the next page of results */
+        cursor?: string;
+        /** @description Page size, max 1000 */
+        limit?: number;
+        /** @description File status filter */
+        status?: 'EXISTS' | 'TRASHED' | 'DELETED';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFilesSyncResponseDto'];
         };
       };
     };
@@ -9541,6 +9842,29 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['DeviceAsFolder'];
+        };
+      };
+    };
+  };
+  PhotosController_getFilesInFolders: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GetFilesInFoldersDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GetFilesInFoldersResponseDto'];
         };
       };
     };
