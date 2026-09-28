@@ -2,9 +2,10 @@ import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
 import { TeamsSettings } from '../shared/types/teams';
-import { UserSettings, UUID } from '../shared/types/userSettings';
+import { UserSettings } from '../shared/types/userSettings';
 import {
   ChangePasswordWithLinkPayload,
+  CompleteAccountSetupPayload,
   CryptoProvider,
   Keys,
   LoginDetails,
@@ -13,6 +14,7 @@ import {
   RegisterDetails,
   RegisterPreCreatedUser,
   RegisterPreCreatedUserResponse,
+  RegisterResponse,
   SecurityDetails,
   Token,
   TwoFactorAuthQR,
@@ -42,12 +44,7 @@ export class Auth {
    * Tries to register a new user
    * @param registerDetails
    */
-  public register(registerDetails: RegisterDetails): Promise<{
-    token: Token;
-    newToken: Token;
-    user: Omit<UserSettings, 'bucket'> & { referralCode: string };
-    uuid: UUID;
-  }> {
+  public register(registerDetails: RegisterDetails): Promise<RegisterResponse> {
     return this.client.post(
       '/users',
       {
@@ -79,12 +76,7 @@ export class Auth {
    * Tries to register a new user without sending keys
    * @param registerDetails
    */
-  public registerWithoutKeys(registerDetails: Omit<RegisterDetails, 'keys'>): Promise<{
-    token: Token;
-    newToken: Token;
-    user: Omit<UserSettings, 'bucket'> & { referralCode: string };
-    uuid: UUID;
-  }> {
+  public registerWithoutKeys(registerDetails: Omit<RegisterDetails, 'keys'>): Promise<RegisterResponse> {
     const body = {
       name: registerDetails.name,
       captcha: registerDetails.captcha,
@@ -157,6 +149,49 @@ export class Auth {
       },
       this.basicHeaders(),
     );
+  }
+
+  /**
+   * Completes the setup of an account that was created after a payment, setting its password and keys.
+   * The client must be created with the captcha token in the `x-internxt-captcha` custom header.
+   * @param setupDetails - The setup token received by email and the user's encrypted credentials and keys
+   * @returns {Promise<RegisterResponse>} Returns sign in token, user data and uuid.
+   */
+  public completeAccountSetup(setupDetails: CompleteAccountSetupPayload): Promise<RegisterResponse> {
+    return this.client.post(
+      'users/pre-created-users/complete-setup',
+      {
+        token: setupDetails.token,
+        name: setupDetails.name,
+        lastname: setupDetails.lastname,
+        password: setupDetails.password,
+        mnemonic: setupDetails.mnemonic,
+        salt: setupDetails.salt,
+        keys: {
+          ecc: {
+            publicKey: setupDetails.keys.ecc.publicKey,
+            privateKey: setupDetails.keys.ecc.privateKeyEncrypted,
+          },
+          kyber: {
+            publicKey: setupDetails.keys.kyber.publicKey,
+            privateKey: setupDetails.keys.kyber.privateKeyEncrypted,
+          },
+        },
+        referrer: setupDetails.referrer,
+      },
+      this.basicHeaders(),
+    );
+  }
+
+  /**
+   * Requests a new email to complete the setup of an account that was created after a payment.
+   * The client must be created with the captcha token in the `x-internxt-captcha` custom header.
+   *
+   * @param {string} email - The email address associated with the account.
+   * @returns {Promise<void>} - Resolves whether or not the email has a pending setup.
+   */
+  public resendAccountSetupEmail(email: string): Promise<void> {
+    return this.client.post('users/pre-created-users/setup-email', { email }, this.basicHeaders());
   }
 
   /**

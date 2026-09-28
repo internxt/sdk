@@ -4,6 +4,8 @@ import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
 import {
   CreateCustomerPayload,
+  CreateCustomerWithoutAccountPayload,
+  CreatedCustomer,
   CreatePaymentIntentPayload,
   CreateSubscriptionPayload,
   CryptoCurrency,
@@ -50,10 +52,7 @@ export class Checkout {
     captchaToken,
     companyVatId,
     metadata,
-  }: CreateCustomerPayload): Promise<{
-    customerId: string;
-    token: string;
-  }> {
+  }: CreateCustomerPayload): Promise<CreatedCustomer> {
     return this.client.post(
       '/checkout/customer',
       {
@@ -68,6 +67,54 @@ export class Checkout {
         metadata,
       },
       this.authHeaders(),
+    );
+  }
+
+  /**
+   * @description Creates a customer, or gets the existing one, for someone who does not have a Drive account yet.
+   * The request is sent without the user authorization header; the Drive account is created once the payment succeeds.
+   * @param email - The email of the customer, used later to create the Drive account
+   * @param confirmationTokenId - The ID of the Stripe ConfirmationToken created with the payment details
+   * @param country - The country of the customer
+   * @param captchaToken - The captcha token to verify the call
+   * @param customerName - The name of the customer (optional)
+   * @param lineAddress1 - The address of the user (optional)
+   * @param lineAddress2 - The second address line of the user (optional)
+   * @param city - The city of the user (optional)
+   * @param postalCode - The postal code of the customer (optional)
+   * @param companyVatId - The VAT ID of the company (optional)
+   * @param metadata - Additional metadata to attach to the customer (optional)
+   * @returns The customer ID and the user token used to create a subscription or payment intent
+   */
+  public createCustomerWithoutAccount({
+    email,
+    confirmationTokenId,
+    customerName,
+    lineAddress1,
+    lineAddress2,
+    postalCode,
+    city,
+    country,
+    captchaToken,
+    companyVatId,
+    metadata,
+  }: CreateCustomerWithoutAccountPayload): Promise<CreatedCustomer> {
+    return this.client.post(
+      '/checkout/customer',
+      {
+        email,
+        confirmationTokenId,
+        customerName,
+        city,
+        lineAddress1,
+        lineAddress2,
+        country,
+        postalCode,
+        captchaToken,
+        companyVatId,
+        metadata,
+      },
+      this.headers(),
     );
   }
 

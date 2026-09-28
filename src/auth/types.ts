@@ -35,6 +35,17 @@ export interface RegisterDetails {
   referral?: string;
 }
 
+export interface RegisterResponse {
+  token: Token;
+  newToken: Token;
+  user: Omit<UserSettings, 'bucket'> & { referralCode: string };
+  uuid: UUID;
+}
+
+export interface CompleteAccountSetupPayload extends Omit<RegisterDetails, 'email' | 'captcha' | 'referral'> {
+  token: string;
+}
+
 export interface RegisterPreCreatedUser extends RegisterDetails {
   invitationId: string;
 }

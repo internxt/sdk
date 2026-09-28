@@ -3,7 +3,20 @@ import { emptyRegisterDetails } from './registerDetails.mother';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { HttpClient } from '../../src/shared/http/client';
-import { Auth, CryptoProvider, Keys, LoginDetails, RegisterDetails, Token } from '../../src';
+import {
+  ACCOUNT_SETUP_PENDING_ERROR_CODE,
+  AppError,
+  Auth,
+  CompleteAccountSetupPayload,
+  CryptoProvider,
+  isAccountSetupPendingError,
+  Keys,
+  LoginDetails,
+  RegisterDetails,
+  Token,
+} from '../../src';
+import { AxiosResponseError } from '../../src/shared/types/errors';
+import { AxiosResponse } from 'axios';
 
 describe('# auth service tests', () => {
   beforeEach(() => {
@@ -746,6 +759,103 @@ describe('# auth service tests', () => {
     });
   });
 
+  describe('Account setup after payment', () => {
+    const captchaToken = 'captcha-token';
+
+    function setupDetails(): CompleteAccountSetupPayload {
+      return {
+        token: 'setup-token',
+        name: 'Jane',
+        lastname: 'Doe',
+        password: 'encrypted-password',
+        mnemonic: 'encrypted-mnemonic',
+        salt: 'encrypted-salt',
+        keys: {
+          ecc: { publicKey: 'ecc-public', privateKeyEncrypted: 'ecc-private' },
+          kyber: { publicKey: 'kyber-public', privateKeyEncrypted: 'kyber-private' },
+        },
+        referrer: 'referrer-code',
+      };
+    }
+
+    it('When the user completes the setup, then the token, credentials and keys go with the captcha', async () => {
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithCaptcha(captchaToken);
+
+      await client.completeAccountSetup(setupDetails());
+
+      expect(postCall).toHaveBeenCalledWith(
+        'users/pre-created-users/complete-setup',
+        {
+          token: 'setup-token',
+          name: 'Jane',
+          lastname: 'Doe',
+          password: 'encrypted-password',
+          mnemonic: 'encrypted-mnemonic',
+          salt: 'encrypted-salt',
+          keys: {
+            ecc: { publicKey: 'ecc-public', privateKey: 'ecc-private' },
+            kyber: { publicKey: 'kyber-public', privateKey: 'kyber-private' },
+          },
+          referrer: 'referrer-code',
+        },
+        headers,
+      );
+      expect(postCall.mock.calls[0][2]).toHaveProperty('x-internxt-captcha', captchaToken);
+    });
+
+    it('When the setup is completed, then the user gets the same session data as after signing up', async () => {
+      const sessionData = { token: 'token', newToken: 'new-token', user: { email: 'jane@internxt.com' }, uuid: 'uuid' };
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(sessionData);
+      const { client } = clientAndHeadersWithCaptcha(captchaToken);
+
+      const session = await client.completeAccountSetup(setupDetails());
+
+      expect(session).toStrictEqual(sessionData);
+    });
+
+    it('When the user asks for the setup email again, then the email is sent with the captcha', async () => {
+      const postCall = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(undefined);
+      const { client, headers } = clientAndHeadersWithCaptcha(captchaToken);
+
+      await client.resendAccountSetupEmail('jane@internxt.com');
+
+      expect(postCall).toHaveBeenCalledWith(
+        'users/pre-created-users/setup-email',
+        { email: 'jane@internxt.com' },
+        headers,
+      );
+      expect(postCall.mock.calls[0][2]).toHaveProperty('x-internxt-captcha', captchaToken);
+    });
+
+    it('When logging in to an account pending setup, then the error is recognised as a pending setup', async () => {
+      vi.spyOn(HttpClient.prototype, 'post').mockRejectedValue(
+        forbiddenResponseError({ message: 'The account setup is pending', code: ACCOUNT_SETUP_PENDING_ERROR_CODE }),
+      );
+      const { client } = clientAndHeaders();
+
+      const loginError = await client.securityDetails('jane@internxt.com').catch((error: unknown) => error);
+
+      expect(isAccountSetupPendingError(loginError)).toBe(true);
+    });
+
+    it('When the app error carries the pending setup code, then it is recognised as a pending setup', () => {
+      const appError = new AppError('The account setup is pending', 403, ACCOUNT_SETUP_PENDING_ERROR_CODE);
+
+      expect(isAccountSetupPendingError(appError)).toBe(true);
+    });
+
+    it('When login is forbidden for another reason, then it is not recognised as a pending setup', async () => {
+      vi.spyOn(HttpClient.prototype, 'post').mockRejectedValue(forbiddenResponseError({ message: 'Forbidden' }));
+      const { client } = clientAndHeaders();
+
+      const loginError = await client.securityDetails('jane@internxt.com').catch((error: unknown) => error);
+
+      expect(isAccountSetupPendingError(loginError)).toBe(false);
+      expect(isAccountSetupPendingError(new Error('Network error'))).toBe(false);
+    });
+  });
+
   describe('-> send email unblock account', () => {
     it('Should call with right params & return values', async () => {
       // Arrange
@@ -1027,4 +1137,24 @@ function clientAndHeadersWithToken(
   const client = Auth.client(apiUrl, appDetails, apiSecurity);
   const headers = headersWithToken({ clientName, clientVersion, token });
   return { client, headers };
+}
+
+function clientAndHeadersWithCaptcha(
+  captchaToken: string,
+  clientName = 'c-name',
+  clientVersion = '0.1',
+): {
+  client: Auth;
+  headers: object;
+} {
+  const customHeaders = { 'x-internxt-captcha': captchaToken };
+  const appDetails: AppDetails = { clientName, clientVersion, customHeaders };
+  const client = Auth.client('', appDetails);
+  const headers = basicHeaders({ clientName, clientVersion, customHeaders });
+  return { client, headers };
+}
+
+function forbiddenResponseError(responseBody: object): AxiosResponseError {
+  const response = { status: 403, data: responseBody, headers: {} } as AxiosResponse;
+  return new AxiosResponseError('Request failed with status code 403', 'post /auth/login', response);
 }

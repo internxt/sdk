@@ -47,3 +47,16 @@ export class AxiosUnknownError extends Error {
     Object.setPrototypeOf(this, AxiosUnknownError.prototype);
   }
 }
+
+export const ACCOUNT_SETUP_PENDING_ERROR_CODE = 'AccountSetupPending';
+
+export function isAccountSetupPendingError(error: unknown): boolean {
+  if (error instanceof AppError) {
+    return error.code === ACCOUNT_SETUP_PENDING_ERROR_CODE;
+  }
+  if (error instanceof AxiosResponseError) {
+    const responseBody = error.data as { code?: unknown } | undefined;
+    return responseBody?.code === ACCOUNT_SETUP_PENDING_ERROR_CODE;
+  }
+  return false;
+}
