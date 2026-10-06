@@ -3,7 +3,12 @@ import { HttpClient } from '../../src/shared/http/client';
 import { Checkout } from '../../src/payments';
 import { ApiSecurity, AppDetails } from '../../src/shared';
 import { basicHeaders, headersWithToken } from '../../src/shared/headers';
-import { CreateCustomerPayload, CreatePaymentIntentPayload, CryptoCurrency } from '../../src/payments/types';
+import {
+  CreateCustomerPayload,
+  CreateCustomerWithoutAccountPayload,
+  CreatePaymentIntentPayload,
+  CryptoCurrency,
+} from '../../src/payments/types';
 
 describe('Checkout service tests', () => {
   beforeEach(() => {
@@ -37,6 +42,50 @@ describe('Checkout service tests', () => {
       // Assert
       expect(callStub).toHaveBeenCalledWith('/checkout/customer', userPayload, headers);
       expect(body).toStrictEqual([mockedResponse]);
+    });
+  });
+
+  describe('Create customer for someone without an account', () => {
+    const customerPayload: CreateCustomerWithoutAccountPayload = {
+      email: 'new-user@internxt.com',
+      confirmationTokenId: 'ctoken_123',
+      customerName: 'New user',
+      country: 'ES',
+      postalCode: '46001',
+      captchaToken: 'captcha_token',
+    };
+
+    it('When someone without an account creates a customer, then it is sent without user authorization', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithToken({});
+
+      await client.createCustomerWithoutAccount(customerPayload);
+
+      expect(callStub).toHaveBeenCalledWith('/checkout/customer', customerPayload, headers);
+      expect(callStub.mock.calls[0][2]).not.toHaveProperty('Authorization');
+    });
+
+    it('When the customer is created, then the customer id and the checkout token are returned', async () => {
+      const createdCustomer = { customerId: 'customerId', token: 'checkout_token' };
+      vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(createdCustomer);
+      const { client } = clientAndHeadersWithToken({});
+
+      const customer = await client.createCustomerWithoutAccount(customerPayload);
+
+      expect(customer).toStrictEqual(createdCustomer);
+    });
+
+    it('When a signed-in user creates a customer, then it is authorized with their token as before', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithAuthToken({ token: 'session_token' });
+
+      await client.createCustomer({ country: 'ES', captchaToken: 'captcha_token' });
+
+      const [, body, sentHeaders] = callStub.mock.calls[0];
+      expect(sentHeaders).toStrictEqual(headers);
+      expect(sentHeaders).toHaveProperty('Authorization', 'Bearer session_token');
+      expect(body).not.toHaveProperty('email');
+      expect(body).not.toHaveProperty('confirmationTokenId');
     });
   });
 

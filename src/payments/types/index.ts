@@ -12,6 +12,16 @@ export interface CreateCustomerPayload {
   metadata?: Record<string, string>;
 }
 
+export interface CreateCustomerWithoutAccountPayload extends CreateCustomerPayload {
+  email: string;
+  confirmationTokenId: string;
+}
+
+export interface CreatedCustomer {
+  customerId: string;
+  token: string;
+}
+
 export interface CreateSubscriptionPayload {
   customerId: string;
   priceId: string;

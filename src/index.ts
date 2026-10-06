@@ -1,5 +1,5 @@
 export * from './auth';
-export { AppError } from './shared';
+export { AppError, ACCOUNT_SETUP_PENDING_ERROR_CODE, isAccountSetupPendingError } from './shared';
 export * as Drive from './drive';
 export * as Network from './network';
 export * as Shared from './shared';
