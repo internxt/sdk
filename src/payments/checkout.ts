@@ -32,7 +32,8 @@ export class Checkout {
   /**
    * @description Creates a customer or gets the existing one if it already exists
    * @param country - The country of the customer
-   * @param captchaToken - The captcha token to verify the call
+   * @param captchaToken - The reCAPTCHA token to verify the call (fallback provider, optional)
+   * @param turnstileToken - The Cloudflare Turnstile token to verify the call (primary provider)
    * @param customerName - The name of the customer (optional)
    * @param lineAddress1 - The address of the user (optional)
    * @param lineAddress2 - The second address line of the user (optional)
@@ -50,6 +51,7 @@ export class Checkout {
     city,
     country,
     captchaToken,
+    turnstileToken,
     companyVatId,
     metadata,
   }: CreateCustomerPayload): Promise<CreatedCustomer> {
@@ -63,6 +65,7 @@ export class Checkout {
         country,
         postalCode,
         captchaToken,
+        turnstileToken,
         companyVatId,
         metadata,
       },
@@ -138,6 +141,7 @@ export class Checkout {
     token,
     currency,
     captchaToken,
+    turnstileToken,
     promoCodeId,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
@@ -148,6 +152,7 @@ export class Checkout {
         token,
         currency,
         captchaToken,
+        turnstileToken,
         promoCodeId,
       },
       this.authHeaders(),
@@ -177,6 +182,7 @@ export class Checkout {
     token,
     currency,
     captchaToken,
+    turnstileToken,
     userAddress,
     promoCodeId,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
@@ -188,6 +194,7 @@ export class Checkout {
         token,
         currency,
         captchaToken,
+        turnstileToken,
         userAddress,
         promoCodeId,
       },
