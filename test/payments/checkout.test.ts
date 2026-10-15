@@ -7,6 +7,7 @@ import {
   CreateCustomerPayload,
   CreateCustomerWithoutAccountPayload,
   CreatePaymentIntentPayload,
+  CreateSubscriptionPayload,
   CryptoCurrency,
 } from '../../src/payments/types';
 
@@ -118,6 +119,67 @@ describe('Checkout service tests', () => {
       // Assert
       expect(callStub).toHaveBeenCalledWith('/checkout/payment-intent', userPayload, headers);
       expect(body).toStrictEqual([mockedResponse]);
+    });
+
+    it('When the buyer comes from a Google Ads click, then the click ID is sent along with the payment intent', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      await client.createPaymentIntent({
+        customerId: 'customer-id',
+        priceId: 'price-id',
+        token: 'user-token',
+        currency: 'eur',
+        captchaToken: 'captcha-token',
+        userAddress: '1.1.1.1',
+        gclid: 'gclid-123',
+      });
+
+      expect(callStub).toHaveBeenCalledWith(
+        '/checkout/payment-intent',
+        expect.objectContaining({ gclid: 'gclid-123' }),
+        headers,
+      );
+    });
+  });
+
+  describe('Create subscription', () => {
+    const subscriptionPayload: CreateSubscriptionPayload = {
+      customerId: 'customer-id',
+      priceId: 'price-id',
+      token: 'user-token',
+      currency: 'eur',
+      captchaToken: 'captcha-token',
+      promoCodeId: 'promo-code',
+    };
+
+    it('When a subscription is created, then it is sent with the given params and the created subscription is returned', async () => {
+      const mockedResponse = {
+        type: 'payment',
+        clientSecret: 'client-secret',
+        subscriptionId: 'subscription-id',
+        paymentIntentId: 'payment-intent-id',
+      };
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(mockedResponse);
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      const body = await client.createSubscription(subscriptionPayload);
+
+      expect(callStub).toHaveBeenCalledWith('/checkout/subscription', subscriptionPayload, headers);
+      expect(body).toStrictEqual(mockedResponse);
+    });
+
+    it('When the buyer comes from a Google Ads click, then the click ID is sent along with the subscription', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      await client.createSubscription({ ...subscriptionPayload, gclid: 'gclid-123' });
+
+      expect(callStub).toHaveBeenCalledWith(
+        '/checkout/subscription',
+        { ...subscriptionPayload, gclid: 'gclid-123' },
+        headers,
+      );
     });
   });
 
