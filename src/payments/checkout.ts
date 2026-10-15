@@ -126,6 +126,7 @@ export class Checkout {
    * @param currency - The currency of the subscription (optional)
    * @param promoCodeId - The ID of the promo code (optional)
    * @param quantity - The quantity of the subscription (optional)
+   * @param gclid - The Google Click ID for tracking purposes (optional)
    * @returns The created subscription data:
    * - `type`: The type of the subscription (setup or payment)
    * - `clientSecret`: The client secret for the subscription to be used with Stripe Elements
@@ -139,6 +140,7 @@ export class Checkout {
     currency,
     captchaToken,
     promoCodeId,
+    gclid,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/checkout/subscription',
@@ -149,6 +151,7 @@ export class Checkout {
         currency,
         captchaToken,
         promoCodeId,
+        gclid,
       },
       this.authHeaders(),
     );
@@ -161,6 +164,7 @@ export class Checkout {
    * @param token - The token used to authenticate the customer
    * @param currency - The currency of the payment intent (optional)
    * @param promoCodeId - The ID of the promo code (optional)
+   * @param gclid - The Google Click ID for tracking purposes (optional)
    * @returns The created invoice data:
    * - `clientSecret`: The client secret for the invoice to be used with Stripe Elements
    * - `id`: The ID of the invoice
@@ -179,6 +183,7 @@ export class Checkout {
     captchaToken,
     userAddress,
     promoCodeId,
+    gclid,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
@@ -190,6 +195,7 @@ export class Checkout {
         captchaToken,
         userAddress,
         promoCodeId,
+        gclid,
       },
       this.authHeaders(),
     );
