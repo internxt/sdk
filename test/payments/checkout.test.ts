@@ -8,7 +8,6 @@ import {
   CreateCustomerWithoutAccountPayload,
   CreatePaymentIntentPayload,
   CreateSubscriptionPayload,
-  CryptoCurrency,
 } from '../../src/payments/types';
 
 describe('Checkout service tests', () => {
@@ -21,9 +20,6 @@ describe('Checkout service tests', () => {
       // Arrange
       const userPayload: CreateCustomerPayload = {
         customerName: 'example',
-        city: 'Valencia',
-        lineAddress1: 'Marina de empresas',
-        lineAddress2: '',
         country: 'ES',
         postalCode: '14005',
         captchaToken: 'captcha_token',
@@ -99,7 +95,6 @@ describe('Checkout service tests', () => {
         token: 'user-token',
         currency: 'eur',
         captchaToken: 'captcha-token',
-        userAddress: '1.1.1.1',
         promoCodeId: 'promo-code',
       };
       const mockedResponse = {
@@ -131,7 +126,6 @@ describe('Checkout service tests', () => {
         token: 'user-token',
         currency: 'eur',
         captchaToken: 'captcha-token',
-        userAddress: '1.1.1.1',
         gclid: 'gclid-123',
       });
 
@@ -180,52 +174,6 @@ describe('Checkout service tests', () => {
         { ...subscriptionPayload, gclid: 'gclid-123' },
         headers,
       );
-    });
-  });
-
-  describe('Fetch available crypto currencies', () => {
-    it('should call with right params & return data', async () => {
-      // Arrange
-      const mockedCryptoCurrency: CryptoCurrency = {
-        currencyId: 'some-id',
-        imageUrl: 'http://some-url',
-        name: 'Bitcoin',
-        networks: [
-          {
-            platformId: 'bitcoin',
-            name: 'Bitcoin Network',
-          },
-        ],
-        receiveType: true,
-        type: 'crypto',
-      };
-      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue([mockedCryptoCurrency]);
-
-      const { client, headers } = clientAndHeadersWithToken({});
-
-      // Act
-      const body = await client.getAvailableCryptoCurrencies();
-
-      // Assert
-      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/currencies', headers);
-      expect(body).toStrictEqual([mockedCryptoCurrency]);
-    });
-  });
-
-  describe('Verify crypto payments', () => {
-    it('should call with right params & return data', async () => {
-      // Arrange
-      const mockedInvoiceId = 'encoded-invoice-id';
-      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(true);
-
-      const { client, headers } = clientAndHeadersWithAuthToken({});
-
-      // Act
-      const body = await client.verifyCryptoPayment(mockedInvoiceId);
-
-      // Assert
-      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers);
-      expect(body).toStrictEqual(true);
     });
   });
 });
