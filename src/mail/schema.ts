@@ -594,6 +594,11 @@ export interface components {
        * @example 4096
        */
       size: number;
+      /**
+       * @description Content-ID without angle brackets; the HTML body references the part as cid:<value>
+       * @example logo@example.com
+       */
+      cid: string | null;
     };
     EmailResponseDto: {
       /** @example Ma1f09b… */
