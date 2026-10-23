@@ -86,7 +86,7 @@ export class HttpClient {
    * @param headers
    */
   public async get<Response>(url: URL, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.get(url, { headers }));
+    return await this.execute(() => this.axios.get(url, { headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -96,7 +96,7 @@ export class HttpClient {
    * @param headers
    */
   public async getWithParams<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.get(url, { params, headers }));
+    return await this.execute(() => this.axios.get(url, { params, headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -155,7 +155,7 @@ export class HttpClient {
     const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
-      return this.axios.get<never, Response>(url, { headers, params, cancelToken: source.token });
+      return this.axios.get(url, { headers, params, cancelToken: source.token }) as unknown as Promise<Response>;
     });
 
     return { promise, requestCanceler };
@@ -168,7 +168,7 @@ export class HttpClient {
    * @param headers
    */
   public async post<Response>(url: URL, params: Parameters, headers: Headers, signal?: AbortSignal): Promise<Response> {
-    return await this.execute(() => this.axios.post(url, params, { headers, signal }));
+    return await this.execute(() => this.axios.post(url, params, { headers, signal }) as unknown as Promise<Response>);
   }
 
   /**
@@ -178,14 +178,15 @@ export class HttpClient {
    * @param headers
    */
   public async postWithKeepAlive<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() =>
-      this.axios.post(url, params, {
-        headers,
-        adapter: 'fetch',
-        fetchOptions: {
-          keepalive: true,
-        },
-      }),
+    return await this.execute(
+      () =>
+        this.axios.post(url, params, {
+          headers,
+          adapter: 'fetch',
+          fetchOptions: {
+            keepalive: true,
+          },
+        }) as unknown as Promise<Response>,
     );
   }
 
@@ -196,7 +197,7 @@ export class HttpClient {
    * @param headers
    */
   public async postForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.postForm(url, params, { headers }));
+    return await this.execute(() => this.axios.postForm(url, params, { headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -219,7 +220,7 @@ export class HttpClient {
     const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
-      return this.axios.postForm<never, Response>(url, params, { headers, cancelToken: source.token });
+      return this.axios.postForm(url, params, { headers, cancelToken: source.token }) as unknown as Promise<Response>;
     });
 
     return { promise, requestCanceler };
@@ -245,7 +246,7 @@ export class HttpClient {
     const promise = this.execute(() => {
       const source = axios.CancelToken.source();
       currentCancel = source.cancel;
-      return this.axios.post<never, Response>(url, params, { headers, cancelToken: source.token });
+      return this.axios.post(url, params, { headers, cancelToken: source.token }) as unknown as Promise<Response>;
     });
 
     return { promise, requestCanceler };
@@ -258,7 +259,7 @@ export class HttpClient {
    * @param headers
    */
   public async patch<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.patch(url, params, { headers }));
+    return await this.execute(() => this.axios.patch(url, params, { headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -268,7 +269,7 @@ export class HttpClient {
    * @param headers
    */
   public async put<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.put(url, params, { headers }));
+    return await this.execute(() => this.axios.put(url, params, { headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -278,7 +279,7 @@ export class HttpClient {
    * @param headers
    */
   public async putForm<Response>(url: URL, params: Parameters, headers: Headers): Promise<Response> {
-    return await this.execute(() => this.axios.putForm(url, params, { headers }));
+    return await this.execute(() => this.axios.putForm(url, params, { headers }) as unknown as Promise<Response>);
   }
 
   /**
@@ -288,7 +289,7 @@ export class HttpClient {
    * @param params
    */
   public async delete<Response>(url: URL, headers: Headers, params?: Parameters): Promise<Response> {
-    return await this.execute(() => this.axios.delete(url, { headers, data: params }));
+    return await this.execute(() => this.axios.delete(url, { headers, data: params }) as unknown as Promise<Response>);
   }
 
   /**
