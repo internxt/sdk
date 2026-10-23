@@ -7,7 +7,7 @@ import {
   CreateCustomerPayload,
   CreateCustomerWithoutAccountPayload,
   CreatePaymentIntentPayload,
-  CryptoCurrency,
+  CreateSubscriptionPayload,
 } from '../../src/payments/types';
 
 describe('Checkout service tests', () => {
@@ -20,9 +20,6 @@ describe('Checkout service tests', () => {
       // Arrange
       const userPayload: CreateCustomerPayload = {
         customerName: 'example',
-        city: 'Valencia',
-        lineAddress1: 'Marina de empresas',
-        lineAddress2: '',
         country: 'ES',
         postalCode: '14005',
         captchaToken: 'captcha_token',
@@ -98,7 +95,6 @@ describe('Checkout service tests', () => {
         token: 'user-token',
         currency: 'eur',
         captchaToken: 'captcha-token',
-        userAddress: '1.1.1.1',
         promoCodeId: 'promo-code',
       };
       const mockedResponse = {
@@ -119,51 +115,65 @@ describe('Checkout service tests', () => {
       expect(callStub).toHaveBeenCalledWith('/checkout/payment-intent', userPayload, headers);
       expect(body).toStrictEqual([mockedResponse]);
     });
-  });
 
-  describe('Fetch available crypto currencies', () => {
-    it('should call with right params & return data', async () => {
-      // Arrange
-      const mockedCryptoCurrency: CryptoCurrency = {
-        currencyId: 'some-id',
-        imageUrl: 'http://some-url',
-        name: 'Bitcoin',
-        networks: [
-          {
-            platformId: 'bitcoin',
-            name: 'Bitcoin Network',
-          },
-        ],
-        receiveType: true,
-        type: 'crypto',
-      };
-      const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue([mockedCryptoCurrency]);
+    it('When the buyer comes from a Google Ads click, then the click ID is sent along with the payment intent', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithAuthToken({});
 
-      const { client, headers } = clientAndHeadersWithToken({});
+      await client.createPaymentIntent({
+        customerId: 'customer-id',
+        priceId: 'price-id',
+        token: 'user-token',
+        currency: 'eur',
+        captchaToken: 'captcha-token',
+        gclid: 'gclid-123',
+      });
 
-      // Act
-      const body = await client.getAvailableCryptoCurrencies();
-
-      // Assert
-      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/currencies', headers);
-      expect(body).toStrictEqual([mockedCryptoCurrency]);
+      expect(callStub).toHaveBeenCalledWith(
+        '/checkout/payment-intent',
+        expect.objectContaining({ gclid: 'gclid-123' }),
+        headers,
+      );
     });
   });
 
-  describe('Verify crypto payments', () => {
-    it('should call with right params & return data', async () => {
-      // Arrange
-      const mockedInvoiceId = 'encoded-invoice-id';
-      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(true);
+  describe('Create subscription', () => {
+    const subscriptionPayload: CreateSubscriptionPayload = {
+      customerId: 'customer-id',
+      priceId: 'price-id',
+      token: 'user-token',
+      currency: 'eur',
+      captchaToken: 'captcha-token',
+      promoCodeId: 'promo-code',
+    };
 
+    it('When a subscription is created, then it is sent with the given params and the created subscription is returned', async () => {
+      const mockedResponse = {
+        type: 'payment',
+        clientSecret: 'client-secret',
+        subscriptionId: 'subscription-id',
+        paymentIntentId: 'payment-intent-id',
+      };
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(mockedResponse);
       const { client, headers } = clientAndHeadersWithAuthToken({});
 
-      // Act
-      const body = await client.verifyCryptoPayment(mockedInvoiceId);
+      const body = await client.createSubscription(subscriptionPayload);
 
-      // Assert
-      expect(callStub).toHaveBeenCalledWith('/checkout/crypto/verify/payment', { token: mockedInvoiceId }, headers);
-      expect(body).toStrictEqual(true);
+      expect(callStub).toHaveBeenCalledWith('/checkout/subscription', subscriptionPayload, headers);
+      expect(body).toStrictEqual(mockedResponse);
+    });
+
+    it('When the buyer comes from a Google Ads click, then the click ID is sent along with the subscription', async () => {
+      const callStub = vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({});
+      const { client, headers } = clientAndHeadersWithAuthToken({});
+
+      await client.createSubscription({ ...subscriptionPayload, gclid: 'gclid-123' });
+
+      expect(callStub).toHaveBeenCalledWith(
+        '/checkout/subscription',
+        { ...subscriptionPayload, gclid: 'gclid-123' },
+        headers,
+      );
     });
   });
 });

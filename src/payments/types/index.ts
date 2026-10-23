@@ -2,9 +2,6 @@ import { UserType } from '../../drive/payments/types/types';
 
 export interface CreateCustomerPayload {
   customerName?: string;
-  lineAddress1?: string;
-  lineAddress2?: string;
-  city?: string;
   country: string;
   postalCode?: string;
   captchaToken: string;
@@ -29,6 +26,7 @@ export interface CreateSubscriptionPayload {
   captchaToken: string;
   currency?: string;
   promoCodeId?: string;
+  gclid?: string;
 }
 
 export interface CreatePaymentIntentPayload {
@@ -37,8 +35,8 @@ export interface CreatePaymentIntentPayload {
   token: string;
   currency: string;
   captchaToken: string;
-  userAddress: string;
   promoCodeId?: string;
+  gclid?: string;
 }
 
 export interface PaymentMethodVerificationPayload {
@@ -87,29 +85,6 @@ export type PriceWithTax = {
   taxes: Taxes;
 };
 
-export interface CryptoCurrency {
-  currencyId: string;
-  name: string;
-  type: 'crypto' | 'fiat';
-  receiveType: boolean;
-  networks: { platformId: string; name: string }[];
-  imageUrl: string;
-}
-
-export interface PaymentIntentCrypto {
-  id: string;
-  type: 'crypto';
-  token: string;
-  payload: {
-    paymentRequestUri: string;
-    payAmount: number;
-    payCurrency: string;
-    paymentAddress: string;
-    url: string;
-    qrUrl: string;
-  };
-}
-
 export interface PaymentIntentFiat {
   id: string;
   type: 'fiat';
@@ -117,4 +92,4 @@ export interface PaymentIntentFiat {
   invoiceStatus?: string;
 }
 
-export type PaymentIntent = PaymentIntentCrypto | PaymentIntentFiat;
+export type PaymentIntent = PaymentIntentFiat;

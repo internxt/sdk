@@ -8,7 +8,6 @@ import {
   CreatedCustomer,
   CreatePaymentIntentPayload,
   CreateSubscriptionPayload,
-  CryptoCurrency,
   GetPriceByIdPayload,
   PaymentIntent,
   PriceWithTax,
@@ -34,9 +33,6 @@ export class Checkout {
    * @param country - The country of the customer
    * @param captchaToken - The captcha token to verify the call
    * @param customerName - The name of the customer (optional)
-   * @param lineAddress1 - The address of the user (optional)
-   * @param lineAddress2 - The second address line of the user (optional)
-   * @param city - The city of the user (optional)
    * @param postalCode - The postal code of the customer (optional)
    * @param companyVatId - The VAT ID of the company (optional)
    * @param metadata - Additional metadata to attach to the customer (optional)
@@ -44,10 +40,7 @@ export class Checkout {
    */
   public createCustomer({
     customerName,
-    lineAddress1,
-    lineAddress2,
     postalCode,
-    city,
     country,
     captchaToken,
     companyVatId,
@@ -57,9 +50,6 @@ export class Checkout {
       '/checkout/customer',
       {
         customerName,
-        city,
-        lineAddress1,
-        lineAddress2,
         country,
         postalCode,
         captchaToken,
@@ -78,9 +68,6 @@ export class Checkout {
    * @param country - The country of the customer
    * @param captchaToken - The captcha token to verify the call
    * @param customerName - The name of the customer (optional)
-   * @param lineAddress1 - The address of the user (optional)
-   * @param lineAddress2 - The second address line of the user (optional)
-   * @param city - The city of the user (optional)
    * @param postalCode - The postal code of the customer (optional)
    * @param companyVatId - The VAT ID of the company (optional)
    * @param metadata - Additional metadata to attach to the customer (optional)
@@ -90,10 +77,7 @@ export class Checkout {
     email,
     confirmationTokenId,
     customerName,
-    lineAddress1,
-    lineAddress2,
     postalCode,
-    city,
     country,
     captchaToken,
     companyVatId,
@@ -105,9 +89,6 @@ export class Checkout {
         email,
         confirmationTokenId,
         customerName,
-        city,
-        lineAddress1,
-        lineAddress2,
         country,
         postalCode,
         captchaToken,
@@ -125,7 +106,7 @@ export class Checkout {
    * @param token - The token used to authenticate the customer
    * @param currency - The currency of the subscription (optional)
    * @param promoCodeId - The ID of the promo code (optional)
-   * @param quantity - The quantity of the subscription (optional)
+   * @param gclid - The Google Click ID for tracking purposes (optional)
    * @returns The created subscription data:
    * - `type`: The type of the subscription (setup or payment)
    * - `clientSecret`: The client secret for the subscription to be used with Stripe Elements
@@ -139,6 +120,7 @@ export class Checkout {
     currency,
     captchaToken,
     promoCodeId,
+    gclid,
   }: CreateSubscriptionPayload): Promise<CreatedSubscriptionData> {
     return this.client.post(
       '/checkout/subscription',
@@ -149,6 +131,7 @@ export class Checkout {
         currency,
         captchaToken,
         promoCodeId,
+        gclid,
       },
       this.authHeaders(),
     );
@@ -161,15 +144,12 @@ export class Checkout {
    * @param token - The token used to authenticate the customer
    * @param currency - The currency of the payment intent (optional)
    * @param promoCodeId - The ID of the promo code (optional)
+   * @param gclid - The Google Click ID for tracking purposes (optional)
    * @returns The created invoice data:
    * - `clientSecret`: The client secret for the invoice to be used with Stripe Elements
    * - `id`: The ID of the invoice
    * - `invoiceStatus`: The status of the invoice (only when the status is 'paid')
-   * - `type`: The type of the currency - 'fiat' or 'crypto'
-   * - `payload`: The payload of the invoice if the type is 'crypto' containing { paymentRequestUri, url, qrUrl }
-   * - `payload.paymentRequestUri`: The payment request URI for the invoice
-   * - `payload.url`: The URL of the invoice
-   * - `payload.qrUrl`: The QR code URL of the invoice
+   * - `type`: The type of the payment, always 'fiat'
    */
   public createPaymentIntent({
     customerId,
@@ -177,8 +157,8 @@ export class Checkout {
     token,
     currency,
     captchaToken,
-    userAddress,
     promoCodeId,
+    gclid,
   }: CreatePaymentIntentPayload): Promise<PaymentIntent> {
     return this.client.post(
       '/checkout/payment-intent',
@@ -188,8 +168,8 @@ export class Checkout {
         token,
         currency,
         captchaToken,
-        userAddress,
         promoCodeId,
+        gclid,
       },
       this.authHeaders(),
     );
@@ -218,29 +198,6 @@ export class Checkout {
     if (postalCode !== undefined) query.set('postalCode', postalCode);
     if (country !== undefined) query.set('country', country);
     return this.client.get<PriceWithTax>(`/checkout/price-by-id?${query.toString()}`, this.headers());
-  }
-
-  /**
-   * @description Fetches all available cryptocurrencies for the checkout module
-   * @returns A promise which resolves to an array of available cryptocurrencies
-   */
-  public getAvailableCryptoCurrencies(): Promise<CryptoCurrency[]> {
-    return this.client.get<CryptoCurrency[]>('/checkout/crypto/currencies', this.headers());
-  }
-
-  /**
-   * @description Verifies a cryptocurrency payment
-   * @param token - The encoded token we need to verify the payment
-   * @returns A promise that resolves to a boolean indicating whether the payment is verified
-   */
-  public verifyCryptoPayment(token: string): Promise<boolean> {
-    return this.client.post<boolean>(
-      '/checkout/crypto/verify/payment',
-      {
-        token,
-      },
-      this.authHeaders(),
-    );
   }
 
   /**
