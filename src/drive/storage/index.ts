@@ -9,7 +9,6 @@ import {
   CheckDuplicatedFilesPayload,
   CheckDuplicatedFilesResponse,
   CheckDuplicatedFolderPayload,
-  CheckDuplicatedFoldersResponse,
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
@@ -24,6 +23,7 @@ import {
   FetchFolderContentResponse,
   FetchFolderFilesCursorResponse,
   FetchFolderFoldersCursorResponse,
+  FetchExistentFoldersResponse,
   FetchFolderByPathResponse,
   FetchFolderMetaResponse,
   FetchFoldersSyncResponse,
@@ -934,12 +934,12 @@ export class Storage {
    * Checks if the given folders names already exist in the given folder
    *
    * @param {CheckDuplicatedFolderPayload} payload - Payload containing the folder UUID and the list of folders to check.
-   * @return {Promise<CheckDuplicatedFoldersResponse>} - Promise that contains the duplicated folders in a list.
+   * @return {Promise<FetchExistentFoldersResponse>} - Promise that contains the duplicated folders in a list.
    */
   public checkDuplicatedFolders({
     folderUuid,
     folderNamesList,
-  }: CheckDuplicatedFolderPayload): Promise<CheckDuplicatedFoldersResponse> {
+  }: CheckDuplicatedFolderPayload): Promise<FetchExistentFoldersResponse> {
     return this.client.post(
       `/folders/content/${folderUuid}/folders/existence`,
       {

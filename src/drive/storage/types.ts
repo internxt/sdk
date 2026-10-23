@@ -199,6 +199,9 @@ export type FetchFolderMetaResponse =
 export type FetchFolderByPathResponse =
   paths['/folders/meta']['get']['responses']['200']['content']['application/json'];
 
+export type FetchExistentFoldersResponse =
+  paths['/folders/content/{uuid}/folders/existence']['post']['responses']['200']['content']['application/json'];
+
 export type FilesSyncQuery = NonNullable<paths['/files/sync']['get']['parameters']['query']>;
 
 export type FoldersSyncQuery = NonNullable<paths['/folders/sync']['get']['parameters']['query']>;
