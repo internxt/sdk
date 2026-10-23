@@ -9,7 +9,6 @@ import {
   CheckDuplicatedFilesPayload,
   CheckDuplicatedFilesResponse,
   CheckDuplicatedFolderPayload,
-  CheckDuplicatedFoldersResponse,
   CreateFolderByUuidPayload,
   CreateFolderPayload,
   CreateFolderResponse,
@@ -24,6 +23,9 @@ import {
   FetchFolderContentResponse,
   FetchFolderFilesCursorResponse,
   FetchFolderFoldersCursorResponse,
+  FetchExistentFoldersResponse,
+  FetchFolderByPathResponse,
+  FetchFolderMetaResponse,
   FetchFoldersSyncResponse,
   FetchLimitResponse,
   FetchPaginatedFilesContent,
@@ -831,16 +833,20 @@ export class Storage {
    * Gets the meta of a given folder UUID
    *
    * @param {string} folderUUID - UUID of the folder.
-   * @returns {Promise<FolderMeta>}
+   * @returns {Promise<FetchFolderMetaResponse>}
    */
-  public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
+  public getFolderMeta(
+    uuid: string,
+    workspacesToken?: string,
+    resourcesToken?: string,
+  ): Promise<FetchFolderMetaResponse> {
     const customHeaders = workspacesToken
       ? {
           'x-internxt-workspace': workspacesToken,
         }
       : undefined;
 
-    return this.client.get<FolderMeta>(
+    return this.client.get<FetchFolderMetaResponse>(
       `folders/${uuid}/meta`,
       addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
     );
@@ -928,12 +934,12 @@ export class Storage {
    * Checks if the given folders names already exist in the given folder
    *
    * @param {CheckDuplicatedFolderPayload} payload - Payload containing the folder UUID and the list of folders to check.
-   * @return {Promise<CheckDuplicatedFoldersResponse>} - Promise that contains the duplicated folders in a list.
+   * @return {Promise<FetchExistentFoldersResponse>} - Promise that contains the duplicated folders in a list.
    */
   public checkDuplicatedFolders({
     folderUuid,
     folderNamesList,
-  }: CheckDuplicatedFolderPayload): Promise<CheckDuplicatedFoldersResponse> {
+  }: CheckDuplicatedFolderPayload): Promise<FetchExistentFoldersResponse> {
     return this.client.post(
       `/folders/content/${folderUuid}/folders/existence`,
       {
@@ -947,11 +953,11 @@ export class Storage {
    * Gets the folder meta from a given path (e.g. "/folder1/folder2")
    *
    * @param {string} folderPath - The path of the folder.
-   * @returns {Promise<FolderMeta>} A promise that resolves the folder on that path.
+   * @returns {Promise<FetchFolderByPathResponse>} A promise that resolves the folder on that path.
    */
-  public getFolderByPath(folderPath: string): Promise<FolderMeta> {
+  public getFolderByPath(folderPath: string): Promise<FetchFolderByPathResponse> {
     const query = new URLSearchParams({ path: folderPath });
-    return this.client.get<FolderMeta>(`folders/meta?${query}`, this.headers());
+    return this.client.get<FetchFolderByPathResponse>(`folders/meta?${query}`, this.headers());
   }
 
   /**
