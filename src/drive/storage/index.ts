@@ -24,6 +24,8 @@ import {
   FetchFolderContentResponse,
   FetchFolderFilesCursorResponse,
   FetchFolderFoldersCursorResponse,
+  FetchFolderByPathResponse,
+  FetchFolderMetaResponse,
   FetchFoldersSyncResponse,
   FetchLimitResponse,
   FetchPaginatedFilesContent,
@@ -831,16 +833,20 @@ export class Storage {
    * Gets the meta of a given folder UUID
    *
    * @param {string} folderUUID - UUID of the folder.
-   * @returns {Promise<FolderMeta>}
+   * @returns {Promise<FetchFolderMetaResponse>}
    */
-  public getFolderMeta(uuid: string, workspacesToken?: string, resourcesToken?: string): Promise<FolderMeta> {
+  public getFolderMeta(
+    uuid: string,
+    workspacesToken?: string,
+    resourcesToken?: string,
+  ): Promise<FetchFolderMetaResponse> {
     const customHeaders = workspacesToken
       ? {
           'x-internxt-workspace': workspacesToken,
         }
       : undefined;
 
-    return this.client.get<FolderMeta>(
+    return this.client.get<FetchFolderMetaResponse>(
       `folders/${uuid}/meta`,
       addResourcesTokenToHeaders(this.headers(customHeaders), resourcesToken),
     );
@@ -947,11 +953,11 @@ export class Storage {
    * Gets the folder meta from a given path (e.g. "/folder1/folder2")
    *
    * @param {string} folderPath - The path of the folder.
-   * @returns {Promise<FolderMeta>} A promise that resolves the folder on that path.
+   * @returns {Promise<FetchFolderByPathResponse>} A promise that resolves the folder on that path.
    */
-  public getFolderByPath(folderPath: string): Promise<FolderMeta> {
+  public getFolderByPath(folderPath: string): Promise<FetchFolderByPathResponse> {
     const query = new URLSearchParams({ path: folderPath });
-    return this.client.get<FolderMeta>(`folders/meta?${query}`, this.headers());
+    return this.client.get<FetchFolderByPathResponse>(`folders/meta?${query}`, this.headers());
   }
 
   /**
