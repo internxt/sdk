@@ -22,6 +22,17 @@ describe('HttpClient', () => {
       // Assert
       expect(createSpy).toHaveBeenCalledWith({
         baseURL: 'my-url',
+        withCredentials: false,
+      });
+    });
+    it('when credentials are enabled, then the axios instance is created with withCredentials', () => {
+      const createSpy = vi.spyOn(axios, 'create');
+
+      HttpClient.create('my-url', undefined, undefined, { withCredentials: true });
+
+      expect(createSpy).toHaveBeenCalledWith({
+        baseURL: 'my-url',
+        withCredentials: true,
       });
     });
   });
