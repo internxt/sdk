@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { Photos } from '../../../src/drive/photos';
-import { PhotoDevice } from '../../../src/drive/photos/types';
+import { PhotoDevice, PhotoFolderFile } from '../../../src/drive/photos/types';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { headersWithToken } from '../../../src/shared/headers';
 import { HttpClient } from '../../../src/shared/http/client';
@@ -122,5 +122,46 @@ describe('renameDevice', () => {
     const { client } = clientAndHeaders();
 
     await expect(client.renameDevice('device-uuid-1', 'New Name')).rejects.toThrow('server error');
+  });
+});
+
+describe('getFilesInFolders', () => {
+  const photoFile = {
+    uuid: 'file-uuid-1',
+    plainName: 'IMG_0001',
+    type: 'heic',
+    folderUuid: 'day-folder-uuid-1',
+    status: 'EXISTS',
+    thumbnails: [],
+  } as unknown as PhotoFolderFile;
+
+  test('when files are requested by folders and date, then the files and next cursor are returned', async () => {
+    const response = { files: [photoFile], nextCursor: 'next-cursor' };
+    vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue(response);
+    const { client, headers } = clientAndHeaders();
+    const payload = { folderUuids: ['day-folder-uuid-1', 'day-folder-uuid-2'], updatedAt: '1970-01-01T00:00:00.000Z' };
+
+    const result = await client.getFilesInFolders(payload);
+
+    expect(result).toEqual(response);
+    expect(HttpClient.prototype.post).toHaveBeenCalledWith('/photos/folders/files/delta/search', payload, headers);
+  });
+
+  test('when a cursor and a limit are given, then they are sent to fetch the next page', async () => {
+    vi.spyOn(HttpClient.prototype, 'post').mockResolvedValue({ files: [], nextCursor: null });
+    const { client, headers } = clientAndHeaders();
+    const payload = { folderUuids: ['day-folder-uuid-1'], cursor: 'next-cursor', limit: 50 };
+
+    const result = await client.getFilesInFolders(payload);
+
+    expect(result).toEqual({ files: [], nextCursor: null });
+    expect(HttpClient.prototype.post).toHaveBeenCalledWith('/photos/folders/files/delta/search', payload, headers);
+  });
+
+  test('when the server throws, then the error is propagated', async () => {
+    vi.spyOn(HttpClient.prototype, 'post').mockRejectedValue(new Error('payment required'));
+    const { client } = clientAndHeaders();
+
+    await expect(client.getFilesInFolders({ folderUuids: ['day-folder-uuid-1'] })).rejects.toThrow('payment required');
   });
 });

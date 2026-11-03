@@ -1,7 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
-import { PhotoDevice } from './types';
+import { GetPhotoFilesInFoldersPayload, GetPhotoFilesInFoldersResponse, PhotoDevice } from './types';
 
 export class Photos {
   private readonly client: HttpClient;
@@ -36,6 +36,10 @@ export class Photos {
 
   public renameDevice(uuid: string, deviceName: string): Promise<PhotoDevice> {
     return this.client.patch(`/photos/devices/${uuid}`, { deviceName }, this.headers());
+  }
+
+  public getFilesInFolders(payload: GetPhotoFilesInFoldersPayload): Promise<GetPhotoFilesInFoldersResponse> {
+    return this.client.post('/photos/folders/files/delta/search', payload, this.headers());
   }
 
   private headers() {
