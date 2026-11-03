@@ -1,6 +1,7 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { basicHeaders, headersWithToken } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
+import { HttpClientOptions } from '../shared/http/types';
 import { TeamsSettings } from '../shared/types/teams';
 import { UserSettings } from '../shared/types/userSettings';
 import {
@@ -29,12 +30,12 @@ export class Auth {
   private readonly apiSecurity?: ApiSecurity;
   private readonly apiUrl: string;
 
-  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    return new Auth(apiUrl, appDetails, apiSecurity);
+  public static client(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity, options?: HttpClientOptions) {
+    return new Auth(apiUrl, appDetails, apiSecurity, options);
   }
 
-  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity) {
-    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback, apiSecurity?.retryOptions);
+  private constructor(apiUrl: ApiUrl, appDetails: AppDetails, apiSecurity?: ApiSecurity, options?: HttpClientOptions) {
+    this.client = HttpClient.create(apiUrl, apiSecurity?.unauthorizedCallback, apiSecurity?.retryOptions, options);
     this.appDetails = appDetails;
     this.apiSecurity = apiSecurity;
     this.apiUrl = apiUrl;

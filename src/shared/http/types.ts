@@ -7,3 +7,10 @@ export interface RequestCanceler {
 }
 
 export type UnauthorizedCallback = () => void;
+
+export interface HttpClientOptions {
+  /**
+   * Sends and stores cookies on cross-origin browser requests. The API must allow credentials on CORS
+   */
+  withCredentials?: boolean;
+}

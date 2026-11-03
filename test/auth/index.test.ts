@@ -23,6 +23,22 @@ describe('# auth service tests', () => {
     vi.restoreAllMocks();
   });
 
+  describe('-> client options', () => {
+    it('when credentials are enabled, then requests are sent with credentials', () => {
+      const auth = Auth.client('url', { clientName: 'c-name', clientVersion: '0.1' }, undefined, {
+        withCredentials: true,
+      });
+
+      expect(getAxiosDefaults(auth).withCredentials).toBe(true);
+    });
+
+    it('when no options are given, then requests are sent without credentials', () => {
+      const auth = Auth.client('url', { clientName: 'c-name', clientVersion: '0.1' });
+
+      expect(getAxiosDefaults(auth).withCredentials).toBe(false);
+    });
+  });
+
   describe('-> register use case', () => {
     it('Should have all the correct params on call', async () => {
       // Arrange
@@ -1157,4 +1173,9 @@ function clientAndHeadersWithCaptcha(
 function forbiddenResponseError(responseBody: object): AxiosResponseError {
   const response = { status: 403, data: responseBody, headers: {} } as AxiosResponse;
   return new AxiosResponseError('Request failed with status code 403', 'post /auth/login', response);
+}
+
+function getAxiosDefaults(auth: Auth) {
+  const httpClient = (auth as unknown as { client: HttpClient }).client;
+  return (httpClient as unknown as { axios: { defaults: { withCredentials?: boolean } } }).axios.defaults;
 }

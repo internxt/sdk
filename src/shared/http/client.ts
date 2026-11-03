@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { AxiosResponseError, AxiosUnknownError } from '../types/errors';
-import { Headers, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
+import { Headers, HttpClientOptions, Parameters, RequestCanceler, URL, UnauthorizedCallback } from './types';
 import { RetryOptions, retryWithBackoff } from './retryWithBackoff';
 
 export { RequestCanceler } from './types';
@@ -46,16 +46,27 @@ export class HttpClient {
     HttpClient.globalRetryOptions = (options ?? {}) as RetryOptions;
   }
 
-  public static create(baseURL: URL, unauthorizedCallback?: UnauthorizedCallback, retryOptions?: RetryOptions) {
+  public static create(
+    baseURL: URL,
+    unauthorizedCallback?: UnauthorizedCallback,
+    retryOptions?: RetryOptions,
+    options?: HttpClientOptions,
+  ) {
     if (unauthorizedCallback === undefined) {
       unauthorizedCallback = () => null;
     }
-    return new HttpClient(baseURL, unauthorizedCallback, retryOptions);
+    return new HttpClient(baseURL, unauthorizedCallback, retryOptions, options);
   }
 
-  private constructor(baseURL: URL, unauthorizedCallback: UnauthorizedCallback, retryOptions?: RetryOptions) {
+  private constructor(
+    baseURL: URL,
+    unauthorizedCallback: UnauthorizedCallback,
+    retryOptions?: RetryOptions,
+    options?: HttpClientOptions,
+  ) {
     this.axios = axios.create({
       baseURL: baseURL,
+      withCredentials: options?.withCredentials ?? false,
     });
     this.unauthorizedCallback = unauthorizedCallback;
     this.retryOptions = retryOptions;
