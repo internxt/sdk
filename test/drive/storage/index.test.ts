@@ -3,7 +3,6 @@ import { Storage, StorageTypes } from '../../../src/drive';
 import {
   CreateFolderPayload,
   CreateFolderResponse,
-  DeleteFilePayload,
   DriveFolderData,
   EncryptionVersion,
   FetchPaginatedFolderContentResponse,
@@ -677,29 +676,6 @@ describe('# storage service tests', () => {
       });
     });
 
-    describe('delete file', () => {
-      it('Should call with right arguments and return control', async () => {
-        // Arrange
-        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
-          valid: true,
-        });
-        const { client, headers } = clientAndHeaders({});
-        const payload: DeleteFilePayload = {
-          fileId: 5,
-          folderId: 2,
-        };
-
-        // Act
-        const body = await client.deleteFile(payload);
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith('/storage/folder/2/file/5', headers);
-        expect(body).toEqual({
-          valid: true,
-        });
-      });
-    });
-
     describe('move file', () => {
       it('Should call with right arguments & return content', async () => {
         // Arrange
@@ -1144,7 +1120,6 @@ describe('# storage service tests', () => {
 
         const expectedResponse: StorageTypes.Thumbnail = {
           id: 456,
-          file_id: 123,
           max_width: 200,
           max_height: 200,
           type: 'image/jpeg',

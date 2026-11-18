@@ -1,13 +1,8 @@
 import { ApiSecurity, ApiUrl, AppDetails } from '../../shared';
 import { headersWithToken } from '../../shared/headers';
 import { HttpClient } from '../../shared/http/client';
-import { FetchFolderContentResponse, FetchTrashContentResponse } from '../storage/types';
-import {
-  AddItemsToTrashPayload,
-  DeleteFilePayload,
-  DeleteItemsPermanentlyByUUIDPayload,
-  DeleteItemsPermanentlyPayload,
-} from './types';
+import { FetchFolderContentResponse, FetchTrashContentResponse, TrashedItem } from '../storage/types';
+import { AddItemsToTrashPayload, DeleteItemsPermanentlyByUUIDPayload, DeleteItemsPermanentlyPayload } from './types';
 
 export * as TrashTypes from './types';
 
@@ -35,14 +30,6 @@ export class Trash {
   }
 
   /**
-   * Deletes a specific file entry
-   * @param payload
-   */
-  public async deleteFile(payload: DeleteFilePayload): Promise<unknown> {
-    return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
-  }
-
-  /**
    * Returns a list of items in trash
    */
   public getTrash(): Promise<FetchFolderContentResponse> {
@@ -59,13 +46,13 @@ export class Trash {
    * @param {number} [folderId] - The ID of the folder to retrieve content from.
    * @returns {Promise<FetchTrashContentResponse>} - A promise that resolves with the paginated list of trashed content.
    */
-  public getTrashedFilesPaginated(
+  public getTrashedFilesPaginated<T extends 'files' | 'folders'>(
     limit: number,
     offset = 0,
-    type: 'files' | 'folders',
+    type: T,
     root: boolean,
     folderId?: number,
-  ): Promise<FetchTrashContentResponse> {
+  ): Promise<FetchTrashContentResponse<TrashedItem<T>>> {
     const endpoint = '/storage/trash/paginated';
     const folderIdQuery = folderId !== undefined ? `folderId=${folderId}&` : '';
 
@@ -86,15 +73,15 @@ export class Trash {
    * @param {number} [folderId] - The ID of the folder to retrieve content from.
    * @returns {Promise<FetchTrashContentResponse>} - A promise that resolves with the paginated list of trashed content.
    */
-  public getTrashedItemsSorted(
+  public getTrashedItemsSorted<T extends 'files' | 'folders'>(
     limit: number,
     offset = 0,
-    type: 'files' | 'folders',
+    type: T,
     root: boolean,
     sort: 'plainName' | 'updatedAt',
     order: 'ASC' | 'DESC',
     folderId?: number,
-  ): Promise<FetchTrashContentResponse> {
+  ): Promise<FetchTrashContentResponse<TrashedItem<T>>> {
     const endpoint = '/storage/trash/paginated';
     const folderIdQuery = folderId !== undefined ? `folderId=${folderId}&` : '';
     const params = `limit=${limit}&offset=${offset}&type=${type}&root=${root}&sort=${sort}&order=${order}`;
