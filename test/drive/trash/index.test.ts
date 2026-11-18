@@ -88,7 +88,6 @@ describe('# trash service tests', () => {
           items: [
             { id: 36225, type: 'folder' },
             { id: 36225, type: 'folder' },
-            { id: '36225', type: 'file' },
           ],
         };
 

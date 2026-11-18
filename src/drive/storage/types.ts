@@ -371,7 +371,7 @@ export interface SearchResult {
   similarity: number;
   userId: string;
   item: {
-    id: number;
+    id?: number;
     bucket?: string;
     fileId?: string;
     plainName?: string;
