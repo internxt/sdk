@@ -12,6 +12,7 @@ export interface UserSettings {
   bridgeUser: string;
   bucket: string;
   backupsBucket: string | null;
+  photosBucket: string | null;
   root_folder_id: number;
   rootFolderId: string;
   rootFolderUuid: string | undefined;
