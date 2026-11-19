@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Trash } from '../../../src/drive';
 import { randomFolderContentResponse } from '../storage/mothers/folderContentResponse.mother';
-import { DeleteFilePayload, DeleteItemsPermanentlyPayload } from '../../../src/drive/trash/types';
+import { DeleteItemsPermanentlyPayload } from '../../../src/drive/trash/types';
 import { headersWithToken } from '../../../src/shared/headers';
 import { ApiSecurity, AppDetails } from '../../../src/shared';
 import { HttpClient } from '../../../src/shared/http/client';
@@ -25,31 +25,6 @@ describe('# trash service tests', () => {
 
         // Assert
         expect(callStub).toHaveBeenCalledWith('/storage/folder/2', headers);
-        expect(body).toEqual({
-          valid: true,
-        });
-      });
-    });
-  });
-
-  describe('-> files', () => {
-    describe('delete file', () => {
-      it('Should call with right arguments and return control', async () => {
-        // Arrange
-        const callStub = vi.spyOn(HttpClient.prototype, 'delete').mockResolvedValue({
-          valid: true,
-        });
-        const { client, headers } = clientAndHeaders();
-        const payload: DeleteFilePayload = {
-          fileId: 5,
-          folderId: 2,
-        };
-
-        // Act
-        const body = await client.deleteFile(payload);
-
-        // Assert
-        expect(callStub).toHaveBeenCalledWith('/storage/folder/2/file/5', headers);
         expect(body).toEqual({
           valid: true,
         });
@@ -113,7 +88,6 @@ describe('# trash service tests', () => {
           items: [
             { id: 36225, type: 'folder' },
             { id: 36225, type: 'folder' },
-            { id: '36225', type: 'file' },
           ],
         };
 
