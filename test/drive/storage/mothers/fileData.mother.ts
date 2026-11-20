@@ -11,7 +11,6 @@ export function randomFileData(): DriveFileData {
     fileId: '',
     folderId: 0,
     folder_id: 0,
-    id: 0,
     name: '',
     size: 0,
     type: '',

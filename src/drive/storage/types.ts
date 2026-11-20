@@ -36,7 +36,6 @@ export interface DriveFileData {
   folderId: number;
   folder_id: number;
   folderUuid: string;
-  id: number;
   name: string;
   plain_name: string | null;
   plainName?: string | null;
@@ -57,7 +56,6 @@ export interface DriveFileData {
 
 export interface Thumbnail {
   id: number;
-  file_id: number;
   max_width: number;
   max_height: number;
   type: string;
@@ -210,28 +208,35 @@ export type FetchFilesSyncResponse = paths['/files/sync']['get']['responses']['2
 
 export type FetchFoldersSyncResponse = paths['/folders/sync']['get']['responses']['200']['content']['application/json'];
 
-export interface FetchTrashContentResponse {
-  result: {
-    id: number;
-    fileId: string;
-    folderId: number;
-    folder: string | null;
-    name: string;
-    type: string;
-    size: string;
-    bucket: string;
-    encryptVersion: string;
-    deleted: boolean;
-    deletedAt: Date;
-    userId: number;
-    user: string | null;
-    modificationTime: Date;
-    createdAt: Date;
-    updatedAt: Date;
-    folderUuid: string | null;
-    uuid: string;
-    plainName: string;
-  }[];
+export interface TrashedFile {
+  fileId: string;
+  folderId: number;
+  folder: string | null;
+  name: string;
+  type: string;
+  size: string;
+  bucket: string;
+  encryptVersion: string;
+  deleted: boolean;
+  deletedAt: Date;
+  userId: number;
+  user: string | null;
+  modificationTime: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  folderUuid: string | null;
+  uuid: string;
+  plainName: string;
+}
+
+export type TrashedFolder = components['schemas']['FolderDto'];
+
+export type TrashItemType = 'files' | 'folders' | 'file' | 'folder';
+
+export type TrashedItem<T extends TrashItemType> = T extends 'files' | 'file' ? TrashedFile : TrashedFolder;
+
+export interface FetchTrashContentResponse<T = TrashedFile> {
+  result: T[];
 }
 
 export enum EncryptionVersion {
@@ -250,17 +255,6 @@ export interface FileEntry {
 }
 
 export type FileEntryByUuid = paths['/files']['post']['requestBody']['content']['application/json'];
-
-export interface ThumbnailEntry {
-  file_id: number;
-  max_width: number;
-  max_height: number;
-  type: string;
-  size: number;
-  bucket_id: string;
-  bucket_file: string;
-  encrypt_version: EncryptionVersion;
-}
 
 export interface CreateThumbnailEntryPayload {
   fileUuid: string;
@@ -335,11 +329,6 @@ export interface UpdateFilePayload {
   };
 }
 
-export interface DeleteFilePayload {
-  fileId: number;
-  folderId: number;
-}
-
 export interface MoveFilePayload {
   fileId: string;
   destination: number;
@@ -382,7 +371,7 @@ export interface SearchResult {
   similarity: number;
   userId: string;
   item: {
-    id: number;
+    id?: number;
     bucket?: string;
     fileId?: string;
     plainName?: string;

@@ -13,7 +13,6 @@ import {
   CreateFolderPayload,
   CreateFolderResponse,
   CreateThumbnailEntryPayload,
-  DeleteFilePayload,
   DriveFileData,
   FavoriteFileDto,
   FavoriteFolderDto,
@@ -57,7 +56,6 @@ import {
   RestoreFileVersionResponse,
   SearchResultData,
   Thumbnail,
-  ThumbnailEntry,
   UpdateFilePayload,
   UpdateFolderMetadataPayload,
   UsageResponse,
@@ -524,20 +522,6 @@ export class Storage {
   }
 
   /**
-   * Creates a new thumbnail entry
-   * @param thumbnailEntry
-   */
-  public createThumbnailEntry(thumbnailEntry: ThumbnailEntry, resourcesToken?: Token): Promise<Thumbnail> {
-    return this.client.post(
-      '/storage/thumbnail',
-      {
-        thumbnail: thumbnailEntry,
-      },
-      addResourcesTokenToHeaders(this.headers(), resourcesToken),
-    );
-  }
-
-  /**
    * Creates a new thumbnail entry using drive-server-wip
    * @param CreateThumbnailEntryPayload
    */
@@ -610,15 +594,6 @@ export class Storage {
       payload,
       addResourcesTokenToHeaders(this.headers(), resourcesToken),
     );
-  }
-
-  /**
-   * Deletes a specific file entry
-   * @param payload
-   * @deprecated Use `deleteFileByUuid` instead.
-   */
-  public deleteFile(payload: DeleteFilePayload): Promise<unknown> {
-    return this.client.delete(`/storage/folder/${payload.folderId}/file/${payload.fileId}`, this.headers());
   }
 
   /**

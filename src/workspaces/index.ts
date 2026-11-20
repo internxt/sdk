@@ -5,6 +5,7 @@ import {
   DriveFileData,
   FetchPaginatedFolderContentResponse,
   FetchTrashContentResponse,
+  TrashedItem,
 } from '../drive/storage/types';
 import { ApiSecurity, ApiUrl, AppDetails } from '../shared';
 import { addResourcesTokenToHeaders, headersWithToken } from '../shared/headers';
@@ -210,17 +211,20 @@ export class Workspaces {
     );
   }
 
-  public getPersonalTrash(
+  public getPersonalTrash<T extends ItemType>(
     workspaceId: string,
-    type: ItemType,
+    type: T,
     offset = 0,
     limit = 50,
-  ): Promise<FetchTrashContentResponse> {
+  ): Promise<FetchTrashContentResponse<TrashedItem<T>>> {
     const offsetQuery = `?offset=${offset}`;
     const limitQuery = `&limit=${limit}`;
     const typeQuery = `&type=${type}`;
     const query = `${offsetQuery}${limitQuery}${typeQuery}`;
-    return this.client.get<FetchTrashContentResponse>(`/workspaces/${workspaceId}/trash${query}`, this.headers());
+    return this.client.get<FetchTrashContentResponse<TrashedItem<T>>>(
+      `/workspaces/${workspaceId}/trash${query}`,
+      this.headers(),
+    );
   }
 
   public emptyPersonalTrash(workspaceId: string): Promise<void> {

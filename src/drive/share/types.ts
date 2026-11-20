@@ -140,11 +140,9 @@ export type SharedFiles = {
   deleted: boolean;
   deletedAt: string | null;
   encryptVersion: string;
-  fileiId: number;
   folder: string | null;
   folderId: number;
   folderUuid: string;
-  id: number;
   modificationTime: string;
   name: string;
   plainName: string;
