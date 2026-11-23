@@ -1,7 +1,7 @@
 import { ApiUrl, AppDetails } from '../shared';
 import { basicHeaders } from '../shared/headers';
 import { HttpClient } from '../shared/http/client';
-import { CreateSendLinksPayload, CreateSendLinksResponse, GetSendLinkResponse } from './types';
+import { CreateSendLinksPayload, CreateSendLinksResponse, GetNetworkTokenResponse, GetSendLinkResponse } from './types';
 
 export class Send {
   private readonly client: HttpClient;
@@ -33,6 +33,14 @@ export class Send {
   public createSendLink(payload: CreateSendLinksPayload): Promise<CreateSendLinksResponse> {
     // Spread payload into a plain object literal so it matches the `Parameters`/Record<string, unknown> expected by HttpClient.post
     return this.client.post('/links/', { ...payload }, this.headers());
+  }
+
+  /**
+   * Gets temporary network credentials to upload and download send files
+   * @returns a promise with the basic auth user, token, bucket and seconds until expiration
+   */
+  public getNetworkToken(): Promise<GetNetworkTokenResponse> {
+    return this.client.post('/links/network-token', {}, this.headers());
   }
 
   /**
