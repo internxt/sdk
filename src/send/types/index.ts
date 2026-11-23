@@ -48,6 +48,13 @@ export interface CreateSendLinksPayload {
   mnemonic: string;
 }
 
+export interface GetNetworkTokenResponse {
+  user: string;
+  token: string;
+  bucketId: string;
+  expiresIn: number;
+}
+
 export interface CreateSendLinksResponse {
   id: string;
   title: string;
