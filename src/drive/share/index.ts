@@ -311,11 +311,14 @@ export class Share {
     password?: string,
   ): Promise<ListSharedItemsResponse> {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
-    const extraHeaders = password ? { 'x-share-password': encodeURIComponent(password) } : {};
+    const extraHeaders = {
+      ...(code && { 'x-share-code': code }),
+      ...(password && { 'x-share-password': encodeURIComponent(password) }),
+    };
 
     return this.client.get(
       // eslint-disable-next-line max-len
-      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&code=${code}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
       { ...this.headers(), ...extraHeaders },
     );
   }
@@ -436,8 +439,11 @@ export class Share {
    * Get sharing meta with code
    */
   public getSharingMeta(sharingId: string, code: string, password?: string): Promise<SharingMeta> {
-    const extraHeaders = password ? { 'x-share-password': password } : {};
-    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, {
+    const extraHeaders = {
+      'x-share-code': code,
+      ...(password && { 'x-share-password': password }),
+    };
+    return this.client.get(`sharings/${sharingId}/meta`, {
       ...this.headers(),
       ...extraHeaders,
     });

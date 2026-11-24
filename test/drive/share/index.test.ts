@@ -431,20 +431,20 @@ describe('# share service tests', () => {
       await client.getPublicSharedFolderContent(folderId, 'folders', 'tkn', 1, 20, 'the-code', 'views:ASC', password);
 
       expect(callStub).toHaveBeenCalledWith(
-        `sharings/public/items/${folderId}/folders?token=tkn&code=the-code&page=1&perPage=20&orderBy=views:ASC`,
-        { ...headers, 'x-share-password': encodeURIComponent(password) },
+        `sharings/public/items/${folderId}/folders?token=tkn&page=1&perPage=20&orderBy=views:ASC`,
+        { ...headers, 'x-share-code': 'the-code', 'x-share-password': encodeURIComponent(password) },
       );
     });
 
-    it('When no password is provided, then only the base headers are sent', async () => {
+    it('When no password is provided, then only the base and code headers are sent', async () => {
       const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
       const { client, headers } = clientAndHeadersWithToken();
 
       await client.getPublicSharedFolderContent(folderId, 'files', 'tkn', 0, 50, 'the-code', 'createdAt:DESC');
 
       expect(callStub).toHaveBeenCalledWith(
-        `sharings/public/items/${folderId}/files?token=tkn&code=the-code&page=0&perPage=50&orderBy=createdAt:DESC`,
-        headers,
+        `sharings/public/items/${folderId}/files?token=tkn&page=0&perPage=50&orderBy=createdAt:DESC`,
+        { ...headers, 'x-share-code': 'the-code' },
       );
       expect(callStub.mock.calls[0][1]).not.toHaveProperty('x-share-password');
     });
