@@ -296,7 +296,9 @@ export class Share {
    * @param {string} token - Key that enables invited users to navigate the folders
    * @param {number} page - The page number for pagination.
    * @param {number} perPage - The number of items per page for pagination.
+   * @param {string} [code] - The sharing code.
    * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
+   * @param {string} [password] - Optional plain password for protected public sharings.
    */
   public getPublicSharedFolderContent(
     sharedFolderId: string,
@@ -306,13 +308,15 @@ export class Share {
     perPage = 50,
     code = '',
     orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
+    password?: string,
   ): Promise<ListSharedItemsResponse> {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
+    const extraHeaders = password ? { 'x-share-password': encodeURIComponent(password) } : {};
 
     return this.client.get(
       // eslint-disable-next-line max-len
       `sharings/public/items/${sharedFolderId}/${type}?token=${token}&code=${code}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
-      this.headers(),
+      { ...this.headers(), ...extraHeaders },
     );
   }
 
