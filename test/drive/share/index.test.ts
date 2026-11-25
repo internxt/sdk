@@ -240,7 +240,7 @@ describe('# share service tests', () => {
       const callStub = vi.spyOn(HttpClient.prototype, 'get').mockResolvedValue({});
       const { client, headers } = clientAndHeadersWithToken();
       const sharingId = '550e8400-e29b-41d4-a716-446655440000';
-      const password = '100% ñ€😀';
+      const password = 'p@ss wörd/&';
 
       // Act
       await client.getSharingMeta(sharingId, 'code', password);
