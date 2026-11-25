@@ -298,7 +298,7 @@ export class Share {
    * @param {number} perPage - The number of items per page for pagination.
    * @param {string} [code] - The sharing code.
    * @param {string} [orderBy] - The optional order criteria (e.g., 'views:ASC', 'createdAt:DESC').
-   * @param {string} [password] - Optional plain password for protected public sharings.
+   * @param {string} [accessToken] - Access token returned by the sharing meta of protected sharings.
    */
   public getPublicSharedFolderContent(
     sharedFolderId: string,
@@ -308,14 +308,17 @@ export class Share {
     perPage = 50,
     code = '',
     orderBy?: 'views:ASC' | 'views:DESC' | 'createdAt:ASC' | 'createdAt:DESC',
-    password?: string,
+    accessToken?: string,
   ): Promise<ListSharedItemsResponse> {
     const orderByQueryParam = orderBy ? `&orderBy=${orderBy}` : '';
-    const extraHeaders = password ? { 'x-share-password': encodeURIComponent(password) } : {};
+    const extraHeaders = {
+      ...(code && { 'x-share-code': code }),
+      ...(accessToken && { 'x-share-access-token': accessToken }),
+    };
 
     return this.client.get(
       // eslint-disable-next-line max-len
-      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&code=${code}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
+      `sharings/public/items/${sharedFolderId}/${type}?token=${token}&page=${page}&perPage=${perPage}${orderByQueryParam}`,
       { ...this.headers(), ...extraHeaders },
     );
   }
@@ -436,8 +439,11 @@ export class Share {
    * Get sharing meta with code
    */
   public getSharingMeta(sharingId: string, code: string, password?: string): Promise<SharingMeta> {
-    const extraHeaders = password ? { 'x-share-password': password } : {};
-    return this.client.get(`sharings/${sharingId}/meta?code=${code}`, {
+    const extraHeaders = {
+      'x-share-code': code,
+      ...(password && { 'x-share-password': encodeURIComponent(password) }),
+    };
+    return this.client.get(`sharings/${sharingId}/meta`, {
       ...this.headers(),
       ...extraHeaders,
     });

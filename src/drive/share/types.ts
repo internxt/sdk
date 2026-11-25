@@ -362,6 +362,7 @@ export type SharingMeta = {
   type: 'public' | 'private';
   item: SharedFiles | SharedFolders;
   itemToken: string;
+  accessToken: string | null;
 };
 
 export type SharingInfo = {
